@@ -15,3 +15,7 @@ news: true  # includes a list of news items
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 ---
+
+Xihuai Wang is currently a Ph.D. candidate at Shanghai Jiao Tong University, supervised by [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying WEN](https://yingwen.io/). He is a member of SJTU-Apex Group and a member of SJTU-MARL Group leaded by Prof. Ying WEN. Xihuai earned his B.Eng in Computer Science and Technology at [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/). 
+
+Xihuai's research interests include **Reinforcement Learning** and **Mutli-agent System**. Specifically, he is now focusing on **Multi-agent Reinforcement Learning in Cooperative Scenarios** and **Large Language Models for Reinforcement Learning**.
