@@ -198,10 +198,6 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - vendor
-  - dropdown
-  - teaching
-  - repositories
-  - projects
 keep_files:
   - CNAME
   - .nojekyll
