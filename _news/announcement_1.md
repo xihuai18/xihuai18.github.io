@@ -1,8 +1,9 @@
 ---
 layout: post
-date: 2015-10-22 15:59:00-0400
+date: 2023-03-25 20:27:23
+title: A paper accepted by ICLR 2023
 inline: true
 related_posts: false
 ---
 
-A simple inline announcement.
+Our work about policy optimization in cooperative multi-agent scenarios [Order Matters: Agent-by-agent Policy Optimization](https://openreview.net/forum?id=Q-neeWNVv1) was accepted by ICLR 2023.
