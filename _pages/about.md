@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Moto. Etc.
+subtitle: <a href='https://apex.sjtu.edu.cn/'>Shanghai Jiaotong University APEX Lab</a>.
 
 profile:
   align: right
