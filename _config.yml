@@ -2,7 +2,7 @@
 # Site settings
 # -----------------------------------------------------------------------------
 
-title: Xihuai's Page # the website title (if blank, full name will be used instead)
+title: Xihuai Wang's Page # the website title (if blank, full name will be used instead)
 first_name: Xihuai
 middle_name: Leo
 last_name: Wang
@@ -168,7 +168,7 @@ collections:
     output: true
     permalink: /news/:path/
   projects:
-    output: true
+    output: false
     permalink: /projects/:path/
 
 news_scrollable: true # adds a vertical scroll bar if there are more than 3 news items
