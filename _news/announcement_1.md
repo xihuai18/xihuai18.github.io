@@ -2,7 +2,7 @@
 layout: post
 date: 2023-03-25 20:27:23
 title: A paper accepted by ICLR 2023
-inline: flase
+inline: false
 related_posts: false
 ---
 
