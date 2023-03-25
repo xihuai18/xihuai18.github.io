@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiaotong University</a>.
+subtitle: <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.
 
 profile:
   align: right
