@@ -1,0 +1,50 @@
+- title: General Information
+  type: map
+  contents:
+    - name: Full Name
+      value: Xihuai Wang
+    - name: Date of Birth
+      value: 1998
+    - name: Languages
+      value: Chinese, English
+
+- title: Education
+  type: time_table
+  contents:
+    - title: Ph.D.
+      institution: School of Electronic Information and Electrical Engineering, Shanghai Jiaotong University, Shanghai, China
+      year: 2020-present
+    - title: B.Eng.
+      institution: School of Computer Science and Engineering, Sun Yat-sen University, Guangzhou, China
+      year: 2016-2020
+
+- title: Experience
+  type: time_table
+  contents:
+    - title: Research Intern
+      institution: Tencent AI Lab
+      year: 2020-2021
+    - title: Research Intern
+      institution: Shanghai Digital Brain Lab
+      year: 2022-present
+
+- title: Honors and Awards
+  type: time_table
+  contents:
+    - year: 2017
+      items: 
+        - National Scholarships
+    - year: 2018
+      items: 
+        - National Scholarships
+
+- title: Academic Interests
+  type: nested_list
+  contents:
+    - title: Multi-agent Reinforcement Learning in Cooperative Scenarios.
+    - title: Large Language Models for Reinforcement Learning.
+
+- title: Other Interests
+  type: list
+  contents:
+    - <u>Hobbies:</u> BodyBuilding, etc.
