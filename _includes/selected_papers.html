@@ -1,4 +1,4 @@
 
-          <div class="publications" reversed>
-            {% bibliography -f papers -q @*[selected=true]* %}
+          <div class="publications">
+            {% bibliography -f papers -q @*[selected=true]* | reverse %}
           </div>
