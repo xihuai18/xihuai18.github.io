@@ -1,5 +1,3 @@
-The CV is updated in 2023-03-25.
-
 - title: General Information
   type: map
   contents:
@@ -9,6 +7,8 @@ The CV is updated in 2023-03-25.
       value: 1998
     - name: Languages
       value: Chinese, English
+    - name: CV updated time
+      value: 2023-03-25
 
 - title: Education
   type: time_table
