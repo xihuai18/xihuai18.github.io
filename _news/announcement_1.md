@@ -6,4 +6,4 @@ inline: true
 related_posts: false
 ---
 
-Our work about policy optimization in cooperative multi-agent scenarios [Order Matters: Agent-by-agent Policy Optimization](https://openreview.net/forum?id=Q-neeWNVv1) was accepted by ICLR 2023. The code will be released ASAP.
+Our work about policy optimization in cooperative multi-agent scenarios [Order Matters: Agent-by-agent Policy Optimization](https://openreview.net/forum?id=Q-neeWNVv1) was accepted by ICLR 2023.
