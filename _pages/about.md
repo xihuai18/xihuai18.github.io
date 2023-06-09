@@ -6,7 +6,7 @@ subtitle: <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong Unive
 
 profile:
   align: right
-  image: portrait.jpg
+  image: portrait.png
   image_circular: false # crops the image to make it circular
   address: >
     <p>Shanghai, China</p>
