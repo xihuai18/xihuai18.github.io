@@ -2,11 +2,9 @@
   type: map
   contents:
     - name: Full Name
-      value: Xihuai Wang
-    - name: Date of Birth
-      value: 1998
-    - name: Languages
-      value: Chinese, English
+      value: Xihuai Wang (王锡淮)
+    - name: email
+      value: leoxhwang@sjtu.edu.cn
     - name: CV Updated Time
       value: 2024-07-17
 
@@ -40,13 +38,20 @@
       items:
         - National Scholarships
 
-- title: Academic Interests
-  type: nested_list
+- title: Services
+  type: map
   contents:
-    - title: Multi-agent Decision Making in Cooperative Scenarios.
-    - title: Large Language Models for Reinforcement Learning.
+    - name: Conference Reviewer / PC Member
+      value: NeurIPS 2024/2022/2021, ICML 2024/2023/2022, AAMAS 2024
+    - name: Journal Reviewer
+      value: TPAMI, Machine Learning, Frontiers of Computer Science
 
 - title: Other Interests
   type: list
   contents:
     - <u>Hobbies:</u> BodyBuilding, etc.
+
+- title: PDF Version
+  type: nested_list
+  contents:
+    - items: If you are looking for my CV in PDF format, feel free to contact me via email!
