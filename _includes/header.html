@@ -64,7 +64,7 @@
           {%- endif %}
 
           <!-- CV -->
-          {% if site.cv_nav_title %}
+          <!-- {% if site.cv_nav_title %}
           <li class="nav-item {% if page.url contains 'blog' %}active{% endif %}">
             <a class="nav-link" href="{{ site.cv_pdf | prepend: 'assets/pdf/' | relative_url }}" target="_blank"
               rel="noopener noreferrer">{{ site.cv_nav_title }}
@@ -73,7 +73,7 @@
               {%- endif -%}
             </a>
           </li>
-          {%- endif %}
+          {%- endif %} -->
           <!-- Other pages -->
           {%- assign sorted_pages = site.pages | sort: "nav_order" -%}
           {%- for p in sorted_pages -%}

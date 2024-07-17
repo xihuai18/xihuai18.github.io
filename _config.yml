@@ -135,7 +135,7 @@ bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 # # the information below.
 # giscus:
 #   repo: xihuai/xihuai.github.io      # <your-github-user-name>/<your-github-repo-name>
-#   repo_id: 
+#   repo_id:
 #   category: Comments             # name of the category under which discussions will be created
 #   category_id:
 #   mapping: title                 # identify discussions by post title
@@ -324,7 +324,7 @@ imagemagick:
   output_formats:
     webp: "-resize 1000x"
 cv_nav_title: cv
-cv_pdf: CV-202406.pdf
+cv_pdf:
 # -----------------------------------------------------------------------------
 # Jekyll Diagrams
 # -----------------------------------------------------------------------------
