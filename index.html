@@ -34,7 +34,7 @@
     
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="canonical" href="https://xihuai18.github.io/">
-    
+
     <!-- Dark Mode -->
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/monokai.css" media="none" id="highlight_theme_dark" />
@@ -74,14 +74,17 @@
           
 
           <!-- CV -->
-          
+          <!-- 
           <li class="nav-item ">
-            <a class="nav-link" href="/assets/pdf/CV-202406.pdf" target="_blank"
+            <a class="nav-link" href="/assets/pdf/" target="_blank"
               rel="noopener noreferrer">cv</a>
-          </li>
+          </li> -->
           <!-- Other pages -->
           <li class="nav-item ">
             <a class="nav-link" href="/publications/">publications</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/cv/">cv</a>
           </li>
 
           <!-- Toogle theme mode -->
@@ -104,6 +107,7 @@
   </progress>
 </header>
 
+
     <!-- Content -->
     <div class="container mt-5">
       <!-- about.html -->
@@ -122,35 +126,35 @@
 
   <picture>
     
-    <source 
+    <source
         class="responsive-img-srcset"
-        media="(max-width: 480px)" 
+        media="(max-width: 480px)"
         srcset="/assets/img/portrait-480.webp"
       />
-    <source 
+    <source
         class="responsive-img-srcset"
-        media="(max-width: 800px)" 
+        media="(max-width: 800px)"
         srcset="/assets/img/portrait-800.webp"
       />
-    <source 
+    <source
         class="responsive-img-srcset"
-        media="(max-width: 1400px)" 
+        media="(max-width: 1400px)"
         srcset="/assets/img/portrait-1400.webp"
       />
     
 
     <!-- Fallback to the original file -->
-    <img 
+    <img
       src="/assets/img/portrait.png"
-      class="img-fluid z-depth-1 rounded"  
-      width="auto" 
-      height="auto" 
-       
-       
-       
-       
-      alt="portrait.png" 
-       
+      class="img-fluid z-depth-1 rounded"
+      width="auto"
+      height="auto"
+      
+      
+      
+      
+      alt="portrait.png"
+      
       
       onerror="this.onerror=null; $('.responsive-img-srcset').remove();"
     />
@@ -182,29 +186,29 @@
           </div>
 
           <!-- News -->
-          <h2><a href="/news/" style="color: inherit;">news</a></h2>          
+          <h2><a href="/news/" style="color: inherit;">news</a></h2>
           <div class="news">
             <div class="table-responsive" >
               <table class="table table-sm table-borderless">
-               
+              
                 <tr>
                   <th scope="row">Aug 8, 2023</th>
                   <td>
                     Give a talk about cooperative multi-agent reinforcement learning (<a href="assets\pdf\CoordinatingAgents-RLChina.pdf">Coordinate Agents vis Policy Optimization</a>) at RLChina.
 
 <iframe src="//player.bilibili.com/player.html?aid=404558756&amp;bvid=BV15V41137pA&amp;cid=1230482639&amp;p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
- 
+
                   </td>
-                </tr> 
+                </tr>
                 <tr>
                   <th scope="row">Mar 25, 2023</th>
                   <td>
                     Our work about policy optimization in cooperative multi-agent scenarios <a href="https://openreview.net/forum?id=Q-neeWNVv1">Order Matters: Agent-by-agent Policy Optimization</a> was accepted by ICLR 2023.
- 
+
                   </td>
-                </tr> 
+                </tr>
               </table>
-            </div> 
+            </div>
           </div>
 
 
@@ -364,21 +368,23 @@
                 Contact me by leoxhwang@sjtu.edu.cn
 
               </div>
-              
+
             </div>
         </article>
 
 </div>
 
 <script type="text/javascript" src="//rf.revolvermaps.com/0/0/6.js?i=5wywz3vbozj&amp;m=0c&amp;c=ffffff&amp;cr1=ffc617&amp;f=comic_sans_ms&amp;l=0&amp;z=15&amp;cw=8eaafa&amp;cb=489c1f" async="async"></script>
+
     </div>
 
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
-        &copy; Copyright 2024 Xihuai Leo Wang. Last updated: June 23, 2024.
+        &copy; Copyright 2024 Xihuai Leo Wang. Last updated: July 17, 2024.
       </div>
     </footer>
+
 
     <!-- JavaScripts -->
     <!-- jQuery -->
@@ -424,10 +430,10 @@
 <!-- Scrolling Progress Bar -->
 <script type="text/javascript">
   /*
-   * This JavaScript code has been adapted from the article 
-   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * This JavaScript code has been adapted from the article
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar,
    * published on the website https://css-tricks.com on the 7th of May, 2014.
-   * Couple of changes were made to the original code to make it compatible 
+   * Couple of changes were made to the original code to make it compatible
    * with the `al-foio` theme.
    */
   const progressBar = $("#progress");
