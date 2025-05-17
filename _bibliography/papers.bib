@@ -1,96 +1,98 @@
 ---
 ---
 
-@article{zhang2024mutualtheorymindhumanai,
-abbr={Language Agent},
-bibtex_show={true},
-title={Mutual Theory of Mind in Human-AI Collaboration: An Empirical Study with LLM-driven AI Agents in a Real-time Shared Workspace Task}, 
-author={Shao Zhang* and Xihuai Wang* and Wenhao Zhang and Yongshan Chen and Landi Gao and Dakuo Wang and Weinan Zhang and Xinbing Wang and Ying Wen},
-year={2024},
-eprint={2409.08811},
-archivePrefix={arXiv},
-primaryClass={cs.HC},
-url={https://arxiv.org/abs/2409.08811}, 
-pdf={https://arxiv.org/abs/2409.08811.pdf},
-selected={false},
-journal={Preprint Under Review},
-abstract={Theory of Mind (ToM) significantly impacts human collaboration and communication as a crucial capability to understand others. When AI agents with ToM capability collaborate with humans, Mutual Theory of Mind (MToM) arises in such human-AI teams (HATs). The MToM process, which involves interactive communication and ToM-based strategy adjustment, affects the team's performance and collaboration process. To explore the MToM process, we conducted a mixed-design experiment using a large language model-driven AI agent with ToM and communication modules in a real-time shared-workspace task. We find that the agent's ToM capability does not significantly impact team performance but enhances human understanding of the agent and the feeling of being understood. Most participants in our study believe verbal communication increases human burden, and the results show that bidirectional communication leads to lower HAT performance. We discuss the results' implications for designing AI agents that collaborate with humans in real-time shared workspace tasks.}
-}
-
-
-@ainproceedings{hu2025pmat,
-title={PMAT: Optimizing Action Generation Order in Multi-Agent Reinforcement Learning},
-author={Hu, Kun and Wen, Muning and Wang, Xihuai and Zhang, Shao and Shi, Yiwei and Li, Minne and Li, Minglong and Wen, Ying},
-code={https://github.com/NUDT-BI-MARL/PMAT},
-url={https://arxiv.org/abs/2502.16496}, 
-pdf={https://arxiv.org/pdf/2502.16496},
-abbr={MARL},
-booktitle={Proceedings of the 24rd International Conference on Autonomous Agents and Multiagent Systems},
-publisher={International Foundation for Autonomous Agents and Multiagent Systems},
-selected={false},
-journal={24th AAMAS},
-bibtex_show={true},
-year={2025}
-}
-
 @article{zhang2025dpt,
-title={Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration}, 
-author={Shao Zhang* and Xihuai Wang* and Wenhao Zhang and Chaoran Li and Junru Song and Tingyu Li and Lin Qiu and Xuezhi Cao and Xunliang Cai and Wen Yao and Weinan Zhang and Xinbing Wang and Ying Wen},
-year={2025},
-url={https://arxiv.org/abs/2502.11882}, 
-pdf={https://arxiv.org/abs/2502.11882.pdf}, 
-bibtex_show={true},
-abbr={Language Agent},
-selected={true},
-journal={63rd ACL},
-code={https://github.com/sjtu-marl/DPT-Agent},
-abstract={Agents built on large language models (LLMs) have excelled in turn-by-turn human-AI collaboration but struggle with simultaneous tasks requiring real-time interaction. Latency issues and the challenge of inferring variable human strategies hinder their ability to make autonomous decisions without explicit instructions. Through experiments with current independent System 1 and System 2 methods, we validate the necessity of using Dual Process Theory (DPT) in real-time tasks. We propose DPT-Agent, a novel language agent framework that integrates System 1 and System 2 for efficient real-time simultaneous human-AI collaboration. DPT-Agent's System 1 uses a Finite-state Machine (FSM) and code-as-policy for fast, intuitive, and controllable decision-making. DPT-Agent's System 2 integrates Theory of Mind (ToM) and asynchronous reflection to infer human intentions and perform reasoning-based autonomous decisions. We demonstrate the effectiveness of DPT-Agent through further experiments with rule-based agents and human collaborators, showing significant improvements over mainstream LLM-based frameworks. To the best of our knowledge, DPT-Agent is the first language agent framework that achieves successful real-time simultaneous human-AI collaboration autonomously. Code of DPT-Agent can be found in https://github.com/sjtu-marl/DPT-Agent.}
+  author        = {Shao Zhang* and Xihuai Wang* and Wenhao Zhang and Chaoran Li and Junru Song and Tingyu Li and Lin Qiu and Xuezhi Cao and Xunliang Cai and Wen Yao and Weinan Zhang and Xinbing Wang and Ying Wen},
+  title         = {Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration},
+  journal       = {63rd ACL},
+  year          = {2025},
+  url           = {https://arxiv.org/abs/2502.11882},
+  pdf           = {https://arxiv.org/abs/2502.11882.pdf},
+  code          = {https://github.com/sjtu-marl/DPT-Agent},
+  abbr          = {Language Agent},
+  abstract      = {Agents built on large language models (LLMs) have excelled in turn-by-turn human-AI collaboration but struggle with simultaneous tasks requiring real-time interaction. Latency issues and the challenge of inferring variable human strategies hinder their ability to make autonomous decisions without explicit instructions. Through experiments with current independent System 1 and System 2 methods, we validate the necessity of using Dual Process Theory (DPT) in real-time tasks. We propose DPT-Agent, a novel language agent framework that integrates System 1 and System 2 for efficient real-time simultaneous human-AI collaboration. DPT-Agent's System 1 uses a Finite-state Machine (FSM) and code-as-policy for fast, intuitive, and controllable decision-making. DPT-Agent's System 2 integrates Theory of Mind (ToM) and asynchronous reflection to infer human intentions and perform reasoning-based autonomous decisions. We demonstrate the effectiveness of DPT-Agent through further experiments with rule-based agents and human collaborators, showing significant improvements over mainstream LLM-based frameworks. To the best of our knowledge, DPT-Agent is the first language agent framework that achieves successful real-time simultaneous human-AI collaboration autonomously.},
+  bibtex_show   = {true},
+  selected      = {true}
+}
+
+@inproceedings{hu2025pmat,
+  author        = {Hu, Kun and Wen, Muning and Wang, Xihuai and Zhang, Shao and Shi, Yiwei and Li, Minne and Li, Minglong and Wen, Ying},
+  title         = {PMAT: Optimizing Action Generation Order in Multi-Agent Reinforcement Learning},
+  booktitle     = {Proceedings of the 24th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2025)},
+  year          = {2025},
+  publisher     = {International Foundation for Autonomous Agents and Multiagent Systems},
+  url           = {https://arxiv.org/abs/2502.16496},
+  pdf           = {https://arxiv.org/pdf/2502.16496},
+  code          = {https://github.com/NUDT-BI-MARL/PMAT},
+  abbr          = {MARL},
+  bibtex_show   = {true},
+  selected      = {false}
+}
+
+
+@article{zhang2024mutualtheorymindhumanai,
+  author        = {Shao Zhang* and Xihuai Wang* and Wenhao Zhang and Yongshan Chen and Landi Gao and Dakuo Wang and Weinan Zhang and Xinbing Wang and Ying Wen},
+  title         = {Mutual Theory of Mind in Human-AI Collaboration: An Empirical Study with LLM-driven AI Agents in a Real-time Shared Workspace Task},
+  journal       = {Preprint Under Review},
+  year          = {2024},
+  url           = {https://arxiv.org/abs/2409.08811},
+  pdf           = {https://arxiv.org/abs/2409.08811.pdf},
+  abbr          = {Language Agent},
+  eprint        = {2409.08811},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.HC},
+  abstract      = {Theory of Mind (ToM) significantly impacts human collaboration and communication as a crucial capability to understand others. When AI agents with ToM capability collaborate with humans, Mutual Theory of Mind (MToM) arises in such human-AI teams (HATs). The MToM process, which involves interactive communication and ToM-based strategy adjustment, affects the team's performance and collaboration process. To explore the MToM process, we conducted a mixed-design experiment using a large language model-driven AI agent with ToM and communication modules in a real-time shared-workspace task. We find that the agent's ToM capability does not significantly impact team performance but enhances human understanding of the agent and the feeling of being understood. Most participants in our study believe verbal communication increases human burden, and the results show that bidirectional communication leads to lower HAT performance. We discuss the results' implications for designing AI agents that collaborate with humans in real-time shared workspace tasks.},
+  bibtex_show   = {true},
+  selected      = {false}
 }
 
 @article{wang2023zsceval,
-title={ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
-author={Xihuai Wang and Shao Zhang and Wenhao Zhang and Wentao Dong and Jingxiao Chen and Ying Wen and Weinan Zhang},
-year={2024},
-bibtex_show={true},
-selected={true},
-pdf={https://arxiv.org/pdf/2310.05208.pdf},
-abbr={MARL Generalization},
-journal={38th NeurIPS Dataset and Benchmark Track},
-code={https://github.com/sjtu-marl/zsc-eval}
+  author        = {Xihuai Wang and Shao Zhang and Wenhao Zhang and Wentao Dong and Jingxiao Chen and Ying Wen and Weinan Zhang},
+  title         = {ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
+  journal       = {38th NeurIPS Dataset and Benchmark Track},
+  year          = {2024},
+  url           = {https://arxiv.org/abs/2310.05208},
+  pdf           = {https://arxiv.org/pdf/2310.05208.pdf},
+  code          = {https://github.com/sjtu-marl/zsc-eval},
+  abbr          = {MARL Generalization},
+  bibtex_show   = {true},
+  selected      = {true}
 }
 
-@article{
-wang2023order,
-abbr={MARL Efficiency},
-title={Order Matters: Agent-by-agent Policy Optimization},
-author={Xihuai Wang and Zheng Tian and Ziyu Wan and Ying Wen and Jun Wang and Weinan Zhang},
-journal={11th ICLR},
-year={2023},
-bibtex_show={true},
-url={https://openreview.net/forum?id=Q-neeWNVv1},
-selected={true},
-pdf={https://arxiv.org/pdf/2302.06205.pdf},
-code={https://github.com/xihuai18/A2PO-ICLR2023}
+@article{wang2023order,
+  author        = {Xihuai Wang and Zheng Tian and Ziyu Wan and Ying Wen and Jun Wang and Weinan Zhang},
+  title         = {Order Matters: Agent-by-agent Policy Optimization},
+  journal       = {11th ICLR},
+  year          = {2023},
+  url           = {https://openreview.net/forum?id=Q-neeWNVv1},
+  pdf           = {https://arxiv.org/pdf/2302.06205.pdf},
+  code          = {https://github.com/xihuai18/A2PO-ICLR2023},
+  abbr          = {MARL Efficiency},
+  bibtex_show   = {true},
+  selected      = {true}
 }
 
-@article{Wang2022ModelbasedMR,
-title={Model-based Multi-agent Reinforcement Learning: Recent Progress and Prospects},
-author={Xihuai Wang and Zhicheng Zhang and Weinan Zhang},
-journal={ArXiv},
-abbr={MARL Efficiency},
-year={2022},
-bibtex_show={true},
-volume={abs/2203.10603},
-pdf={https://arxiv.org/pdf/2203.10603.pdf}
+@article{wang2022modelbased,
+  author        = {Xihuai Wang and Zhicheng Zhang and Weinan Zhang},
+  title         = {Model-based Multi-agent Reinforcement Learning: Recent Progress and Prospects},
+  journal       = {arXiv preprint arXiv:2203.10603},
+  year          = {2022},
+  url           = {https://arxiv.org/pdf/2203.10603.pdf},
+  pdf           = {https://arxiv.org/pdf/2203.10603.pdf},
+  abbr          = {MARL Efficiency},
+  bibtex_show   = {true}
 }
-@article{Zhang2021ModelbasedMP,
-abbr={MARL Efficiency},
-title={Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts},
-author={Weinan Zhang and Xihuai Wang and Jian Shen and Ming Zhou},
-journal={30th IJCAI},
-year={2021},
-bibtex_show={true},
-selected={true},
-pdf={https://arxiv.org/pdf/2105.03363.pdf},
-code={https://github.com/xihuai18/AORPO}
+
+@article{zhang2021modelbased,
+  author        = {Weinan Zhang and Xihuai Wang and Jian Shen and Ming Zhou},
+  title         = {Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts},
+  journal       = {30th IJCAI},
+  year          = {2021},
+  url           = {https://arxiv.org/pdf/2105.03363.pdf},
+  pdf           = {https://arxiv.org/pdf/2105.03363.pdf},
+  code          = {https://github.com/xihuai18/AORPO},
+  abbr          = {MARL Efficiency},
+  bibtex_show   = {true},
+  selected      = {true}
 }
+
