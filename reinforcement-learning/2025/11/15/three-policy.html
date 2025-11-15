@@ -132,19 +132,19 @@
   <article class="post-content">
     <h2 id="训推不一致和异步框架">训推不一致和异步框架</h2>
 
-<p>最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都在围绕一个更基础的矛盾打转——<strong>行为策略（behavior policy）和参考策略（reference policy）不一致。</strong></p>
+<p>最近看到不少关于大模型强化学习中”训推不一致”和”异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都围绕着一个更基础的矛盾——<strong>行为策略（behavior policy）和参考策略（reference policy）不一致。</strong></p>
 
 <p>本文先简单梳理一下我目前看到的相关工作，然后再尝试从“行为策略 vs 参考策略”的角度，把它们串到同一条线上，给各位读者提供一个补充视角。</p>
 
 <p>在本文中我会用：</p>
 
 <ul>
-  <li><strong>行为策略</strong> $\mu$：实际负责生成 rollout 的策略，也就是“你在什么分布下采样到了这些数据”。在现代 LLM RL 系统里，它对应的是推理引擎里的那套实现（vLLM / SGLang 等），在异步框架下往往还是<strong>多个 worker 策略的混合分布</strong>。</li>
-  <li><strong>参考策略</strong> $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的 “旧策略”（old policy）。</li>
-  <li><strong>目标策略</strong> $\pi_{\theta}$：训练目标里要优化的策略，也就是“你想让模型变成什么样”。典型地就是 PPO / GRPO 里的 “新策略”（new policy）。</li>
+  <li><strong>行为策略</strong> $\mu$：实际负责生成 rollout 的策略，也就是”你在什么分布下采样到了这些数据”。在现代 LLM RL 系统里，它对应的是推理引擎里的那套实现（vLLM / SGLang 等），在异步框架下往往还是<strong>多个 worker 策略的混合分布</strong>。</li>
+  <li><strong>参考策略</strong> $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的”旧策略”（old policy）。</li>
+  <li><strong>目标策略</strong> $\pi_{\theta}$：训练目标里要优化的策略，也就是”你想让模型变成什么样”。典型地就是 PPO / GRPO 里的”新策略”（new policy）。</li>
 </ul>
 
-<p>在最经典、理想化的设定里，我们通常<strong>默认</strong> $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理 / 训练后端、MoE 路由波动甚至硬件数值差异等因素影响，这二者往往会出现不同程度的偏离。</p>
+<p>在最经典、理想化的设定里，我们通常<strong>默认</strong> $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理 / 训练后端、MoE 路由波动甚至硬件数值差异等因素影响，二者往往会出现不同程度的偏离。</p>
 
 <h2 id="相关工作">相关工作</h2>
 
@@ -176,8 +176,8 @@
 <p>下面这节我会用尽量简单的数学，把这个三策略版 TRPO 摊开——它其实就是“TRPO + 三角不等式”，但非常好用：</p>
 
 <ul>
-  <li>一方面让我们重新理解“训推不一致”和“异步训练框架”到底在破坏什么；</li>
-  <li>另一方面，也帮我们统一理解 TIS、IcePop、sequence-level MIS 等，其实都是在实施下文的“<strong>约束 2</strong>”。</li>
+  <li>一方面让我们重新理解”训推不一致”和”异步训练框架”到底在影响什么；</li>
+  <li>另一方面，也帮我们统一理解 TIS、IcePop、sequence-level MIS 等，其实都是在实施下文的”<strong>约束 2</strong>“。</li>
 </ul>
 
 <h3 id="三个策略">三个策略</h3>
@@ -195,15 +195,15 @@
 \(V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s).\)</li>
 </ul>
 
-<p>稍微赘述一下，在“三策略”设定里，我们有：</p>
+<p>稍微赘述一下，在”三策略”设定里，我们有：</p>
 
 <ul>
   <li><strong>行为策略</strong>（behavior policy）：$\mu$，真正用来 rollout 的策略；数据 $(s,a,r,\dots)$ 都是从它来的。</li>
-  <li><strong>参考策略</strong>（reference policy）：$\pi_{\theta_{\text{old}}}$，优化目标里拿来做 ratio、clip 或 KL 约束的那一份“旧策略”。</li>
+  <li><strong>参考策略</strong>（reference policy）：$\pi_{\theta_{\text{old}}}$，优化目标里拿来做 ratio、clip 或 KL 约束的那一份”旧策略”。</li>
   <li><strong>目标策略</strong>（target policy）：$\pi_\theta$，我们这一步想要优化的策略。</li>
 </ul>
 
-<p>在理想设定里我们默认 $\mu = \pi_{\theta_{\text{old}}}$；现实系统里这俩往往不等，这就是“训推不一致”的数学影子。</p>
+<p>在理想设定里我们默认 $\mu = \pi_{\theta_{\text{old}}}$；现实系统里二者往往不等，这就是”训推不一致”的数学影子。</p>
 
 <h3 id="两策略-trpo">两策略 TRPO</h3>
 
@@ -225,20 +225,20 @@
 <p>直觉非常简单：</p>
 
 <ul>
-  <li>$A_\mu(s,a)$ 就是在说“如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报多 / 少多少”；</li>
-  <li>把所有时刻、所有状态、所有动作的“增益”累积起来，就得到新策略比老策略总共赚了多少。</li>
+  <li>$A_\mu(s,a)$ 就是在说”如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报会多或少多少”；</li>
+  <li>把所有时刻、所有状态、所有动作的”增益”累积起来，就得到新策略比行为策略总共赚了多少。</li>
 </ul>
 
 <p>TRPO 的核心是：我们没法准确算
 \(\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)],\)
 因为 $d_{\pi_\theta}$ 是“新策略”的状态分布，我们没有在它下面采样过。</p>
 
-<p>于是 TRPO 引入了一个替代目标：把状态分布换成旧策略的：</p>
+<p>于是 TRPO 引入了一个替代目标：把状态分布换成行为策略的：</p>
 
 \[L_\mu(\pi_\theta)
 := \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)].\]
 
-<p>这份 $L_\mu$ 在理论上是一个“我们可以从数据分布 $d_\mu$ 出发定义、并在实践中通过重要性采样或 PPO-style surrogate <strong>近似估计</strong>”的 quantity：在旧策略的状态分布下，让新策略试着去选动作，看优势有多大。</p>
+<p>$L_\mu$ 的直觉解释是：在行为策略的状态分布下，让新策略试着去选动作，看优势有多大。</p>
 
 <p>从性能差分引理出发，两者之差是：</p>
 
@@ -263,7 +263,7 @@
 <p>这里出现了第一个关键量：</p>
 
 <blockquote>
-  <p><strong>状态分布偏移</strong> $|d_{\pi_\theta} - d_\mu|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。</p>
+  <p><strong>状态分布偏移</strong> $|d_{\pi_\theta} - d_\mu|_1$，也就是”新策略和行为策略看到的世界，到底差了多少”。</p>
 </blockquote>
 
 <p>我们通常不会直接对 $|d_{\pi_\theta} - d_\mu|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如信赖域、KL、clip 全是干这个的。</p>
@@ -275,7 +275,7 @@
 <p>假设存在常数 $\beta$，使得</p>
 
 <blockquote>
-  <p>对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：<br />
+  <p>对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：
 \(D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta.\)</p>
 </blockquote>
 
@@ -284,8 +284,8 @@
 <p>一个经典结果（可以用 coupling 证明）是：</p>
 
 <blockquote>
-  <p><strong>Lemma 2</strong><br />
-在上述条件下有<br />
+  <p><strong>Lemma 2</strong>
+在上述条件下有
 \(\|d_{\pi_\theta} - d_\mu\|_1
 \le \frac{2\gamma}{1-\gamma}\,\beta.\)</p>
 </blockquote>
@@ -299,7 +299,7 @@
 <p>于是我们得到一个非常干净的<strong>两策略 TRPO 下界（基准为行为策略）</strong>：</p>
 
 <blockquote>
-  <p><strong>Theorem 1（两策略版 TRPO 下界）</strong><br />
+  <p><strong>Theorem 1（两策略 TRPO）</strong><br />
 \(\mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
@@ -310,10 +310,12 @@ L_\mu(\pi_\theta)
 <p>这说明：</p>
 
 <ul>
-  <li><strong>真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong><br />
+  <li><strong>真正决定”替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong>
 \(\beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).\)</li>
   <li>如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。</li>
 </ul>
+
+<h3 id="三策略-trpo">三策略 TRPO</h3>
 
 <p>现实问题在于：<strong>大模型强化学习训练里我们可能无法直接控制 $\beta$ 本身。</strong></p>
 
@@ -349,11 +351,9 @@ L_\mu(\pi_\theta)
 <p>直觉上：</p>
 
 <ul>
-  <li>$\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是信赖域的那部分；</li>
-  <li>$\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致 / 异步的影子。</li>
+  <li>$\alpha_0$：新策略到底离”你宣称的那份旧策略”有多远——这就是信赖域的那部分；</li>
+  <li>$\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致或异步的影子。</li>
 </ul>
-
-<h3 id="三策略-trpo">三策略 TRPO</h3>
 
 <p>现在，可以把这两个量塞回 TRPO 的下界里。</p>
 
@@ -406,14 +406,16 @@ C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},\)
 \alpha_1
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
                               \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).\)
-则对任意目标策略 $\pi_\theta$ 有
-\(\boxed{
+则对任意目标策略 $\pi_\theta$ 有</p>
+
+\[\boxed{
 \mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\; C\,(\alpha_0 + \alpha_1),
-}\)
-其中
+}\]
+
+  <p>其中
 \(L_\mu(\pi_\theta)
 :=
 \mathcal{J}(\mu) + \frac{1}{1-\gamma}
@@ -425,8 +427,8 @@ L_\mu(\pi_\theta)
 <ul>
   <li><strong>替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，可以拆成两部分：</strong>
     <ul>
-      <li>参考 vs 目标 的偏移 $\alpha_0$；</li>
-      <li>行为 vs 参考 的偏移 $\alpha_1$。</li>
+      <li>参考 vs 目标的偏移 $\alpha_0$；</li>
+      <li>行为 vs 参考的偏移 $\alpha_1$。</li>
     </ul>
   </li>
 </ul>
@@ -460,12 +462,12 @@ L_\mu(\pi_\theta)
       </li>
       <li>训推对齐：
         <ul>
-          <li>强调训练框架和推理框架用相同精度、相同算子、相近的 kernel 行为；</li>
+          <li>强调训练框架和推理框架用相同精度、相同算子、相近的 kernel 行为。</li>
         </ul>
       </li>
     </ul>
 
-    <p>这些机制的目标是：从“算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。</p>
+    <p>这些机制的目标是：从”算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。</p>
   </li>
   <li>
     <p><strong>算法层：样本修正</strong></p>
@@ -491,7 +493,7 @@ L_\mu(\pi_\theta)
 <p>也就是说：</p>
 
 <ul>
-  <li>$r_t(\theta)$ 是 <strong>目标 vs 参考</strong> 的比率（对应约束 1）；</li>
+  <li>$r_t(\theta)$ 是 <strong>目标 vs 参考</strong>的比率（对应约束 1）；</li>
   <li>$A_t$ 基于行为策略采样的数据，是我们能估到的优势函数。</li>
 </ul>
 
@@ -540,7 +542,7 @@ L_\mu(\pi_\theta)
 
 <ul>
   <li>蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。</li>
-  <li>从三策略 TRPO 的角度看，这相当于在 <strong>token 分布</strong> 上“软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。</li>
+  <li>从三策略 TRPO 的角度看，这相当于在 <strong>token 分布</strong>上”软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。</li>
 </ul>
 
 <hr />
@@ -558,7 +560,7 @@ L_\mu(\pi_\theta)
 
 <ul>
   <li>蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。</li>
-  <li>这相当于硬性裁掉“行为策略和参考策略极度不一致”的 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。</li>
+  <li>这相当于硬性裁掉”行为策略和参考策略极度不一致”的 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的”约束 2”。</li>
 </ul>
 
 <hr />
@@ -596,20 +598,20 @@ L_\mu(\pi_\theta)
 <p>如果把这篇文章压缩成一句话，就是：</p>
 
 <blockquote>
-  <p><strong>许多“大模型 RL 训推不一致”和“异步训练”问题，其实都可以理解为：在 TRPO 框架下，大模型作为行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 时，二者之间的偏移（$\alpha_1$）被严重低估了。</strong></p>
+  <p><strong>许多”大模型 RL 训推不一致”和”异步训练”问题，其实都可以理解为：在 TRPO 框架下，当行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 不一致时，二者之间的偏移（$\alpha_1$）被严重低估了。</strong></p>
 </blockquote>
 
 <p>从两策略到三策略，我们做的事情其实很简单：</p>
 
 <ul>
-  <li>把 TRPO 的下界从“旧策略 vs 新策略”的叙述，改写成“<strong>行为策略 – 参考策略 – 目标策略</strong>”三者的关系；</li>
+  <li>把 TRPO 的下界从”旧策略 vs 新策略”的叙述，改写成”<strong>行为策略 – 参考策略 – 目标策略</strong>“三者的关系；</li>
   <li>显式地拆出了两个 TV 距离：
     <ul>
       <li><strong>约束 1：参考 vs 目标</strong> $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；</li>
       <li><strong>约束 2：行为 vs 参考</strong> $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；</li>
     </ul>
   </li>
-  <li>得到了一个非常直接的结论：<br />
+  <li>得到了一个非常直接的结论：
 <strong>替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。</strong></li>
 </ul>
 
@@ -630,14 +632,14 @@ L_\mu(\pi_\theta)
 <p>从这个统一视角出发，也许有助于回答几个实际问题：</p>
 
 <ul>
-  <li>在什么条件下，我们还能把“大模型 RL 训练”理解成某种意义上的“近似 TRPO / PPO”？</li>
+  <li>在什么条件下，我们还能把”大模型 RL 训练”理解成某种意义上的”近似 TRPO / PPO”？</li>
   <li>对一个具体的 RL 系统，我们究竟应该把主要精力花在：
     <ul>
       <li>收紧 $\alpha_0$（更强的 KL / 更稳的 sequence-level 目标），还是</li>
       <li>压低 $\alpha_1$（更一致的训推框架、更激进的 MIS / TIS / IcePop）？</li>
     </ul>
   </li>
-  <li>在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装“$\mu \approx \pi_{\theta_{\text{old}}}$”多久？</li>
+  <li>在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装”$\mu \approx \pi_{\theta_{\text{old}}}$”多久？</li>
 </ul>
 
 <p>本文只是在 TRPO 这个老框架上做了一个非常“<strong>最小化</strong>”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。如果你也关注实际大模型 RL 训练的情况，欢迎把具体的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式。</p>
