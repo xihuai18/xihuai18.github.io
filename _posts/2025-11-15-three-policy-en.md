@@ -1,6 +1,6 @@
 ---
 layout: post
-title: From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch
+title: From Two Policies to Three - Extending TRPO under Behavior–Reference Policy Mismatch
 date: 2025-11-15
 description: In large-scale reinforcement learning for LLMs, mismatches between inference and training stacks and the diversity of behavior policies under asynchronous frameworks make behavior–reference policy mismatch particularly prominent. This post analyzes its impact on TRPO and, based on this analysis, surveys existing methods that tackle this issue.
 categories: reinforcement-learning
