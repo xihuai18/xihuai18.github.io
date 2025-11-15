@@ -285,7 +285,7 @@ $$
 
 于是，我们得到一个非常干净的**三策略 TRPO 下界**：
 
-> **Theorem 2（三策略 TRPO，下界形式）**  
+> **Theorem 2（三策略 TRPO）**  
 > 记
 > $$
 > \epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
@@ -314,8 +314,7 @@ $$
 > $$
 > L_\mu(\pi_\theta)
 > :=
-> \mathcal{J}(\mu)
-> + \frac{1}{1-\gamma}
+> \mathcal{J}(\mu) + \frac{1}{1-\gamma}
 >   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
 > $$
 
