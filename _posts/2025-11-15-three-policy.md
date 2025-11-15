@@ -462,3 +462,37 @@ $$
 - 对于 **IS 比率超过阈值 $C$ 的序列**：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。
 
 从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在**序列级**筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
+
+## 小结
+
+如果把这篇文章压缩成一句话，就是：
+
+> **许多看起来彼此独立的“大模型 RL 训推不一致”问题，其实都可以理解为：在 TRPO 框架下，行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的偏移（$\alpha_1$）被严重低估了。**
+
+从两策略到三策略，我们做的事情其实很简单：
+
+- 把 TRPO 的下界从“旧策略 vs 新策略”的叙述，改写成“**行为策略 – 参考策略 – 目标策略**”三者的关系；
+- 显式地拆出了两个 TV 距离：
+  - **约束 1：参考 vs 目标** $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；
+  - **约束 2：行为 vs 参考** $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；
+- 得到了一个非常直接的结论：  
+  **替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。**
+
+在这个视角下：
+
+- Decoupled PPO / AReaL 可以被看作是在**形式上承认“三策略存在”**，并尝试在目标函数上将“行为分布”和“参考策略”解耦；
+- TIS、IcePop、sequence-level MIS，则是在不同粒度（token / sequence）上，**试图通过 IS 截断 / 掩码把“约束 2”落到样本层面**：
+  - TIS：用 token-level 截断权重削弱极端样本的影响；
+  - IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃“极端不一致”的 token；
+  - MIS：在 sequence-level 直接屏蔽整条“偏差过大”的轨迹；
+- 《RL老训崩？训推差异是基石》、Defeating Nondeterminism 等工程经验，则可以理解为在**系统侧和数值实现侧**，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。
+
+从这个统一视角出发，也许有助于回答几个实际问题：
+
+- 在什么条件下，我们还能把“大模型 RL 训练”理解成某种意义上的“近似 TRPO / PPO”？  
+- 对一个具体的 RL 系统，我们究竟应该把主要精力花在：
+  - 收紧 $\alpha_0$（更强的 KL / 更稳的 sequence-level 目标），还是
+  - 压低 $\alpha_1$（更一致的训推框架、更激进的 MIS / TIS / IcePop）？
+- 在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装“$\mu \approx \pi_{\theta_{\text{old}}}$”多久？
+
+本文只是在 TRPO 这个老框架上做了一个非常“**最小化**”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。如果你也关注实际大模型 RL 训练的情况，欢迎把具体的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式。
