@@ -188,35 +188,19 @@ $$
 到这里，两策略 TRPO 已经给了我们一个非常干净的结论：
 
 > **两策略 TRPO（基准为行为策略 $\mu$）：**  
-> 记
-> \[
-> \epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
-> \beta := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big),
-> \]
+> 记  
+> $$\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad \beta := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big),$$
 > 则  
-> \[
-> \mathcal{J}(\pi_\theta)
-> \;\ge\;
-> L_\mu(\pi_\theta)
-> \;-\;
-> \underbrace{\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}}_{=:C}
-> \,\beta,
-> \]
-> 其中
-> \[
-> L_\mu(\pi_\theta)
-> :=
-> \mathcal{J}(\mu)
-> + \frac{1}{1-\gamma}
->   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
-> \]
+> $$\mathcal{J}(\pi_\theta) \;\ge\; L_\mu(\pi_\theta) \;-\; \underbrace{\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}}_{=:C} \,\beta,$$
+> 其中  
+> $$L_\mu(\pi_\theta) := \mathcal{J}(\mu) + \frac{1}{1-\gamma} \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].$$
 
 也就是说：
 
 - **真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：**  
-  \[
+  $$
   \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
-  \]
+  $$
 - 如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。
 
 现实问题在于：**大模型强化学习训练里我们可能无法直接控制 $\beta$ 本身。**
@@ -229,28 +213,28 @@ $$
 也就是说，实际可以“动手”的是两个量：
 
 1. **参考 vs 目标**：我们可以通过 KL / clip 等手段控制
-   \[\
+   $$\
    D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
-   \]
+   $$
 2. **行为 vs 参考**：我们希望**间接**控制
-   \[
+   $$
    D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
-   \]
+   $$
 
 于是自然就定义两个“proxy 差异”：
 
 - **约束 1：参考 vs 目标**
-  \[
+  $$
   \alpha_0
   := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
                                 \pi_\theta(\cdot\mid s)\big)
-  \]
+  $$
 - **约束 2：行为 vs 参考**
-  \[
+  $$
   \alpha_1
   := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
                                 \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
-  \]
+  $$
 
 直觉上：
 
@@ -263,7 +247,7 @@ $$
 
 对任意状态 $s$，有
 
-\[
+$$
 \begin{aligned}
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 &\le
@@ -272,20 +256,20 @@ D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
 &\quad +
 D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).
 \end{aligned}
-\]
+$$
 
 对 $s$ 取上确界：
 
-\[
+$$
 \beta
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 \;\le\;
 \alpha_1 + \alpha_0.
-\]
+$$
 
 把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里：
 
-\[
+$$
 \mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
@@ -295,7 +279,7 @@ C\,\beta
 L_\mu(\pi_\theta)
 \;-\;
 C\,(\alpha_0 + \alpha_1),
-\]
+$$
 
 其中 $C = \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}$。
 
@@ -303,12 +287,12 @@ C\,(\alpha_0 + \alpha_1),
 
 > **Theorem 2（三策略 TRPO，下界形式）**  
 > 记
-> \[
+> $$
 > \epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
 > C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
-> \]
+> $$
 > 以及
-> \[
+> $$
 > \alpha_0
 > := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
 >                               \pi_\theta(\cdot\mid s)\big),
@@ -316,24 +300,24 @@ C\,(\alpha_0 + \alpha_1),
 > \alpha_1
 > := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
 >                               \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
-> \]
+> $$
 > 则对任意目标策略 $\pi_\theta$ 有
-> \[
+> $$
 > \boxed{
 > \mathcal{J}(\pi_\theta)
 > \;\ge\;
 > L_\mu(\pi_\theta)
 > \;-\; C\,(\alpha_0 + \alpha_1),
 > }
-> \]
+> $$
 > 其中
-> \[
+> $$
 > L_\mu(\pi_\theta)
 > :=
 > \mathcal{J}(\mu)
 > + \frac{1}{1-\gamma}
 >   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
-> \]
+> $$
 
 这句话的含义非常简单：
 
