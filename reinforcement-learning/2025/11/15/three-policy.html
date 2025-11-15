@@ -312,39 +312,19 @@ L_\mu(\pi_\theta)
 
 <blockquote>
   <p><strong>两策略 TRPO（基准为行为策略 $\mu$）：</strong><br />
-记
-[
-\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
-\beta := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big),
-]
+记<br />
+\(\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad \beta := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big),\)
 则<br />
-[
-\mathcal{J}(\pi_\theta)
-\;\ge\;
-L_\mu(\pi_\theta)
-\;-\;
-\underbrace{\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}}<em>{=:C}
-\,\beta,
-]
-其中
-[
-L</em>\mu(\pi_\theta)
-:=
-\mathcal{J}(\mu)</p>
-  <ul>
-    <li>\frac{1}{1-\gamma}
-\mathbb{E}<em>{s\sim d</em>\mu,a\sim\pi_\theta}[A_\mu(s,a)].
-]</li>
-  </ul>
+\(\mathcal{J}(\pi_\theta) \;\ge\; L_\mu(\pi_\theta) \;-\; \underbrace{\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}}_{=:C} \,\beta,\)
+其中<br />
+\(L_\mu(\pi_\theta) := \mathcal{J}(\mu) + \frac{1}{1-\gamma} \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].\)</p>
 </blockquote>
 
 <p>也就是说：</p>
 
 <ul>
   <li><strong>真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong><br />
-[
-\beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
-]</li>
+\(\beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).\)</li>
   <li>如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。</li>
 </ul>
 
@@ -361,30 +341,23 @@ L</em>\mu(\pi_\theta)
 
 <ol>
   <li><strong>参考 vs 目标</strong>：我们可以通过 KL / clip 等手段控制
-[<br />
-D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
-]</li>
+\(\
+D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)\)</li>
   <li><strong>行为 vs 参考</strong>：我们希望<strong>间接</strong>控制
-[
-D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
-]</li>
+\(D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)\)</li>
 </ol>
 
 <p>于是自然就定义两个“proxy 差异”：</p>
 
 <ul>
   <li><strong>约束 1：参考 vs 目标</strong>
-[
-\alpha_0
+\(\alpha_0
 := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
-                              \pi_\theta(\cdot\mid s)\big)
-]</li>
+                              \pi_\theta(\cdot\mid s)\big)\)</li>
   <li><strong>约束 2：行为 vs 参考</strong>
-[
-\alpha_1
+\(\alpha_1
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
-]</li>
+                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)\)</li>
 </ul>
 
 <p>直觉上：</p>
@@ -400,30 +373,25 @@ D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
 
 <p>对任意状态 $s$，有</p>
 
-<p>[
-\begin{aligned}
+\[\begin{aligned}
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 &amp;\le
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
-<br />
+\\
 &amp;\quad +
 D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).
-\end{aligned}
-]</p>
+\end{aligned}\]
 
 <p>对 $s$ 取上确界：</p>
 
-<p>[
-\beta
+\[\beta
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 \;\le\;
-\alpha_1 + \alpha_0.
-]</p>
+\alpha_1 + \alpha_0.\]
 
 <p>把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里：</p>
 
-<p>[
-\mathcal{J}(\pi_\theta)
+\[\mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
@@ -431,8 +399,7 @@ C\,\beta
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
-C\,(\alpha_0 + \alpha_1),
-]</p>
+C\,(\alpha_0 + \alpha_1),\]
 
 <p>其中 $C = \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}$。</p>
 
@@ -441,38 +408,32 @@ C\,(\alpha_0 + \alpha_1),
 <blockquote>
   <p><strong>Theorem 2（三策略 TRPO，下界形式）</strong><br />
 记
-[
-\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
-C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
-]
+\(\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},\)
 以及
-[
-\alpha_0
+\(\alpha_0
 := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
                               \pi_\theta(\cdot\mid s)\big),
 \quad
 \alpha_1
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
-]
+                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).\)
 则对任意目标策略 $\pi_\theta$ 有
-[
-\boxed{
+\(\boxed{
 \mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\; C\,(\alpha_0 + \alpha_1),
-}
-]
+}\)
 其中
-[
+$$
 L_\mu(\pi_\theta)
 :=
 \mathcal{J}(\mu)</p>
   <ul>
     <li>\frac{1}{1-\gamma}
 \mathbb{E}<em>{s\sim d</em>\mu,a\sim\pi_\theta}[A_\mu(s,a)].
-]</li>
+$$</li>
   </ul>
 </blockquote>
 
