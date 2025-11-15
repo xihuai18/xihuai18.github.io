@@ -16,7 +16,7 @@ lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: 🤖  # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
 
 url: https://xihuai18.github.io # the base hostname & protocol for your site
-baseurl:  # the subpath of your site, e.g. /blog/
+baseurl: "" # the subpath of your site, e.g. /blog/
 last_updated: true # set to true if you want to display last updated in the footer
 impressum_path:  # set to path to include impressum link in the footer, use the same path as permalink in a page, helps to conform with EU GDPR
 
@@ -117,24 +117,27 @@ bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 # Blog
 # -----------------------------------------------------------------------------
 
-# blog_name: Xihuai's Blog # blog_name will be displayed in your blog page
-# blog_nav_title: Xihuai's Blog # your blog must have a title for it to be displayed in the nav bar
-# blog_description: Xihuai's Blog
-# permalink: /blog/:year/:title/
+blog_name: Xihuai's Blog # blog_name will be displayed in your blog page
+blog_nav_title: Xihuai's Blog # your blog must have a title for it to be displayed in the nav bar
+blog_description: Xihuai's Blog
+permalink: /blog/:year/:title/
 
-# # Pagination
-# pagination:
-#   enabled: false
+# Pagination
+pagination:
+  enabled: true
+  per_page: 5
+  permalink: '/page/:num/'
+  sort_reverse: true
 
-# related_blog_posts:
-#   enabled: false
-#   max_related: 5
+related_blog_posts:
+  enabled: false
+  max_related: 5
 
-# # Giscus comments (RECOMMENDED)
-# # Follow instructions on https://giscus.app/ to setup for your repo to fill out
-# # the information below.
+# Giscus comments (RECOMMENDED)
+# Follow instructions on https://giscus.app/ to setup for your repo to fill out
+# the information below.
 # giscus:
-#   repo: xihuai/xihuai.github.io      # <your-github-user-name>/<your-github-repo-name>
+#   repo: xihuai18/xihuai18.github.io      # <your-github-user-name>/<your-github-repo-name>
 #   repo_id:
 #   category: Comments             # name of the category under which discussions will be created
 #   category_id:
@@ -146,16 +149,16 @@ bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 #   emit_metadata: 0
 #   lang: en
 
-# # Disqus comments (DEPRECATED)
+# Disqus comments (DEPRECATED)
 # disqus_shortname: # put your disqus shortname
-# # https://help.disqus.com/en/articles/1717111-what-s-a-shortname
+# https://help.disqus.com/en/articles/1717111-what-s-a-shortname
 
-# # External sources.
-# # If you have blog posts published on medium.com or other exteranl sources,
-# # you can display them in your blog by adding a link to the RSS feed.
-# external_sources:
-#   # - name: medium.com
-#   #   rss_url: https://medium.com/@al-folio/feed
+# External sources.
+# If you have blog posts published on medium.com or other exteranl sources,
+# you can display them in your blog by adding a link to the RSS feed.
+external_sources:
+  # - name: medium.com
+  #   rss_url: https://medium.com/@al-folio/feed
 
 # # -----------------------------------------------------------------------------
 # Collections
@@ -163,8 +166,6 @@ bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 
 collections:
   news:
-    defaults:
-      layout: post
     output: true
     permalink: /news/:path/
   projects:
