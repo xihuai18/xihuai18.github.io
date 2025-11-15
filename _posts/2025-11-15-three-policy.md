@@ -355,4 +355,74 @@ $$
    具体来说就是下面这些方法，它们本质上全是“实现约束 2 的不同方式”。
 
 
-### TIS、IcePop、sequence-level MIS：都是“约束 2”的不同实现
+## TIS、IcePop、sequence-level MIS：都是“约束 2”的不同实现
+
+下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO/GRPO 风格更新项为  
+$$g_\theta(t) = \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),\quad r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},$$
+这里 $(s_t,a_t)$ 服从行为策略诱导的采样分布，$A_t := A_\mu(s_t,a_t)$ 与前文一致。
+
+为了把 token 级的 $(s_t,a_t)$ 与序列级的 $(x,y)$ 记号打通，在 LLM RLHF 设定中我们约定：
+
+- prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{|y|})$；
+- token 级状态 $s_t := (x, y_{<t})$，动作 $a_t := y_t$；
+- 因此行为策略和参考策略在序列上的分布可写成
+  $$\mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
+  \pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t).$$
+
+此外，为了描述“参考 vs 行为”的偏移，统一定义 token 级重要性比率
+$$\rho_t^{(\text{ref}\leftarrow\text{beh})} := \frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)},$$
+以及其对应的序列级版本
+$$\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)} = \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}.$$
+
+### 1 TIS：token-level 截断 IS
+
+TIS 直接对上述 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 做截断，记
+$$\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}.$$
+
+更新目标写成  
+$$L_{\text{TIS}}(\theta) = - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big].$$
+
+- 蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。  
+- 从三策略 TRPO 的角度看，这相当于在 **token 分布** 上“软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。
+
+---
+
+### 2 IcePop：MoE 场景下的 token-level 双侧 Mask
+
+IcePop 同样以 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 为度量，但采用 **双侧掩码**：  
+$$\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}.$$
+
+更新目标写成  
+$$L_{\text{IcePop}}(\theta) = - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big].$$
+
+- 蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。  
+- 这相当于硬性裁掉“行为策略和参考策略极度不一致 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。
+
+---
+
+### 3 sequence-level MIS：按整条序列 Mask 的重要性采样
+
+MIS 的核心操作是：**只保留 IS 比率不超过阈值 $C$ 的序列，其余序列的损失直接置零**。写成
+$$
+\color{blue}{
+\rho(y\mid x)
+\leftarrow
+\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}
+}
+$$
+
+在统一的损失形式下，可以写成
+$$
+L_{\text{MIS}}(\theta)
+=-\,\mathbb{E}_{(x,y)\sim\mu}
+\Big[\color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}} \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
+\Big],
+$$
+
+简而言之：
+
+- 对于 **IS 比率较小的序列**：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；
+- 对于 **IS 比率超过阈值 $C$ 的序列**：整个序列的 policy loss 被 mask 掉（权重变成 0）。
+
+从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在**序列级**筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
+
