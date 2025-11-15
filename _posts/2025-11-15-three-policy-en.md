@@ -1,251 +1,261 @@
 ---
 layout: post
-title: 从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展
+title: From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch
 date: 2025-11-15
-description: 在大模型强化学习中，因为推理框架和训练框架的不一致，以及异步训练框架下行为策略分布的多样性，行为策略与参考策略不一致的问题变得尤为突出。本文分析了行为策略与参考策略不一致问题在 TRPO 框架下的影响，并在这一分析基础上梳理了当前对这一问题的不同解决方法。
+description: In large-scale reinforcement learning for LLMs, mismatches between inference and training stacks and the diversity of behavior policies under asynchronous frameworks make behavior–reference policy mismatch particularly prominent. This post analyzes its impact on TRPO and, based on this analysis, surveys existing methods that tackle this issue.
 categories: reinforcement-learning
 ---
 
 [中文版本](https://zhuanlan.zhihu.com/p/1973206684907365344) [![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
+## Training–Inference Mismatch and Asynchronous Frameworks
 
-## 训推不一致和异步框架
+Recently I’ve seen quite a lot of discussion around *training–inference mismatch* and *asynchronous RL frameworks* for large language models. My intuition is that many of these seemingly diverse and messy issues are, in fact, manifestations of a more fundamental tension: a mismatch between the **behavior policy** and the **reference policy**.
 
-最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都围绕着一个更基础的矛盾——**行为策略（behavior policy）和参考策略（reference policy）不一致。**
+In this post, I’ll first briefly summarize the related work I’ve come across, and then try to connect them through the lens of “behavior policy vs. reference policy,” as a complementary way to look at the problem.
 
-本文先简单梳理一下我目前看到的相关工作，然后再尝试从“行为策略 vs 参考策略”的角度，把它们串到同一条线上，为读者提供一个补充视角。
+Throughout the post I’ll use:
 
-在本文中我会用：
+- **Behavior policy** $\mu$: the policy that *actually* generates rollouts, i.e., “under which distribution your data are sampled.” In modern LLM-RL systems this typically corresponds to the implementation inside the inference engine (vLLM, SGLang, etc.), and under asynchronous frameworks it is often a **mixture distribution over multiple worker policies**.
 
-- **行为策略** $\mu$：实际负责生成 rollout 的策略，也就是“你在什么分布下采样到了这些数据”。在现代 LLM-RL 系统里，它对应的是推理引擎里的那套实现（vLLM / SGLang 等），在异步框架下往往还是**多个 worker 策略的混合分布**。
-- **参考策略** $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的“旧策略”（old policy）。
-- **目标策略** $\pi_\theta$：训练目标里要优化的策略，也就是“你想让模型变成什么样”。典型地就是 PPO / GRPO 里的“新策略”（new policy）。
+- **Reference policy** $\pi_{\theta_{\text{old}}}$: the policy used in the training objective for importance sampling, clipping, or KL constraints — typically the “old policy” in PPO / GRPO.
 
-在最经典、理想化的设定里，我们通常**默认** $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理 / 训练后端、MoE 路由波动甚至硬件数值差异等因素影响，二者往往会出现不同程度的偏离。
+- **Target policy** $\pi_\theta$: the policy we optimize in the training objective, i.e., “what we want the model to become” — typically the “new policy” in PPO / GRPO.
 
-## 相关工作
+In the classical idealized setup, we usually **implicitly assume** $\mu = \pi_{\theta_{\text{old}}}$. In real systems, however, asynchronous updates, different inference / training backends, MoE routing fluctuations, and even hardware-level numerical differences cause these two policies to deviate to varying degrees.
 
-下面按时间线简单列一下我印象比较深的一些工作（只代表我个人看到的片面子集）：
+## Related Work
 
-- [Decoupled PPO](https://arxiv.org/pdf/2110.00641) 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，“旧策略”（old policy）实际承担了两个不同的角色：一是用于重要性采样进行异策略修正，在这个目的下，“旧策略”用于代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，在这个目的下，“旧策略”被用于衡量新旧策略的变化程度，称作近端策略（proximal policy，对应本文中的“参考策略”）。文章指出这两个目的下的“旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，把“采样用谁”和“对谁做 trust region”在形式上解耦开来。
+Below is a rough timeline of the works that left a strong impression on me (this is only a partial and biased subset of the literature I’ve seen):
 
-- [AReaL](https://arxiv.org/abs/2505.24298) 关注到了异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将“行为策略分布”和“参考策略”显式区分开来，从而在异步场景下仍然维持类似 PPO 的优化性质。
+- [Decoupled PPO](https://arxiv.org/pdf/2110.00641) was among the first to point out that in trust-region policy optimization methods (TRPO and PPO), the “old policy” actually plays two distinct roles:
 
-- [GSPO](https://arxiv.org/abs/2507.18071) 从 GRPO 在长序列和 MoE 模型上的稳定性问题出发，指出 token-level 的 PPO / GRPO 在专家路由高度波动（尤其是新旧策略之间的路由差异）时，会引入巨大的方差与不稳定。GSPO 提出在 **sequence-level** 定义 PPO-style 目标与比率约束，用整条序列的比率来约束更新，从而在 MoE 场景下显著缓解由路由不一致带来的训练崩溃问题。
+  1. It is used for importance sampling to perform off-policy correction. In this sense, the “old policy” is meant to represent the **behavior policy** that generated the training data.
 
-- [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl#28b721e3f6c480c3a756f8fb319e860d) 关注到了现有的一些大模型强化学习训练框架（如 VeRL）中，推理框架和训练框架在不少相同的功能模块上有不同的实现（例如 vLLM 和 FSDP / Megatron 等算子上的差异），导致行为策略 $\mu$ 与参考策略 $\pi_{\theta_{\text{old}}}$ 不一致。这种不一致使得原本假定为同策略（on-policy）的训练，实际上变成了带有明显偏差的异策略（off-policy）训练。文章总结了两种处理这一问题的现有方法：PPO-IS 与 vanilla-IS，并提出在 **token-level** 做截断重要性采样（truncated IS, TIS），以减少训推不一致程度较重的样本在训练中的影响。作者还写了两篇更为基础的分析文章，从原理上分析训推不一致问题：[Part I](https://fengyao.notion.site/pg-seq-token-part1-basics) 和 [Part II](https://fengyao.notion.site/pg-seq-token-part2-mismatch)。
+  2. It is also used to limit the update step size of the new policy. In this sense, the “old policy” acts as a baseline to measure how much the new and old policies differ, i.e., a **proximal policy** (what I call the reference policy here).
 
-- [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference) 指出，批处理大小不变性（batch-size invariance）的缺失是大模型推理框架随机性的核心来源之一：同一个输入在不同的 batch 组合和 kernel 路径下，得到的概率分布会发生可观差异。这意味着，即便“名义上”是同一套参数，真实运行时的行为策略 $\mu$ 也会因为系统负载和调度差异而波动，从而进一步加剧训推不一致。
+  The paper points out that these two roles do *not* have to be played by the same policy, and proposes the Decoupled PPO objective, which explicitly decouples “who generates the data” from “who defines the trust region” at the level of the optimization objective.
 
-- [Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!](https://ringtech.notion.site/icepop) 观察到，上述训推不一致问题在 MoE 模型上会进一步加剧：路由本身就对微小扰动高度敏感，再叠加推理 / 训练实现差异和异步采样，很容易放大偏差。文章提出 IcePop 方法：在 **token-level** 通过计算重要性采样比率，对过于大或者过于小的比率进行双侧掩码（masking），将这些“噪声较大”的数据从梯度中丢弃，从而稳定 MoE 上的 RL 训练。
+- [AReaL](https://arxiv.org/abs/2505.24298) focuses on the mismatch between behavior and reference policies under asynchronous training frameworks: rollouts are often generated by **stale parameter versions** or **different workers**. The paper adopts a Decoupled-PPO-style objective in the asynchronous setting, explicitly separating the behavior distribution from the reference policy, while still maintaining PPO-like optimization properties in this asynchronous regime.
 
-- [When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch](https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda) 系统性分析了训推不一致的各种成因，包括智能体工作流中引入的大量分布外和低概率信息、硬件和内核 / kernel 实现带来的计算不确定性，并分析了在 **token-level** 进行重要性采样如何在长序列上引入严重的偏差。文章进一步提出在 **sequence-level** 计算重要性采样掩码（sequence-level masked IS, sequence-level MIS）：只丢弃那些整条序列的重要性采样比率过大的数据，从而在控制偏差的同时，显著抑制由极端样本导致的训练崩溃。文中给出了较为完整的理论推导和丰富的实验支撑。
+- [GSPO](https://arxiv.org/abs/2507.18071) starts from stability issues of GRPO on long sequences and MoE models. It shows that token-level PPO / GRPO can become highly unstable when MoE expert routing is extremely volatile (especially when routing differs significantly between old and new policies), leading to huge variance and collapse. GSPO proposes a **sequence-level** PPO-style objective and ratio constraint, using the ratio over entire sequences to control updates. This substantially mitigates training collapse in MoE scenarios caused by routing instability and long-horizon token-level noise.
 
-- [RL老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
+- [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl#28b721e3f6c480c3a756f8fb319e860d) observes that in existing LLM-RL frameworks (such as VeRL), the inference stack and the training stack often differ across multiple functional modules (e.g., vLLM vs. FSDP / Megatron kernels and operators). This makes the behavior policy $\mu$ differ from the reference policy $\pi_{\theta_{\text{old}}}$, so what is *assumed* to be on-policy training actually becomes off-policy training with nontrivial bias. The article summarizes two existing ways to handle this: PPO-IS and vanilla-IS, and further proposes **token-level truncated importance sampling (TIS)** to downweight samples with severe training–inference mismatch. The author also wrote two more foundational notes analyzing training–inference mismatch from basic principles: [Part I](https://fengyao.notion.site/pg-seq-token-part1-basics) and [Part II](https://fengyao.notion.site/pg-seq-token-part2-mismatch).
 
-## 三策略 TRPO 视角下的最小统一理解
+- [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference) points out that the lack of **batch-size invariance** is a core source of randomness in LLM inference: the same input can yield noticeably different probability distributions under different batch compositions and kernel paths. This means that even when you “nominally” have a single set of parameters, the **behavior policy** $\mu$ realized in practice can fluctuate with system load and scheduling, further exacerbating training–inference mismatch.
 
-上面列的这些工作，看上去各自解决的是：
+- [Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!](https://ringtech.notion.site/icepop) observes that the above mismatch issues are further amplified in MoE models: routing itself is highly sensitive to small perturbations, and stacked with inference / training implementation differences and asynchronous sampling, it is easy to magnify bias and instability. The paper proposes IcePop: at the **token level**, it computes importance sampling ratios and applies **two-sided masking** to discard tokens whose ratios are either too large or too small. This removes “very noisy” data from the gradient, stabilizing RL training on MoE models.
 
-- 算法层：PPO / GRPO 的目标怎么写，token-level 还是 sequence-level，用 clip 还是 mask；
-- 系统层：推理框架和训练框架怎样对齐；
-- 模型层：MoE 模型路由问题如何放大训练不稳定，等等。
+- [When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch](https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda) gives a systematic analysis of the causes of training–inference mismatch, including large amounts of out-of-distribution and low-probability content introduced by agent workflows, hardware and kernel-level numerical uncertainty, and how **token-level** importance sampling can introduce severe bias on long sequences. It further proposes **sequence-level** masked importance sampling (sequence-level MIS): compute an IS ratio at the sequence level and discard only those sequences whose overall ratio is too large, thereby controlling bias while strongly suppressing training collapse caused by extreme samples. The paper provides reasonably complete theoretical derivations and extensive experimental evidence.
 
-但如果我们把“行为策略 vs 参考策略”这条线拉直，会发现相当一部分问题，其实都可以放到一个相对简单的理论框架里理解：**三策略 TRPO**。
+- [RL老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) approaches the problem more from a practical perspective, sharing experience on how to engineer for near training–inference consistency: choosing consistent operators and precision settings, monitoring and constraining the log-prob gap between training and inference, etc. The focus is on framework-level engineering practices that can mitigate training–inference difference at the root.
 
-下面这节我会用尽量简单的数学，把这个三策略版 TRPO 摊开——它可以被看作是“TRPO + 三角不等式”的一个小扩展，但在分析大模型 RL 里的训推不一致时非常好用：
+## A Minimally Unified View from a Three-Policy TRPO Perspective
 
-- 一方面让我们重新理解“训推不一致”和“异步训练框架”到底在影响什么；
-- 另一方面，也帮我们统一理解 TIS、IcePop、sequence-level MIS 等，在本文的视角下，它们其实都是在实施下文的“**约束 2**”。
+At first glance, the works listed above seem to tackle different aspects:
 
-### 三个策略
+- **Algorithmic level**: how to formulate PPO / GRPO objectives, token-level vs. sequence-level, clip vs. mask, etc.
+- **Systems level**: how to align inference and training stacks.
+- **Model level**: how MoE routing amplifies instability, and so on.
 
-沿用前文的记号，我们在一个折扣 MDP 上工作，折扣因子为 $\gamma\in(0,1)$：
+However, if we align everything along a single axis — **behavior policy vs. reference policy** — a large fraction of these issues can be placed in a relatively simple theoretical framework: a **three-policy TRPO**.
 
-- 状态 $s\in\mathcal{S}$，动作 $a\in\mathcal{A}$；
-- 策略 $\pi(a\mid s)$；
-- 折扣状态分布：
+In the next section I’ll unpack this three-policy TRPO in as simple math as I can. You can think of it as “TRPO + triangle inequality” — a very small extension conceptually, but surprisingly handy when analyzing training–inference mismatch in LLM-RL:
+
+- On the one hand, it helps us understand what exactly “training–inference mismatch” and “asynchronous training frameworks” are harming within the TRPO view.
+- On the other hand, it offers a unifying way to interpret TIS, IcePop, sequence-level MIS, etc. In the view of this post, they can all be seen as different incarnations of **Constraint 2** introduced below.
+
+### Three Policies
+
+We stick to the notation from above and consider a discounted MDP with discount factor $\gamma \in (0,1)$:
+
+- States $s \in \mathcal{S}$, actions $a \in \mathcal{A}$.
+- Policy $\pi(a \mid s)$.
+- Discounted state distribution:
   $$
-  d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s)。
+  d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s).
   $$
-- 回报（episode 视角）：
+- Return (episodic view):
   $$
-  \mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big]。
+  \mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big].
   $$
-- 值函数 / 优势函数：
+- Value / Q / advantage functions:
   $$
-  V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s)。
+  V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s).
   $$
 
-稍微赘述一下，在“三策略”设定里，我们有：
+It’s worth spelling out that in the three-policy setup we have:
 
-- **行为策略**（behavior policy）：$\mu$，真正用来 rollout 的策略；数据 $(s,a,r,\dots)$ 都是从它来的。
-- **参考策略**（reference policy）：$\pi_{\theta_{\text{old}}}$，优化目标里拿来做 ratio、clip 或 KL 约束的那一份“旧策略”。
-- **目标策略**（target policy）：$\pi_\theta$，我们这一步想要优化的策略。
+- **Behavior policy** $\mu$: the policy that actually generates rollouts. Data $(s,a,r,\dots)$ are sampled from it.
 
-在理想设定里我们默认 $\mu = \pi_{\theta_{\text{old}}}$；现实系统里二者往往不等，这就是“训推不一致”的数学影子。
+- **Reference policy** $\pi_{\theta_{\text{old}}}$: the “old policy” used in the optimization objective for importance sampling ratios, clipping, or KL constraints.
 
-### 两策略 TRPO
+- **Target policy** $\pi_\theta$: the policy we are optimizing in this update.
 
-> 熟悉 TRPO 的读者可以直接跳到后面的“三策略 TRPO”小节。
+In the ideal setup we assume $\mu = \pi_{\theta_{\text{old}}}$; in real systems they are often unequal. This is the mathematical shadow of “training–inference mismatch.”
 
-TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势函数**之上的。既然实际能算清楚的**只有** $A_\mu$（数据是按 $\mu$ 采的），那我们就直接把 $\mu$ 当成基准。
+### Two-Policy TRPO
 
-一个经典的结论是 **性能差分引理（Performance Difference Lemma）**：
+> If you’re already familiar with TRPO, feel free to skip ahead to the “Three-Policy TRPO” subsection.
 
-> 对任意两策略 $\mu$ 和 $\pi_\theta$，有  
+All the theoretical guarantees in TRPO are stated **with respect to the advantage function of some baseline policy**. Since the only advantage we can estimate reliably in practice is $A_\mu$ (data are sampled under $\mu$), we may as well treat $\mu$ as the baseline policy.
+
+A classical result is the **Performance Difference Lemma**:
+
+> For any two policies $\mu$ and $\pi_\theta$, we have
 > $$
 > \mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
 > = \frac{1}{1-\gamma}\;
-> \mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)]。
+> \mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)].
 > $$
 
-直觉非常简单：
+The intuition is simple:
 
-- $A_\mu(s,a)$ 就是在说“如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报会多或少多少”；
-- 把所有时刻、所有状态、所有动作的“增益”累积起来，就得到新策略比行为策略总共赚了多少。
+- $A_\mu(s,a)$ says: “if I deviate from what $\mu$ would do at state $s$ and instead take action $a$, how much will the long-term return change?”
+- Summing that “gain” across all time steps, states, and actions gives the total improvement of the new policy over the behavior policy.
 
-TRPO 的问题在于，我们没法准确算
+The challenge in TRPO is that we cannot compute
 $$
-\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]，
+\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]
 $$
-因为 $d_{\pi_\theta}$ 是“新策略”的状态分布，我们没有在它下面采样过。
+exactly, because $d_{\pi_\theta}$ is the state distribution of the *new* policy, under which we do not have samples.
 
-于是 TRPO 引入了一个替代目标：把状态分布换成行为策略的：
+So TRPO introduces a surrogate objective by replacing the state distribution with that of the behavior policy:
 
 $$
 L_\mu(\pi_\theta)
-:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)]。
+:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)].
 $$
 
-$L_\mu$ 的直觉解释是：在行为策略的状态分布下，让新策略试着去选动作，看优势有多大。
+Intuitively, $L_\mu$ asks the following question: “Under the states visited by the behavior policy, how good is the new policy if we just let it pick the actions?”
 
-从性能差分引理出发，两者之差是：
+Starting from the Performance Difference Lemma, the difference between the true objective and the surrogate is:
 
 $$
 \mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)
 = \frac{1}{1-\gamma}\;
   \sum_s \big(d_{\pi_\theta}(s) - d_\mu(s)\big)
-  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)]。
+  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)].
 $$
 
-如果我们定义
+If we define
 
 $$
-\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|，
+\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,
 $$
 
-那么有一个直接的上界：
+we immediately get the following upper bound:
 
 > **Lemma 1**  
 > $$
 > |\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
 > \le \frac{\epsilon_\mu}{1-\gamma}\;
->     \|d_{\pi_\theta} - d_\mu\|_1。
+>     \|d_{\pi_\theta} - d_\mu\|_1.
 > $$
 
-这里出现了第一个关键量：
+This reveals the first key quantity:
 
-> **状态分布偏移** $\|d_{\pi_\theta} - d_\mu\|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。
+> **State distribution shift** $\|d_{\pi_\theta} - d_\mu\|_1$, i.e., “how differently the new policy sees the world, compared to the behavior policy.”
 
-我们通常不会直接对 $\|d_{\pi_\theta} - d_\mu\|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如信赖域、KL、clip 全是干这个的。
+We usually do *not* directly impose constraints on $\|d_{\pi_\theta} - d_\mu\|_1$. Instead, we constrain the per-timestep action distribution difference — via trust regions, KL penalties, clipping, etc.
 
-记总变差距离（total variation）：
-
+Define the total variation (TV) distance:
 $$
-D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1。
+D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1.
 $$
 
-假设存在常数 $\beta$，使得
+Assume there is a constant $\beta$ such that
 
-> 对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：
+> For all $s$, the TV distance between the behavior and target policies is bounded:
 > $$
-> D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta。
+> D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta.
 > $$
 
-直观含义：在任意状态里，“新策略”和“生成数据的策略”选动作的分布都不会离太远。
+Intuitively: in any state, the action distribution of the “new policy” cannot deviate too much from that of the policy that generated the data.
 
-一个经典结果（可以用 coupling 证明）是：
+A standard result (provable via coupling) is:
 
 > **Lemma 2**  
-> 在上述条件下有
+> Under the assumption above,
 > $$
 > \|d_{\pi_\theta} - d_\mu\|_1
-> \le \frac{2\gamma}{1-\gamma}\,\beta。
+> \le \frac{2\gamma}{1-\gamma}\,\beta.
 > $$
 
-把它和 Lemma 1 结合：
+Combining Lemma 1 and Lemma 2, we obtain
 
 $$
 |\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
 \le \frac{\epsilon_\mu}{1-\gamma}\; \frac{2\gamma}{1-\gamma}\,\beta
-= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。
+= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
 $$
 
-于是我们得到一个形式上相当简洁的**两策略 TRPO 下界（基准为行为策略）**：
+This gives a remarkably compact **two-policy TRPO lower bound (baseline = behavior policy)**:
 
-> **Theorem 1（两策略 TRPO）**  
+> **Theorem 1 (Two-Policy TRPO)**  
 > $$
 > \mathcal{J}(\pi_\theta)
 > \;\ge\;
 > L_\mu(\pi_\theta)
 > \;-\;
-> \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。
+> \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
 > $$
 
-这说明：
+This tells us:
 
-- **真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：**
+- **What really matters for the tightness of $L_\mu(\pi_\theta)$ as a surrogate for $\mathcal{J}(\pi_\theta)$ is how far the behavior policy $\mu$ and the target policy $\pi_\theta$ drift apart:**
   $$
-  \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big)。
+  \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
   $$
 
-如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。
+If you can directly control this $\beta$, you can essentially port TRPO’s monotonic improvement guarantees to the behavior-policy view.
 
-### 三策略 TRPO
+### Three-Policy TRPO
 
-现实问题在于：**大模型强化学习训练里我们可能无法直接控制 $\beta$ 本身。**
+In practice, especially in large-scale LLM-RL, **we often cannot directly control $\beta$ itself.**
 
-在大部分 PPO / GRPO / GSPO / 现有 RLHF 框架里，实际发生的是：
+In most PPO / GRPO / GSPO / RLHF-style frameworks, the actual situation is:
 
-- rollout 数据是由某个**行为策略** $\mu$ 产生的（推理引擎里的“那一版参数” + 若干系统细节）；
-- 更新时，我们希望利用**参考策略** $\pi_{\theta_{\text{old}}}$ 来限制**目标策略** $\pi_\theta$ 的更新幅度。
+- Rollout data are generated by some **behavior policy** $\mu$ (some particular parameter version plus system details inside the inference engine).
+- During updates, we would like to leverage a **reference policy** $\pi_{\theta_{\text{old}}}$ to limit the update of the **target policy** $\pi_\theta$.
 
-也就是说，实际可以“动手”的是两个量：
+In other words, what we can actually touch and control are two quantities:
 
-1. **参考 vs 目标**：我们可以通过 KL / clip 等手段控制
+1. **Reference vs. target**: via KL penalties, clipping, etc., we constrain
    $$
-   D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。
-   $$
-2. **行为 vs 参考**：我们希望**间接**控制
-   $$
-   D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。
+   D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).
    $$
 
-于是自然就定义两个“proxy 差异”：
+2. **Behavior vs. reference**: we would *like* to keep
+   $$
+   D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
+   $$
+   small as well — this is where training–inference mismatch and asynchronous execution come in.
 
-- **约束 1：参考 vs 目标**
+This motivates defining two “proxy gaps”:
+
+- **Constraint 1: reference vs. target**
   $$
   \alpha_0
   := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
-                                \pi_\theta(\cdot\mid s)\big)；
+                                \pi_\theta(\cdot\mid s)\big);
   $$
-- **约束 2：行为 vs 参考**
+
+- **Constraint 2: behavior vs. reference**
   $$
   \alpha_1
   := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                                \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。
+                                \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
   $$
 
-直觉上：
+Intuitively:
 
-- $\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是信赖域的那部分；
-- $\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致或异步的影子。
+- $\alpha_0$: how far the new policy is from the “old policy” you are using in the loss — this is the trust region part.
+- $\alpha_1$: how far the reference policy used in training is from the *actual* behavior policy that generated the data — this is the footprint of training–inference mismatch and asynchrony.
 
-现在，可以把这两个量塞回 TRPO 的下界里。
+Now we can plug these two quantities back into the TRPO lower bound.
 
-对任意状态 $s$，有
-
+For any state $s$, by the triangle inequality we have
 $$
 \begin{aligned}
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
@@ -253,27 +263,26 @@ D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
 \\
 &\quad +
-D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。
+D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).
 \end{aligned}
 $$
 
-对 $s$ 取上确界：
+Taking the supremum over $s$ gives
 
 $$
 \beta
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 \;\le\;
-\alpha_1 + \alpha_0。
+\alpha_1 + \alpha_0.
 $$
 
-把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里，记
+Plugging this inequality into the two-policy TRPO bound (Theorem 1), and denoting
 
 $$
-C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
 $$
 
-即得到：
-
+we obtain
 $$
 \mathcal{J}(\pi_\theta)
 \;\ge\;
@@ -283,29 +292,28 @@ C\,\beta
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
-C\,(\alpha_0 + \alpha_1)。
+C\,(\alpha_0 + \alpha_1).
 $$
 
-于是，我们得到一个非常直接的**三策略 TRPO 下界**：
+This yields a very direct **three-policy TRPO lower bound**:
 
-> **Theorem 2（三策略 TRPO）**  
-> 记
+> **Theorem 2 (Three-Policy TRPO)**  
+> Let
 > $$
 > \epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
-> C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，
+> C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
 > $$
-> 以及
+> and
 > $$
 > \alpha_0
 > := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
->                               \pi_\theta(\cdot\mid s)\big)，
+>                               \pi_\theta(\cdot\mid s)\big),
 > \quad
 > \alpha_1
 > := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
->                               \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。
+>                               \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
 > $$
-> 则对任意目标策略 $\pi_\theta$ 有
-> 
+> Then for any target policy $\pi_\theta$,
 > $$
 > \boxed{
 > \mathcal{J}(\pi_\theta)
@@ -314,141 +322,141 @@ $$
 > \;-\; C\,(\alpha_0 + \alpha_1)
 > }
 > $$
-> 
-> 其中
+> where
 > $$
 > L_\mu(\pi_\theta)
 > :=
 > \mathcal{J}(\mu) + \frac{1}{1-\gamma}
->   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)]。
+>   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
 > $$
 
-这个结论的含义其实很直接：
+The meaning of this bound is quite straightforward:
 
-- **替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，可以拆成两部分：**
-  - 参考 vs 目标的偏移 $\alpha_0$；
-  - 行为 vs 参考的偏移 $\alpha_1$。
+- **The gap between the surrogate objective $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ decomposes into two pieces:**
+  - The deviation between reference and target policies, $\alpha_0$.
+  - The deviation between behavior and reference policies, $\alpha_1$.
 
-只要这两个量都小，**优化 $L_\mu$ 就有希望有效提升 $\mathcal{J}$**。
+As long as both terms are small, **optimizing $L_\mu$ is likely to improve $\mathcal{J}$**.
 
-### 这两个差异各自怎么约束？
+### How to Control These Two Deviations in Practice?
 
-现在，我们可以从 Theorem 2 回头看各种实际方法：
+We can now revisit various practical methods through the lens of Theorem 2:
 
-- 绝大多数 “PPO / GRPO / GSPO” 类工作，其实是在控制 **约束 1：$\alpha_0$**；
-- 绝大多数 “TIS / IcePop / MIS” 类工作，在本文的统一视角下，可以理解为主要是在控制 **约束 2：$\alpha_1$**。
+- Most PPO / GRPO / GSPO-style work focuses on controlling **Constraint 1: $\alpha_0$**.
+- Most TIS / IcePop / MIS-style work, in the view of this post, can be understood as primarily targeting **Constraint 2: $\alpha_1$**.
 
-本文下面只讨论 **约束 2**。
+In the remainder of this post I will focus on **Constraint 2**.
 
-约束 2 的目标是：**保证用来训练的数据，尽可能来自“接近参考策略”的行为策略。**
+The goal of Constraint 2 is: **ensure that the data used in training come (effectively) from a behavior policy that is close to the reference policy.**
 
-这里通常既有**系统层**的机制，也有**算法层（importance sampling）**的机制。
+In practice, this usually involves both **system-level mechanisms** and **algorithmic mechanisms (importance sampling)**.
 
-1. **系统层：让行为策略别飘太远**
+1. **System level: keep the behavior policy from drifting too far**
 
-   - 异步框架：  
-     给每个样本打上策略版本号，只能用与 $\pi_{\theta_{\text{old}}}$ 相差不大的参数版本采样的数据；
-   - 训推对齐：  
-     强调训练框架和推理框架用相同精度、相同算子、相近的内核 / kernel 行为。
+   - Asynchronous frameworks:  
+     Tag each sample with a policy version, and only use data generated by parameter versions that are close enough to $\pi_{\theta_{\text{old}}}$.
 
-   这些机制的目标是：从“算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。
+   - Training–inference alignment:  
+     Use consistent precision, operators, and similar kernel behavior between the training and inference stacks.
 
-2. **算法层：样本修正**
+   These mechanisms act “outside” the algorithm to make $\mu$ closer to $\pi_{\theta_{\text{old}}}$, thereby shrinking $\alpha_1$.
 
-   在算法层，我们不再试图“纠正整个行为策略”，而是用重要性采样比率在**样本层面**做筛选和重加权，让“真正参与训练的样本子集”上的行为策略尽量接近参考策略，或者减小差异较大的样本在训练上的权重。
+2. **Algorithmic level: sample-wise correction**
 
-   具体来说，就是下面这些方法，它们本质上都可以看作是“实现约束 2 的不同方式”。
+   At the algorithmic level, we no longer attempt to “fix” the entire behavior policy. Instead, we use importance sampling ratios to correct at the **sample level**: we filter or reweight samples so that the behavior policy is close to the reference policy *on the subset of data that actually participates in training*, or at least reduce the influence of samples with large mismatch.
 
-## TIS、IcePop、sequence-level MIS：都是“约束 2”的不同实现
+   Concretely, this gives rise to methods like TIS, IcePop, and MIS, which can be seen as different ways of implementing Constraint 2 at the sample level.
 
-下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为  
+## TIS, IcePop, and Sequence-Level MIS: Different Implementations of Constraint 2
+
+In this section I’ll reuse the notation introduced above to write down the objectives of these three methods, focusing only on the design choices related to “behavior vs. reference policy.” Let the token-level PPO / GRPO-style update term be
 
 $$
 g_\theta(t)
 = \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),
 $$
 
-其中
+where
 
 $$
 r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
-\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t)。
+\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t).
 $$
 
-也就是说：
+Here:
 
-- $r_t(\theta)$ 是 **目标 vs 参考** 的比率（对应约束 1）；
-- $A_t$ 基于行为策略采样的数据，是我们能估到的优势函数。
+- $r_t(\theta)$ is the **target vs. reference** ratio (corresponding to Constraint 1).
+- $A_t$ is the advantage estimated from data sampled under the behavior policy.
 
-为了把 token 级的 $(s_t,a_t)$ 与序列级的 $(x,y)$ 记号打通，在以 RLHF（reinforcement learning from human feedback，人类反馈强化学习）为代表的 LLM-RL 设定中，我们约定：
+To connect token-level $(s_t,a_t)$ with sequence-level $(x,y)$ notation, consider the RLHF setting (reinforcement learning from human feedback) for LLMs:
 
-- prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{|y|})$；
-- token 级状态 $s_t := (x, y_{<t})$，动作 $a_t := y_t$；
-- 因此行为策略和参考策略在序列上的分布可写成
+- Prompts are denoted by $x$, and responses by $y = (y_1,\dots,y_{|y|})$.
+- Token-level states and actions are defined as $s_t := (x,y_{<t})$, $a_t := y_t$.
+- The behavior and reference policies on sequences can then be written as
   $$
   \mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
-  \pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t)。
+  \pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t).
   $$
 
-此外，为了描述“参考 vs 行为”的偏移，统一定义 token 级重要性比率
+To quantify the deviation between reference and behavior policies, we can define the token-level importance ratio:
 
 $$
 \rho_t^{(\text{ref}\leftarrow\text{beh})} := 
-\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)}，
+\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)},
 $$
 
-以及其对应的序列级版本
+and its sequence-level counterpart:
 
 $$
 \rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)} 
-= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}。
+= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}.
 $$
 
-接下来，TIS / IcePop / MIS 的区别，就体现在“如何利用这些 $\rho$ 来实现约束 2”。
+The difference between TIS, IcePop, and MIS lies in **how they use $\rho$ to implement Constraint 2**.
 
-### 1. TIS：token-level 截断 IS
+### 1. TIS: Token-Level Truncated Importance Sampling
 
-TIS 直接对上述 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 做截断，记
+TIS directly truncates the token-level ratio $\rho_t^{(\text{ref}\leftarrow\text{beh})}$; define
 
 $$
-\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}。
+\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}.
 $$
 
-更新目标写成  
+The update objective becomes
 
 $$
 L_{\text{TIS}}(\theta) 
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big]。
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big].
 $$
 
-- 蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。
-- 从三策略 TRPO 的角度看，这相当于在 **token 分布** 上“软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。
+- The blue $\color{blue}{w_t}$ is the truncated IS weight: extremely large ratios are capped at a constant $C_{\text{IS}}$.
+- From the three-policy TRPO perspective, this is a *soft* way to downweight tokens where behavior and reference policies differ significantly, effectively reducing their contribution to $\alpha_1$ in the gradient.
 
 ---
 
-### 2. IcePop：MoE 场景下的 token-level 双侧 Mask
+### 2. IcePop: Token-Level Two-Sided Masking in MoE
 
-IcePop 同样以 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 为度量，但采用 **双侧掩码**：
+IcePop also uses $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ as a discrepancy measure, but opts for **two-sided masking**:
 
 $$
-\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}。
+\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}.
 $$
 
-更新目标写成  
+The update objective becomes
 
 $$
 L_{\text{IcePop}}(\theta) 
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big]。
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big].
 $$
 
-- 蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。
-- 这相当于硬性裁掉“行为策略和参考策略极度不一致”的 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。
+- The blue $\color{blue}{m_t}$ decides whether a token participates in the update: tokens with ratios that are too large or too small are dropped entirely.
+- This is a *hard* sample selection scheme: only tokens where behavior and reference policies are reasonably aligned (ratios within $[C_{\text{low}}, C_{\text{high}}]$) are kept, implementing a stricter version of Constraint 2 at the token level.
 
 ---
 
-### 3. sequence-level MIS：按整条序列 Mask 的重要性采样
+### 3. Sequence-Level MIS: Masked Importance Sampling Over Entire Sequences
 
-MIS 的核心操作是：**只保留 IS 比率不超过阈值 $C$ 的序列，其余序列的损失直接置零**。写成
+The core operation in MIS is to **retain only sequences whose sequence-level IS ratio is below a threshold $C$**, zeroing out the loss for all other sequences:
 
 $$
 \color{blue}{
@@ -458,7 +466,7 @@ $$
 }
 $$
 
-在统一的损失形式下，可以写成
+In a unified loss form, this can be written as
 
 $$
 L_{\text{MIS}}(\theta)
@@ -466,46 +474,52 @@ L_{\text{MIS}}(\theta)
 \Big[
 \color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}} 
 \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
-\Big],
+\Big].
 $$
 
-简而言之：
+In words:
 
-- 对于 **IS 比率较小的序列**：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；
-- 对于 **IS 比率超过阈值 $C$ 的序列**：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。
+- For **sequences with small IS ratios**, the full weight $\rho(y\mid x)$ is retained for off-policy correction.
+- For **sequences whose ratios exceed the threshold $C$**, the entire policy loss is masked out (weight set to $0$).
 
-从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在**序列级**筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
+From the three-policy TRPO viewpoint, MIS no longer truncates at the token level. Instead, it performs **trajectory-level** filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. This implements Constraint 2 at the sequence level.
 
-## 小结
+## Conclusion
 
-如果把这篇文章压缩成一句话，就是：
+If I had to compress this post into a single sentence, it would be:
 
-> **许多“大模型 RL 训推不一致”和“异步训练”问题，在本文的视角下，其实都可以理解为：在 TRPO 框架下，当行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 不一致时，二者之间的偏移（$\alpha_1$）被严重低估了。**
+> **Many issues around “training–inference mismatch” and “asynchronous training” in large-scale LLM RL can be understood, in the TRPO framework, as severely underestimating the deviation between the behavior policy $\mu$ and the reference policy $\pi_{\theta_{\text{old}}}$ — i.e., the term $\alpha_1$.**
 
-从两策略到三策略，我们做的事情其实很简单：
+From two policies to three, what we did is conceptually very small:
 
-- 把 TRPO 的下界从“旧策略 vs 新策略”的叙述，改写成“**行为策略 – 参考策略 – 目标策略**”三者的关系；
-- 显式地拆出了两个 TV 距离：
-  - **约束 1：参考 vs 目标** $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；
-  - **约束 2：行为 vs 参考** $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；
-- 得到了一个非常直接的结论：  
-  替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。
+- We rewrote the TRPO lower bound from a “old vs. new policy” narrative into a “**behavior–reference–target**” three-policy relationship.
 
-在这个视角下（当然这只是众多可能视角之一）：
+- We explicitly separated two TV distances:
+  - **Constraint 1: reference vs. target**, $\alpha_0$, corresponding to the KL / clip / trust-region style constraints in PPO / GRPO / GSPO.
+  - **Constraint 2: behavior vs. reference**, $\alpha_1$, capturing real-world factors like asynchronous frameworks, training–inference mismatch, MoE routing volatility, kernel-level nondeterminism, etc.
 
-- Decoupled PPO / AReaL 可以被看作是在**形式上承认“三策略存在”**，并尝试在目标函数上将“行为分布”和“参考策略”解耦；
-- TIS、IcePop、sequence-level MIS，则是在不同粒度（token / sequence）上，**试图通过 IS 截断 / 掩码把“约束 2”落到样本层面**：
-  - TIS：用 token-level 截断权重削弱极端样本的影响；
-  - IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃“极端不一致”的 token；
-  - MIS：在 sequence-level 直接屏蔽整条“偏差过大”的轨迹；
-- 《RL老训崩？训推差异是基石》、以及前文提到的 *Defeating Nondeterminism in LLM Inference* 等工程经验，则可以理解为在**系统侧和数值实现侧**，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。
+- This leads to a very simple conclusion:  
+  The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ scales with $\alpha_0 + \alpha_1$.
 
-从这个统一视角出发，也许有助于回答几个实际问题（这里只是抛几个开放性问题）：
+Under this lens (which is of course only one of many possible perspectives):
 
-- 在什么条件下，我们还能把“大模型 RL 训练”理解成某种意义上的“近似 TRPO / PPO”？
-- 对一个具体的 RL 系统，我们究竟应该把主要精力花在：
-  - 收紧 $\alpha_0$（更强的 KL / 更稳的 sequence-level 目标），还是
-  - 压低 $\alpha_1$（更一致的训推框架、更激进的 MIS / TIS / IcePop）？
-- 在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装“$\mu \approx \pi_{\theta_{\text{old}}}$”多久？
+- Decoupled PPO / AReaL can be viewed as **formally acknowledging the existence of three policies** and explicitly decoupling the behavior distribution from the reference policy in the objective.
 
-本文只是在 TRPO 这个老框架上做了一个非常“**最小化**”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。难免有理解偏差或遗漏之处，如果你也关注实际大模型 RL 训练的情况，欢迎把你自己的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式，或许会有不一样的直观感受。
+- TIS, IcePop, and sequence-level MIS can be seen as different ways of implementing **Constraint 2** at different granularities (token vs. sequence) using importance sampling truncation / masking:
+  - TIS: token-level truncation of IS weights to soften the influence of extreme samples.
+  - IcePop: token-level two-sided masking in MoE to hard-drop tokens with severe mismatch.
+  - MIS: sequence-level masking to ignore entire trajectories whose behavior–reference mismatch is too large.
+
+- Engineering advice such as in *RL老训崩？训推差异是基石* and system-level work like *Defeating Nondeterminism in LLM Inference* can be interpreted as efforts to **reduce $\alpha_1$ on the systems and numerical side**, so that the assumptions underlying the algorithms do not break too badly.
+
+From this unified perspective, it may also be easier to think about the following practical questions (these are completely open and I don’t have definitive answers):
+
+- Under what conditions can we still reasonably interpret “LLM RL training” as some approximate form of TRPO / PPO?
+
+- For a concrete RL system, where should we invest more effort:
+  - tightening $\alpha_0$ (stronger KL control, more stable sequence-level objectives), or
+  - reducing $\alpha_1$ (better training–inference alignment, more aggressive MIS / TIS / IcePop)?
+
+- In the presence of MoE, asynchronous sampling, and complex agent workflows, how long can we safely pretend that “$\mu \approx \pi_{\theta_{\text{old}}}$”?
+
+This post is just a very **minimal** extension of the classic TRPO framework, making the “three policies” explicit and using them to organize some existing work. There are inevitably misunderstandings and omissions. If you also care about how RL training actually behaves in large LLM systems, I’d be very interested to see how your own setup can be abstracted into a relationship between $\mu$, $\pi_{\theta_{\text{old}}}$, and $\pi_\theta$, and then re-examined through the inequality in Theorem 2. It might give a slightly different intuitive feel for what your system is really optimizing.
