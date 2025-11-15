@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 从两策略到三策略：行为策略和参考策略不一致下的 PPO 扩展
+title: 从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展
 date: 2025-11-15
 description: 在大模型强化学习中，因为推理框架和训练框架的不一致，以及异步训练框架下行为策略分布的多样性，行为策略与参考策略不一致的问题变得尤为突出。本文分析了行为策略与参考策略不一致问题在 TRPO 框架下的影响，并在这一分析基础上梳理了当前对这一问题的不同解决方法。
 categories: reinforcement-learning
@@ -10,7 +10,7 @@ categories: reinforcement-learning
 
 最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都在围绕一个更基础的矛盾打转——**行为策略（behavior policy）和参考策略（reference policy）不一致。**
 
-本文先简单梳理一下我*目前看到的*相关工作，然后再尝试从“行为策略 vs 参考策略”的角度，把它们串到同一条线上。
+本文先简单梳理一下我目前看到的相关工作，然后再尝试从“行为策略 vs 参考策略”的角度，把它们串到同一条线上，给各位读者提供一个补充视角。
 
 在本文中我会用：
 
@@ -22,7 +22,7 @@ categories: reinforcement-learning
 
 ## 相关工作
 
-下面按时间线简单列一下我印象比较深的一些工作（只代表我个人看到的片面子集），也顺便标注它们主要是在解决哪一层面的不一致：
+下面按时间线简单列一下我印象比较深的一些工作（只代表我个人看到的片面子集）：
 
 - [Decoupled PPO](https://arxiv.org/pdf/2110.00641) 率先指出在信赖域策略优化（TRPO 和 PPO）方法中，“旧策略”（old policy）实际承担了两个不同的角色：一是用于重要性采样进行异策略修正，在这个目的下，“旧策略”用于代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，在这个目的下，“旧策略”被用于衡量新旧策略的变化程度，称作近端策略（proximal policy，对应本文中的“参考策略”）。文章指出这两个目的下的“旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，把“采样用谁”和“对谁做 trust region”在形式上解耦开来。
 - [AReaL](https://arxiv.org/abs/2505.24298) 关注到了异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将“行为策略分布”与“参考策略”显式区分开来，从而在异步场景下仍然维持类似 PPO 的优化性质。
@@ -76,7 +76,7 @@ categories: reinforcement-learning
 
 在理想设定里我们默认 $\mu = \pi_{\theta_{\text{old}}}$；现实系统里这俩往往不等，这就是“训推不一致”的数学影子。
 
-### 两策略框架
+### 两策略 TRPO
 
 > 有基础的读者可以直接跳到[三策略 TRPO](#三策略-trpo把参考策略--拉进来)。
 
@@ -184,3 +184,192 @@ $$
 这就是最经典的“TRPO 单调性保证”的一种形式，只是我们把“旧策略”显式叫成了**行为策略** $\mu$。
 
 ### 三策略 TRPO：把参考策略 $\pi_{\theta_{\text{old}}}$ 拉进来
+
+到这里，两策略 TRPO 已经给了我们一个非常干净的结论：
+
+> **两策略 TRPO（基准为行为策略 $\mu$）：**  
+> 记
+> \[
+> \epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
+> \beta := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big),
+> \]
+> 则  
+> \[
+> \mathcal{J}(\pi_\theta)
+> \;\ge\;
+> L_\mu(\pi_\theta)
+> \;-\;
+> \underbrace{\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}}_{=:C}
+> \,\beta,
+> \]
+> 其中
+> \[
+> L_\mu(\pi_\theta)
+> :=
+> \mathcal{J}(\mu)
+> + \frac{1}{1-\gamma}
+>   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
+> \]
+
+也就是说：
+
+- **真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：**  
+  \[
+  \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
+  \]
+- 如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。
+
+现实问题在于：**大模型强化学习训练里我们可能无法直接控制 $\beta$ 本身。**
+
+在大部分 PPO / GRPO / GSPO / 现有 RLHF 框架里，实际发生的是：
+
+- rollout 数据是由某个**行为策略** $\mu$ 产生的（推理引擎里的“那一版参数”+ 若干系统细节）；
+- 更新时，我们希望利用**参考策略 $\pi_{\theta_{\text{old}}}$** 来限制**目标策略** $\pi_\theta$的更新幅度。
+
+也就是说，实际可以“动手”的是两个量：
+
+1. **参考 vs 目标**：我们可以通过 KL / clip 等手段控制
+   \[\
+   D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
+   \]
+2. **行为 vs 参考**：我们希望**间接**控制
+   \[
+   D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
+   \]
+
+于是自然就定义两个“proxy 差异”：
+
+- **约束 1：参考 vs 目标**
+  \[
+  \alpha_0
+  := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
+                                \pi_\theta(\cdot\mid s)\big)
+  \]
+- **约束 2：行为 vs 参考**
+  \[
+  \alpha_1
+  := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
+                                \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
+  \]
+
+直觉上：
+
+- $\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是信赖域的那部分；
+- $\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致/异步的影子。
+
+接下来只需要一行三角不等式。
+
+### 一行三角不等式：从两策略到三策略 TRPO
+
+对任意状态 $s$，有
+
+\[
+\begin{aligned}
+D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
+&\le
+D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
+\\
+&\quad +
+D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).
+\end{aligned}
+\]
+
+对 $s$ 取上确界：
+
+\[
+\beta
+:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
+\;\le\;
+\alpha_1 + \alpha_0.
+\]
+
+把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里：
+
+\[
+\mathcal{J}(\pi_\theta)
+\;\ge\;
+L_\mu(\pi_\theta)
+\;-\;
+C\,\beta
+\;\ge\;
+L_\mu(\pi_\theta)
+\;-\;
+C\,(\alpha_0 + \alpha_1),
+\]
+
+其中 $C = \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}$。
+
+于是，我们得到一个非常干净的**三策略 TRPO 下界**：
+
+> **Theorem 2（三策略 TRPO，下界形式）**  
+> 记
+> \[
+> \epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
+> C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
+> \]
+> 以及
+> \[
+> \alpha_0
+> := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
+>                               \pi_\theta(\cdot\mid s)\big),
+> \quad
+> \alpha_1
+> := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
+>                               \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
+> \]
+> 则对任意目标策略 $\pi_\theta$ 有
+> \[
+> \boxed{
+> \mathcal{J}(\pi_\theta)
+> \;\ge\;
+> L_\mu(\pi_\theta)
+> \;-\; C\,(\alpha_0 + \alpha_1),
+> }
+> \]
+> 其中
+> \[
+> L_\mu(\pi_\theta)
+> :=
+> \mathcal{J}(\mu)
+> + \frac{1}{1-\gamma}
+>   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
+> \]
+
+这句话的含义非常简单：
+
+- **替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，被拆成了两部分：**
+  - 参考 vs 目标 的偏移 $\alpha_0$；
+  - 行为 vs 参考 的偏移 $\alpha_1$。
+
+只要这两个量都小，**优化 $L_\mu$ 就能有效提升 $\mathcal{J}$**。
+
+### 这两个差异各自怎么约束？
+
+现在，我们可以从 Theorem 2 回头看各种实际方法：
+
+- 绝大多数 “PPO/GRPO/GSPO” 类工作，其实是在控制 **约束 1：$\alpha_0$**；
+- 绝大多数 “TIS / IcePop / MIS” 类工作，其实是在控制 **约束 2：$\alpha_1$**。
+
+本文只讨论 **约束 2**。
+
+约束 2的目标：**保证用来训练的数据，尽可能来自“接近参考策略”的行为策略。**
+
+这里通常既有**系统层**的机制，也有**算法层（importance sampling）**的机制。
+
+1. **系统层：让行为策略别飘太远**
+
+   - 异步框架：
+     - 给每个样本打上策略版本号，只能用 $\pi_{\theta_{\text{old}}}$ 不太远的版本采样的数据；
+   - 训推对齐：
+     - 强调训练框架和推理框架用相同精度、相同算子；
+
+   这些机制的目标是：从“算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。
+
+2. **算法层：样本修正**
+
+   在算法层，我们不再试图“纠正整个行为策略”，而是用重要性采样比率在**样本层面**做筛选和重加权，让 **“真正参与训练的样本子集”** 上的行为策略尽量接近参考策略，或者减小差异较大的样本在训练上的权重。
+
+   具体来说就是下面这些方法，它们本质上全是“实现约束 2 的不同方式”。
+
+
+### TIS、IcePop、sequence-level MIS：都是“约束 2”的不同实现
