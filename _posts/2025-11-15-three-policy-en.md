@@ -6,7 +6,8 @@ description: 在大模型强化学习中，因为推理框架和训练框架的�
 categories: reinforcement-learning
 ---
 
-[Chinese Version in Zhihu](https://zhuanlan.zhihu.com/p/1973206684907365344).
+[中文版本](https://zhuanlan.zhihu.com/p/1973206684907365344) [![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
+
 
 ## 训推不一致和异步框架
 
