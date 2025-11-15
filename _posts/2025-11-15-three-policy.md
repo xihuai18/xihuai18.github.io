@@ -15,10 +15,10 @@ categories: reinforcement-learning
 在本文中我会用：
 
 - **行为策略** $\mu$：实际负责生成 rollout 的策略，也就是“你在什么分布下采样到了这些数据”。在现代 LLM RL 系统里，它对应的是推理引擎里的那套实现（vLLM / SGLang 等），在异步框架下往往还是**多个 worker 策略的混合分布**。
-- **参考策略** $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、Clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的 “旧策略”（old policy）。
+- **参考策略** $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的 “旧策略”（old policy）。
 - **目标策略** $\pi_{\theta}$：训练目标里要优化的策略，也就是“你想让模型变成什么样”。典型地就是 PPO / GRPO 里的 “新策略”（new policy）。
 
-在最经典、理想化的设定里，我们通常**默认** $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理/训练后端、MoE 路由波动甚至硬件数值差异等因素影响，这二者往往会出现不同程度的偏离。
+在最经典、理想化的设定里，我们通常**默认** $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理 / 训练后端、MoE 路由波动甚至硬件数值差异等因素影响，这二者往往会出现不同程度的偏离。
 
 ## 相关工作
 
@@ -29,18 +29,17 @@ categories: reinforcement-learning
 - [GSPO](https://arxiv.org/abs/2507.18071) 从 GRPO 在长序列和 MoE 模型上的稳定性问题出发，指出 token-level 的 PPO / GRPO 在专家路由高度波动（尤其是新旧策略之间的路由差异）时会引入巨大的方差与不稳定。GSPO 提出在 **sequence-level** 定义 PPO-style 目标与比率约束，用整条序列的比率来约束更新，从而在 MoE 场景下显著缓解由路由不一致带来的训练崩溃问题。
 - [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl#28b721e3f6c480c3a756f8fb319e860d) 关注到了现有的一些大模型强化学习训练框架（如 VeRL）中，推理框架和训练框架在不少相同的功能模块上有不同的实现（例如 vLLM 和 FSDP / Megatron 等算子上的差异），导致行为策略 $\mu$ 与参考策略 $\pi_{\theta_{\text{old}}}$ 不一致。这种不一致使得原本假定为同策略（on-policy）的训练，实际上变成了带有明显偏差的异策略（off-policy）训练。文章总结了两种处理这一问题的现有方法：PPO-IS 与 vanilla-IS，并提出在 **token-level** 做截断重要性采样（truncated IS, TIS），以减少训推不一致程度较重的样本在训练中的影响。作者还写了两篇更为基础的分析文章，从原理上分析训推不一致问题：[Part I](https://fengyao.notion.site/pg-seq-token-part1-basics) 和 [Part II](https://fengyao.notion.site/pg-seq-token-part2-mismatch)。
 - [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference) 指出批处理大小不变性（batch-size invariance）的缺失是大模型推理框架随机性的核心来源之一：同一个输入在不同的 batch 组合和 kernel 路径下，得到的概率分布会发生可观差异。这意味着即便“名义上”是同一套参数，真实运行时的行为策略 $\mu$ 也会因为系统负载和调度差异而波动，从而进一步加剧训推不一致。
-- [Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!](https://ringtech.notion.site/icepop) 观察到上述训推不一致问题在 MoE 模型上会进一步加剧：路由本身就对微小扰动高度敏感，再叠加推理/训练实现差异和异步采样，很容易放大偏差。文章提出 IcePop 方法：在 **token-level** 通过计算重要性采样比率，对过于大或者过于小的比率进行双侧掩码（masking），将这些“噪声较大”的数据从梯度中丢弃，从而稳定 MoE 上的 RL 训练。
+- [Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!](https://ringtech.notion.site/icepop) 观察到上述训推不一致问题在 MoE 模型上会进一步加剧：路由本身就对微小扰动高度敏感，再叠加推理 / 训练实现差异和异步采样，很容易放大偏差。文章提出 IcePop 方法：在 **token-level** 通过计算重要性采样比率，对过于大或者过于小的比率进行双侧掩码（masking），将这些“噪声较大”的数据从梯度中丢弃，从而稳定 MoE 上的 RL 训练。
 - [When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch](https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda) 系统性分析了训推不一致的各种成因，包括智能体工作流中引入的大量分布外和低概率信息、硬件和内核实现带来的计算不确定性，并分析了在 **token-level** 进行重要性采样如何在长序列上引入严重的偏差。文章进一步提出在 **sequence-level** 计算重要性采样掩码（sequence-level masked IS, sequence-level MIS）：只丢弃那些整条序列的重要性采样比率过大的数据，从而在控制偏差的同时，显著抑制由极端样本导致的训练崩溃。文中给出了较为完整的理论推导和丰富的实验支撑。
 - [RL老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
-
 
 ## 三策略 TRPO 视角下的最小统一理解
 
 上面列的这些工作，看上去各自解决的是：
 
-- 算法层：PPO/GRPO 的目标怎么写，token-level 还是 sequence-level，用 clip 还是 mask；
+- 算法层：PPO / GRPO 的目标怎么写，token-level 还是 sequence-level，用 clip 还是 mask；
 - 系统层：推理框架和训练框架怎样对齐；
-- 模型层：MoE 模型路由问题放大训练不稳定，等等。
+- 模型层：MoE 模型路由问题如何放大训练不稳定，等等。
 
 但如果我们把“行为策略 vs 参考策略”这条线拉直，会发现绝大部分问题其实都可以塞进一个很简单的理论框架里：**三策略 TRPO**。
 
@@ -78,9 +77,9 @@ categories: reinforcement-learning
 
 ### 两策略 TRPO
 
-> 有基础的读者可以直接跳到[三策略 TRPO](#三策略-trpo把参考策略--拉进来)。
+> 熟悉 TRPO 的读者可以直接跳到 [三策略 TRPO](#三策略-trpo)。
 
-TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势函数**之上的。  既然实际能算清楚的**只有** $A_\mu$（数据是按 $\mu$ 采的），那我们就直接把 $\mu$ 当成基准。
+TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势函数**之上的。既然实际能算清楚的**只有** $A_\mu$（数据是按 $\mu$ 采的），那我们就直接把 $\mu$ 当成基准。
 
 一个经典的结论是 **性能差分引理（Performance Difference Lemma）**：
 
@@ -93,7 +92,7 @@ TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势�
 
 直觉非常简单：
 
-- $A_\mu(s,a)$ 就是在说“如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报多/少多少”；  
+- $A_\mu(s,a)$ 就是在说“如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报多 / 少多少”；  
 - 把所有时刻、所有状态、所有动作的“增益”累积起来，就得到新策略比老策略总共赚了多少。
 
 TRPO 的核心是：我们没法准确算
@@ -109,7 +108,7 @@ L_\mu(\pi_\theta)
 := \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)].
 $$
 
-这份 $L_\mu$ 才是我们真正用数据能估出来的东西：“在旧策略的状态分布下，让新策略试着去选动作，看看优势有多大”。
+这份 $L_\mu$ 在理论上是一个“我们可以从数据分布 $d_\mu$ 出发定义、并在实践中通过重要性采样或 PPO-style surrogate **近似估计**”的 quantity：在旧策略的状态分布下，让新策略试着去选动作，看优势有多大。
 
 从性能差分引理出发，两者之差是：
 
@@ -136,6 +135,7 @@ $$
 > $$
 
 这里出现了第一个关键量：  
+
 > **状态分布偏移** $\|d_{\pi_\theta} - d_\mu\|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。
 
 我们通常不会直接对 $\|d_{\pi_\theta} - d_\mu\|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如信赖域、KL、clip 全是干这个的。
@@ -146,9 +146,9 @@ $$
 D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1.
 $$
 
-我们先假设一个条件：
+假设存在常数 $\beta$，使得
 
-> 对所有 $s$，行为策略和目标策略之间的 TV 被一个常数 $\beta$ 上界：  
+> 对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：  
 > $$
 > D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta.
 > $$
@@ -167,7 +167,9 @@ $$
 把它和 Lemma 1 结合：
 
 $$
-|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)| \le \frac{\epsilon_\mu}{1-\gamma}\; \frac{2\gamma}{1-\gamma}\,\beta = \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
+|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
+\le \frac{\epsilon_\mu}{1-\gamma}\; \frac{2\gamma}{1-\gamma}\,\beta
+= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
 $$
 
 于是我们得到一个非常干净的**两策略 TRPO 下界（基准为行为策略）**：
@@ -181,21 +183,7 @@ $$
 > \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
 > $$
 
-这就是最经典的“TRPO 单调性保证”的一种形式，只是我们把“旧策略”显式叫成了**行为策略** $\mu$。
-
-### 三策略 TRPO：把参考策略 $\pi_{\theta_{\text{old}}}$ 拉进来
-
-到这里，两策略 TRPO 已经给了我们一个非常干净的结论：
-
-> **两策略 TRPO（基准为行为策略 $\mu$）：**  
-> 记  
-> $$\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad \beta := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big),$$
-> 则  
-> $$\mathcal{J}(\pi_\theta) \;\ge\; L_\mu(\pi_\theta) \;-\; \underbrace{\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}}_{=:C} \,\beta,$$
-> 其中  
-> $$L_\mu(\pi_\theta) := \mathcal{J}(\mu) + \frac{1}{1-\gamma} \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].$$
-
-也就是说：
+这说明：
 
 - **真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：**  
   $$
@@ -208,12 +196,12 @@ $$
 在大部分 PPO / GRPO / GSPO / 现有 RLHF 框架里，实际发生的是：
 
 - rollout 数据是由某个**行为策略** $\mu$ 产生的（推理引擎里的“那一版参数”+ 若干系统细节）；
-- 更新时，我们希望利用**参考策略 $\pi_{\theta_{\text{old}}}$** 来限制**目标策略** $\pi_\theta$的更新幅度。
+- 更新时，我们希望利用**参考策略 $\pi_{\theta_{\text{old}}}$** 来限制**目标策略** $\pi_\theta$ 的更新幅度。
 
 也就是说，实际可以“动手”的是两个量：
 
 1. **参考 vs 目标**：我们可以通过 KL / clip 等手段控制
-   $$\
+   $$
    D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
    $$
 2. **行为 vs 参考**：我们希望**间接**控制
@@ -239,11 +227,11 @@ $$
 直觉上：
 
 - $\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是信赖域的那部分；
-- $\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致/异步的影子。
+- $\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致 / 异步的影子。
 
-接下来只需要一行三角不等式。
+### 三策略 TRPO
 
-### 一行三角不等式：从两策略到三策略 TRPO
+现在，可以把这两个量塞回 TRPO 的下界里。
 
 对任意状态 $s$，有
 
@@ -267,7 +255,13 @@ $$
 \alpha_1 + \alpha_0.
 $$
 
-把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里：
+把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里，记
+
+$$
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
+$$
+
+即得到：
 
 $$
 \mathcal{J}(\pi_\theta)
@@ -278,10 +272,8 @@ C\,\beta
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
-C\,(\alpha_0 + \alpha_1),
+C\,(\alpha_0 + \alpha_1).
 $$
-
-其中 $C = \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}$。
 
 于是，我们得到一个非常干净的**三策略 TRPO 下界**：
 
@@ -318,9 +310,9 @@ $$
 >   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
 > $$
 
-这句话的含义非常简单：
+这个结论的含义其实很直接：
 
-- **替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，被拆成了两部分：**
+- **替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，可以拆成两部分：**
   - 参考 vs 目标 的偏移 $\alpha_0$；
   - 行为 vs 参考 的偏移 $\alpha_1$。
 
@@ -330,21 +322,21 @@ $$
 
 现在，我们可以从 Theorem 2 回头看各种实际方法：
 
-- 绝大多数 “PPO/GRPO/GSPO” 类工作，其实是在控制 **约束 1：$\alpha_0$**；
+- 绝大多数 “PPO / GRPO / GSPO” 类工作，其实是在控制 **约束 1：$\alpha_0$**；
 - 绝大多数 “TIS / IcePop / MIS” 类工作，其实是在控制 **约束 2：$\alpha_1$**。
 
-本文只讨论 **约束 2**。
+本文下面只讨论 **约束 2**。
 
-约束 2的目标：**保证用来训练的数据，尽可能来自“接近参考策略”的行为策略。**
+约束 2 的目标：**保证用来训练的数据，尽可能来自“接近参考策略”的行为策略。**
 
 这里通常既有**系统层**的机制，也有**算法层（importance sampling）**的机制。
 
 1. **系统层：让行为策略别飘太远**
 
    - 异步框架：
-     - 给每个样本打上策略版本号，只能用 $\pi_{\theta_{\text{old}}}$ 不太远的版本采样的数据；
+     - 给每个样本打上策略版本号，只能用与 $\pi_{\theta_{\text{old}}}$ 相差不大的参数版本采样的数据；
    - 训推对齐：
-     - 强调训练框架和推理框架用相同精度、相同算子；
+     - 强调训练框架和推理框架用相同精度、相同算子、相近的 kernel 行为；
 
    这些机制的目标是：从“算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。
 
@@ -354,55 +346,97 @@ $$
 
    具体来说就是下面这些方法，它们本质上全是“实现约束 2 的不同方式”。
 
-
 ## TIS、IcePop、sequence-level MIS：都是“约束 2”的不同实现
 
-下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO/GRPO 风格更新项为  
-$$g_\theta(t) = \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),\quad r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},$$
-这里 $(s_t,a_t)$ 服从行为策略诱导的采样分布，$A_t := A_\mu(s_t,a_t)$ 与前文一致。
+下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为  
+
+$$
+g_\theta(t)
+= \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),
+$$
+
+其中
+
+$$
+r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
+\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t).
+$$
+
+也就是说：
+
+- $r_t(\theta)$ 是 **目标 vs 参考** 的比率（对应约束 1）；  
+- $A_t$ 基于行为策略采样的数据，是我们能估到的优势函数。
 
 为了把 token 级的 $(s_t,a_t)$ 与序列级的 $(x,y)$ 记号打通，在 LLM RLHF 设定中我们约定：
 
 - prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{|y|})$；
 - token 级状态 $s_t := (x, y_{<t})$，动作 $a_t := y_t$；
 - 因此行为策略和参考策略在序列上的分布可写成
-  $$\mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
-  \pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t).$$
+  $$
+  \mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
+  \pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t).
+  $$
 
 此外，为了描述“参考 vs 行为”的偏移，统一定义 token 级重要性比率
-$$\rho_t^{(\text{ref}\leftarrow\text{beh})} := \frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)},$$
-以及其对应的序列级版本
-$$\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)} = \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}.$$
 
-### 1 TIS：token-level 截断 IS
+$$
+\rho_t^{(\text{ref}\leftarrow\text{beh})} := 
+\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)},
+$$
+
+以及其对应的序列级版本
+
+$$
+\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)} 
+= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}.
+$$
+
+接下来，TIS / IcePop / MIS 的区别，就体现在“如何利用这些 $\rho$ 来实现约束 2”。
+
+### 1. TIS：token-level 截断 IS
 
 TIS 直接对上述 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 做截断，记
-$$\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}.$$
+
+$$
+\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}.
+$$
 
 更新目标写成  
-$$L_{\text{TIS}}(\theta) = - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big].$$
+
+$$
+L_{\text{TIS}}(\theta) 
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big].
+$$
 
 - 蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。  
 - 从三策略 TRPO 的角度看，这相当于在 **token 分布** 上“软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。
 
 ---
 
-### 2 IcePop：MoE 场景下的 token-level 双侧 Mask
+### 2. IcePop：MoE 场景下的 token-level 双侧 Mask
 
-IcePop 同样以 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 为度量，但采用 **双侧掩码**：  
-$$\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}.$$
+IcePop 同样以 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 为度量，但采用 **双侧掩码**：
+
+$$
+\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}.
+$$
 
 更新目标写成  
-$$L_{\text{IcePop}}(\theta) = - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big].$$
+
+$$
+L_{\text{IcePop}}(\theta) 
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big].
+$$
 
 - 蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。  
-- 这相当于硬性裁掉“行为策略和参考策略极度不一致 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。
+- 这相当于硬性裁掉“行为策略和参考策略极度不一致”的 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。
 
 ---
 
-### 3 sequence-level MIS：按整条序列 Mask 的重要性采样
+### 3. sequence-level MIS：按整条序列 Mask 的重要性采样
 
 MIS 的核心操作是：**只保留 IS 比率不超过阈值 $C$ 的序列，其余序列的损失直接置零**。写成
+
 $$
 \color{blue}{
 \rho(y\mid x)
@@ -412,17 +446,19 @@ $$
 $$
 
 在统一的损失形式下，可以写成
+
 $$
 L_{\text{MIS}}(\theta)
 =-\,\mathbb{E}_{(x,y)\sim\mu}
-\Big[\color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}} \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
+\Big[
+\color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}} 
+\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
 \Big],
 $$
 
 简而言之：
 
-- 对于 **IS 比率较小的序列**：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；
-- 对于 **IS 比率超过阈值 $C$ 的序列**：整个序列的 policy loss 被 mask 掉（权重变成 0）。
+- 对于 **IS 比率较小的序列**：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；  
+- 对于 **IS 比率超过阈值 $C$ 的序列**：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。
 
 从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在**序列级**筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
-
