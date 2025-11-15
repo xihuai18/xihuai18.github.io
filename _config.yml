@@ -117,18 +117,18 @@ bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 # Blog
 # -----------------------------------------------------------------------------
 
-blog_name: Xihuai's Blog # blog_name will be displayed in your blog page
-blog_nav_title: Xihuai's Blog # your blog must have a title for it to be displayed in the nav bar
-blog_description: Xihuai's Blog
-permalink: /blog/:year/:title/
+# blog_name: Xihuai's Blog # blog_name will be displayed in your blog page
+# blog_nav_title: Xihuai's Blog # your blog must have a title for it to be displayed in the nav bar
+# blog_description: Xihuai's Blog
+# permalink: /blog/:year/:title/
 
-# Pagination
-pagination:
-  enabled: false
+# # Pagination
+# pagination:
+#   enabled: false
 
-related_blog_posts:
-  enabled: false
-  max_related: 5
+# related_blog_posts:
+#   enabled: false
+#   max_related: 5
 
 # Giscus comments (RECOMMENDED)
 # Follow instructions on https://giscus.app/ to setup for your repo to fill out
@@ -247,7 +247,7 @@ jekyll-archives:
     tag: '/blog/tag/:name/'
     category: '/blog/category/:name/'
 
-display_tags: ['formatting', 'images', 'links', 'math', 'code'] # this tags will be dispalyed on the front page of your blog
+# display_tags: ['formatting', 'images', 'links', 'math', 'code'] # this tags will be dispalyed on the front page of your blog
 
 # -----------------------------------------------------------------------------
 # Jekyll Scholar

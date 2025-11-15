@@ -3,8 +3,7 @@ layout: post
 title: 欢迎来到我的博客
 date: 2025-01-15 10:00:00
 description: 这是我的第一篇博客文章
-tags: formatting tutorial
-categories: sample-posts
+categories: reinforcement-learning
 ---
 
 欢迎来到我的博客！这是一篇示例文章，展示了博客的基本功能。
