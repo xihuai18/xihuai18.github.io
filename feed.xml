@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-15T17:16:19+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-15T17:18:28+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry><title type="html">从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy.html" rel="alternate" type="text/html" title="从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy.html"><![CDATA[<h2 id="训推不一致和异步框架">训推不一致和异步框架</h2>
 
 <p>最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都在围绕一个更基础的矛盾打转——<strong>行为策略（behavior policy）和参考策略（reference policy）不一致。</strong></p>
@@ -465,7 +465,7 @@ L_\mu(\pi_\theta)
 <p>如果把这篇文章压缩成一句话，就是：</p>
 
 <blockquote>
-  <p><strong>许多看起来彼此独立的“大模型 RL 训推不一致”问题，其实都可以理解为：在 TRPO 框架下，行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的偏移（$\alpha_1$）被严重低估了。</strong></p>
+  <p><strong>许多“大模型 RL 训推不一致”和“异步训练”问题，其实都可以理解为：在 TRPO 框架下，大模型作为行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 时，二者之间的偏移（$\alpha_1$）被严重低估了。</strong></p>
 </blockquote>
 
 <p>从两策略到三策略，我们做的事情其实很简单：</p>
