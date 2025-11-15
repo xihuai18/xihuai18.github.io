@@ -406,7 +406,7 @@ C\,(\alpha_0 + \alpha_1),\]
 <p>于是，我们得到一个非常干净的<strong>三策略 TRPO 下界</strong>：</p>
 
 <blockquote>
-  <p><strong>Theorem 2（三策略 TRPO，下界形式）</strong><br />
+  <p><strong>Theorem 2（三策略 TRPO）</strong><br />
 记
 \(\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
 C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},\)
@@ -426,15 +426,10 @@ L_\mu(\pi_\theta)
 \;-\; C\,(\alpha_0 + \alpha_1),
 }\)
 其中
-$$
-L_\mu(\pi_\theta)
+\(L_\mu(\pi_\theta)
 :=
-\mathcal{J}(\mu)</p>
-  <ul>
-    <li>\frac{1}{1-\gamma}
-\mathbb{E}<em>{s\sim d</em>\mu,a\sim\pi_\theta}[A_\mu(s,a)].
-$$</li>
-  </ul>
+\mathcal{J}(\mu) + \frac{1}{1-\gamma}
+  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].\)</p>
 </blockquote>
 
 <p>这句话的含义非常简单：</p>

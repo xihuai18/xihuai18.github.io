@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-15T16:47:38+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-15T16:50:04+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry><title type="html">从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy.html" rel="alternate" type="text/html" title="从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy.html"><![CDATA[<h2 id="训推不一致和异步框架">训推不一致和异步框架</h2>
 
 <p>最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都在围绕一个更基础的矛盾打转——<strong>行为策略（behavior policy）和参考策略（reference policy）不一致。</strong></p>
@@ -275,7 +275,7 @@ C\,(\alpha_0 + \alpha_1),\]
 <p>于是，我们得到一个非常干净的<strong>三策略 TRPO 下界</strong>：</p>
 
 <blockquote>
-  <p><strong>Theorem 2（三策略 TRPO，下界形式）</strong><br />
+  <p><strong>Theorem 2（三策略 TRPO）</strong><br />
 记
 \(\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
 C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},\)
@@ -295,15 +295,10 @@ L_\mu(\pi_\theta)
 \;-\; C\,(\alpha_0 + \alpha_1),
 }\)
 其中
-$$
-L_\mu(\pi_\theta)
+\(L_\mu(\pi_\theta)
 :=
-\mathcal{J}(\mu)</p>
-  <ul>
-    <li>\frac{1}{1-\gamma}
-\mathbb{E}<em>{s\sim d</em>\mu,a\sim\pi_\theta}[A_\mu(s,a)].
-$$</li>
-  </ul>
+\mathcal{J}(\mu) + \frac{1}{1-\gamma}
+  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].\)</p>
 </blockquote>
 
 <p>这句话的含义非常简单：</p>
