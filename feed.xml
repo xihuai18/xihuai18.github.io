@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-15T17:11:10+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-15T17:16:19+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry><title type="html">从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy.html" rel="alternate" type="text/html" title="从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy.html"><![CDATA[<h2 id="训推不一致和异步框架">训推不一致和异步框架</h2>
 
 <p>最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都在围绕一个更基础的矛盾打转——<strong>行为策略（behavior policy）和参考策略（reference policy）不一致。</strong></p>
@@ -458,4 +458,55 @@ L_\mu(\pi_\theta)
   <li>对于 <strong>IS 比率超过阈值 $C$ 的序列</strong>：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。</li>
 </ul>
 
-<p>从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在<strong>序列级</strong>筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。</p>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[在大模型强化学习中，因为推理框架和训练框架的不一致，以及异步训练框架下行为策略分布的多样性，行为策略与参考策略不一致的问题变得尤为突出。本文分析了行为策略与参考策略不一致问题在 TRPO 框架下的影响，并在这一分析基础上梳理了当前对这一问题的不同解决方法。]]></summary></entry></feed>
+<p>从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在<strong>序列级</strong>筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。</p>
+
+<h2 id="小结">小结</h2>
+
+<p>如果把这篇文章压缩成一句话，就是：</p>
+
+<blockquote>
+  <p><strong>许多看起来彼此独立的“大模型 RL 训推不一致”问题，其实都可以理解为：在 TRPO 框架下，行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的偏移（$\alpha_1$）被严重低估了。</strong></p>
+</blockquote>
+
+<p>从两策略到三策略，我们做的事情其实很简单：</p>
+
+<ul>
+  <li>把 TRPO 的下界从“旧策略 vs 新策略”的叙述，改写成“<strong>行为策略 – 参考策略 – 目标策略</strong>”三者的关系；</li>
+  <li>显式地拆出了两个 TV 距离：
+    <ul>
+      <li><strong>约束 1：参考 vs 目标</strong> $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；</li>
+      <li><strong>约束 2：行为 vs 参考</strong> $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；</li>
+    </ul>
+  </li>
+  <li>得到了一个非常直接的结论：<br />
+<strong>替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。</strong></li>
+</ul>
+
+<p>在这个视角下：</p>
+
+<ul>
+  <li>Decoupled PPO / AReaL 可以被看作是在<strong>形式上承认“三策略存在”</strong>，并尝试在目标函数上将“行为分布”和“参考策略”解耦；</li>
+  <li>TIS、IcePop、sequence-level MIS，则是在不同粒度（token / sequence）上，<strong>试图通过 IS 截断 / 掩码把“约束 2”落到样本层面</strong>：
+    <ul>
+      <li>TIS：用 token-level 截断权重削弱极端样本的影响；</li>
+      <li>IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃“极端不一致”的 token；</li>
+      <li>MIS：在 sequence-level 直接屏蔽整条“偏差过大”的轨迹；</li>
+    </ul>
+  </li>
+  <li>《RL老训崩？训推差异是基石》、Defeating Nondeterminism 等工程经验，则可以理解为在<strong>系统侧和数值实现侧</strong>，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。</li>
+</ul>
+
+<p>从这个统一视角出发，也许有助于回答几个实际问题：</p>
+
+<ul>
+  <li>在什么条件下，我们还能把“大模型 RL 训练”理解成某种意义上的“近似 TRPO / PPO”？</li>
+  <li>对一个具体的 RL 系统，我们究竟应该把主要精力花在：
+    <ul>
+      <li>收紧 $\alpha_0$（更强的 KL / 更稳的 sequence-level 目标），还是</li>
+      <li>压低 $\alpha_1$（更一致的训推框架、更激进的 MIS / TIS / IcePop）？</li>
+    </ul>
+  </li>
+  <li>在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装“$\mu \approx \pi_{\theta_{\text{old}}}$”多久？</li>
+</ul>
+
+<p>本文只是在 TRPO 这个老框架上做了一个非常“<strong>最小化</strong>”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。如果你也关注实际大模型 RL 训练的情况，欢迎把具体的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式。</p>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[在大模型强化学习中，因为推理框架和训练框架的不一致，以及异步训练框架下行为策略分布的多样性，行为策略与参考策略不一致的问题变得尤为突出。本文分析了行为策略与参考策略不一致问题在 TRPO 框架下的影响，并在这一分析基础上梳理了当前对这一问题的不同解决方法。]]></summary></entry></feed>
