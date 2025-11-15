@@ -9,9 +9,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>欢迎来到我的博客 | Xihuai Wang's Page</title>
+    <title>从两策略到三策略：采样策略不一致下的 PPO 扩展 | Xihuai Wang's Page</title>
     <meta name="author" content="Xihuai Leo Wang" />
-    <meta name="description" content="这是我的第一篇博客文章" />
+    <meta name="description" content="在大模型强化学习中，因为推理框架和训练框架的不一致，以及异步训练框架下采样策略的多样性，采样策略与参考策略不一致的问题变得尤为突出。本文分析了采样策略与参考策略不一致问题在 TRPO 框架下的影响，并在这一分析基础上梳理了当前对这一问题的不同解决方法。" />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System" />
 
 
@@ -32,7 +32,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/01/15/welcome-to-my-blog.html">
+    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/01/15/three-policy.html">
 
     <!-- Dark Mode -->
     
@@ -74,9 +74,9 @@
 
           <!-- CV -->
           <!-- 
-          <li class="nav-item active">
+          <li class="nav-item ">
             <a class="nav-link" href="/assets/pdf/" target="_blank"
-              rel="noopener noreferrer">cv<span class="sr-only">(current)</span></a>
+              rel="noopener noreferrer">cv</a>
           </li> -->
           <!-- Other pages -->
           <li class="nav-item ">
@@ -117,91 +117,20 @@
 <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">欢迎来到我的博客</h1>
+    <h1 class="post-title">从两策略到三策略：采样策略不一致下的 PPO 扩展</h1>
     <p class="post-meta">January 15, 2025</p>
     <p class="post-tags">
-      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+  <a href="/blog/2025"> 📅 2025 </a>
       &nbsp; &middot; &nbsp;
         <a href="/blog/category/reinforcement-learning">
-          <i class="fas fa-tag fa-sm"></i> reinforcement-learning</a> &nbsp;
+          🏷️ reinforcement-learning</a> &nbsp;
           
 
     </p>
   </header>
 
   <article class="post-content">
-    <p>欢迎来到我的博客！这是一篇示例文章，展示了博客的基本功能。</p>
-
-<h2 id="markdown-语法支持">Markdown 语法支持</h2>
-
-<p>你可以使用各种 Markdown 语法来编写文章：</p>
-
-<h3 id="代码块">代码块</h3>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">hello_world</span><span class="p">():</span>
-    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Hello, World!</span><span class="sh">"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="sh">"</span><span class="s">欢迎使用 Jekyll 博客</span><span class="sh">"</span>
-
-<span class="nf">hello_world</span><span class="p">()</span>
-</code></pre></div></div>
-
-<h3 id="数学公式">数学公式</h3>
-
-<p>行内公式：$E = mc^2$</p>
-
-<p>块级公式：</p>
-
-\[\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}\]
-
-<h3 id="列表">列表</h3>
-
-<p><strong>无序列表：</strong></p>
-<ul>
-  <li>项目 1</li>
-  <li>项目 2</li>
-  <li>项目 3</li>
-</ul>
-
-<p><strong>有序列表：</strong></p>
-<ol>
-  <li>第一项</li>
-  <li>第二项</li>
-  <li>第三项</li>
-</ol>
-
-<h3 id="引用">引用</h3>
-
-<blockquote>
-  <p>这是一段引用文字。可以用来强调重要内容或引用他人的观点。</p>
-</blockquote>
-
-<h3 id="链接和图片">链接和图片</h3>
-
-<p><a href="https://github.com">访问 GitHub</a></p>
-
-<h2 id="文章功能">文章功能</h2>
-
-<p>这个博客系统支持：</p>
-<ul>
-  <li>✅ Markdown 语法</li>
-  <li>✅ 代码高亮</li>
-  <li>✅ 数学公式（KaTeX）</li>
-  <li>✅ 文章分页</li>
-  <li>✅ 标签和分类</li>
-  <li>✅ 相关文章推荐</li>
-  <li>✅ 按年份归档</li>
-</ul>
-
-<h2 id="如何创建新文章">如何创建新文章</h2>
-
-<ol>
-  <li>在 <code class="language-plaintext highlighter-rouge">_posts</code> 目录下创建新文件</li>
-  <li>文件名格式：<code class="language-plaintext highlighter-rouge">YYYY-MM-DD-title.md</code></li>
-  <li>添加 Front Matter（文章头部的 YAML 配置）</li>
-  <li>使用 Markdown 编写内容</li>
-</ol>
-
-<p>就这么简单！祝你写作愉快！</p>
+    
 
   </article></div>
 
