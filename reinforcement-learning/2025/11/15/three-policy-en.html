@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>From Two Policies to Three - Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL | Xihuai Wang's Page</title>
+    <title>From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL | Xihuai Wang's Page</title>
     <meta name="author" content="Xihuai Leo Wang" />
     <meta name="description" content="Modern LLM RL pipelines often train under an “old policy” that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations." />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System" />
@@ -117,7 +117,7 @@
 <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">From Two Policies to Three - Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</h1>
+    <h1 class="post-title">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</h1>
     <p class="post-meta">November 15, 2025</p>
     <p class="post-tags">
   <a href="/blog/2025"> 📅 2025 </a>
@@ -130,7 +130,7 @@
   </header>
 
   <article class="post-content">
-    <p><a href="https://zhuanlan.zhihu.com/p/1973206684907365344">中文版本</a> <a href="https://zhuanlan.zhihu.com/p/1973206684907365344"><img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+    <p><a href="https://zhuanlan.zhihu.com/p/1973206684907365344">中文版本<img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <h2 id="traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</h2>
 
