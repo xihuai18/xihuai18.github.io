@@ -9,9 +9,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>From Two Policies to Three - Extending TRPO under Behavior–Reference Policy Mismatch | Xihuai Wang's Page</title>
+    <title>From Two Policies to Three - Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL | Xihuai Wang's Page</title>
     <meta name="author" content="Xihuai Leo Wang" />
-    <meta name="description" content="In large-scale reinforcement learning for LLMs, mismatches between inference and training stacks and the diversity of behavior policies under asynchronous frameworks make behavior–reference policy mismatch particularly prominent. This post analyzes its impact on TRPO and, based on this analysis, surveys existing methods that tackle this issue." />
+    <meta name="description" content="Modern LLM RL pipelines often train under an “old policy” that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations." />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System" />
 
 
@@ -117,7 +117,7 @@
 <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">From Two Policies to Three - Extending TRPO under Behavior–Reference Policy Mismatch</h1>
+    <h1 class="post-title">From Two Policies to Three - Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</h1>
     <p class="post-meta">November 15, 2025</p>
     <p class="post-tags">
   <a href="/blog/2025"> 📅 2025 </a>
@@ -701,7 +701,7 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
-        &copy; Copyright 2025 Xihuai Leo Wang. Last updated: November 15, 2025.
+        &copy; Copyright 2025 Xihuai Leo Wang. Last updated: November 16, 2025.
       </div>
     </footer>
 
