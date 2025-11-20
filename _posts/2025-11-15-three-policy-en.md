@@ -6,10 +6,9 @@ description: Modern LLM RL pipelines often train under an “old policy” that 
 categories: reinforcement-learning
 ---
 
-[中文版本![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
+[TOC]
 
-* TOC
-{:toc}
+[中文版本![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
 ## Training–Inference Mismatch and Asynchronous Frameworks
 
