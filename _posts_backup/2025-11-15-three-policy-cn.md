@@ -24,7 +24,7 @@ categories: reinforcement-learning
 
 下面按时间线简单列一下我印象比较深的一些工作（只代表我个人看到的片面子集）：
 
-- [Decoupled PPO](https://arxiv.org/pdf/2110.00641) 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，“旧策略”（old policy）实际承担了两个不同的角色：一是用于重要性采样进行异策略修正，在这个目的下，“旧策略”用于代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，在这个目的下，“旧策略”被用于衡量新旧策略的变化程度，称作近端策略（proximal policy，对应本文中的“参考策略”）。文章指出这两个目的下的“旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，把“采样用谁”和“对谁做 trust region”在形式上解耦开来。
+- [Decoupled PPO](https://arxiv.org/abs/2110.00641) 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，“旧策略”（old policy）实际承担了两个不同的角色：一是用于重要性采样进行异策略修正，在这个目的下，“旧策略”用于代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，在这个目的下，“旧策略”被用于衡量新旧策略的变化程度，称作近端策略（proximal policy，对应本文中的“参考策略”）。文章指出这两个目的下的“旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，把“采样用谁”和“对谁做 trust region”在形式上解耦开来。
 
 - [AReaL](https://arxiv.org/abs/2505.24298) 关注到了异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将“行为策略分布”和“参考策略”显式区分开来，从而在异步场景下仍然维持类似 PPO 的优化性质。
 
@@ -38,7 +38,9 @@ categories: reinforcement-learning
 
 - [When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch](https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda) 系统性分析了训推不一致的各种成因，包括智能体工作流中引入的大量分布外和低概率信息、硬件和内核 / kernel 实现带来的计算不确定性，并分析了在 **token-level** 进行重要性采样如何在长序列上引入严重的偏差。文章进一步提出在 **sequence-level** 计算重要性采样掩码（sequence-level masked IS, sequence-level MIS）：只丢弃那些整条序列的重要性采样比率过大的数据，从而在控制偏差的同时，显著抑制由极端样本导致的训练崩溃。文中给出了较为完整的理论推导和丰富的实验支撑。
 
-- [RL老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
+- [Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers](https://arxiv.org/abs/2510.11370) 聚焦于 MoE 架构下特有的 **路由不一致（Routing Inconsistency）** 问题。文章发现，推理端和训练端即便在输入完全相同的情况下，由于算子实现或并行的微小差异，Router 选中的专家往往不同。这种“物理路径”上的不一致，使得行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的差异远超预期，极易导致训练崩溃。文章提出了 **Rollout Routing Replay (R3)**：在推理阶段记录下每个 token 实际命中的专家索引，并在训练阶段**强制回放**这些路由决策，不再重新进行计算。通过这种方式，R3 在 MoE 拓扑结构上强制对齐了训推两端的计算路径。
+
+- [RL 老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
 
 ## 三策略 TRPO 视角下的最小统一理解
 
@@ -90,7 +92,8 @@ TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势�
 
 一个经典的结论是 **性能差分引理（Performance Difference Lemma）**：
 
-> 对任意两策略 $\mu$ 和 $\pi_\theta$，有  
+> 对任意两策略 $\mu$ 和 $\pi_\theta$，有
+>
 > $$
 > \mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
 > = \frac{1}{1-\gamma}\;
@@ -103,9 +106,11 @@ TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势�
 - 把所有时刻、所有状态、所有动作的“增益”累积起来，就得到新策略比行为策略总共赚了多少。
 
 TRPO 的问题在于，我们没法准确算
+
 $$
 \mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]，
 $$
+
 因为 $d_{\pi_\theta}$ 是“新策略”的状态分布，我们没有在它下面采样过。
 
 于是 TRPO 引入了一个替代目标：把状态分布换成行为策略的：
@@ -134,7 +139,8 @@ $$
 
 那么有一个直接的上界：
 
-> **Lemma 1**  
+> **Lemma 1**
+>
 > $$
 > |\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
 > \le \frac{\epsilon_\mu}{1-\gamma}\;
@@ -156,6 +162,7 @@ $$
 假设存在常数 $\beta$，使得
 
 > 对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：
+>
 > $$
 > D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta。
 > $$
@@ -166,6 +173,7 @@ $$
 
 > **Lemma 2**  
 > 在上述条件下有
+>
 > $$
 > \|d_{\pi_\theta} - d_\mu\|_1
 > \le \frac{2\gamma}{1-\gamma}\,\beta。
@@ -181,7 +189,8 @@ $$
 
 于是我们得到一个形式上相当简洁的**两策略 TRPO 下界（基准为行为策略）**：
 
-> **Theorem 1（两策略 TRPO）**  
+> **Theorem 1（两策略 TRPO）**
+>
 > $$
 > \mathcal{J}(\pi_\theta)
 > \;\ge\;
@@ -287,11 +296,14 @@ $$
 
 > **Theorem 2（三策略 TRPO）**  
 > 记
+>
 > $$
 > \epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
 > C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，
 > $$
+>
 > 以及
+>
 > $$
 > \alpha_0
 > := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
@@ -301,8 +313,9 @@ $$
 > := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
 >                               \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。
 > $$
+>
 > 则对任意目标策略 $\pi_\theta$ 有
-> 
+>
 > $$
 > \boxed{
 > \mathcal{J}(\pi_\theta)
@@ -311,8 +324,9 @@ $$
 > \;-\; C\,(\alpha_0 + \alpha_1)
 > }
 > $$
-> 
+>
 > 其中
+>
 > $$
 > L_\mu(\pi_\theta)
 > :=
@@ -358,7 +372,7 @@ $$
 
 ## TIS、IcePop、sequence-level MIS：都是“约束 2”的不同实现
 
-下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为  
+下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为
 
 $$
 g_\theta(t)
@@ -390,14 +404,14 @@ $$
 此外，为了描述“参考 vs 行为”的偏移，统一定义 token 级重要性比率
 
 $$
-\rho_t^{(\text{ref}\leftarrow\text{beh})} := 
+\rho_t^{(\text{ref}\leftarrow\text{beh})} :=
 \frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)}，
 $$
 
 以及其对应的序列级版本
 
 $$
-\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)} 
+\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)}
 = \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}。
 $$
 
@@ -411,17 +425,15 @@ $$
 \color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}。
 $$
 
-更新目标写成  
+更新目标写成
 
 $$
-L_{\text{TIS}}(\theta) 
+L_{\text{TIS}}(\theta)
 = - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big]。
 $$
 
 - 蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。
 - 从三策略 TRPO 的角度看，这相当于在 **token 分布** 上“软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。
-
----
 
 ### 2. IcePop：MoE 场景下的 token-level 双侧 Mask
 
@@ -431,17 +443,15 @@ $$
 \color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}。
 $$
 
-更新目标写成  
+更新目标写成
 
 $$
-L_{\text{IcePop}}(\theta) 
+L_{\text{IcePop}}(\theta)
 = - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big]。
 $$
 
 - 蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。
 - 这相当于硬性裁掉“行为策略和参考策略极度不一致”的 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。
-
----
 
 ### 3. sequence-level MIS：按整条序列 Mask 的重要性采样
 
@@ -461,7 +471,7 @@ $$
 L_{\text{MIS}}(\theta)
 =-\,\mathbb{E}_{(x,y)\sim\mu}
 \Big[
-\color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}} 
+\color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}}
 \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
 \Big],
 $$
@@ -472,6 +482,126 @@ $$
 - 对于 **IS 比率超过阈值 $C$ 的序列**：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。
 
 从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在**序列级**筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
+
+## 路由回放是修改优化目标而不是实现约束
+
+在 MoE（Mixture-of-Experts）模型上，训推不一致往往首先表现为**路由不一致（routing inconsistency）**：即便参数相同，推理端与训练端也可能因为算子、并行或数值细节的微小差异而路由到不同专家。一个很自然的工程应对是**路由回放（routing replay）**：在 rollout（推理）时记录实际命中的专家路径，训练时强制复用这些路由决策。
+
+这类方法经常被直觉性地理解为“在实现约束 2、压小 \(\alpha_1\)”。但从三策略 TRPO 的视角看，更准确的说法是：
+
+> **路由回放并不是在原 surrogate objective 上收紧约束，而是在把 surrogate objective 改写成另一个“带路由条件/替换”的目标。**  
+> 它让路由不一致在 loss 里“不可见”，但并没有让真实策略距离里的 \(\alpha_0\) 或 \(\alpha_1\) 变小。
+
+下面用一个**尽量简单**但足够说明问题的建模来把这件事写清楚。
+
+### MoE 下的 surrogate objective：把“路由”和“token 生成”拆开
+
+把 MoE 抽象成两阶段随机决策：“先选专家 \(z\)，再在该专家条件下生成 token \(a\)”。
+因此目标策略可以分解为
+
+$$
+\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),
+$$
+
+其中：
+
+- \(\omega\_\theta(z\mid s)\) 是路由器（router）的分布；
+- \(\pi\_\theta(a\mid s,z)\) 是在专家 \(z\) 条件下的 token 分布。
+
+在三策略 TRPO 中，我们真正想优化的 surrogate objective 为
+
+$$
+L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_z \omega_\theta(z\mid s)\,F_\theta(s,z)
+\bigg],
+$$
+
+其中我把专家层的优势聚合写成
+
+$$
+F_\theta(s,z)
+:=
+\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z).
+$$
+
+关键点：**在原始的 \(L*\mu(\pi*\theta)\) 里，路由分布是当前要更新的 \(\omega\_\theta\)**。也就是说，MoE 的 RL 训练不仅在更新 token 生成分布，也在更新路由器本身。
+
+### 1) 回放行为策略的路由（behavior-router replay / R3 类）
+
+R3 的做法是：rollout 时记录推理端实际命中的专家集合 \(M\_\mu(s)\)，训练时强制当前策略**只在该集合内路由**。可以把它写成对路由分布的“条件化投影”：
+
+$$
+\omega_\theta^{\text{R3}}(z\mid s)
+:=
+\frac{\omega_\theta(z\mid s)\,\mathbf{1}\{z\in M_\mu(s)\}}
+     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .
+$$
+
+从而训练时实际优化的 surrogate objective 变为
+
+$$
+L_\mu^{\text{R3}}(\pi_\theta) =
+\mathcal{J}(\mu) +
+\frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_{z\in M_\mu(s)} \omega_\theta^{\text{R3}}(z\mid s)\,F_\theta(s,z)
+\bigg].
+$$
+
+和原始 \(L*\mu(\pi*\theta)\) 对比可以看到，R3 并没有让 \(\omega*\theta\) 逼近 \(\omega*{\text{old}}\) 或 \(\omega\_\mu\)；它做的是：
+
+- **把对 \(z\sim\omega*\theta\) 的期望，改成了对 \(z\sim\omega*\theta(\cdot\mid z\in M\_\mu(s))\) 的条件期望**；
+- 等价地说，**把路由的可行 support 缩到了 \(M\_\mu(s)\)**。
+
+因此 R3 训练的是一个“被行为路由集合条件化后的 surrogate objective”，而不是原来的 \(L*\mu(\pi*\theta)\)。  
+好处是显著降方差、提升稳定性；代价是**在每个状态上都收缩了路由器探索/更新的自由度**。
+
+### 2) 回放参考策略的路由（reference-router replay）
+
+另一类 routing replay 复用的是参考策略（old policy）的路由器 \(\omega\_{\text{old}}\)。这等价于训练一个混合策略
+
+$$
+\hat\pi_\theta(a,z\mid s)
+:=
+\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),
+$$
+
+对应 surrogate objective 为
+
+$$
+L_\mu^{\text{ref-replay}}(\pi_\theta) =
+\mathcal{J}(\mu) +
+\frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_z \omega_{\text{old}}(z\mid s)\,F_\theta(s,z)
+\bigg].
+$$
+
+这意味着：
+
+- 在 surrogate objective 中，路由器被**固定为旧路由器**，路由相关的“参考 vs 目标”差异在 loss 里被直接抹掉；
+- 训练对“新路由器 \(\omega*\theta\) 是否偏离 \(\omega*{\text{old}}\)”不再敏感，于是路由不一致导致的不稳定被绕开。
+
+但注意这同样是**换目标**：
+
+- 真实策略空间里的 \(\alpha_0\) 并没有因此变小，只是被“用旧路由器重定义目标”而在 loss 中不可见；
+- 路由器的学习被强行冻结或极度削弱。
+
+### 路由回放只是在改写 surrogate objective
+
+把两类 replay 放在一起看，它们的共同点是：
+
+1. **优化的都不是原始的 \(L*\mu(\pi*\theta)\)**，而是某个“路由被条件化/替换后的 surrogate objective”。
+2. **它们没有直接收缩三策略 TRPO 下界里的 \(\alpha_0,\alpha_1\)**。replay 让路由不匹配不再显式出现在 loss 中，但不匹配在真实策略距离里仍然存在。
+3. **实践上是在“用偏差换方差”**：回放往往显著降低方差、提升稳定性，但也可能限制了 MoE 在 RL 目标下学到更优的路由模式。
+
+所以，从三策略 TRPO 的视角，更准确的理解是：
+
+> **routing replay 是一种 surrogate objective 的改写，而不是对 \(\alpha_0\) 或 \(\alpha_1\) 的直接实现。**
 
 ## 小结
 
@@ -495,7 +625,8 @@ $$
   - TIS：用 token-level 截断权重削弱极端样本的影响；
   - IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃“极端不一致”的 token；
   - MIS：在 sequence-level 直接屏蔽整条“偏差过大”的轨迹；
-- 《RL老训崩？训推差异是基石》、以及前文提到的 *Defeating Nondeterminism in LLM Inference* 等工程经验，则可以理解为在**系统侧和数值实现侧**，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。
+- **routing replay（路由回放）在三策略 TRPO 的视角下更像是“改写 surrogate objective”而非“直接实现约束”**：无论回放行为路由（R3 类）还是回放参考路由，它们都把原本的 \(L*\mu(\pi*\theta)\) 改成了一个路由被条件化/替换后的 surrogate objective，用**一定的目标偏差与路由学习自由度的收缩**换取**降低方差与提升稳定性**。因此它并不会真正收缩 \(\alpha_0\) 或 \(\alpha_1\)，而是让路由不一致在 loss 中“不可见”；
+- 《RL 老训崩？训推差异是基石》、以及前文提到的 _Defeating Nondeterminism in LLM Inference_ 等工程经验，则可以理解为在**系统侧和数值实现侧**，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。
 
 从这个统一视角出发，也许有助于回答几个实际问题（这里只是抛几个开放性问题）：
 
@@ -506,3 +637,5 @@ $$
 - 在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装“$\mu \approx \pi_{\theta_{\text{old}}}$”多久？
 
 本文只是在 TRPO 这个老框架上做了一个非常“**最小化**”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。难免有理解偏差或遗漏之处，如果你也关注实际大模型 RL 训练的情况，欢迎把你自己的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式，或许会有不一样的直观感受。
+
+[英文版 From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL](https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html)
