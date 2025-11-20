@@ -48,6 +48,8 @@ Below is a rough timeline of the works that left a strong impression on me (this
 
 - [When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch](https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda) gives a systematic analysis of the causes of training–inference mismatch, including large amounts of out-of-distribution and low-probability content introduced by agent workflows, hardware and kernel-level numerical uncertainty, and how **token-level** importance sampling can introduce severe bias on long sequences. It further proposes **sequence-level** masked importance sampling (sequence-level MIS): compute an IS ratio at the sequence level and discard only those sequences whose overall ratio is too large, thereby controlling bias while strongly suppressing training collapse caused by extreme samples. The paper provides reasonably complete theoretical derivations and extensive experimental evidence.
 
+- [Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers](https://arxiv.org/abs/2510.11370) focuses on the MoE-specific problem of **routing inconsistency**. The paper finds that even for identical inputs, inference and training can route tokens to different experts due to small differences in operator implementations or parallelism. This “physical-path” mismatch makes the gap between the behavior policy $\mu$ and the reference policy $\pi_{\theta_{\text{old}}}$ much larger than expected and can easily cause training collapse. To address this, the paper proposes **Rollout Routing Replay (R3)**: during rollout it records, for each token, the actual expert indices selected by the inference router, and during training it **replays** these routing decisions instead of recomputing them. In effect, R3 forces the training and inference stacks to share the same routing paths in the MoE topology, aligning the two sides at the level of the computation graph.
+
 - [RL老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) approaches the problem more from a practical perspective, sharing experience on how to engineer for near training–inference consistency: choosing consistent operators and precision settings, monitoring and constraining the log-prob gap between training and inference, etc. The focus is on framework-level engineering practices that can mitigate training–inference difference at the root.
 
 ## A Minimally Unified View from a Three-Policy TRPO Perspective
@@ -484,6 +486,126 @@ In words:
 
 From the three-policy TRPO viewpoint, sequence-level MIS no longer truncates at the token level. Instead, it performs **trajectory-level** filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. This implements Constraint 2 at the sequence level.
 
+## MoE Routing Replay: What Does It Actually Do in Three-Policy TRPO?
+
+In MoE (Mixture-of-Experts) models, training–inference mismatch often first appears as **routing inconsistency**: even with identical parameters, the inference and training stacks may route tokens to different experts because of small differences in operators, parallelism, or numerics. A natural engineering response is **routing replay**: during rollout (inference), record the actual expert paths, and during training, force the model to reuse these routing decisions.
+
+These methods are often intuitively described as “implementing Constraint 2 and shrinking $\alpha_1$.” From the three-policy TRPO perspective, a more precise statement is:
+
+> **Routing replay does not tighten the original surrogate objective via a constraint; instead, it rewrites the surrogate objective into one that is conditioned on / replaces the routing.**  
+> It makes routing mismatch invisible in the loss, but it does not actually shrink the true policy distances $\alpha_0$ or $\alpha_1$.
+
+Below I’ll sketch a **minimal** abstraction that is sufficient to make this concrete.
+
+### Surrogate Objective in MoE: Separating Routing and Token Generation
+
+Abstract an MoE model as a two-stage stochastic decision: “first choose an expert $z$, then generate token $a$ conditioned on that expert.” The target policy can be factorized as
+
+$$
+\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),
+$$
+
+where:
+
+- $\omega_\theta(z\mid s)$ is the router distribution.
+- $\pi_\theta(a\mid s,z)$ is the token distribution conditioned on expert $z$.
+
+In the three-policy TRPO setting, the surrogate objective we actually want to optimize can be written as
+
+$$
+L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_z \omega_\theta(z\mid s)\,F_\theta(s,z)
+\bigg],
+$$
+
+where I use
+
+$$
+F_\theta(s,z)
+:=
+\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z)
+$$
+
+to denote the expert-level aggregation of advantages.
+
+The key point is that **in the original $L_\mu(\pi_\theta)$, the routing distribution is precisely the current router $\omega_\theta$ that we are updating**. In other words, RL on MoE is updating not only the token-generation distribution but also the router itself.
+
+### (1) Replaying Behavior-Policy Routing (Behavior-Router Replay / R3-Style)
+
+R3-style methods record, during rollout, the set of experts $M_\mu(s)$ actually selected by the behavior policy on the inference side, and during training force the current policy to **route only within this set**. This can be written as a “conditional projection” of the routing distribution:
+
+$$
+\omega_\theta^{\text{R3}}(z\mid s)
+:=
+\frac{\omega_\theta(z\mid s)\,\mathbf{1}\{z\in M_\mu(s)\}}
+     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .
+$$
+
+The surrogate objective that is actually optimized during training becomes
+
+$$
+L_\mu^{\text{R3}}(\pi_\theta) =
+\mathcal{J}(\mu) +
+\frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_{z\in M_\mu(s)} \omega_\theta^{\text{R3}}(z\mid s)\,F_\theta(s,z)
+\bigg].
+$$
+
+Compared to the original $L_\mu(\pi_\theta)$, R3 does *not* push $\omega_\theta$ closer to $\omega_{\text{old}}$ or $\omega_\mu$. Instead, it:
+
+- **replaces the expectation over $z\sim\omega_\theta$ by a conditional expectation over $z\sim\omega_\theta(\cdot\mid z\in M_\mu(s))$**, and
+- equivalently, **shrinks the feasible routing support to $M_\mu(s)$**.
+
+So R3 is optimizing a “behavior-routing-conditioned surrogate objective,” rather than the original $L_\mu(\pi_\theta)$. The benefit is substantially reduced variance and improved stability; the cost is that **the router’s exploration and update freedom is constrained at every state**.
+
+### (2) Replaying Reference-Policy Routing (Reference-Router Replay)
+
+Another class of routing-replay schemes instead reuses the reference policy’s router $\omega_{\text{old}}$. This is equivalent to training a hybrid policy
+
+$$
+\hat\pi_\theta(a,z\mid s)
+:=
+\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),
+$$
+
+with surrogate objective
+
+$$
+L_\mu^{\text{ref-replay}}(\pi_\theta) =
+\mathcal{J}(\mu) +
+\frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_z \omega_{\text{old}}(z\mid s)\,F_\theta(s,z)
+\bigg].
+$$
+
+This has the effect that:
+
+- In the surrogate objective, the router is **frozen to the old router** $\omega_{\text{old}}$, so the “reference vs. target” discrepancy in routing is simply removed from the loss.
+- Training becomes insensitive to how far the *new* router $\omega_\theta$ drifts from $\omega_{\text{old}}$, thereby sidestepping the instabilities caused by routing mismatch.
+
+Again, this is fundamentally a **change of objective**:
+
+- The deviation $\alpha_0$ in the true policy space is not reduced; it is merely rendered invisible by redefining the surrogate in terms of the old router.
+- Learning of the router is effectively frozen or heavily suppressed.
+
+### Routing Replay as a Change of Surrogate Objective
+
+Putting these replay variants side by side, they share several properties:
+
+1. **They optimize not the original $L_\mu(\pi_\theta)$, but a surrogate where routing has been conditioned or replaced.**
+2. **They do not directly shrink the three-policy TRPO bound’s $\alpha_0$ or $\alpha_1$**. Routing mismatch is removed from the loss, but it still exists in the true policy distances.
+3. **In practice they trade bias for variance**: replay typically lowers variance and improves stability, but may also limit the router’s ability to learn routing patterns that are optimal for the RL objective.
+
+So, in the three-policy TRPO view, a more accurate characterization is:
+
+> **Routing replay is best thought of as a rewrite of the surrogate objective, not as a direct implementation of a constraint on $\alpha_0$ or $\alpha_1$.**
+
 ## Conclusion
 
 If I had to compress this post into a single sentence, it would be:
@@ -509,6 +631,8 @@ Under this lens (which is of course only one of many possible perspectives):
   - TIS: token-level truncation of IS weights to soften the influence of extreme samples.
   - IcePop: token-level two-sided masking in MoE to hard-drop tokens with severe mismatch.
   - MIS: sequence-level masking to ignore entire trajectories whose behavior–reference mismatch is too large.
+
+- **Routing replay** (whether replaying behavior routing in R3-style schemes or replaying reference routing) is better viewed as **changing the surrogate objective** rather than directly implementing a constraint: both variants replace the original $L_\mu(\pi_\theta)$ with a routing-conditioned / routing-frozen surrogate, trading off some objective bias and reduced routing learning freedom for lower variance and greater stability, without actually shrinking $\alpha_0$ or $\alpha_1$—they simply make routing mismatch invisible in the loss.
 
 - Engineering advice such as in *RL老训崩？训推差异是基石* and system-level work like *Defeating Nondeterminism in LLM Inference* can be interpreted as efforts to **reduce $\alpha_1$ on the systems and numerical side**, so that the assumptions underlying the algorithms do not break too badly.
 

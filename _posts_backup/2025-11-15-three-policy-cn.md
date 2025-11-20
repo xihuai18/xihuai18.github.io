@@ -1,11 +1,3 @@
----
-layout: post
-title: 从两策略到三策略：行为策略和参考策略不一致下的 TRPO 扩展
-date: 2025-11-15
-description: 在大模型强化学习中，因为推理框架和训练框架的不一致，以及异步训练框架下行为策略分布的多样性，行为策略与参考策略不一致的问题变得尤为突出。本文分析了行为策略与参考策略不一致问题在 TRPO 框架下的影响，并在这一分析基础上梳理了当前对这一问题的不同解决方法。
-categories: reinforcement-learning
----
-
 ## 训推不一致和异步框架
 
 最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都围绕着一个更基础的矛盾——**行为策略（behavior policy）和参考策略（reference policy）不一致。**
@@ -151,7 +143,7 @@ $$
 
 > **状态分布偏移** $\|d_{\pi_\theta} - d_\mu\|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。
 
-我们通常不会直接对 $\|d_{\pi_\theta} - d_\mu\|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如信赖域、KL、clip 全是干这个的。
+我们通常不会直接对 $\|d_{\pi_\theta} - d_\mu\|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如 trust region、KL、clip 等。
 
 记总变差距离（total variation）：
 
@@ -245,7 +237,7 @@ $$
 
 直觉上：
 
-- $\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是信赖域的那部分；
+- $\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是 trust region 控制的那部分；
 - $\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致或异步的影子。
 
 现在，可以把这两个量塞回 TRPO 的下界里。
@@ -357,10 +349,8 @@ $$
 
 1. **系统层：让行为策略别飘太远**
 
-   - 异步框架：  
-     给每个样本打上策略版本号，只能用与 $\pi_{\theta_{\text{old}}}$ 相差不大的参数版本采样的数据；
-   - 训推对齐：  
-     强调训练框架和推理框架用相同精度、相同算子、相近的内核 / kernel 行为。
+   - 异步框架：给每个样本打上策略版本号，只能用与 $\pi_{\theta_{\text{old}}}$ 相差不大的参数版本采样的数据；
+   - 训推对齐：强调训练框架和推理框架用相同精度、相同算子、相近的内核 / kernel 行为。
 
    这些机制的目标是：从“算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。
 
@@ -394,7 +384,7 @@ $$
 为了把 token 级的 $(s_t,a_t)$ 与序列级的 $(x,y)$ 记号打通，在以 RLHF（reinforcement learning from human feedback，人类反馈强化学习）为代表的 LLM-RL 设定中，我们约定：
 
 - prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{|y|})$；
-- token 级状态 $s_t := (x, y_{<t})$，动作 $a_t := y_t$；
+- token 级状态 $s_t := (x, y_{\lt t})$，动作 $a_t := y_t$；
 - 因此行为策略和参考策略在序列上的分布可写成
   $$
   \mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
@@ -483,20 +473,20 @@ $$
 
 从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在**序列级**筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
 
-## 路由回放是修改优化目标而不是实现约束
+## MoE 路由回放：它在三策略 TRPO 中到底做了什么？
 
 在 MoE（Mixture-of-Experts）模型上，训推不一致往往首先表现为**路由不一致（routing inconsistency）**：即便参数相同，推理端与训练端也可能因为算子、并行或数值细节的微小差异而路由到不同专家。一个很自然的工程应对是**路由回放（routing replay）**：在 rollout（推理）时记录实际命中的专家路径，训练时强制复用这些路由决策。
 
-这类方法经常被直觉性地理解为“在实现约束 2、压小 \(\alpha_1\)”。但从三策略 TRPO 的视角看，更准确的说法是：
+这类方法经常被直觉性地理解为“在实现约束 2、压小 $\alpha_1$”。但从三策略 TRPO 的视角看，更准确的说法是：
 
 > **路由回放并不是在原 surrogate objective 上收紧约束，而是在把 surrogate objective 改写成另一个“带路由条件/替换”的目标。**  
-> 它让路由不一致在 loss 里“不可见”，但并没有让真实策略距离里的 \(\alpha_0\) 或 \(\alpha_1\) 变小。
+> 它让路由不一致在 loss 里“不可见”，但并没有让真实策略距离里的 $\alpha_0$ 或 $\alpha_1$ 变小。
 
 下面用一个**尽量简单**但足够说明问题的建模来把这件事写清楚。
 
 ### MoE 下的 surrogate objective：把“路由”和“token 生成”拆开
 
-把 MoE 抽象成两阶段随机决策：“先选专家 \(z\)，再在该专家条件下生成 token \(a\)”。
+把 MoE 抽象成两阶段随机决策：“先选专家 $z$，再在该专家条件下生成 token $a$”。
 因此目标策略可以分解为
 
 $$
@@ -505,8 +495,8 @@ $$
 
 其中：
 
-- \(\omega\_\theta(z\mid s)\) 是路由器（router）的分布；
-- \(\pi\_\theta(a\mid s,z)\) 是在专家 \(z\) 条件下的 token 分布。
+- $\omega_\theta(z\mid s)$ 是路由器（router）的分布；
+- $\pi_\theta(a\mid s,z)$ 是在专家 $z$ 条件下的 token 分布。
 
 在三策略 TRPO 中，我们真正想优化的 surrogate objective 为
 
@@ -526,11 +516,11 @@ F_\theta(s,z)
 \sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z).
 $$
 
-关键点：**在原始的 \(L*\mu(\pi*\theta)\) 里，路由分布是当前要更新的 \(\omega\_\theta\)**。也就是说，MoE 的 RL 训练不仅在更新 token 生成分布，也在更新路由器本身。
+关键点：**在原始的 $L_\mu(\pi_\theta)$ 里，路由分布是当前要更新的 $\omega_\theta$**。也就是说，MoE 的 RL 训练不仅在更新 token 生成分布，也在更新路由器本身。
 
-### 1) 回放行为策略的路由（behavior-router replay / R3 类）
+### 1）回放行为策略的路由（behavior-router replay / R3 类）
 
-R3 的做法是：rollout 时记录推理端实际命中的专家集合 \(M\_\mu(s)\)，训练时强制当前策略**只在该集合内路由**。可以把它写成对路由分布的“条件化投影”：
+R3 的做法是：rollout 时记录推理端实际命中的专家集合 $M_\mu(s)$，训练时强制当前策略**只在该集合内路由**。可以把它写成对路由分布的“条件化投影”：
 
 $$
 \omega_\theta^{\text{R3}}(z\mid s)
@@ -551,17 +541,17 @@ L_\mu^{\text{R3}}(\pi_\theta) =
 \bigg].
 $$
 
-和原始 \(L*\mu(\pi*\theta)\) 对比可以看到，R3 并没有让 \(\omega*\theta\) 逼近 \(\omega*{\text{old}}\) 或 \(\omega\_\mu\)；它做的是：
+和原始 $L_\mu(\pi_\theta)$ 对比可以看到，R3 并没有让 $\omega_\theta$ 逼近 $\omega_{\text{old}}$ 或 $\omega_\mu$；它做的是：
 
-- **把对 \(z\sim\omega*\theta\) 的期望，改成了对 \(z\sim\omega*\theta(\cdot\mid z\in M\_\mu(s))\) 的条件期望**；
-- 等价地说，**把路由的可行 support 缩到了 \(M\_\mu(s)\)**。
+- **把对 $z\sim\omega_\theta$ 的期望，改成了对 $z\sim\omega_\theta(\cdot\mid z\in M_\mu(s))$ 的条件期望**；
+- 等价地说，把路由的可行 support 缩到了 $M_\mu(s)$。
 
-因此 R3 训练的是一个“被行为路由集合条件化后的 surrogate objective”，而不是原来的 \(L*\mu(\pi*\theta)\)。  
-好处是显著降方差、提升稳定性；代价是**在每个状态上都收缩了路由器探索/更新的自由度**。
+因此 R3 训练的是一个“被行为路由集合条件化后的 surrogate objective”，而不是原来的 $L_\mu(\pi_\theta)$。  
+好处是显著降方差、提升稳定性；代价是**在每个状态上都收缩了路由器探索 / 更新的自由度**。
 
-### 2) 回放参考策略的路由（reference-router replay）
+### 2）回放参考策略的路由（reference-router replay）
 
-另一类 routing replay 复用的是参考策略（old policy）的路由器 \(\omega\_{\text{old}}\)。这等价于训练一个混合策略
+另一类 routing replay 复用的是参考策略（old policy）的路由器 $\omega_{\text{old}}$。这等价于训练一个混合策略
 
 $$
 \hat\pi_\theta(a,z\mid s)
@@ -584,24 +574,24 @@ $$
 这意味着：
 
 - 在 surrogate objective 中，路由器被**固定为旧路由器**，路由相关的“参考 vs 目标”差异在 loss 里被直接抹掉；
-- 训练对“新路由器 \(\omega*\theta\) 是否偏离 \(\omega*{\text{old}}\)”不再敏感，于是路由不一致导致的不稳定被绕开。
+- 训练对“新路由器 $\omega_\theta$ 是否偏离 $\omega_{\text{old}}$”不再敏感，于是路由不一致导致的不稳定被绕开。
 
 但注意这同样是**换目标**：
 
-- 真实策略空间里的 \(\alpha_0\) 并没有因此变小，只是被“用旧路由器重定义目标”而在 loss 中不可见；
+- 真实策略空间里的 $\alpha_0$ 并没有因此变小，只是被“用旧路由器重定义目标”而在 loss 中不可见；
 - 路由器的学习被强行冻结或极度削弱。
 
 ### 路由回放只是在改写 surrogate objective
 
 把两类 replay 放在一起看，它们的共同点是：
 
-1. **优化的都不是原始的 \(L*\mu(\pi*\theta)\)**，而是某个“路由被条件化/替换后的 surrogate objective”。
-2. **它们没有直接收缩三策略 TRPO 下界里的 \(\alpha_0,\alpha_1\)**。replay 让路由不匹配不再显式出现在 loss 中，但不匹配在真实策略距离里仍然存在。
+1. **优化的都不是原始的 $L_\mu(\pi_\theta)$**，而是某个“路由被条件化 / 替换后的 surrogate objective”。
+2. **它们没有直接收缩三策略 TRPO 下界里的 $\alpha_0,\alpha_1$**。replay 让路由不匹配不再显式出现在 loss 中，但不匹配在真实策略距离里仍然存在。
 3. **实践上是在“用偏差换方差”**：回放往往显著降低方差、提升稳定性，但也可能限制了 MoE 在 RL 目标下学到更优的路由模式。
 
 所以，从三策略 TRPO 的视角，更准确的理解是：
 
-> **routing replay 是一种 surrogate objective 的改写，而不是对 \(\alpha_0\) 或 \(\alpha_1\) 的直接实现。**
+> **routing replay 是一种 surrogate objective 的改写，而不是对 $\alpha_0$ 或 $\alpha_1$ 的直接实现。**
 
 ## 小结
 
@@ -625,7 +615,7 @@ $$
   - TIS：用 token-level 截断权重削弱极端样本的影响；
   - IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃“极端不一致”的 token；
   - MIS：在 sequence-level 直接屏蔽整条“偏差过大”的轨迹；
-- **routing replay（路由回放）在三策略 TRPO 的视角下更像是“改写 surrogate objective”而非“直接实现约束”**：无论回放行为路由（R3 类）还是回放参考路由，它们都把原本的 \(L*\mu(\pi*\theta)\) 改成了一个路由被条件化/替换后的 surrogate objective，用**一定的目标偏差与路由学习自由度的收缩**换取**降低方差与提升稳定性**。因此它并不会真正收缩 \(\alpha_0\) 或 \(\alpha_1\)，而是让路由不一致在 loss 中“不可见”；
+- **routing replay（路由回放）在三策略 TRPO 的视角下更像是“改写 surrogate objective”而非“直接实现约束”**：无论回放行为路由（R3 类）还是回放参考路由，它们都把原本的 $L_{\mu}(\pi_{\theta})$ 改成了一个路由被条件化/替换后的 surrogate objective，用**一定的目标偏差与路由学习自由度的收缩**换取**降低方差与提升稳定性**。因此它并不会真正收缩 $\alpha_0$ 或 $\alpha_1$，而是让路由不一致在 loss 中“不可见”；
 - 《RL 老训崩？训推差异是基石》、以及前文提到的 _Defeating Nondeterminism in LLM Inference_ 等工程经验，则可以理解为在**系统侧和数值实现侧**，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。
 
 从这个统一视角出发，也许有助于回答几个实际问题（这里只是抛几个开放性问题）：
