@@ -8,6 +8,9 @@ categories: reinforcement-learning
 
 [中文版本![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
+* TOC
+{:toc}
+
 ## Training–Inference Mismatch and Asynchronous Frameworks
 
 Recently I’ve seen quite a lot of discussion around _training–inference mismatch_ and _asynchronous RL frameworks_ for large language models. My intuition is that many of these seemingly diverse and complicated issues are, in fact, manifestations of a more fundamental tension: a mismatch between the **behavior policy** and the **reference policy**.
