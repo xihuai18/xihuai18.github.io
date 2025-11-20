@@ -9,7 +9,7 @@ categories: reinforcement-learning
 * TOC
 {:toc}
 
-[中文版本![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
+[中文版本  ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
 ## Training–Inference Mismatch and Asynchronous Frameworks
 
