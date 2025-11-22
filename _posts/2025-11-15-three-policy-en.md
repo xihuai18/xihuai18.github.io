@@ -668,3 +668,16 @@ From this unified perspective, it may also be easier to think about the followin
 - In the presence of MoE, asynchronous sampling, and complex agent workflows, how long can we safely pretend that “$\mu \approx \pi_{\theta_{\text{old}}}$”?
 
 This post is just a very **minimal** extension of the classic TRPO framework, making the “three policies” explicit and using them to organize some existing work. There are inevitably misunderstandings and omissions. If you also care about how RL training actually behaves in large LLM systems, I’d be very interested to see how your own setup can be abstracted into a relationship between $\mu$, $\pi_{\theta_{\text{old}}}$, and $\pi_\theta$, and then re-examined through the inequality in Theorem 2. It might give a slightly different intuitive feel for what your system is really optimizing.
+
+
+```bibtex
+@misc{WangZhang2025ThreePolicyTRPO,
+  author       = {Wang, Xihuai and Zhang, Shao},
+  title        = {From Two Policies to Three: Extending TRPO under Behavior--Reference Policy Mismatch in LLM RL},
+  year         = {2025},
+  month        = nov,
+  day          = {15},
+  url          = {https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html},
+  urldate      = {2025-11-23}
+}
+```
