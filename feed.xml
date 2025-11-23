@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-23T14:05:24+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-23T14:23:18+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry><title type="html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" rel="alternate" type="text/html" title="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#traininginference-mismatch-and-asynchronous-frameworks" id="markdown-toc-traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</a></li>
   <li><a href="#related-work" id="markdown-toc-related-work">Related Work</a></li>
@@ -27,7 +27,7 @@
 
 <p><a href="https://zhuanlan.zhihu.com/p/1973206684907365344">中文版本  <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
-<p><img src="/assets/img/three-policy-mini-class.png" alt="Mini-class" /></p>
+<p><img src="/assets/img/three-policy-mini-class.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <h2 id="traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</h2>
 
