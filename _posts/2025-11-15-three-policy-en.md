@@ -11,7 +11,8 @@ categories: reinforcement-learning
 
 [中文版本  ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
-![Mini-class](/assets/img/three-policy-mini-class.png)
+![Mini-class](/assets/img/three-policy-mini-class.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+
 
 ## Training–Inference Mismatch and Asynchronous Frameworks
 
