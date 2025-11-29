@@ -130,8 +130,31 @@
   </header>
 
   <article class="post-content">
-    <ul>
-  <li>TOC</li>
+    <ul id="markdown-toc">
+  <li><a href="#traininginference-mismatch-and-asynchronous-frameworks" id="markdown-toc-traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</a></li>
+  <li><a href="#related-work" id="markdown-toc-related-work">Related Work</a></li>
+  <li><a href="#a-minimally-unified-view-from-a-three-policy-trpo-perspective" id="markdown-toc-a-minimally-unified-view-from-a-three-policy-trpo-perspective">A Minimally Unified View from a Three-Policy TRPO Perspective</a>    <ul>
+      <li><a href="#three-policies" id="markdown-toc-three-policies">Three Policies</a></li>
+      <li><a href="#two-policy-trpo" id="markdown-toc-two-policy-trpo">Two-Policy TRPO</a></li>
+      <li><a href="#three-policy-trpo" id="markdown-toc-three-policy-trpo">Three-Policy TRPO</a></li>
+      <li><a href="#how-to-control-these-two-deviations-in-practice" id="markdown-toc-how-to-control-these-two-deviations-in-practice">How to Control These Two Deviations in Practice?</a></li>
+    </ul>
+  </li>
+  <li><a href="#importance-sampling-and-masking-four-implementations-of-constraint-2" id="markdown-toc-importance-sampling-and-masking-four-implementations-of-constraint-2">Importance Sampling and Masking: Four Implementations of Constraint 2</a>    <ul>
+      <li><a href="#1-tis-token-level-truncated-importance-sampling" id="markdown-toc-1-tis-token-level-truncated-importance-sampling">1. TIS: Token-Level Truncated Importance Sampling</a></li>
+      <li><a href="#2-icepop-token-level-two-sided-masking-in-moe" id="markdown-toc-2-icepop-token-level-two-sided-masking-in-moe">2. IcePop: Token-Level Two-Sided Masking in MoE</a></li>
+      <li><a href="#3-sequence-level-mis-masked-importance-sampling-over-entire-sequences" id="markdown-toc-3-sequence-level-mis-masked-importance-sampling-over-entire-sequences">3. Sequence-Level MIS: Masked Importance Sampling Over Entire Sequences</a></li>
+      <li><a href="#4-worst-token-reject-sampling-rejecting-entire-sequences-based-on-the-worst-token" id="markdown-toc-4-worst-token-reject-sampling-rejecting-entire-sequences-based-on-the-worst-token">4. Worst Token Reject Sampling: Rejecting Entire Sequences Based on the Worst Token</a></li>
+    </ul>
+  </li>
+  <li><a href="#moe-routing-replay-what-does-it-actually-do-in-three-policy-trpo" id="markdown-toc-moe-routing-replay-what-does-it-actually-do-in-three-policy-trpo">MoE Routing Replay: What Does It Actually Do in Three-Policy TRPO?</a>    <ul>
+      <li><a href="#surrogate-objective-in-moe-separating-routing-and-token-generation" id="markdown-toc-surrogate-objective-in-moe-separating-routing-and-token-generation">Surrogate Objective in MoE: Separating Routing and Token Generation</a></li>
+      <li><a href="#1-replaying-behavior-policy-routing-behavior-router-replay--r3-style" id="markdown-toc-1-replaying-behavior-policy-routing-behavior-router-replay--r3-style">(1) Replaying Behavior-Policy Routing (Behavior-Router Replay / R3-Style)</a></li>
+      <li><a href="#2-replaying-reference-policy-routing-reference-router-replay" id="markdown-toc-2-replaying-reference-policy-routing-reference-router-replay">(2) Replaying Reference-Policy Routing (Reference-Router Replay)</a></li>
+      <li><a href="#routing-replay-as-a-change-of-surrogate-objective" id="markdown-toc-routing-replay-as-a-change-of-surrogate-objective">Routing Replay as a Change of Surrogate Objective</a></li>
+    </ul>
+  </li>
+  <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
 </ul>
 
 <p><a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>

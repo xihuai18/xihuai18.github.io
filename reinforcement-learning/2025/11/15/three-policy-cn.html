@@ -130,8 +130,31 @@
   </header>
 
   <article class="post-content">
-    <ul>
-  <li>TOC</li>
+    <ul id="markdown-toc">
+  <li><a href="#训推不一致和异步框架" id="markdown-toc-训推不一致和异步框架">训推不一致和异步框架</a></li>
+  <li><a href="#相关工作" id="markdown-toc-相关工作">相关工作</a></li>
+  <li><a href="#三策略-trpo-视角下的最小统一理解" id="markdown-toc-三策略-trpo-视角下的最小统一理解">三策略 TRPO 视角下的最小统一理解</a>    <ul>
+      <li><a href="#三个策略" id="markdown-toc-三个策略">三个策略</a></li>
+      <li><a href="#两策略-trpo" id="markdown-toc-两策略-trpo">两策略 TRPO</a></li>
+      <li><a href="#三策略-trpo" id="markdown-toc-三策略-trpo">三策略 TRPO</a></li>
+      <li><a href="#这两个差异各自怎么约束" id="markdown-toc-这两个差异各自怎么约束">这两个差异各自怎么约束？</a></li>
+    </ul>
+  </li>
+  <li><a href="#重要性采样与掩码四种约束-2-实现" id="markdown-toc-重要性采样与掩码四种约束-2-实现">重要性采样与掩码：四种约束 2 实现</a>    <ul>
+      <li><a href="#1-tistoken-level-截断-is" id="markdown-toc-1-tistoken-level-截断-is">1. TIS：token-level 截断 IS</a></li>
+      <li><a href="#2-icepopmoe-场景下的-token-level-双侧-mask" id="markdown-toc-2-icepopmoe-场景下的-token-level-双侧-mask">2. IcePop：MoE 场景下的 token-level 双侧 Mask</a></li>
+      <li><a href="#3-sequence-level-mis按整条序列-mask-的重要性采样" id="markdown-toc-3-sequence-level-mis按整条序列-mask-的重要性采样">3. sequence-level MIS：按整条序列 Mask 的重要性采样</a></li>
+      <li><a href="#4-worst-token-reject-sampling按最差-token-拒绝整条序列" id="markdown-toc-4-worst-token-reject-sampling按最差-token-拒绝整条序列">4. Worst Token Reject Sampling：按最差 token 拒绝整条序列</a></li>
+    </ul>
+  </li>
+  <li><a href="#moe-路由回放它在三策略-trpo-中到底做了什么" id="markdown-toc-moe-路由回放它在三策略-trpo-中到底做了什么">MoE 路由回放：它在三策略 TRPO 中到底做了什么？</a>    <ul>
+      <li><a href="#moe-下的-surrogate-objective把路由和token-生成拆开" id="markdown-toc-moe-下的-surrogate-objective把路由和token-生成拆开">MoE 下的 surrogate objective：把“路由”和“token 生成”拆开</a></li>
+      <li><a href="#1回放行为策略的路由behavior-router-replay--r3-类" id="markdown-toc-1回放行为策略的路由behavior-router-replay--r3-类">1）回放行为策略的路由（behavior-router replay / R3 类）</a></li>
+      <li><a href="#2回放参考策略的路由reference-router-replay" id="markdown-toc-2回放参考策略的路由reference-router-replay">2）回放参考策略的路由（reference-router replay）</a></li>
+      <li><a href="#路由回放只是在改写-surrogate-objective" id="markdown-toc-路由回放只是在改写-surrogate-objective">路由回放只是在改写 surrogate objective</a></li>
+    </ul>
+  </li>
+  <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
 </ul>
 
 <p><a href="/reinforcement-learning/2025/11/15/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
