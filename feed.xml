@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-23T14:46:00+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-11-29T09:41:11+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry><title type="html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" rel="alternate" type="text/html" title="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#traininginference-mismatch-and-asynchronous-frameworks" id="markdown-toc-traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</a></li>
   <li><a href="#related-work" id="markdown-toc-related-work">Related Work</a></li>
@@ -9,10 +9,11 @@
       <li><a href="#how-to-control-these-two-deviations-in-practice" id="markdown-toc-how-to-control-these-two-deviations-in-practice">How to Control These Two Deviations in Practice?</a></li>
     </ul>
   </li>
-  <li><a href="#tis-icepop-and-sequence-level-mis-different-implementations-of-constraint-2" id="markdown-toc-tis-icepop-and-sequence-level-mis-different-implementations-of-constraint-2">TIS, IcePop, and Sequence-Level MIS: Different Implementations of Constraint 2</a>    <ul>
+  <li><a href="#importance-sampling-and-masking-four-implementations-of-constraint-2" id="markdown-toc-importance-sampling-and-masking-four-implementations-of-constraint-2">Importance Sampling and Masking: Four Implementations of Constraint 2</a>    <ul>
       <li><a href="#1-tis-token-level-truncated-importance-sampling" id="markdown-toc-1-tis-token-level-truncated-importance-sampling">1. TIS: Token-Level Truncated Importance Sampling</a></li>
       <li><a href="#2-icepop-token-level-two-sided-masking-in-moe" id="markdown-toc-2-icepop-token-level-two-sided-masking-in-moe">2. IcePop: Token-Level Two-Sided Masking in MoE</a></li>
       <li><a href="#3-sequence-level-mis-masked-importance-sampling-over-entire-sequences" id="markdown-toc-3-sequence-level-mis-masked-importance-sampling-over-entire-sequences">3. Sequence-Level MIS: Masked Importance Sampling Over Entire Sequences</a></li>
+      <li><a href="#4-worst-token-reject-sampling-rejecting-entire-sequences-based-on-the-worst-token" id="markdown-toc-4-worst-token-reject-sampling-rejecting-entire-sequences-based-on-the-worst-token">4. Worst Token Reject Sampling: Rejecting Entire Sequences Based on the Worst Token</a></li>
     </ul>
   </li>
   <li><a href="#moe-routing-replay-what-does-it-actually-do-in-three-policy-trpo" id="markdown-toc-moe-routing-replay-what-does-it-actually-do-in-three-policy-trpo">MoE Routing Replay: What Does It Actually Do in Three-Policy TRPO?</a>    <ul>
@@ -25,7 +26,7 @@
   <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
 </ul>
 
-<p><a href="https://zhuanlan.zhihu.com/p/1973206684907365344">中文版本  <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/1973206684907365344">中文版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <p><img src="/assets/img/three-policy-mini-class.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
@@ -93,6 +94,12 @@
   </li>
   <li>
     <p><a href="https://zhuanlan.zhihu.com/p/1959976628290590602">RL 老训崩？训推差异是基石</a> approaches the problem more from a practical perspective, sharing experience on how to engineer for near training–inference consistency: choosing consistent operators and precision settings, monitoring and constraining the log-prob gap between training and inference, etc. The focus is on framework-level engineering practices that can mitigate training–inference difference at the root.</p>
+  </li>
+  <li>
+    <p><a href="https://verl.readthedocs.io/en/latest/advance/rollout_is.html">verl Rollout Importance Sampling</a> introduces a <strong>Token Veto</strong> mechanism in its rollout correction module: it computes <strong>token-level</strong> importance ratios $\rho_t^{(\text{ref}\leftarrow\text{beh})}$, and if any token in a trajectory satisfies $\min_t \rho_t &lt; \tau_{\text{veto}}$, the entire sequence is discarded from training. This “token-level detection, sequence-level veto” design embodies a conservative “one-vote veto” strategy.</p>
+  </li>
+  <li>
+    <p><a href="https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf">INTELLECT-3 Technical Report</a> adopts a similar rejection sampling strategy in its asynchronous distributed RL training framework. INTELLECT-3 computes <strong>token-level</strong> importance ratios for each rollout; if any token’s ratio falls below a threshold ($10^{-5}$ in the paper), the entire trajectory is masked.</p>
   </li>
 </ul>
 
@@ -441,7 +448,7 @@ Use consistent precision, operators, and similar kernel behavior between the tra
   </li>
 </ol>
 
-<h2 id="tis-icepop-and-sequence-level-mis-different-implementations-of-constraint-2">TIS, IcePop, and Sequence-Level MIS: Different Implementations of Constraint 2</h2>
+<h2 id="importance-sampling-and-masking-four-implementations-of-constraint-2">Importance Sampling and Masking: Four Implementations of Constraint 2</h2>
 
 <p>In this section I’ll reuse the notation introduced above to write down the objectives of these three methods, focusing only on the design choices related to “behavior vs. reference policy.” Let the token-level PPO / GRPO-style update term be</p>
 
@@ -551,6 +558,43 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 </ul>
 
 <p>From the three-policy TRPO viewpoint, sequence-level MIS no longer truncates at the token level. Instead, it performs <strong>trajectory-level</strong> filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. This implements Constraint 2 at the sequence level.</p>
+
+<h3 id="4-worst-token-reject-sampling-rejecting-entire-sequences-based-on-the-worst-token">4. Worst Token Reject Sampling: Rejecting Entire Sequences Based on the Worst Token</h3>
+
+<p>The verl Token Veto mechanism and INTELLECT-3 both adopt a rejection sampling strategy that can be collectively called <strong>Worst Token Reject Sampling (WTRS)</strong>:</p>
+
+<ul>
+  <li>
+    <p><strong>verl Token Veto</strong>: In its rollout correction module, if any token in a trajectory has $\min_t \rho_t &lt; \tau_{\text{veto}}$, the entire sequence is discarded via response<em>mask. The threshold $\tau</em>{\text{veto}}$ is user-configurable.</p>
+  </li>
+  <li>
+    <p><strong>INTELLECT-3 Token Masking</strong>: In its asynchronous distributed RL framework, if any token’s ratio is below $10^{-5}$, the entire trajectory is masked.</p>
+  </li>
+</ul>
+
+<p>The core operation is identical: <strong>if any token in a trajectory has an IS ratio below a threshold $\tau$, the entire sequence is rejected from training.</strong> This can be written as:</p>
+
+\[\color{blue}{
+m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})} \ge \tau\Big\}
+}\]
+
+<p>In a unified loss form:</p>
+
+\[L_{\text{WTRS}}(\theta)
+=-\,\mathbb{E}_{(x,y)\sim\mu}
+\Big[
+\color{blue}{m(y\mid x)}
+\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
+\Big].\]
+
+<p>In words:</p>
+
+<ul>
+  <li>For <strong>sequences where all tokens have IS ratios $\ge \tau$</strong>: participate in training normally.</li>
+  <li>For <strong>sequences where any token has an IS ratio $&lt; \tau$</strong>: the entire sequence’s policy loss is masked out.</li>
+</ul>
+
+<p>From the three-policy TRPO perspective, WTRS adopts a hybrid “token-level detection, sequence-level veto” strategy: it detects extreme mismatch signals at the <strong>token level</strong>, and once detected, rejects at the <strong>sequence level</strong>. This “one-vote veto” design reflects a conservative philosophy — when a trajectory contains a token that “the behavior policy generated but the reference policy would almost never generate,” <strong>the credibility of the entire trajectory is called into question</strong>, thereby implementing control over Constraint 2 ($\mu$ vs. $\pi_{\theta_{\text{old}}}$ deviation) at the trajectory granularity.</p>
 
 <h2 id="moe-routing-replay-what-does-it-actually-do-in-three-policy-trpo">MoE Routing Replay: What Does It Actually Do in Three-Policy TRPO?</h2>
 
@@ -707,12 +751,13 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
     <p>Decoupled PPO / AReaL can be viewed as <strong>formally acknowledging the existence of three policies</strong> and explicitly decoupling the behavior distribution from the reference policy in the objective.</p>
   </li>
   <li>
-    <p>TIS, IcePop, and sequence-level MIS can be seen as different ways of implementing <strong>Constraint 2</strong> at different granularities (token vs. sequence) using importance sampling truncation / masking:</p>
+    <p>TIS, IcePop, MIS, and WTRS can be seen as different ways of implementing <strong>Constraint 2</strong> using importance sampling truncation / masking:</p>
 
     <ul>
       <li>TIS: token-level truncation of IS weights to soften the influence of extreme samples.</li>
       <li>IcePop: token-level two-sided masking in MoE to hard-drop tokens with severe mismatch.</li>
       <li>MIS: sequence-level masking to ignore entire trajectories whose behavior–reference mismatch is too large.</li>
+      <li>WTRS: token-level detection of extremely small ratios, rejecting the entire trajectory once such a signal is found.</li>
     </ul>
   </li>
   <li>
