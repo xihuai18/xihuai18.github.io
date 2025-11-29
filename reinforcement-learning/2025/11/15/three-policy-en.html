@@ -134,9 +134,9 @@
   <li>TOC</li>
 </ul>
 
-<p><a href="https://zhuanlan.zhihu.com/p/1973206684907365344">中文版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
-<p><img src="/assets/img/three-policy-mini-class.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+<p><img src="/assets/img/three-policy-mini-class-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <h2 id="traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</h2>
 
@@ -165,9 +165,7 @@
 <p>Below is a rough timeline of the works that left a strong impression on me (this is only a partial and biased subset of the literature I’ve seen):</p>
 
 <ul>
-  <li>
-    <p><a href="https://arxiv.org/pdf/2110.00641">Decoupled PPO</a> was among the first to point out that in trust-region policy optimization methods (TRPO and PPO), the “old policy” actually plays two distinct roles:</p>
-
+  <li><a href="https://arxiv.org/pdf/2110.00641">Decoupled PPO</a> was among the first to point out that in trust-region policy optimization methods (TRPO and PPO), the “old policy” actually plays two distinct roles:
     <ol>
       <li>
         <p>It is used for importance sampling to perform off-policy correction. In this sense, the “old policy” is meant to represent the <strong>behavior policy</strong> that generated the training data.</p>
@@ -204,11 +202,9 @@
     <p><a href="https://zhuanlan.zhihu.com/p/1959976628290590602">RL 老训崩？训推差异是基石</a> approaches the problem more from a practical perspective, sharing experience on how to engineer for near training–inference consistency: choosing consistent operators and precision settings, monitoring and constraining the log-prob gap between training and inference, etc. The focus is on framework-level engineering practices that can mitigate training–inference difference at the root.</p>
   </li>
   <li>
-    <p><a href="https://verl.readthedocs.io/en/latest/advance/rollout_is.html">verl Rollout Importance Sampling</a> introduces a <strong>Token Veto</strong> mechanism in its rollout correction module: it computes <strong>token-level</strong> importance ratios $\rho_t^{(\text{ref}\leftarrow\text{beh})}$, and if any token in a trajectory satisfies $\min_t \rho_t &lt; \tau_{\text{veto}}$, the entire sequence is discarded from training. This “token-level detection, sequence-level veto” design embodies a conservative “one-vote veto” strategy.</p>
+    <p><a href="https://verl.readthedocs.io/en/latest/algo/rollout_corr.html">verl Rollout Importance Sampling</a> introduces a <strong>Token Veto</strong> mechanism in its rollout correction module: it computes <strong>token-level</strong> importance ratios $\rho_t^{(\text{ref}\leftarrow\text{beh})}$, and if any token in a trajectory satisfies $\min_t \rho_t &lt; \tau_{\text{veto}}$, the entire sequence is discarded from training. This “token-level detection, sequence-level veto” design embodies a conservative “one-vote veto” strategy.</p>
   </li>
-  <li>
-    <p><a href="https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf">INTELLECT-3 Technical Report</a> adopts a similar rejection sampling strategy in its asynchronous distributed RL training framework. INTELLECT-3 computes <strong>token-level</strong> importance ratios for each rollout; if any token’s ratio falls below a threshold ($10^{-5}$ in the paper), the entire trajectory is masked.</p>
-  </li>
+  <li><a href="https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf">INTELLECT-3 Technical Report</a> adopts a similar rejection sampling strategy in its asynchronous distributed RL training framework. INTELLECT-3 computes <strong>token-level</strong> importance ratios for each rollout; if any token’s ratio falls below a threshold ($10^{-5}$ in the paper), the entire trajectory is masked.</li>
 </ul>
 
 <h2 id="a-minimally-unified-view-from-a-three-policy-trpo-perspective">A Minimally Unified View from a Three-Policy TRPO Perspective</h2>
@@ -345,7 +341,7 @@
 <p>A standard result (provable via coupling) is:</p>
 
 <blockquote>
-  <p><strong>Lemma 2</strong><br />
+  <p><strong>Lemma 2</strong>
 Under the assumption above,</p>
 
 \[\|d_{\pi_\theta} - d_\mu\|_1
@@ -469,7 +465,7 @@ C\,(\alpha_0 + \alpha_1).\]
 <p>This yields a very direct <strong>three-policy TRPO lower bound</strong>:</p>
 
 <blockquote>
-  <p><strong>Theorem 2 (Three-Policy TRPO)</strong><br />
+  <p><strong>Theorem 2 (Three-Policy TRPO)</strong>
 Let</p>
 
 \[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
@@ -531,16 +527,14 @@ L_\mu(\pi_\theta)
 <p>In practice, this usually involves both <strong>system-level mechanisms</strong> and <strong>algorithmic mechanisms (importance sampling)</strong>.</p>
 
 <ol>
-  <li>
-    <p><strong>System level: keep the behavior policy from drifting too far</strong></p>
-
+  <li><strong>System level: keep the behavior policy from drifting too far</strong>
     <ul>
       <li>
-        <p>Asynchronous frameworks:<br />
+        <p>Asynchronous frameworks:
 Tag each sample with a policy version, and only use data generated by parameter versions that are close enough to $\pi_{\theta_{\text{old}}}$.</p>
       </li>
       <li>
-        <p>Training–inference alignment:<br />
+        <p>Training–inference alignment:
 Use consistent precision, operators, and similar kernel behavior between the training and inference stacks.</p>
       </li>
     </ul>
@@ -711,7 +705,7 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
 <p>These methods are often intuitively described as “implementing Constraint 2 and shrinking $\alpha_1$.” From the three-policy TRPO perspective, a more precise statement is:</p>
 
 <blockquote>
-  <p><strong>Routing replay does not tighten the original surrogate objective via a constraint; instead, it rewrites the surrogate objective into one that is conditioned on / replaces the routing.</strong><br />
+  <p><strong>Routing replay does not tighten the original surrogate objective via a constraint; instead, it rewrites the surrogate objective into one that is conditioned on / replaces the routing.</strong>
 It makes routing mismatch invisible in the loss, but it does not actually shrink the true policy distances $\alpha_0$ or $\alpha_1$.</p>
 </blockquote>
 
@@ -838,18 +832,14 @@ It makes routing mismatch invisible in the loss, but it does not actually shrink
   <li>
     <p>We rewrote the TRPO lower bound from an “old vs. new policy” narrative into a “<strong>behavior–reference–target</strong>” three-policy relationship.</p>
   </li>
-  <li>
-    <p>We explicitly separated two TV distances:</p>
-
+  <li>We explicitly separated two TV distances:
     <ul>
       <li><strong>Constraint 1: reference vs. target</strong>, $\alpha_0$, corresponding to the KL / clip / trust-region style constraints in PPO / GRPO / GSPO.</li>
       <li><strong>Constraint 2: behavior vs. reference</strong>, $\alpha_1$, capturing real-world factors like asynchronous frameworks, training–inference mismatch, MoE routing volatility, kernel-level nondeterminism, etc.</li>
     </ul>
   </li>
-  <li>
-    <p>This leads to a simple conclusion:<br />
-The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ scales with $\alpha_0 + \alpha_1$.</p>
-  </li>
+  <li>This leads to a simple conclusion:
+The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ scales with $\alpha_0 + \alpha_1$.</li>
 </ul>
 
 <p>Under this lens (which is of course only one of many possible perspectives):</p>
@@ -858,9 +848,7 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   <li>
     <p>Decoupled PPO / AReaL can be viewed as <strong>formally acknowledging the existence of three policies</strong> and explicitly decoupling the behavior distribution from the reference policy in the objective.</p>
   </li>
-  <li>
-    <p>TIS, IcePop, MIS, and WTRS can be seen as different ways of implementing <strong>Constraint 2</strong> using importance sampling truncation / masking:</p>
-
+  <li>TIS, IcePop, MIS, and WTRS can be seen as different ways of implementing <strong>Constraint 2</strong> using importance sampling truncation / masking:
     <ul>
       <li>TIS: token-level truncation of IS weights to soften the influence of extreme samples.</li>
       <li>IcePop: token-level two-sided masking in MoE to hard-drop tokens with severe mismatch.</li>
@@ -871,9 +859,7 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   <li>
     <p><strong>Routing replay</strong> (whether replaying behavior routing in R3-style schemes or replaying reference routing) is better viewed as <strong>changing the surrogate objective</strong> rather than directly implementing a constraint: both variants replace the original $L_\mu(\pi_\theta)$ with a routing-conditioned / routing-frozen surrogate, trading off some objective bias and reduced routing learning freedom for lower variance and greater stability, without actually shrinking $\alpha_0$ or $\alpha_1$—they simply make routing mismatch invisible in the loss.</p>
   </li>
-  <li>
-    <p>Engineering advice such as in <em>RL 老训崩？训推差异是基石</em> and system-level work like <em>Defeating Nondeterminism in LLM Inference</em> can be interpreted as efforts to <strong>reduce $\alpha_1$ on the systems and numerical side</strong>, so that the assumptions underlying the algorithms do not break too badly.</p>
-  </li>
+  <li>Engineering advice such as in <em>RL 老训崩？训推差异是基石</em> and system-level work like <em>Defeating Nondeterminism in LLM Inference</em> can be interpreted as efforts to <strong>reduce $\alpha_1$ on the systems and numerical side</strong>, so that the assumptions underlying the algorithms do not break too badly.</li>
 </ul>
 
 <p>From this unified perspective, it may also be easier to think about the following practical questions (these are completely open and I don’t have definitive answers):</p>
@@ -882,17 +868,13 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   <li>
     <p>Under what conditions can we still reasonably interpret “LLM RL training” as some approximate form of TRPO / PPO?</p>
   </li>
-  <li>
-    <p>For a concrete RL system, where should we invest more effort:</p>
-
+  <li>For a concrete RL system, where should we invest more effort:
     <ul>
       <li>tightening $\alpha_0$ (stronger KL control, more stable sequence-level objectives), or</li>
       <li>reducing $\alpha_1$ (better training–inference alignment, more aggressive MIS / TIS / IcePop)?</li>
     </ul>
   </li>
-  <li>
-    <p>In the presence of MoE, asynchronous sampling, and complex agent workflows, how long can we safely pretend that “$\mu \approx \pi_{\theta_{\text{old}}}$”?</p>
-  </li>
+  <li>In the presence of MoE, asynchronous sampling, and complex agent workflows, how long can we safely pretend that “$\mu \approx \pi_{\theta_{\text{old}}}$”?</li>
 </ul>
 
 <p>This post is just a very <strong>minimal</strong> extension of the classic TRPO framework, making the “three policies” explicit and using them to organize some existing work. There are inevitably misunderstandings and omissions. If you also care about how RL training actually behaves in large LLM systems, I’d be very interested to see how your own setup can be abstracted into a relationship between $\mu$, $\pi_{\theta_{\text{old}}}$, and $\pi_\theta$, and then re-examined through the inequality in Theorem 2. It might give a slightly different intuitive feel for what your system is really optimizing.</p>
