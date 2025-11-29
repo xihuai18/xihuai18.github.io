@@ -682,4 +682,14 @@ $$
 
 本文只是在 TRPO 这个老框架上做了一个非常“**最小化**”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。难免有理解偏差或遗漏之处，如果你也关注实际大模型 RL 训练的情况，欢迎把你自己的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式，或许会有不一样的直观感受。
 
-[英文版 From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL](https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html)
+```bibtex
+@misc{WangZhang2025ThreePolicyTRPO,
+  author       = {Wang, Xihuai and Zhang, Shao},
+  title        = {From Two Policies to Three: Extending TRPO under Behavior-Reference Policy Mismatch in LLM RL},
+  year         = {2025},
+  month        = nov,
+  day          = {15},
+  url          = {https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html},
+  urldate      = {2025-11-23}
+}
+```
