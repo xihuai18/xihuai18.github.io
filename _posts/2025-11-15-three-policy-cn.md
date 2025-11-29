@@ -1,3 +1,19 @@
+---
+layout: post
+title: "从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展"
+date: 2025-11-15
+description: 现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。
+categories: reinforcement-learning
+lang: zh
+---
+
+- TOC
+  {:toc}
+
+[English Version](/reinforcement-learning/2025/11/15/three-policy-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
+
+![Mini-class](/assets/img/three-policy-mini-class-cn.jpg){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+
 ## 训推不一致和异步框架
 
 最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都围绕着一个更基础的矛盾——**行为策略（behavior policy）和参考策略（reference policy）不一致。**
@@ -34,7 +50,7 @@
 
 - [RL 老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
 
-- [verl Rollout Importance Sampling](https://verl.readthedocs.io/en/latest/advance/rollout_is.html) 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 **token-level** 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t < \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种"token 粒度检测、sequence 粒度否决"的设计体现了一种"一票否决"的保守策略。
+- [verl Rollout Importance Sampling](https://verl.readthedocs.io/en/latest/algo/rollout_corr.html) 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 **token-level** 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t < \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种"token 粒度检测、sequence 粒度否决"的设计体现了一种"一票否决"的保守策略。
 
 - [INTELLECT-3 Technical Report](https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf) 在其异步分布式 RL 训练框架中采用了类似的拒绝采样策略。INTELLECT-3 对每条 rollout 计算 **token-level** 重要性比率，若任意 token 的比率低于阈值（文中使用 $10^{-5}$），则对整条轨迹进行 masking。
 
@@ -167,7 +183,7 @@ $$
 
 一个经典结果（可以用 coupling 证明）是：
 
-> **Lemma 2**  
+> **Lemma 2**
 > 在上述条件下有
 >
 > $$
@@ -290,7 +306,7 @@ $$
 
 于是，我们得到一个非常直接的**三策略 TRPO 下界**：
 
-> **Theorem 2（三策略 TRPO）**  
+> **Theorem 2（三策略 TRPO）**
 > 记
 >
 > $$
@@ -352,7 +368,6 @@ $$
 这里通常既有**系统层**的机制，也有**算法层（importance sampling）**的机制。
 
 1. **系统层：让行为策略别飘太远**
-
    - 异步框架：给每个样本打上策略版本号，只能用与 $\pi_{\theta_{\text{old}}}$ 相差不大的参数版本采样的数据；
    - 训推对齐：强调训练框架和推理框架用相同精度、相同算子、相近的内核 / kernel 行为。
 
@@ -517,7 +532,7 @@ $$
 
 这类方法经常被直觉性地理解为“在实现约束 2、压小 $\alpha_1$”。但从三策略 TRPO 的视角看，更准确的说法是：
 
-> **路由回放并不是在原 surrogate objective 上收紧约束，而是在把 surrogate objective 改写成另一个“带路由条件/替换”的目标。**  
+> **路由回放并不是在原 surrogate objective 上收紧约束，而是在把 surrogate objective 改写成另一个“带路由条件/替换”的目标。**
 > 它让路由不一致在 loss 里“不可见”，但并没有让真实策略距离里的 $\alpha_0$ 或 $\alpha_1$ 变小。
 
 下面用一个**尽量简单**但足够说明问题的建模来把这件事写清楚。
@@ -584,7 +599,7 @@ $$
 - **把对 $z\sim\omega_\theta$ 的期望，改成了对 $z\sim\omega_\theta(\cdot\mid z\in M_\mu(s))$ 的条件期望**；
 - 等价地说，把路由的可行 support 缩到了 $M_\mu(s)$。
 
-因此 R3 训练的是一个“被行为路由集合条件化后的 surrogate objective”，而不是原来的 $L_\mu(\pi_\theta)$。  
+因此 R3 训练的是一个“被行为路由集合条件化后的 surrogate objective”，而不是原来的 $L_\mu(\pi_\theta)$。
 好处是显著降方差、提升稳定性；代价是**在每个状态上都收缩了路由器探索 / 更新的自由度**。
 
 ### 2）回放参考策略的路由（reference-router replay）
@@ -643,7 +658,7 @@ $$
 - 显式地拆出了两个 TV 距离：
   - **约束 1：参考 vs 目标** $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；
   - **约束 2：行为 vs 参考** $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；
-- 得到了一个非常直接的结论：  
+- 得到了一个非常直接的结论：
   替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。
 
 在这个视角下（当然这只是众多可能视角之一）：
