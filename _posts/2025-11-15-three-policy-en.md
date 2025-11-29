@@ -9,10 +9,9 @@ categories: reinforcement-learning
 * TOC
 {:toc}
 
-[中文版本  ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
+[中文版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
 ![Mini-class](/assets/img/three-policy-mini-class.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
-
 
 ## Training–Inference Mismatch and Asynchronous Frameworks
 
@@ -57,6 +56,10 @@ Below is a rough timeline of the works that left a strong impression on me (this
 - [Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers](https://arxiv.org/abs/2510.11370) focuses on the MoE-specific problem of **routing inconsistency**. The paper finds that even for identical inputs, inference and training can route tokens to different experts due to small differences in operator implementations or parallelism. This “physical-path” mismatch makes the gap between the behavior policy $\mu$ and the reference policy $\pi_{\theta_{\text{old}}}$ much larger than expected and can easily cause training collapse. To address this, the paper proposes **Rollout Routing Replay (R3)**: during rollout it records, for each token, the actual expert indices selected by the inference router, and during training it **replays** these routing decisions instead of recomputing them. In effect, R3 forces the training and inference stacks to share the same routing paths in the MoE topology, aligning the two sides at the level of the computation graph.
 
 - [RL 老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) approaches the problem more from a practical perspective, sharing experience on how to engineer for near training–inference consistency: choosing consistent operators and precision settings, monitoring and constraining the log-prob gap between training and inference, etc. The focus is on framework-level engineering practices that can mitigate training–inference difference at the root.
+
+- [verl Rollout Importance Sampling](https://verl.readthedocs.io/en/latest/advance/rollout_is.html) introduces a **Token Veto** mechanism in its rollout correction module: it computes **token-level** importance ratios $\rho_t^{(\text{ref}\leftarrow\text{beh})}$, and if any token in a trajectory satisfies $\min_t \rho_t < \tau_{\text{veto}}$, the entire sequence is discarded from training. This "token-level detection, sequence-level veto" design embodies a conservative "one-vote veto" strategy.
+
+- [INTELLECT-3 Technical Report](https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf) adopts a similar rejection sampling strategy in its asynchronous distributed RL training framework. INTELLECT-3 computes **token-level** importance ratios for each rollout; if any token's ratio falls below a threshold ($10^{-5}$ in the paper), the entire trajectory is masked.
 
 ## A Minimally Unified View from a Three-Policy TRPO Perspective
 
@@ -394,7 +397,7 @@ In practice, this usually involves both **system-level mechanisms** and **algori
 
    Concretely, this gives rise to methods like TIS, IcePop, and MIS, which can be seen as different ways of implementing Constraint 2 at the sample level.
 
-## TIS, IcePop, and Sequence-Level MIS: Different Implementations of Constraint 2
+## Importance Sampling and Masking: Four Implementations of Constraint 2
 
 In this section I’ll reuse the notation introduced above to write down the objectives of these three methods, focusing only on the design choices related to “behavior vs. reference policy.” Let the token-level PPO / GRPO-style update term be
 
@@ -506,6 +509,40 @@ In words:
 - For **sequences whose ratios exceed the threshold $C$**, the entire policy loss is masked out (weight set to $0$).
 
 From the three-policy TRPO viewpoint, sequence-level MIS no longer truncates at the token level. Instead, it performs **trajectory-level** filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. This implements Constraint 2 at the sequence level.
+
+### 4. Worst Token Reject Sampling: Rejecting Entire Sequences Based on the Worst Token
+
+The verl Token Veto mechanism and INTELLECT-3 both adopt a rejection sampling strategy that can be collectively called **Worst Token Reject Sampling (WTRS)**:
+
+- **verl Token Veto**: In its rollout correction module, if any token in a trajectory has $\min_t \rho_t < \tau_{\text{veto}}$, the entire sequence is discarded via response*mask. The threshold $\tau*{\text{veto}}$ is user-configurable.
+
+- **INTELLECT-3 Token Masking**: In its asynchronous distributed RL framework, if any token's ratio is below $10^{-5}$, the entire trajectory is masked.
+
+The core operation is identical: **if any token in a trajectory has an IS ratio below a threshold $\tau$, the entire sequence is rejected from training.** This can be written as:
+
+$$
+\color{blue}{
+m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})} \ge \tau\Big\}
+}
+$$
+
+In a unified loss form:
+
+$$
+L_{\text{WTRS}}(\theta)
+=-\,\mathbb{E}_{(x,y)\sim\mu}
+\Big[
+\color{blue}{m(y\mid x)}
+\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
+\Big].
+$$
+
+In words:
+
+- For **sequences where all tokens have IS ratios $\ge \tau$**: participate in training normally.
+- For **sequences where any token has an IS ratio $< \tau$**: the entire sequence's policy loss is masked out.
+
+From the three-policy TRPO perspective, WTRS adopts a hybrid "token-level detection, sequence-level veto" strategy: it detects extreme mismatch signals at the **token level**, and once detected, rejects at the **sequence level**. This "one-vote veto" design reflects a conservative philosophy — when a trajectory contains a token that "the behavior policy generated but the reference policy would almost never generate," **the credibility of the entire trajectory is called into question**, thereby implementing control over Constraint 2 ($\mu$ vs. $\pi_{\theta_{\text{old}}}$ deviation) at the trajectory granularity.
 
 ## MoE Routing Replay: What Does It Actually Do in Three-Policy TRPO?
 
@@ -649,11 +686,12 @@ Under this lens (which is of course only one of many possible perspectives):
 
 - Decoupled PPO / AReaL can be viewed as **formally acknowledging the existence of three policies** and explicitly decoupling the behavior distribution from the reference policy in the objective.
 
-- TIS, IcePop, and sequence-level MIS can be seen as different ways of implementing **Constraint 2** at different granularities (token vs. sequence) using importance sampling truncation / masking:
+- TIS, IcePop, MIS, and WTRS can be seen as different ways of implementing **Constraint 2** using importance sampling truncation / masking:
 
   - TIS: token-level truncation of IS weights to soften the influence of extreme samples.
   - IcePop: token-level two-sided masking in MoE to hard-drop tokens with severe mismatch.
   - MIS: sequence-level masking to ignore entire trajectories whose behavior–reference mismatch is too large.
+  - WTRS: token-level detection of extremely small ratios, rejecting the entire trajectory once such a signal is found.
 
 - **Routing replay** (whether replaying behavior routing in R3-style schemes or replaying reference routing) is better viewed as **changing the surrogate objective** rather than directly implementing a constraint: both variants replace the original $L_\mu(\pi_\theta)$ with a routing-conditioned / routing-frozen surrogate, trading off some objective bias and reduced routing learning freedom for lower variance and greater stability, without actually shrinking $\alpha_0$ or $\alpha_1$—they simply make routing mismatch invisible in the loss.
 
@@ -671,7 +709,6 @@ From this unified perspective, it may also be easier to think about the followin
 - In the presence of MoE, asynchronous sampling, and complex agent workflows, how long can we safely pretend that “$\mu \approx \pi_{\theta_{\text{old}}}$”?
 
 This post is just a very **minimal** extension of the classic TRPO framework, making the “three policies” explicit and using them to organize some existing work. There are inevitably misunderstandings and omissions. If you also care about how RL training actually behaves in large LLM systems, I’d be very interested to see how your own setup can be abstracted into a relationship between $\mu$, $\pi_{\theta_{\text{old}}}$, and $\pi_\theta$, and then re-examined through the inequality in Theorem 2. It might give a slightly different intuitive feel for what your system is really optimizing.
-
 
 ```bibtex
 @misc{WangZhang2025ThreePolicyTRPO,

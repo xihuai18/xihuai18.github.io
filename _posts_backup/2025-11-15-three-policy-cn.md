@@ -34,6 +34,10 @@
 
 - [RL 老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
 
+- [verl Rollout Importance Sampling](https://verl.readthedocs.io/en/latest/advance/rollout_is.html) 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 **token-level** 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t < \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种"token 粒度检测、sequence 粒度否决"的设计体现了一种"一票否决"的保守策略。
+
+- [INTELLECT-3 Technical Report](https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf) 在其异步分布式 RL 训练框架中采用了类似的拒绝采样策略。INTELLECT-3 对每条 rollout 计算 **token-level** 重要性比率，若任意 token 的比率低于阈值（文中使用 $10^{-5}$），则对整条轨迹进行 masking。
+
 ## 三策略 TRPO 视角下的最小统一理解
 
 上面列的这些工作，看上去各自解决的是：
@@ -360,7 +364,7 @@ $$
 
    具体来说，就是下面这些方法，它们本质上都可以看作是“实现约束 2 的不同方式”。
 
-## TIS、IcePop、sequence-level MIS：都是“约束 2”的不同实现
+## 重要性采样与掩码：四种约束 2 实现
 
 下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为
 
@@ -472,6 +476,40 @@ $$
 - 对于 **IS 比率超过阈值 $C$ 的序列**：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。
 
 从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在**序列级**筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
+
+### 4. Worst Token Reject Sampling：按最差 token 拒绝整条序列
+
+verl 中的 veto 机制 与 INTELLECT-3 分别在各自的训练框架中采用了一种可统称为 **Worst Token Reject Sampling（WTRS）** 的拒绝采样策略：
+
+- **verl Token Veto**：在其 rollout correction 模块中，若轨迹中存在任意 token 使得 $\min_t \rho_t < \tau_{\text{veto}}$，则通过 response*mask 将整条序列剔除。阈值 $\tau*{\text{veto}}$ 可由用户配置。
+
+- **INTELLECT-3 Token Masking**：在其异步分布式 RL 框架中，若任意 token 的比率低于 $10^{-5}$，则对整条轨迹进行 masking。
+
+二者的核心操作一致：**若轨迹中存在任意 token 的 IS 比率低于阈值 $\tau$，则将整条序列从训练中剔除**。写成
+
+$$
+\color{blue}{
+m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})} \ge \tau\Big\}
+}
+$$
+
+在统一的损失形式下，可以写成
+
+$$
+L_{\text{WTRS}}(\theta)
+=-\,\mathbb{E}_{(x,y)\sim\mu}
+\Big[
+\color{blue}{m(y\mid x)}
+\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
+\Big],
+$$
+
+简而言之：
+
+- 对于 **所有 token 的 IS 比率均不低于 $\tau$ 的序列**：正常参与训练；
+- 对于 **存在任意 token 的 IS 比率低于 $\tau$ 的序列**：整条序列的 policy loss 被 mask 掉。
+
+从三策略 TRPO 的角度看，WTRS 采用了"token 粒度检测、sequence 粒度否决"的混合策略：在 **token-level** 检测极端不一致的信号，一旦发现则在 **sequence-level** 执行拒绝。这种"一票否决"的设计体现了一种保守思路——当轨迹中存在"行为策略生成但参考策略几乎不可能生成"的 token 时，**整条轨迹的可信度都将受到质疑**，从而在 trajectory 粒度上实现对"约束 2"（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。
 
 ## MoE 路由回放：它在三策略 TRPO 中到底做了什么？
 
@@ -611,10 +649,11 @@ $$
 在这个视角下（当然这只是众多可能视角之一）：
 
 - Decoupled PPO / AReaL 可以被看作是在**形式上承认“三策略存在”**，并尝试在目标函数上将“行为分布”和“参考策略”解耦；
-- TIS、IcePop、sequence-level MIS，则是在不同粒度（token / sequence）上，**试图通过 IS 截断 / 掩码把“约束 2”落到样本层面**：
-  - TIS：用 token-level 截断权重削弱极端样本的影响；
-  - IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃“极端不一致”的 token；
-  - MIS：在 sequence-level 直接屏蔽整条“偏差过大”的轨迹；
+- TIS、IcePop、MIS、WTRS 则是通过 IS 或者掩码机制在样本层面实施"约束 2"：
+  - TIS：用 token-level 截断权重削弱比率过大样本的影响；
+  - IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃"极端不一致"的 token；
+  - MIS：在 sequence-level 直接屏蔽整条"比率过大"的轨迹；
+  - WTRS：在 token-level 检测比率过小的信号，一旦发现则在 sequence-level 拒绝整条轨迹；
 - **routing replay（路由回放）在三策略 TRPO 的视角下更像是“改写 surrogate objective”而非“直接实现约束”**：无论回放行为路由（R3 类）还是回放参考路由，它们都把原本的 $L_{\mu}(\pi_{\theta})$ 改成了一个路由被条件化/替换后的 surrogate objective，用**一定的目标偏差与路由学习自由度的收缩**换取**降低方差与提升稳定性**。因此它并不会真正收缩 $\alpha_0$ 或 $\alpha_1$，而是让路由不一致在 loss 中“不可见”；
 - 《RL 老训崩？训推差异是基石》、以及前文提到的 _Defeating Nondeterminism in LLM Inference_ 等工程经验，则可以理解为在**系统侧和数值实现侧**，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。
 
