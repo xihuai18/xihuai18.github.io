@@ -108,7 +108,12 @@ $$
 **几何直觉**：$k_3$ 实际上是一个 **Bregman 散度**。考虑凸函数 $\phi(x) = -\log x$，它在 $x=1$ 处的切线为 $y = 1 - x$。Bregman 散度定义为「函数值与切线值之差」：
 
 $$
-D_\phi(r, 1) = \phi(r) - \phi(1) - \phi'(1)(r - 1) = -\log r - 0 - (-1)(r-1) = r - 1 - \log r = k_3
+\begin{aligned}
+D_\phi(r, 1) &= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
+&= -\log r - 0 - (-1)(r - 1) \\
+&= r - 1 - \log r \\
+&= k_3.
+\end{aligned}
 $$
 
 由于凸函数始终位于其切线上方，这个差值**天然非负**。更重要的是，在 $r \to 1$ 时，函数与切线「贴合」得越来越紧，差值以 $(r-1)^2$ 的二阶速度趋近于零——这正是 $k_3$ 在策略接近时方差小的根本原因。
@@ -265,7 +270,13 @@ $$
 由链式法则：
 
 $$
-\nabla_\theta k_2 = (\log r) \cdot \nabla_\theta (\log r) = (\log r) \cdot \nabla_\theta \left(\log p(x) - \log q_\theta(x)\right) = (\log r) \cdot (-s_\theta) = -(\log r) \cdot s_\theta
+\begin{aligned}
+\nabla_\theta k_2 
+&= (\log r) \cdot \nabla_\theta(\log r) \\
+&= (\log r) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
+&= (\log r)(-s_\theta) \\
+&= - (\log r) s_\theta.
+\end{aligned}
 $$
 
 **推导 $\nabla_\theta k_3$**：

@@ -106,7 +106,12 @@ which is **always non-negative**. This guarantees that each sample contributes i
 **Geometric intuition**: $k_3$ is in fact a **Bregman divergence**. Consider the convex function $\phi(x) = -\log x$. The tangent at $x = 1$ is $y = 1 - x$. The Bregman divergence between $r$ and 1 is
 
 $$
-D_\phi(r, 1) = \phi(r) - \phi(1) - \phi'(1)(r - 1) = -\log r - 0 - (-1)(r - 1) = r - 1 - \log r = k_3.
+\begin{aligned}
+D_\phi(r, 1) &= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
+&= -\log r - 0 - (-1)(r - 1) \\
+&= r - 1 - \log r \\
+&= k_3.
+\end{aligned}
 $$
 
 Since a convex function always lies above its tangents, this difference is **naturally non-negative**. More importantly, as $r \to 1$, the function and its tangent “stick together” more tightly, and the gap shrinks at the rate of $(r-1)^2$. This is exactly why $k_3$ has small variance when the policies are close.
@@ -265,7 +270,13 @@ $$
 By the chain rule
 
 $$
-\nabla_\theta k_2 = (\log r) \cdot \nabla_\theta(\log r) = (\log r) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) = (\log r)(-s_\theta) = - (\log r) s_\theta.
+\begin{aligned}
+\nabla_\theta k_2 
+&= (\log r) \cdot \nabla_\theta(\log r) \\
+&= (\log r) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
+&= (\log r)(-s_\theta) \\
+&= - (\log r) s_\theta.
+\end{aligned}
 $$
 
 **Gradient of $k_3$**:
