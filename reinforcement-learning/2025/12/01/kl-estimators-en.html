@@ -250,7 +250,12 @@
 
 <p><strong>Geometric intuition</strong>: $k_3$ is in fact a <strong>Bregman divergence</strong>. Consider the convex function $\phi(x) = -\log x$. The tangent at $x = 1$ is $y = 1 - x$. The Bregman divergence between $r$ and 1 is</p>
 
-\[D_\phi(r, 1) = \phi(r) - \phi(1) - \phi'(1)(r - 1) = -\log r - 0 - (-1)(r - 1) = r - 1 - \log r = k_3.\]
+\[\begin{aligned}
+D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
+&amp;= -\log r - 0 - (-1)(r - 1) \\
+&amp;= r - 1 - \log r \\
+&amp;= k_3.
+\end{aligned}\]
 
 <p>Since a convex function always lies above its tangents, this difference is <strong>naturally non-negative</strong>. More importantly, as $r \to 1$, the function and its tangent “stick together” more tightly, and the gap shrinks at the rate of $(r-1)^2$. This is exactly why $k_3$ has small variance when the policies are close.</p>
 
@@ -453,7 +458,13 @@
 
 <p>By the chain rule</p>
 
-\[\nabla_\theta k_2 = (\log r) \cdot \nabla_\theta(\log r) = (\log r) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) = (\log r)(-s_\theta) = - (\log r) s_\theta.\]
+\[\begin{aligned}
+\nabla_\theta k_2 
+&amp;= (\log r) \cdot \nabla_\theta(\log r) \\
+&amp;= (\log r) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
+&amp;= (\log r)(-s_\theta) \\
+&amp;= - (\log r) s_\theta.
+\end{aligned}\]
 
 <p><strong>Gradient of $k_3$</strong>:</p>
 
