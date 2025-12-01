@@ -14,6 +14,8 @@ lang: zh
 
 [English Version](https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
+![Mini-class](/assets/img/kl-estimator-cn.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+
 ## 引言：KL 散度在强化学习中的角色
 
 在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。

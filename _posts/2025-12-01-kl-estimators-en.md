@@ -14,6 +14,8 @@ lang: en
 
 [中文版](https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
+![Mini-class](/assets/img/kl-estimator-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+
 ## Introduction: The Role of KL Divergence in Reinforcement Learning
 
 In policy optimization (PPO, GRPO, etc.) or alignment training (RLHF/RLAIF), **KL regularization** is the core mechanism that constrains the new policy from drifting too far away from a reference policy, in order to prevent unstable training or policy collapse.
