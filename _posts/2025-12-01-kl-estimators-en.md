@@ -12,7 +12,7 @@ lang: en
 
 > In reinforcement learning, how we approximate KL divergence directly affects training stability. This post systematically analyzes the differences between three classic estimators $k_1, k_2, k_3$ and provides practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.
 
-[中文版](https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html)
+[中文版](https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
 ## Introduction: The Role of KL Divergence in Reinforcement Learning
 
