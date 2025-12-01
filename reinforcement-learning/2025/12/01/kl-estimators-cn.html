@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计 | Xihuai Wang's Page</title>
+    <meta name="author" content="Xihuai Leo Wang" />
+    <meta name="description" content="在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1、k2、k3 的性质差异，并给出用于 reward 惩罚与用于 loss 回传时的选型指南。" />
+    <meta name="keywords" content="Reinforcement Learning, Multi-agent System" />
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous" />
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" />
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/monokai.css" media="none" id="highlight_theme_dark" />
+
+    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/dark_mode.js"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header --><header>
+
+  <!-- Nav Bar -->
+  <nav id="navbar"
+    class="navbar navbar-light navbar-expand-sm fixed-top">
+    <div class="container">
+      <a class="navbar-brand title font-weight-lighter" href="/">Xihuai Wang's Page</a>
+      <!-- Navbar Toggle -->
+      <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar top-bar"></span>
+        <span class="icon-bar middle-bar"></span>
+        <span class="icon-bar bottom-bar"></span>
+      </button>
+
+      <div class="collapse navbar-collapse text-right" id="navbarNav">
+        <ul class="navbar-nav ml-auto flex-nowrap">
+
+          <!-- About -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/">about</a>
+          </li>
+          
+
+          <!-- CV -->
+          <!-- 
+          <li class="nav-item ">
+            <a class="nav-link" href="/assets/pdf/" target="_blank"
+              rel="noopener noreferrer">cv</a>
+          </li> -->
+          <!-- Other pages -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/blog/">Xihuai's Blog</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/publications/">publications</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/cv/">cv</a>
+          </li>
+
+          <!-- Toogle theme mode -->
+          <li class="toggle-container">
+            <button id="light-toggle" title="Change theme">
+              <i class="fas fa-moon"></i>
+              <i class="fas fa-sun"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Scrolling Progress Bar -->
+  <progress id="progress" value="0">
+    <div class="progress-container">
+      <span class="progress-bar"></span>
+    </div>
+  </progress>
+</header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      <!-- _layouts/post.html -->
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</h1>
+    <p class="post-meta">December 1, 2025</p>
+    <p class="post-tags">
+  <a href="/blog/2025"> 📅 2025 </a>
+      &nbsp; &middot; &nbsp;
+        <a href="/blog/category/reinforcement-learning">
+          🏷️ reinforcement-learning</a> &nbsp;
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    <ul id="markdown-toc">
+  <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
+      <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
+    </ul>
+  </li>
+  <li><a href="#三种估计器的定义与设计原理" id="markdown-toc-三种估计器的定义与设计原理">三种估计器的定义与设计原理</a>    <ul>
+      <li><a href="#k_1最朴素的估计器" id="markdown-toc-k_1最朴素的估计器">$k_1$：最朴素的估计器</a></li>
+      <li><a href="#k_2基于-f-散度的低方差估计器" id="markdown-toc-k_2基于-f-散度的低方差估计器">$k_2$：基于 f-散度的低方差估计器</a></li>
+      <li><a href="#k_3控制变量法构造的最优估计器" id="markdown-toc-k_3控制变量法构造的最优估计器">$k_3$：控制变量法构造的「最优」估计器</a></li>
+      <li><a href="#三者对比总结" id="markdown-toc-三者对比总结">三者对比总结</a></li>
+    </ul>
+  </li>
+  <li><a href="#核心分析" id="markdown-toc-核心分析">核心分析</a>    <ul>
+      <li><a href="#估计-kl-数值时的偏差与方差" id="markdown-toc-估计-kl-数值时的偏差与方差">估计 KL 数值时的偏差与方差</a></li>
+      <li><a href="#估计-kl-梯度时的关键区分" id="markdown-toc-估计-kl-梯度时的关键区分">估计 KL 梯度时的关键区分</a>        <ul>
+          <li><a href="#正向与反向-kl-真梯度的推导" id="markdown-toc-正向与反向-kl-真梯度的推导">正向与反向 KL 真梯度的推导</a></li>
+          <li><a href="#两种求导顺序" id="markdown-toc-两种求导顺序">两种求导顺序</a></li>
+          <li><a href="#三种估计器的梯度推导" id="markdown-toc-三种估计器的梯度推导">三种估计器的梯度推导</a></li>
+          <li><a href="#先期望后梯度vs先梯度后期望" id="markdown-toc-先期望后梯度vs先梯度后期望">「先期望后梯度」vs「先梯度后期望」</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#rl-实践指南" id="markdown-toc-rl-实践指南">RL 实践指南</a>    <ul>
+      <li><a href="#kl-作为-reward-惩罚不需要梯度" id="markdown-toc-kl-作为-reward-惩罚不需要梯度">KL 作为 Reward 惩罚（不需要梯度）</a></li>
+      <li><a href="#kl-作为-loss需要梯度回传" id="markdown-toc-kl-作为-loss需要梯度回传">KL 作为 Loss（需要梯度回传）</a>        <ul>
+          <li><a href="#优化反向-kl最常见场景" id="markdown-toc-优化反向-kl最常见场景">优化反向 KL（最常见场景）</a></li>
+          <li><a href="#优化正向-kl覆盖型场景" id="markdown-toc-优化正向-kl覆盖型场景">优化正向 KL（覆盖型场景）</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#一份拿来就用的对照表" id="markdown-toc-一份拿来就用的对照表">一份「拿来就用」的对照表</a></li>
+  <li><a href="#常见实现陷阱" id="markdown-toc-常见实现陷阱">常见实现陷阱</a></li>
+  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
+  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+</ul>
+
+<blockquote>
+  <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
+</blockquote>
+
+<h2 id="引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</h2>
+
+<p>在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。</p>
+
+<h3 id="正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</h3>
+
+<p>设 $q_\theta$ 为当前 actor 策略，$p$ 为参考策略，两种方向的 KL 散度分别为：</p>
+
+<p><strong>反向 KL（Reverse KL）</strong>：
+\(D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_\theta(x)}{p(x)}\right]\)</p>
+
+<figure style="text-align:center;">
+  <img src="/assets/img/kl-estimator-reverse.png" style="width:95%;max-width:100%;" />
+  <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+</figure>
+
+<p><strong>正向 KL（Forward KL）</strong>：
+\(D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\theta(x)}\right]\)</p>
+
+<figure style="text-align:center;">
+  <img src="/assets/img/kl-estimator-forward.png" style="width:95%;max-width:100%;" />
+  <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+</figure>
+
+<p><strong>直觉理解</strong>：</p>
+<ul>
+  <li><strong>反向 KL</strong> 倾向于「模式寻优」（mode-seeking）——策略会集中在参考分布的高概率区域，可能牺牲多样性</li>
+  <li><strong>正向 KL</strong> 倾向于「质量覆盖」（mass-covering）——策略会尽量覆盖参考分布的支撑集</li>
+</ul>
+
+<p>在 RLHF 的主流实现中，<strong>反向 KL</strong> 更为常见，因为我们希望 actor 不要偏离 reference policy 太远，而非要求完全覆盖所有模式。</p>
+
+<h2 id="三种估计器的定义与设计原理">三种估计器的定义与设计原理</h2>
+
+<p>设比值 $r(x) = \frac{p(x)}{q_\theta(x)}$，John Schulman 提出的三种单样本估计子定义如下：</p>
+
+<h3 id="k_1最朴素的估计器">$k_1$：最朴素的估计器</h3>
+
+\[k_1(x) = -\log r = \log q_\theta(x) - \log p(x)\]
+
+<p>这是最直接的定义——直接取 log-ratio 的负值。它对反向 KL 无偏，但有一个致命缺陷：<strong>可能取负值</strong>，而 KL 散度始终非负。这导致其方差极高，因为正负样本会相互抵消。</p>
+
+<h3 id="k_2基于-f-散度的低方差估计器">$k_2$：基于 f-散度的低方差估计器</h3>
+
+\[k_2(x) = \frac{1}{2}(\log r)^2\]
+
+<p><strong>设计动机</strong>：$k_1$ 的问题在于可正可负，而 $k_2$ 通过取平方保证<strong>每个样本都是正的</strong>，直观上每个样本都在告诉你 $p$ 和 $q$ 相差多远。</p>
+
+<p><strong>为什么偏差很小？</strong> $k_2$ 本质上是一个 <strong>f-散度</strong>（f-divergence），其中 $f(x) = \frac{1}{2}(\log x)^2$。f-散度有一个优美的性质：<strong>所有可微的 f-散度在 $q \approx p$ 时，二阶展开都形如</strong></p>
+
+\[D_f(p, q_\theta) = \frac{f''(1)}{2} \theta^T F \theta + O(\theta^3)\]
+
+<p>其中 $F$ 是 Fisher 信息矩阵。KL 散度对应 $f(x) = -\log x$，有 $f’‘(1) = 1$；而 $k_2$ 对应的 $f(x) = \frac{1}{2}(\log x)^2$，同样有 $f’‘(1) = 1$。这意味着<strong>当策略接近时，$k_2$ 与真实 KL 的行为几乎一致</strong>，偏差仅体现在高阶项。</p>
+
+<h3 id="k_3控制变量法构造的最优估计器">$k_3$：控制变量法构造的「最优」估计器</h3>
+
+\[k_3(x) = r - 1 - \log r\]
+
+<p><strong>设计动机</strong>：我们想要一个<strong>既无偏又低方差</strong>的估计器。标准做法是给 $k_1$ 加一个<strong>控制变量</strong>（control variate）——一个期望为零但与 $k_1$ 负相关的量。</p>
+
+<p>注意到 $\mathbb{E}_q[r - 1] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$，所以对于任意 $\lambda$，</p>
+
+\[k_1 + \lambda(r - 1) = -\log r + \lambda(r - 1)\]
+
+<p>仍然是无偏估计。</p>
+
+<p><strong>为什么选 $\lambda = 1$？</strong> 由于 $\log$ 是凹函数，有 $\log x \leq x - 1$，因此</p>
+
+\[k_3 = (r - 1) - \log r \geq 0\]
+
+<p><strong>始终非负</strong>！这保证了每个样本都在「正向」贡献信息，消除了 $k_1$ 正负抵消的问题。</p>
+
+<p><strong>几何直觉</strong>：$k_3$ 实际上是一个 <strong>Bregman 散度</strong>。考虑凸函数 $\phi(x) = -\log x$，它在 $x=1$ 处的切线为 $y = 1 - x$。Bregman 散度定义为「函数值与切线值之差」：</p>
+
+\[D_\phi(r, 1) = \phi(r) - \phi(1) - \phi'(1)(r - 1) = -\log r - 0 - (-1)(r-1) = r - 1 - \log r = k_3\]
+
+<p>由于凸函数始终位于其切线上方，这个差值<strong>天然非负</strong>。更重要的是，在 $r \to 1$ 时，函数与切线「贴合」得越来越紧，差值以 $(r-1)^2$ 的二阶速度趋近于零——这正是 $k_3$ 在策略接近时方差小的根本原因。</p>
+
+<h3 id="三者对比总结">三者对比总结</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: left">定义</th>
+      <th style="text-align: left">设计原理</th>
+      <th style="text-align: center">对数值的偏差</th>
+      <th style="text-align: left">方差特性</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: left">$-\log r$</td>
+      <td style="text-align: left">最朴素定义</td>
+      <td style="text-align: center">无偏</td>
+      <td style="text-align: left">高（可正可负）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: left">$\frac{1}{2}(\log r)^2$</td>
+      <td style="text-align: left">f-散度，二阶行为与 KL 一致</td>
+      <td style="text-align: center">有偏（但极小）</td>
+      <td style="text-align: left">低（恒正）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: left">$r - 1 - \log r$</td>
+      <td style="text-align: left">控制变量 + Bregman 散度</td>
+      <td style="text-align: center">无偏</td>
+      <td style="text-align: left">低（恒正）</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，<strong>梯度层面的故事完全不同</strong>。</p>
+
+<h2 id="核心分析">核心分析</h2>
+
+<h3 id="估计-kl-数值时的偏差与方差">估计 KL 数值时的偏差与方差</h3>
+
+<p>假设从 $q_\theta$ 采样来估计反向 KL $D_{\mathrm{KL}}(q_\theta | p)$：</p>
+
+<p><strong>无偏性分析</strong>：</p>
+
+\[\mathbb{E}_{q}[k_1] = \mathbb{E}_{q}\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\]
+
+\[\mathbb{E}_{q}[k_3] = \mathbb{E}_{q}[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\]
+
+\[\mathbb{E}_{q}[k_2] = \frac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{（有偏）}\]
+
+<p><strong>结论</strong>：对于估计反向 KL 的<strong>数值</strong>，$k_1$ 和 $k_3$ 是无偏估计，而 $k_2$ 是有偏的。</p>
+
+<p><strong>方差特性的 Trade-off</strong>：</p>
+
+<p>John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）表明：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: center">bias/true</th>
+      <th style="text-align: center">stdev/true</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">20</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">0.002</td>
+      <td style="text-align: center">1.42</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">1.42</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>当 KL 较大时（$p = \mathcal{N}(1,1)$，真实 KL = 0.5）：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: center">bias/true</th>
+      <th style="text-align: center">stdev/true</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">2</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">0.25</td>
+      <td style="text-align: center">1.73</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">1.7</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>核心直觉</strong>：</p>
+<ul>
+  <li>$k_1 = -\log r$ 以一阶项起步，当 $r$ 接近 1 时波动较大，且可能取负值</li>
+  <li>$k_3 = r - 1 - \log r$ 在 $r=1$ 处是二阶小量，始终非负，因此在策略接近时方差更小</li>
+  <li>但当覆盖严重不足（$r$ 可能爆炸）时，$k_3$ 的方差会被权重爆炸拖累；此时 $k_1$ 反而更稳定</li>
+</ul>
+
+<blockquote>
+  <p><strong>注</strong>：若要估计<strong>正向 KL 的数值</strong> $D_{\mathrm{KL}}(p | q) = \mathbb{E}_p[\log r]$，而只能从 $q$ 采样，可用重要性采样 $\mathbb{E}_q[r \log r]$。</p>
+</blockquote>
+
+<h3 id="估计-kl-梯度时的关键区分">估计 KL 梯度时的关键区分</h3>
+
+<p><strong>这是最容易混淆、也是实践中最关键的部分。</strong></p>
+
+<h4 id="正向与反向-kl-真梯度的推导">正向与反向 KL 真梯度的推导</h4>
+
+<p>在分析估计器之前，我们先推导正向和反向 KL 散度对 $\theta$ 的<strong>真梯度</strong>作为参照。</p>
+
+<p>记 score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$，它有一个重要性质：$\mathbb{E}<em>{q</em>\theta}[s_\theta] = 0$（因为 $\int \nabla_\theta q_\theta dx = \nabla_\theta \int q_\theta dx = \nabla_\theta 1 = 0$）。</p>
+
+<p><strong>反向 KL 的梯度</strong>：</p>
+
+\[D_{\mathrm{KL}}(q_\theta \| p) = \int q_\theta(x) \log \frac{q_\theta(x)}{p(x)} dx\]
+
+<p>对 $\theta$ 求梯度（使用乘积法则）：</p>
+
+\[\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \int \nabla_\theta q_\theta \cdot \log \frac{q_\theta}{p} dx + \int q_\theta \cdot \nabla_\theta \log \frac{q_\theta}{p} dx\]
+
+<p>利用 $\nabla_\theta q_\theta = q_\theta \cdot s_\theta$ 以及 $\nabla_\theta \log q_\theta = s_\theta$、$\nabla_\theta \log p = 0$：</p>
+
+\[= \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] + \mathbb{E}_q[s_\theta] = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right]\]
+
+<p>即：</p>
+
+\[\boxed{\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] = -\mathbb{E}_q[s_\theta \cdot \log r]}\]
+
+<p><strong>正向 KL 的梯度</strong>：</p>
+
+\[D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \log \frac{p(x)}{q_\theta(x)} dx\]
+
+<p>由于 $p(x)$ 不依赖于 $\theta$：</p>
+
+\[\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \cdot \nabla_\theta \left(-\log q_\theta(x)\right) dx = -\mathbb{E}_p[s_\theta]\]
+
+<p>为了用 $q$ 的样本估计这个量，进行重要性采样：</p>
+
+\[-\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} \cdot s_\theta\right] = -\mathbb{E}_q[r \cdot s_\theta]\]
+
+<p>利用 $\mathbb{E}<em>q[s</em>\theta] = 0$，可改写为：</p>
+
+\[\boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q[(1-r) \cdot s_\theta]}\]
+
+<p>有了这两个结果，我们就能判断各估计器的梯度期望究竟对应哪个 KL 的真梯度。</p>
+
+<h4 id="两种求导顺序">两种求导顺序</h4>
+
+<p>在代码实现中，存在两条路径：</p>
+
+<ol>
+  <li><strong>先梯度、后期望</strong>：对每个样本的 $k_i(x)$ 求梯度，再对梯度求期望（Monte Carlo 估计）</li>
+  <li><strong>先期望、后梯度</strong>：把 $\mathbb{E}_q[k_i]$ 当作损失函数，对解析表达式求梯度</li>
+</ol>
+
+<p><strong>在典型的深度学习代码中，我们实际执行的是「先梯度、后期望」</strong>——自动微分对每个样本计算梯度，然后在 batch 上取平均。</p>
+
+<h4 id="三种估计器的梯度推导">三种估计器的梯度推导</h4>
+
+<p>现在我们计算三种估计器的梯度，看它们的期望分别对应哪个 KL 的真梯度。</p>
+
+<p><strong>推导 $\nabla_\theta k_1$</strong>：</p>
+
+\[k_1 = -\log r = -\log \frac{p(x)}{q_\theta(x)} = \log q_\theta(x) - \log p(x)\]
+
+\[\nabla_\theta k_1 = \nabla_\theta \log q_\theta(x) - \nabla_\theta \log p(x) = s_\theta - 0 = s_\theta\]
+
+<p><strong>推导 $\nabla_\theta k_2$</strong>：</p>
+
+\[k_2 = \frac{1}{2}(\log r)^2\]
+
+<p>由链式法则：</p>
+
+\[\nabla_\theta k_2 = (\log r) \cdot \nabla_\theta (\log r) = (\log r) \cdot \nabla_\theta \left(\log p(x) - \log q_\theta(x)\right) = (\log r) \cdot (-s_\theta) = -(\log r) \cdot s_\theta\]
+
+<p><strong>推导 $\nabla_\theta k_3$</strong>：</p>
+
+\[k_3 = r - 1 - \log r\]
+
+<p>首先计算 $\nabla_\theta r$。由于 $r = p(x) \cdot q_\theta(x)^{-1}$：</p>
+
+\[\nabla_\theta r = p(x) \cdot (-1) \cdot q_\theta(x)^{-2} \cdot \nabla_\theta q_\theta(x) = -\frac{p(x)}{q_\theta(x)} \cdot \frac{\nabla_\theta q_\theta(x)}{q_\theta(x)} = -r \cdot s_\theta\]
+
+<p>再计算 $\nabla_\theta \log r$：</p>
+
+\[\nabla_\theta \log r = \frac{1}{r} \nabla_\theta r = \frac{1}{r} \cdot (-r \cdot s_\theta) = -s_\theta\]
+
+<p>因此：</p>
+
+\[\nabla_\theta k_3 = \nabla_\theta r - 0 - \nabla_\theta \log r = -r \cdot s_\theta - (-s_\theta) = (1 - r) \cdot s_\theta\]
+
+<p>对它们在 $q_\theta$ 下取期望：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: left">$\mathbb{E}<em>{q}[\nabla</em>\theta k_i]$</th>
+      <th style="text-align: left">等价于</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: left">$\mathbb{E}<em>{q}[s</em>\theta] = 0$</td>
+      <td style="text-align: left"><strong>无意义（恒为零）</strong></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: left">$-\mathbb{E}<em>{q}[(\log r) \cdot s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: left"><strong>反向 KL 的真梯度</strong></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: left">$\mathbb{E}<em>{q}[(1-r) \cdot s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$</td>
+      <td style="text-align: left"><strong>正向 KL 的真梯度</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>关键洞察</strong>：</p>
+<ul>
+  <li><strong>$k_2$ 的梯度</strong>等价于反向 KL 的真梯度——这是优化「约束策略不偏离 ref」的正确选择</li>
+  <li><strong>$k_3$ 的梯度</strong>等价于正向 KL 的真梯度——这对应「覆盖型」目标</li>
+  <li><strong>$k_1$ 的梯度期望恒为零</strong>——作为 loss 反传毫无意义！</li>
+</ul>
+
+<h4 id="先期望后梯度vs先梯度后期望">「先期望后梯度」vs「先梯度后期望」</h4>
+
+<p>如果从解析角度把 $\mathbb{E}_q[k_i]$ 当作一个关于 $\theta$ 的函数再求梯度（即「先期望后梯度」），那么：</p>
+
+\[\nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p)\]
+
+\[\nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p)\]
+
+<p>两者都给出反向 KL 的梯度。但在代码中直接对 $k_3$ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 $\mathbb{E}<em>q[\nabla</em>\theta k_3]$，即<strong>正向 KL 的梯度</strong>。</p>
+
+<p>这个区分非常重要：<strong>同一个估计器，两种求导顺序可能给出完全不同的结果</strong>。</p>
+
+<h2 id="rl-实践指南">RL 实践指南</h2>
+
+<h3 id="kl-作为-reward-惩罚不需要梯度">KL 作为 Reward 惩罚（不需要梯度）</h3>
+
+<p>当 KL 仅作为标量惩罚加入 reward shaping 时，我们只需要准确的<strong>数值估计</strong>，不需要反传梯度。</p>
+
+<p><strong>推荐</strong>：</p>
+<ul>
+  <li>使用 <strong>$k_1$</strong> 或 <strong>$k_3$</strong>（两者对反向 KL 数值均无偏）</li>
+  <li>当策略已接近参考策略时，$k_3$ 往往更低方差</li>
+  <li>覆盖不足或尾部错配明显时，$k_1$ 更稳健</li>
+</ul>
+
+<blockquote>
+  <p><strong>注</strong>：若想施加<strong>正向 KL 惩罚</strong>（偏向覆盖行为分布），数值上可用 $\mathbb{E}_q[r \log r]$ 或（若可从 $p$ 采样）$\mathbb{E}_p[\log r]$。</p>
+</blockquote>
+
+<h3 id="kl-作为-loss需要梯度回传">KL 作为 Loss（需要梯度回传）</h3>
+
+<p>当 KL 作为 loss 的一部分参与反传时，必须考虑梯度的正确性。</p>
+
+<h4 id="优化反向-kl最常见场景">优化反向 KL（最常见场景）</h4>
+
+<p>目标：控制 actor 不偏离 reference policy。</p>
+
+<p><strong>正确做法</strong>：使用 <strong>$k_2$</strong> 作为 loss。</p>
+
+\[\mathcal{L}_{k_2} = \frac{1}{2}(\log r)^2\]
+
+<p>其梯度期望 $\mathbb{E}<em>q[\nabla k_2] = \nabla</em>\theta D_{\mathrm{KL}}(q | p)$ 正是反向 KL 的真梯度。</p>
+
+<h4 id="优化正向-kl覆盖型场景">优化正向 KL（覆盖型场景）</h4>
+
+<p>目标：让策略覆盖参考分布的支撑集（如离线 RL、模仿学习等）。</p>
+
+<p><strong>正确做法</strong>：使用 <strong>$k_3$</strong> 作为 loss。</p>
+
+\[\mathbb{E}_q[\nabla k_3] = \mathbb{E}_q[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)\]
+
+<p>直接对 $k_3$ 的样本均值调用反传，自动微分计算的就是 $\mathbb{E}<em>q[\nabla</em>\theta k_3]$，即正向 KL 的梯度，无需额外处理。</p>
+
+<h2 id="一份拿来就用的对照表">一份「拿来就用」的对照表</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">目标</th>
+      <th style="text-align: center">采样来源</th>
+      <th style="text-align: left">用于<strong>数值</strong></th>
+      <th style="text-align: left">用于<strong>梯度</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">反向 KL $D_{\mathrm{KL}}(q|p)$</td>
+      <td style="text-align: center">$q$</td>
+      <td style="text-align: left">$k_1$ 或 $k_3$（无偏）</td>
+      <td style="text-align: left">$k_2$</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">正向 KL $D_{\mathrm{KL}}(p|q)$</td>
+      <td style="text-align: center">$q$</td>
+      <td style="text-align: left">$\mathbb{E}_q[r\log r]$</td>
+      <td style="text-align: left">$k_3$</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="常见实现陷阱">常见实现陷阱</h2>
+
+<p><strong>陷阱 1：把 $k_1$ 直接当 loss 反传</strong></p>
+
+<p>$k_1$ 的梯度期望恒为零（$\mathbb{E}<em>q[\nabla k_1] = \mathbb{E}_q[s</em>\theta] = 0$），作为 loss 完全无效。</p>
+
+<blockquote>
+  <p><strong>解决</strong>：reward shaping 用 $k_1$ 或 $k_3$（不需要梯度），loss 用 $k_2$ 或 $k_3$。</p>
+</blockquote>
+
+<p><strong>陷阱 2：混淆 $k_3$ 的「数值无偏性」与「梯度对应的目标」</strong></p>
+
+<p>$k_3$ 对<strong>反向 KL 的数值</strong>是无偏估计，但它的<strong>梯度</strong>对应的是<strong>正向 KL</strong>。如果你的目标是优化反向 KL，却用 $k_3$ 作为 loss，实际上在优化正向 KL。</p>
+
+<blockquote>
+  <p><strong>解决</strong>：明确你的优化目标。优化反向 KL 用 $k_2$；优化正向 KL 才用 $k_3$。</p>
+</blockquote>
+
+<p><strong>陷阱 3：$r$ 重尾导致方差爆炸</strong></p>
+
+<p>当策略与参考分布差异过大时，$r = p/q$ 可能出现极端值，导致 $k_3$ 的方差爆炸。</p>
+
+<h2 id="总结">总结</h2>
+
+<p><strong>一句话记忆</strong>：</p>
+
+<ul>
+  <li><strong>只要数值（KL 作为 reward 惩罚）</strong>：选 $k_1$ 或 $k_3$（均对反向 KL 无偏）</li>
+  <li><strong>需要梯度（KL 作为 loss）</strong>：
+    <ul>
+      <li>优化<strong>反向 KL</strong> → 用 $k_2$</li>
+      <li>优化<strong>正向 KL</strong> → 用 $k_3$</li>
+    </ul>
+  </li>
+</ul>
+
+<p>把「<strong>从谁采样</strong>」、「<strong>估计谁的值</strong>」、「<strong>对谁求梯度</strong>」这三个问题捋清楚，三种估计器就不再让人混淆了。</p>
+
+<h2 id="参考文献">参考文献</h2>
+
+<ol>
+  <li>
+    <p>Dibya Ghosh. “KL Divergence for Machine Learning”. https://dibyaghosh.com/blog/probability/kldivergence</p>
+  </li>
+  <li>
+    <p>John Schulman. “Approximating KL Divergence”. https://joschu.net/blog/kl-approx.html</p>
+  </li>
+  <li>
+    <p>Verl Documentation. “Proximal Policy Optimization (PPO)”. https://verl.readthedocs.io/en/latest/algo/ppo.html</p>
+  </li>
+  <li>
+    <p>初七123334. RLHF/RLVR 训练中的 KL 近似方法浅析（k1 / k2 / k3）. https://zhuanlan.zhihu.com/p/1966872846212010437</p>
+  </li>
+  <li>
+    <p>Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. “Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization”. https://arxiv.org/abs/2510.01555</p>
+  </li>
+</ol>
+
+  </article></div>
+
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        &copy; Copyright 2025 Xihuai Leo Wang. Last updated: December 01, 2025.
+      </div>
+    </footer>
+
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    <!-- Load Common JS -->
+  <script defer src="/assets/js/common.js"></script>
+  <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams',
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2923RQZBXG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-2923RQZBXG');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar,
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+  </body>
+</html>
