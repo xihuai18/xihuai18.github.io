@@ -12,6 +12,8 @@ lang: zh
 
 > 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。
 
+[English Version](https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html)
+
 ## 引言：KL 散度在强化学习中的角色
 
 在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。
@@ -410,3 +412,14 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 4. 初七123334. RLHF/RLVR 训练中的 KL 近似方法浅析（k1 / k2 / k3）. https://zhuanlan.zhihu.com/p/1966872846212010437
 
 5. Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. "Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization". https://arxiv.org/abs/2510.01555
+
+```bibtex
+@misc{WangZhang2025KLEstimators,
+  author       = {Wang, Xihuai and Zhang, Shao},
+  title        = {Understanding {KL} Divergence Estimators in {RL}: From Value Approximation to Gradient Estimation},
+  year         = {2025},
+  month        = dec,
+  day          = {01},
+  url          = {https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}
+}
+```
