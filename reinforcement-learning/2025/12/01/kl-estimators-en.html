@@ -174,7 +174,7 @@
   <p>In reinforcement learning, how we approximate KL divergence directly affects training stability. This post systematically analyzes the differences between three classic estimators $k_1, k_2, k_3$ and provides practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
 </blockquote>
 
-<p><a href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html">中文版</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="/reinforcement-learning/2025/12/01/kl-estimators-cn.html">中文版</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <h2 id="introduction-the-role-of-kl-divergence-in-reinforcement-learning">Introduction: The Role of KL Divergence in Reinforcement Learning</h2>
 
@@ -261,37 +261,37 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h3 id="summary-comparing-the-three-estimators">Summary: Comparing the Three Estimators</h3>
 
-<table style="width:100%; text-align:center;">
+<table>
   <thead>
     <tr>
-      <th>Estimator</th>
-      <th>Definition</th>
-      <th>Design principle</th>
-      <th>Value bias</th>
-      <th>Variance</th>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">Definition</th>
+      <th style="text-align: center">Design principle</th>
+      <th style="text-align: center">Value bias</th>
+      <th style="text-align: center">Variance</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>$k_1$</td>
-      <td>$-\log r$</td>
-      <td>Naive definition</td>
-      <td>Unbiased</td>
-      <td>High (can be neg.)</td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">$-\log r$</td>
+      <td style="text-align: center">Naive definition</td>
+      <td style="text-align: center">Unbiased</td>
+      <td style="text-align: center">High (can be neg.)</td>
     </tr>
     <tr>
-      <td>$k_2$</td>
-      <td>$\frac{1}{2}(\log r)^2$</td>
-      <td>f-divergence, 2nd-order matches KL</td>
-      <td>Biased (small)</td>
-      <td>Low (always pos.)</td>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">$\frac{1}{2}(\log r)^2$</td>
+      <td style="text-align: center">f-divergence, 2nd-order matches KL</td>
+      <td style="text-align: center">Biased (small)</td>
+      <td style="text-align: center">Low (always pos.)</td>
     </tr>
     <tr>
-      <td>$k_3$</td>
-      <td>$r - 1 - \log r$</td>
-      <td>Control variate + Bregman divergence</td>
-      <td>Unbiased</td>
-      <td>Low (always pos.)</td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">$r - 1 - \log r$</td>
+      <td style="text-align: center">Control variate + Bregman divergence</td>
+      <td style="text-align: center">Unbiased</td>
+      <td style="text-align: center">Low (always pos.)</td>
     </tr>
   </tbody>
 </table>
@@ -395,7 +395,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>Before analyzing the estimators, let us derive the <strong>true gradients</strong> of forward and reverse KL with respect to $\theta$.</p>
 
-<p>Denote the score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$. A key property is $\mathbb{E}<em>{q</em>\theta}[s_\theta] = 0$ (since $\int \nabla_\theta q_\theta dx = \nabla_\theta 1 = 0$).</p>
+<p>Denote the score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$. A key property is $\mathbb{E}_{q_\theta}[s_\theta] = 0$ (since $\int \nabla_\theta q_\theta dx = \nabla_\theta 1 = 0$).</p>
 
 <p><strong>Gradient of reverse KL</strong>:</p>
 
@@ -425,7 +425,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 \[-\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} s_\theta\right] = -\mathbb{E}_q[r s_\theta].\]
 
-<p>Using $\mathbb{E}<em>q[s</em>\theta] = 0$, we can rewrite this as</p>
+<p>Using $\mathbb{E}_q[s_\theta] = 0$, we can rewrite this as</p>
 
 \[\boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q[(1 - r) s_\theta]}\]
 
@@ -486,29 +486,29 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>Taking expectations under $q_\theta$:</p>
 
-<table style="width:100%; text-align:center;">
+<table>
   <thead>
     <tr>
-      <th>Estimator</th>
-      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-      <th>Equals</th>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th style="text-align: center">Equals</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>$k_1$</td>
-      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
-      <td><strong>Zero (useless as loss)</strong></td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td style="text-align: center"><strong>Zero (useless as loss)</strong></td>
     </tr>
     <tr>
-      <td>$k_2$</td>
-      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
-      <td><strong>Gradient of reverse KL</strong></td>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
+      <td style="text-align: center"><strong>Gradient of reverse KL</strong></td>
     </tr>
     <tr>
-      <td>$k_3$</td>
-      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
-      <td><strong>Gradient of forward KL</strong></td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
+      <td style="text-align: center"><strong>Gradient of forward KL</strong></td>
     </tr>
   </tbody>
 </table>
@@ -530,7 +530,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 \[\nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p).\]
 
-<p>Both give the gradient of reverse KL. But when you implement $k_3$ as a <strong>sample-wise loss in code</strong> and call <code class="language-plaintext highlighter-rouge">backward</code> on the batch mean, autodiff is effectively computing $\mathbb{E}<em>q[\nabla</em>\theta k_3]$, which, as shown above, is actually the gradient of <strong>forward KL</strong>.</p>
+<p>Both give the gradient of reverse KL. But when you implement $k_3$ as a <strong>sample-wise loss in code</strong> and call <code class="language-plaintext highlighter-rouge">backward</code> on the batch mean, autodiff is effectively computing $\mathbb{E}_q[\nabla_\theta k_3]$, which, as shown above, is actually the gradient of <strong>forward KL</strong>.</p>
 
 <p>This subtle difference is crucial: <strong>for the same estimator, changing the order of expectation and gradient can lead to completely different optimization objectives</strong>.</p>
 
@@ -563,7 +563,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 \[\mathcal{L}_{k_2} = \frac{1}{2}(\log r)^2.\]
 
-<p>Its gradient expectation $\mathbb{E}<em>q[\nabla k_2] = \nabla</em>\theta D_{\mathrm{KL}}(q | p)$ is exactly the true gradient of reverse KL.</p>
+<p>Its gradient expectation $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q | p)$ is exactly the true gradient of reverse KL.</p>
 
 <h4 id="optimizing-forward-kl-coverage-oriented-settings">Optimizing Forward KL (Coverage-Oriented Settings)</h4>
 
@@ -573,31 +573,31 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 \[\mathbb{E}_q[\nabla k_3] = \mathbb{E}_q[(1 - r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q).\]
 
-<p>If you backpropagate through the batch mean of $k_3$, autodiff computes exactly this forward-KL gradient – no extra tricks needed.</p>
+<p>If you backpropagate through the batch mean of $k_3$, autodiff computes exactly this forward-KL gradient \– no extra tricks needed.</p>
 
 <h2 id="a-ready-to-use-cheat-sheet">A Ready-to-Use Cheat Sheet</h2>
 
-<table style="width:100%; text-align:center;">
+<table>
   <thead>
     <tr>
-      <th>Objective</th>
-      <th>Sampling dist.</th>
-      <th>For <strong>value estimate</strong></th>
-      <th>For <strong>gradient (loss)</strong></th>
+      <th style="text-align: center">Objective</th>
+      <th style="text-align: center">Sampling dist.</th>
+      <th style="text-align: center">For <strong>value estimate</strong></th>
+      <th style="text-align: center">For <strong>gradient (loss)</strong></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Reverse KL $D_{\mathrm{KL}}(q \mid p)$</td>
-      <td>$q$</td>
-      <td>$k_1$ or $k_3$ (unbiased)</td>
-      <td>$k_2$</td>
+      <td style="text-align: center">Reverse KL $D_{\mathrm{KL}}(q \mid p)$</td>
+      <td style="text-align: center">$q$</td>
+      <td style="text-align: center">$k_1$ or $k_3$ (unbiased)</td>
+      <td style="text-align: center">$k_2$</td>
     </tr>
     <tr>
-      <td>Forward KL $D_{\mathrm{KL}}(p \mid q)$</td>
-      <td>$q$</td>
-      <td>$\mathbb{E}_q[r\log r]$</td>
-      <td>$k_3$</td>
+      <td style="text-align: center">Forward KL $D_{\mathrm{KL}}(p \mid q)$</td>
+      <td style="text-align: center">$q$</td>
+      <td style="text-align: center">$\mathbb{E}_q[r\log r]$</td>
+      <td style="text-align: center">$k_3$</td>
     </tr>
   </tbody>
 </table>
@@ -606,7 +606,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Pitfall 1: Using $k_1$ Directly as a Loss</strong></p>
 
-<p>The expected gradient of $k_1$ is zero ($\mathbb{E}<em>q[\nabla k_1] = \mathbb{E}_q[s</em>\theta] = 0$), so as a loss it is ineffective.</p>
+<p>The expected gradient of $k_1$ is zero ($\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$), so as a loss it is ineffective.</p>
 
 <blockquote>
   <p><strong>Fix</strong>: Use $k_1$ or $k_3$ only when you need a scalar KL penalty in rewards (no gradient), and use $k_2$ or $k_3$ when you actually want a loss with a meaningful gradient.</p>
