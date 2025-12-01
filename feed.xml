@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-01T18:24:18+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-01T18:32:41+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
       <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
@@ -95,9 +95,9 @@
 
 <p><strong>为什么偏差很小？</strong> $k_2$ 本质上是一个 <strong>f-散度</strong>（f-divergence），其中 $f(x) = \frac{1}{2}(\log x)^2$。f-散度有一个优美的性质：<strong>所有可微的 f-散度在 $q \approx p$ 时，二阶展开都形如</strong></p>
 
-\[D_f(p, q_\theta) = \frac{f''(1)}{2} \theta^T F \theta + O(\theta^3)\]
+\[D_f(p, q_\theta) = \frac{f^{\prime\prime}(1)}{2} \theta^T F \theta + O(\theta^3)\]
 
-<p>其中 $F$ 是 Fisher 信息矩阵。KL 散度对应 $f(x) = -\log x$，有 $f’‘(1) = 1$；而 $k_2$ 对应的 $f(x) = \frac{1}{2}(\log x)^2$，同样有 $f’‘(1) = 1$。这意味着<strong>当策略接近时，$k_2$ 与真实 KL 的行为几乎一致</strong>，偏差仅体现在高阶项。</p>
+<p>其中 $F$ 是 Fisher 信息矩阵。KL 散度对应 $f(x) = -\log x$，有 $f^{\prime\prime}(1) = 1$；而 $k_2$ 对应的 $f(x) = \frac{1}{2}(\log x)^2$，同样有 $f^{\prime\prime}(1) = 1$。这意味着<strong>当策略接近时，$k_2$ 与真实 KL 的行为几乎一致</strong>，偏差仅体现在高阶项。</p>
 
 <h3 id="k_3控制变量法构造的最优估计器">$k_3$：控制变量法构造的「最优」估计器</h3>
 
@@ -130,37 +130,37 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h3 id="三者对比总结">三者对比总结</h3>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: center">估计器</th>
-      <th style="text-align: left">定义</th>
-      <th style="text-align: left">设计原理</th>
-      <th style="text-align: center">对数值的偏差</th>
-      <th style="text-align: left">方差特性</th>
+      <th>估计器</th>
+      <th>定义</th>
+      <th>设计原理</th>
+      <th>对数值的偏差</th>
+      <th>方差特性</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">$k_1$</td>
-      <td style="text-align: left">$-\log r$</td>
-      <td style="text-align: left">最朴素定义</td>
-      <td style="text-align: center">无偏</td>
-      <td style="text-align: left">高（可正可负）</td>
+      <td>$k_1$</td>
+      <td>$-\log r$</td>
+      <td>最朴素定义</td>
+      <td>无偏</td>
+      <td>高（可正可负）</td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_2$</td>
-      <td style="text-align: left">$\frac{1}{2}(\log r)^2$</td>
-      <td style="text-align: left">f-散度，二阶行为与 KL 一致</td>
-      <td style="text-align: center">有偏（但极小）</td>
-      <td style="text-align: left">低（恒正）</td>
+      <td>$k_2$</td>
+      <td>$\frac{1}{2}(\log r)^2$</td>
+      <td>f-散度，二阶行为与 KL 一致</td>
+      <td>有偏（但极小）</td>
+      <td>低（恒正）</td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_3$</td>
-      <td style="text-align: left">$r - 1 - \log r$</td>
-      <td style="text-align: left">控制变量 + Bregman 散度</td>
-      <td style="text-align: center">无偏</td>
-      <td style="text-align: left">低（恒正）</td>
+      <td>$k_3$</td>
+      <td>$r - 1 - \log r$</td>
+      <td>控制变量 + Bregman 散度</td>
+      <td>无偏</td>
+      <td>低（恒正）</td>
     </tr>
   </tbody>
 </table>
@@ -353,29 +353,29 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>对它们在 $q_\theta$ 下取期望：</p>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: center">估计器</th>
-      <th style="text-align: left">$\mathbb{E}<em>{q}[\nabla</em>\theta k_i]$</th>
-      <th style="text-align: left">等价于</th>
+      <th>Estimator</th>
+      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th>Equals</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">$k_1$</td>
-      <td style="text-align: left">$\mathbb{E}<em>{q}[s</em>\theta] = 0$</td>
-      <td style="text-align: left"><strong>无意义（恒为零）</strong></td>
+      <td>$k_1$</td>
+      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td><strong>Zero (useless as loss)</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_2$</td>
-      <td style="text-align: left">$-\mathbb{E}<em>{q}[(\log r) \cdot s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
-      <td style="text-align: left"><strong>反向 KL 的真梯度</strong></td>
+      <td>$k_2$</td>
+      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
+      <td><strong>Gradient of reverse KL</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_3$</td>
-      <td style="text-align: left">$\mathbb{E}<em>{q}[(1-r) \cdot s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$</td>
-      <td style="text-align: left"><strong>正向 KL 的真梯度</strong></td>
+      <td>$k_3$</td>
+      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
+      <td><strong>Gradient of forward KL</strong></td>
     </tr>
   </tbody>
 </table>
@@ -442,27 +442,27 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h2 id="一份拿来就用的对照表">一份「拿来就用」的对照表</h2>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: left">目标</th>
-      <th style="text-align: center">采样来源</th>
-      <th style="text-align: left">用于<strong>数值</strong></th>
-      <th style="text-align: left">用于<strong>梯度</strong></th>
+      <th>目标</th>
+      <th>采样来源</th>
+      <th>用于<strong>数值</strong></th>
+      <th>用于<strong>梯度</strong></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: left">反向 KL $D_{\mathrm{KL}}(q|p)$</td>
-      <td style="text-align: center">$q$</td>
-      <td style="text-align: left">$k_1$ 或 $k_3$（无偏）</td>
-      <td style="text-align: left">$k_2$</td>
+      <td>反向 KL $D_{\mathrm{KL}}(q \mid p)$</td>
+      <td>$q$</td>
+      <td>$k_1$ 或 $k_3$（无偏）</td>
+      <td>$k_2$</td>
     </tr>
     <tr>
-      <td style="text-align: left">正向 KL $D_{\mathrm{KL}}(p|q)$</td>
-      <td style="text-align: center">$q$</td>
-      <td style="text-align: left">$\mathbb{E}_q[r\log r]$</td>
-      <td style="text-align: left">$k_3$</td>
+      <td>正向 KL $D_{\mathrm{KL}}(p \mid q)$</td>
+      <td>$q$</td>
+      <td>$\mathbb{E}_q[r\log r]$</td>
+      <td>$k_3$</td>
     </tr>
   </tbody>
 </table>
@@ -629,9 +629,9 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Why is the bias small?</strong> $k_2$ is essentially an <strong>f-divergence</strong> with $f(x) = \frac{1}{2}(\log x)^2$. f-divergences have a nice property: <strong>for any differentiable $f$-divergence, when $q \approx p$, the second-order expansion has the form</strong></p>
 
-\[D_f(p, q_\theta) = \frac{f''(1)}{2} \theta^T F \theta + O(\theta^3)\]
+\[D_f(p, q_\theta) = \frac{f^{\prime\prime}(1)}{2} \theta^T F \theta + O(\theta^3)\]
 
-<p>where $F$ is the Fisher information matrix. KL divergence corresponds to $f(x) = -\log x$, with $f’‘(1) = 1$; $k_2$ corresponds to $f(x) = \frac{1}{2}(\log x)^2$, which also satisfies $f’‘(1) = 1$. This means that <strong>when the policies are close, $k_2$ behaves almost identically to the true KL</strong>, and the bias only appears in higher-order terms.</p>
+<p>where $F$ is the Fisher information matrix. KL divergence corresponds to $f(x) = -\log x$, with $f^{\prime\prime}(1) = 1$; $k_2$ corresponds to $f(x) = \frac{1}{2}(\log x)^2$, which also satisfies $f^{\prime\prime}(1) = 1$. This means that <strong>when the policies are close, $k_2$ behaves almost identically to the true KL</strong>, and the bias only appears in higher-order terms.</p>
 
 <h3 id="k_3-a-best-of-both-worlds-estimator-via-control-variates">$k_3$: A “Best of Both Worlds” Estimator via Control Variates</h3>
 
@@ -664,37 +664,37 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h3 id="summary-comparing-the-three-estimators">Summary: Comparing the Three Estimators</h3>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: center">Estimator</th>
-      <th style="text-align: left">Definition</th>
-      <th style="text-align: left">Design principle</th>
-      <th style="text-align: center">Value bias</th>
-      <th style="text-align: left">Variance</th>
+      <th>Estimator</th>
+      <th>Definition</th>
+      <th>Design principle</th>
+      <th>Value bias</th>
+      <th>Variance</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">$k_1$</td>
-      <td style="text-align: left">$-\log r$</td>
-      <td style="text-align: left">Naive definition</td>
-      <td style="text-align: center">Unbiased</td>
-      <td style="text-align: left">High (can be neg.)</td>
+      <td>$k_1$</td>
+      <td>$-\log r$</td>
+      <td>Naive definition</td>
+      <td>Unbiased</td>
+      <td>High (can be neg.)</td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_2$</td>
-      <td style="text-align: left">$\frac{1}{2}(\log r)^2$</td>
-      <td style="text-align: left">f-divergence, 2nd-order matches KL</td>
-      <td style="text-align: center">Biased (small)</td>
-      <td style="text-align: left">Low (always pos.)</td>
+      <td>$k_2$</td>
+      <td>$\frac{1}{2}(\log r)^2$</td>
+      <td>f-divergence, 2nd-order matches KL</td>
+      <td>Biased (small)</td>
+      <td>Low (always pos.)</td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_3$</td>
-      <td style="text-align: left">$r - 1 - \log r$</td>
-      <td style="text-align: left">Control variate + Bregman divergence</td>
-      <td style="text-align: center">Unbiased</td>
-      <td style="text-align: left">Low (always pos.)</td>
+      <td>$k_3$</td>
+      <td>$r - 1 - \log r$</td>
+      <td>Control variate + Bregman divergence</td>
+      <td>Unbiased</td>
+      <td>Low (always pos.)</td>
     </tr>
   </tbody>
 </table>
@@ -889,29 +889,29 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>Taking expectations under $q_\theta$:</p>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: center">Estimator</th>
-      <th style="text-align: left">$\mathbb{E}<em>q[\nabla</em>\theta k_i]$</th>
-      <th style="text-align: left">Equals</th>
+      <th>Estimator</th>
+      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th>Equals</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">$k_1$</td>
-      <td style="text-align: left">$\mathbb{E}<em>q[s</em>\theta] = 0$</td>
-      <td style="text-align: left"><strong>Zero (useless as loss)</strong></td>
+      <td>$k_1$</td>
+      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td><strong>Zero (useless as loss)</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_2$</td>
-      <td style="text-align: left">$-\mathbb{E}<em>q[(\log r) s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
-      <td style="text-align: left"><strong>Gradient of reverse KL</strong></td>
+      <td>$k_2$</td>
+      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
+      <td><strong>Gradient of reverse KL</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_3$</td>
-      <td style="text-align: left">$\mathbb{E}<em>q[(1 - r) s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$</td>
-      <td style="text-align: left"><strong>Gradient of forward KL</strong></td>
+      <td>$k_3$</td>
+      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
+      <td><strong>Gradient of forward KL</strong></td>
     </tr>
   </tbody>
 </table>
@@ -980,27 +980,27 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h2 id="a-ready-to-use-cheat-sheet">A Ready-to-Use Cheat Sheet</h2>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: left">Objective</th>
-      <th style="text-align: center">Sampling dist.</th>
-      <th style="text-align: left">For <strong>value estimate</strong></th>
-      <th style="text-align: left">For <strong>gradient (loss)</strong></th>
+      <th>Objective</th>
+      <th>Sampling dist.</th>
+      <th>For <strong>value estimate</strong></th>
+      <th>For <strong>gradient (loss)</strong></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: left">Reverse KL $D_{\mathrm{KL}}(q|p)$</td>
-      <td style="text-align: center">$q$</td>
-      <td style="text-align: left">$k_1$ or $k_3$ (unbiased)</td>
-      <td style="text-align: left">$k_2$</td>
+      <td>Reverse KL $D_{\mathrm{KL}}(q \mid p)$</td>
+      <td>$q$</td>
+      <td>$k_1$ or $k_3$ (unbiased)</td>
+      <td>$k_2$</td>
     </tr>
     <tr>
-      <td style="text-align: left">Forward KL $D_{\mathrm{KL}}(p|q)$</td>
-      <td style="text-align: center">$q$</td>
-      <td style="text-align: left">$\mathbb{E}_q[r\log r]$</td>
-      <td style="text-align: left">$k_3$</td>
+      <td>Forward KL $D_{\mathrm{KL}}(p \mid q)$</td>
+      <td>$q$</td>
+      <td>$\mathbb{E}_q[r\log r]$</td>
+      <td>$k_3$</td>
     </tr>
   </tbody>
 </table>

@@ -226,9 +226,9 @@
 
 <p><strong>Why is the bias small?</strong> $k_2$ is essentially an <strong>f-divergence</strong> with $f(x) = \frac{1}{2}(\log x)^2$. f-divergences have a nice property: <strong>for any differentiable $f$-divergence, when $q \approx p$, the second-order expansion has the form</strong></p>
 
-\[D_f(p, q_\theta) = \frac{f''(1)}{2} \theta^T F \theta + O(\theta^3)\]
+\[D_f(p, q_\theta) = \frac{f^{\prime\prime}(1)}{2} \theta^T F \theta + O(\theta^3)\]
 
-<p>where $F$ is the Fisher information matrix. KL divergence corresponds to $f(x) = -\log x$, with $f’‘(1) = 1$; $k_2$ corresponds to $f(x) = \frac{1}{2}(\log x)^2$, which also satisfies $f’‘(1) = 1$. This means that <strong>when the policies are close, $k_2$ behaves almost identically to the true KL</strong>, and the bias only appears in higher-order terms.</p>
+<p>where $F$ is the Fisher information matrix. KL divergence corresponds to $f(x) = -\log x$, with $f^{\prime\prime}(1) = 1$; $k_2$ corresponds to $f(x) = \frac{1}{2}(\log x)^2$, which also satisfies $f^{\prime\prime}(1) = 1$. This means that <strong>when the policies are close, $k_2$ behaves almost identically to the true KL</strong>, and the bias only appears in higher-order terms.</p>
 
 <h3 id="k_3-a-best-of-both-worlds-estimator-via-control-variates">$k_3$: A “Best of Both Worlds” Estimator via Control Variates</h3>
 
@@ -261,37 +261,37 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h3 id="summary-comparing-the-three-estimators">Summary: Comparing the Three Estimators</h3>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: center">Estimator</th>
-      <th style="text-align: left">Definition</th>
-      <th style="text-align: left">Design principle</th>
-      <th style="text-align: center">Value bias</th>
-      <th style="text-align: left">Variance</th>
+      <th>Estimator</th>
+      <th>Definition</th>
+      <th>Design principle</th>
+      <th>Value bias</th>
+      <th>Variance</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">$k_1$</td>
-      <td style="text-align: left">$-\log r$</td>
-      <td style="text-align: left">Naive definition</td>
-      <td style="text-align: center">Unbiased</td>
-      <td style="text-align: left">High (can be neg.)</td>
+      <td>$k_1$</td>
+      <td>$-\log r$</td>
+      <td>Naive definition</td>
+      <td>Unbiased</td>
+      <td>High (can be neg.)</td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_2$</td>
-      <td style="text-align: left">$\frac{1}{2}(\log r)^2$</td>
-      <td style="text-align: left">f-divergence, 2nd-order matches KL</td>
-      <td style="text-align: center">Biased (small)</td>
-      <td style="text-align: left">Low (always pos.)</td>
+      <td>$k_2$</td>
+      <td>$\frac{1}{2}(\log r)^2$</td>
+      <td>f-divergence, 2nd-order matches KL</td>
+      <td>Biased (small)</td>
+      <td>Low (always pos.)</td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_3$</td>
-      <td style="text-align: left">$r - 1 - \log r$</td>
-      <td style="text-align: left">Control variate + Bregman divergence</td>
-      <td style="text-align: center">Unbiased</td>
-      <td style="text-align: left">Low (always pos.)</td>
+      <td>$k_3$</td>
+      <td>$r - 1 - \log r$</td>
+      <td>Control variate + Bregman divergence</td>
+      <td>Unbiased</td>
+      <td>Low (always pos.)</td>
     </tr>
   </tbody>
 </table>
@@ -486,29 +486,29 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>Taking expectations under $q_\theta$:</p>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: center">Estimator</th>
-      <th style="text-align: left">$\mathbb{E}<em>q[\nabla</em>\theta k_i]$</th>
-      <th style="text-align: left">Equals</th>
+      <th>Estimator</th>
+      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th>Equals</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">$k_1$</td>
-      <td style="text-align: left">$\mathbb{E}<em>q[s</em>\theta] = 0$</td>
-      <td style="text-align: left"><strong>Zero (useless as loss)</strong></td>
+      <td>$k_1$</td>
+      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td><strong>Zero (useless as loss)</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_2$</td>
-      <td style="text-align: left">$-\mathbb{E}<em>q[(\log r) s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
-      <td style="text-align: left"><strong>Gradient of reverse KL</strong></td>
+      <td>$k_2$</td>
+      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
+      <td><strong>Gradient of reverse KL</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center">$k_3$</td>
-      <td style="text-align: left">$\mathbb{E}<em>q[(1 - r) s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$</td>
-      <td style="text-align: left"><strong>Gradient of forward KL</strong></td>
+      <td>$k_3$</td>
+      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
+      <td><strong>Gradient of forward KL</strong></td>
     </tr>
   </tbody>
 </table>
@@ -577,27 +577,27 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h2 id="a-ready-to-use-cheat-sheet">A Ready-to-Use Cheat Sheet</h2>
 
-<table>
+<table style="width:100%; text-align:center;">
   <thead>
     <tr>
-      <th style="text-align: left">Objective</th>
-      <th style="text-align: center">Sampling dist.</th>
-      <th style="text-align: left">For <strong>value estimate</strong></th>
-      <th style="text-align: left">For <strong>gradient (loss)</strong></th>
+      <th>Objective</th>
+      <th>Sampling dist.</th>
+      <th>For <strong>value estimate</strong></th>
+      <th>For <strong>gradient (loss)</strong></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: left">Reverse KL $D_{\mathrm{KL}}(q|p)$</td>
-      <td style="text-align: center">$q$</td>
-      <td style="text-align: left">$k_1$ or $k_3$ (unbiased)</td>
-      <td style="text-align: left">$k_2$</td>
+      <td>Reverse KL $D_{\mathrm{KL}}(q \mid p)$</td>
+      <td>$q$</td>
+      <td>$k_1$ or $k_3$ (unbiased)</td>
+      <td>$k_2$</td>
     </tr>
     <tr>
-      <td style="text-align: left">Forward KL $D_{\mathrm{KL}}(p|q)$</td>
-      <td style="text-align: center">$q$</td>
-      <td style="text-align: left">$\mathbb{E}_q[r\log r]$</td>
-      <td style="text-align: left">$k_3$</td>
+      <td>Forward KL $D_{\mathrm{KL}}(p \mid q)$</td>
+      <td>$q$</td>
+      <td>$\mathbb{E}_q[r\log r]$</td>
+      <td>$k_3$</td>
     </tr>
   </tbody>
 </table>
