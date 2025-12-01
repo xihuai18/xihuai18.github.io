@@ -137,15 +137,13 @@ Assume we sample from $q_\theta$ to estimate the reverse KL $D_{\mathrm{KL}}(q_\
 **Unbiasedness**:
 
 $$
-\mathbb{E}_q[k_1] = \mathbb{E}_q\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}
-$$
-
-$$
-\mathbb{E}_q[k_3] = \mathbb{E}_q[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}
-$$
-
-$$
-\mathbb{E}_q[k_2] = \frac{1}{2}\mathbb{E}_q[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(biased)}
+\begin{aligned}
+\mathbb{E}_{q}[k_1] &= \mathbb{E}_{q}\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(Unbiased)}\\
+\mathbb{E}_{q}[k_3] &= \mathbb{E}_{q}[r - 1 - \log r] \\
+&= 1 - 1 + D_{\mathrm{KL}}(q \| p) \\
+&= D_{\mathrm{KL}}(q \| p) \quad \textbf{(Unbiased)}\\
+\mathbb{E}_{q}[k_2] &= \frac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(Biased)}
+\end{aligned}
 $$
 
 **Conclusion**: For estimating the **value** of the reverse KL, $k_1$ and $k_3$ are unbiased, whereas $k_2$ is biased.

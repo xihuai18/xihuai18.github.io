@@ -139,15 +139,13 @@ $$
 **无偏性分析**：
 
 $$
-\mathbb{E}_{q}[k_1] = \mathbb{E}_{q}\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}
-$$
-
-$$
-\mathbb{E}_{q}[k_3] = \mathbb{E}_{q}[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}
-$$
-
-$$
-\mathbb{E}_{q}[k_2] = \frac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{（有偏）}
+\begin{aligned}
+\mathbb{E}_{q}[k_1] &= \mathbb{E}_{q}\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\\
+\mathbb{E}_{q}[k_3] &= \mathbb{E}_{q}[r - 1 - \log r] \\
+&= 1 - 1 + D_{\mathrm{KL}}(q \| p) \\
+&= D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\\
+\mathbb{E}_{q}[k_2] &= \frac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{（有偏）}
+\end{aligned}
 $$
 
 **结论**：对于估计反向 KL 的**数值**，$k_1$ 和 $k_3$ 是无偏估计，而 $k_2$ 是有偏的。
