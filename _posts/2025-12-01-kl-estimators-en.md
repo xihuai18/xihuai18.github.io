@@ -14,7 +14,7 @@ lang: en
 
 > In reinforcement learning, how we approximate KL divergence directly affects training stability. This post systematically analyzes the differences between three classic estimators $k_1, k_2, k_3$ and provides practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.
 
-[中文版](https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
+[中文版](/reinforcement-learning/2025/12/01/kl-estimators-cn.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
 ## Introduction: The Role of KL Divergence in Reinforcement Learning
 
@@ -119,40 +119,11 @@ Since a convex function always lies above its tangents, this difference is **nat
 
 ### Summary: Comparing the Three Estimators
 
-<table style="width:100%; text-align:center;">
-  <thead>
-    <tr>
-      <th>Estimator</th>
-      <th>Definition</th>
-      <th>Design principle</th>
-      <th>Value bias</th>
-      <th>Variance</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>$k_1$</td>
-      <td>$-\log r$</td>
-      <td>Naive definition</td>
-      <td>Unbiased</td>
-      <td>High (can be neg.)</td>
-    </tr>
-    <tr>
-      <td>$k_2$</td>
-      <td>$\frac{1}{2}(\log r)^2$</td>
-      <td>f-divergence, 2nd-order matches KL</td>
-      <td>Biased (small)</td>
-      <td>Low (always pos.)</td>
-    </tr>
-    <tr>
-      <td>$k_3$</td>
-      <td>$r - 1 - \log r$</td>
-      <td>Control variate + Bregman divergence</td>
-      <td>Unbiased</td>
-      <td>Low (always pos.)</td>
-    </tr>
-  </tbody>
-</table>
+| Estimator |       Definition        |           Design principle           |   Value bias   |      Variance      |
+| :-------: | :---------------------: | :----------------------------------: | :------------: | :----------------: |
+|   $k_1$   |        $-\log r$        |           Naive definition           |    Unbiased    | High (can be neg.) |
+|   $k_2$   | $\frac{1}{2}(\log r)^2$ |  f-divergence, 2nd-order matches KL  | Biased (small) | Low (always pos.)  |
+|   $k_3$   |    $r - 1 - \log r$     | Control variate + Bregman divergence |    Unbiased    | Low (always pos.)  |
 
 From a pure **value estimation** perspective, $k_3$ looks like the “best of both worlds”: **unbiased + low variance**. However, as we will see, the **story is completely different at the gradient level**.
 
@@ -211,7 +182,7 @@ When KL is larger ($p = \mathcal{N}(1,1)$, true KL = 0.5):
 
 Before analyzing the estimators, let us derive the **true gradients** of forward and reverse KL with respect to $\theta$.
 
-Denote the score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$. A key property is $\mathbb{E}_{q_\theta}[s_\theta] = 0$ (since $\int \nabla_\theta q_\theta dx = \nabla_\theta 1 = 0$).
+Denote the score function $s\_\theta(x) = \nabla\_\theta \log q\_\theta(x)$. A key property is $\mathbb{E}\_{q\_\theta}[s\_\theta] = 0$ (since $\int \nabla\_\theta q\_\theta dx = \nabla\_\theta 1 = 0$).
 
 **Gradient of reverse KL**:
 
@@ -255,7 +226,7 @@ $$
 -\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} s_\theta\right] = -\mathbb{E}_q[r s_\theta].
 $$
 
-Using $\mathbb{E}_q[s_\theta] = 0$, we can rewrite this as
+Using $\mathbb{E}\_q[s\_\theta] = 0$, we can rewrite this as
 
 $$
 \boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q[(1 - r) s_\theta]}
@@ -332,32 +303,11 @@ $$
 
 Taking expectations under $q_\theta$:
 
-<table style="width:100%; text-align:center;">
-  <thead>
-    <tr>
-      <th>Estimator</th>
-      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-      <th>Equals</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>$k_1$</td>
-      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
-      <td><strong>Zero (useless as loss)</strong></td>
-    </tr>
-    <tr>
-      <td>$k_2$</td>
-      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
-      <td><strong>Gradient of reverse KL</strong></td>
-    </tr>
-    <tr>
-      <td>$k_3$</td>
-      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
-      <td><strong>Gradient of forward KL</strong></td>
-    </tr>
-  </tbody>
-</table>
+| Estimator |                         $\mathbb{E}\_{q}[\nabla\_\theta k\_i]$                          |           Equals           |
+| :-------: | :----------------------------------------------------------------------------------: | :------------------------: |
+|   $k_1$   |                            $\mathbb{E}\_{q}[s\_\theta] = 0$                            | **Zero (useless as loss)** |
+|   $k_2$   | $-\mathbb{E}\_{q}[(\log r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(q \mid p)$ | **Gradient of reverse KL** |
+|   $k_3$   |   $\mathbb{E}\_{q}[(1-r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(p \mid q)$   | **Gradient of forward KL** |
 
 **Key takeaways**:
 - The **gradient of $k_2$** matches the true gradient of **reverse KL** – this is the correct choice if your goal is to constrain the policy not to drift from the reference.
@@ -378,7 +328,7 @@ $$
 \nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p).
 $$
 
-Both give the gradient of reverse KL. But when you implement $k_3$ as a **sample-wise loss in code** and call `backward` on the batch mean, autodiff is effectively computing $\mathbb{E}_q[\nabla_\theta k_3]$, which, as shown above, is actually the gradient of **forward KL**.
+Both give the gradient of reverse KL. But when you implement $k_3$ as a **sample-wise loss in code** and call `backward` on the batch mean, autodiff is effectively computing $\mathbb{E}\_q[\nabla\_\theta k\_3]$, which, as shown above, is actually the gradient of **forward KL**.
 
 This subtle difference is crucial: **for the same estimator, changing the order of expectation and gradient can lead to completely different optimization objectives**.
 
@@ -410,7 +360,7 @@ $$
 \mathcal{L}_{k_2} = \frac{1}{2}(\log r)^2.
 $$
 
-Its gradient expectation $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ is exactly the true gradient of reverse KL.
+Its gradient expectation $\mathbb{E}\_q[\nabla k\_2] = \nabla\_\theta D\_{\mathrm{KL}}(q \| p)$ is exactly the true gradient of reverse KL.
 
 #### Optimizing Forward KL (Coverage-Oriented Settings)
 
@@ -422,42 +372,22 @@ $$
 \mathbb{E}_q[\nabla k_3] = \mathbb{E}_q[(1 - r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q).
 $$
 
-If you backpropagate through the batch mean of $k_3$, autodiff computes exactly this forward-KL gradient – no extra tricks needed.
+If you backpropagate through the batch mean of $k_3$, autodiff computes exactly this forward-KL gradient \– no extra tricks needed.
 
 
 ## A Ready-to-Use Cheat Sheet
 
-<table style="width:100%; text-align:center;">
-  <thead>
-    <tr>
-      <th>Objective</th>
-      <th>Sampling dist.</th>
-      <th>For <strong>value estimate</strong></th>
-      <th>For <strong>gradient (loss)</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Reverse KL $D_{\mathrm{KL}}(q \mid p)$</td>
-      <td>$q$</td>
-      <td>$k_1$ or $k_3$ (unbiased)</td>
-      <td>$k_2$</td>
-    </tr>
-    <tr>
-      <td>Forward KL $D_{\mathrm{KL}}(p \mid q)$</td>
-      <td>$q$</td>
-      <td>$\mathbb{E}_q[r\log r]$</td>
-      <td>$k_3$</td>
-    </tr>
-  </tbody>
-</table>
+|               Objective                | Sampling dist. |  For **value estimate**   | For **gradient (loss)** |
+| :------------------------------------: | :------------: | :-----------------------: | :---------------------: |
+| Reverse KL $D_{\mathrm{KL}}(q \mid p)$ |      $q$       | $k_1$ or $k_3$ (unbiased) |          $k_2$          |
+| Forward KL $D_{\mathrm{KL}}(p \mid q)$ |      $q$       |  $\mathbb{E}_q[r\log r]$  |          $k_3$          |
 
 
 ## Common Implementation Pitfalls
 
 **Pitfall 1: Using $k_1$ Directly as a Loss**
 
-The expected gradient of $k_1$ is zero ($\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$), so as a loss it is ineffective.
+The expected gradient of $k_1$ is zero ($\mathbb{E}\_q[\nabla k\_1] = \mathbb{E}\_q[s\_\theta] = 0$), so as a loss it is ineffective.
 
 > **Fix**: Use $k_1$ or $k_3$ only when you need a scalar KL penalty in rewards (no gradient), and use $k_2$ or $k_3$ when you actually want a loss with a meaningful gradient.
 

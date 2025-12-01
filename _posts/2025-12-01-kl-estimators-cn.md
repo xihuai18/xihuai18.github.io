@@ -14,7 +14,7 @@ lang: zh
 
 > 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。
 
-[English Version](https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
+[English Version](/reinforcement-learning/2025/12/01/kl-estimators-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
 
 
@@ -89,7 +89,7 @@ $$
 
 **设计动机**：我们想要一个**既无偏又低方差**的估计器。标准做法是给 $k_1$ 加一个**控制变量**（control variate）——一个期望为零但与 $k_1$ 负相关的量。
 
-注意到 $\mathbb{E}_q[r - 1] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$，所以对于任意 $\lambda$，
+注意到 $\mathbb{E}\_q[r - 1] = \mathbb{E}\_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$，所以对于任意 $\lambda$，
 
 $$
 k_1 + \lambda(r - 1) = -\log r + \lambda(r - 1)
@@ -121,40 +121,11 @@ $$
 
 ### 三者对比总结
 
-<table style="width:100%; text-align:center;">
-  <thead>
-    <tr>
-      <th>估计器</th>
-      <th>定义</th>
-      <th>设计原理</th>
-      <th>对数值的偏差</th>
-      <th>方差特性</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>$k_1$</td>
-      <td>$-\log r$</td>
-      <td>最朴素定义</td>
-      <td>无偏</td>
-      <td>高（可正可负）</td>
-    </tr>
-    <tr>
-      <td>$k_2$</td>
-      <td>$\frac{1}{2}(\log r)^2$</td>
-      <td>f-散度，二阶行为与 KL 一致</td>
-      <td>有偏（但极小）</td>
-      <td>低（恒正）</td>
-    </tr>
-    <tr>
-      <td>$k_3$</td>
-      <td>$r - 1 - \log r$</td>
-      <td>控制变量 + Bregman 散度</td>
-      <td>无偏</td>
-      <td>低（恒正）</td>
-    </tr>
-  </tbody>
-</table>
+| 估计器 |          定义           |          设计原理          |  对数值的偏差  |    方差特性    |
+| :----: | :---------------------: | :------------------------: | :------------: | :------------: |
+| $k_1$  |        $\log r$        |         最朴素定义         |      无偏      | 高（可正可负） |
+| $k_2$  | $\frac{1}{2}(\log r)^2$ | f-散度，二阶行为与 KL 一致 | 有偏（但极小） |   低（恒正）   |
+| $k_3$  |    $r - 1 - \log r$     |  控制变量 + Bregman 散度   |      无偏      |   低（恒正）   |
 
 从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，**梯度层面的故事完全不同**。
 
@@ -213,7 +184,7 @@ John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，�
 
 在分析估计器之前，我们先推导正向和反向 KL 散度对 $\theta$ 的**真梯度**作为参照。
 
-记 score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$，它有一个重要性质：$\mathbb{E}_{q_\theta}[s_\theta] = 0$（因为 $\int \nabla_\theta q_\theta dx = \nabla_\theta \int q_\theta dx = \nabla_\theta 1 = 0$）。
+记 score function $s\_\theta(x) = \nabla\_\theta \log q\_\theta(x)$，它有一个重要性质：$\mathbb{E}\_{q\_\theta}[s\_\theta] = 0$（因为 $\int \nabla\_\theta q\_\theta dx = \nabla\_\theta \int q\_\theta dx = \nabla\_\theta 1 = 0$）。
 
 **反向 KL 的梯度**：
 
@@ -257,7 +228,7 @@ $$
 -\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} \cdot s_\theta\right] = -\mathbb{E}_q[r \cdot s_\theta]
 $$
 
-利用 $\mathbb{E}_q[s_\theta] = 0$，可改写为：
+利用 $\mathbb{E}\_q[s\_\theta] = 0$，可改写为：
 
 $$
 \boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q[(1-r) \cdot s_\theta]}
@@ -333,32 +304,11 @@ $$
 
 对它们在 $q_\theta$ 下取期望：
 
-<table style="width:100%; text-align:center;">
-  <thead>
-    <tr>
-      <th>Estimator</th>
-      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-      <th>Equals</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>$k_1$</td>
-      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
-      <td><strong>Zero (useless as loss)</strong></td>
-    </tr>
-    <tr>
-      <td>$k_2$</td>
-      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
-      <td><strong>Gradient of reverse KL</strong></td>
-    </tr>
-    <tr>
-      <td>$k_3$</td>
-      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
-      <td><strong>Gradient of forward KL</strong></td>
-    </tr>
-  </tbody>
-</table>
+| Estimator |                         $\mathbb{E}\_{q}[\nabla\_\theta k\_i]$                          |           Equals           |
+| :-------: | :----------------------------------------------------------------------------------: | :------------------------: |
+|   $k_1$   |                            $\mathbb{E}\_{q}[s\_\theta] = 0$                            | **Zero (useless as loss)** |
+|   $k_2$   | $-\mathbb{E}\_{q}[(\log r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(q \mid p)$ | **Gradient of reverse KL** |
+|   $k_3$   |   $\mathbb{E}\_{q}[(1-r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(p \mid q)$   | **Gradient of forward KL** |
 
 **关键洞察**：
 - **$k_2$ 的梯度**等价于反向 KL 的真梯度——这是优化「约束策略不偏离 ref」的正确选择
@@ -377,7 +327,7 @@ $$
 \nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
 $$
 
-两者都给出反向 KL 的梯度。但在代码中直接对 $k_3$ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 $\mathbb{E}_q[\nabla_\theta k_3]$，即**正向 KL 的梯度**。
+两者都给出反向 KL 的梯度。但在代码中直接对 $k_3$ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 $\mathbb{E}\_q[\nabla\_\theta k\_3]$，即**正向 KL 的梯度**。
 
 这个区分非常重要：**同一个估计器，两种求导顺序可能给出完全不同的结果**。
 
@@ -409,7 +359,7 @@ $$
 \mathcal{L}_{k_2} = \frac{1}{2}(\log r)^2
 $$
 
-其梯度期望 $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ 正是反向 KL 的真梯度。
+其梯度期望 $\mathbb{E}\_q[\nabla k\_2] = \nabla\_\theta D\_{\mathrm{KL}}(q \| p)$ 正是反向 KL 的真梯度。
 
 #### 优化正向 KL（覆盖型场景）
 
@@ -421,42 +371,22 @@ $$
 \mathbb{E}_q[\nabla k_3] = \mathbb{E}_q[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)
 $$
 
-直接对 $k_3$ 的样本均值调用反传，自动微分计算的就是 $\mathbb{E}_q[\nabla_\theta k_3]$，即正向 KL 的梯度，无需额外处理。
+直接对 $k_3$ 的样本均值调用反传，自动微分计算的就是 $\mathbb{E}\_q[\nabla\_\theta k\_3]$，即正向 KL 的梯度，无需额外处理。
 
 
 ## 一份「拿来就用」的对照表
 
-<table style="width:100%; text-align:center;">
-  <thead>
-    <tr>
-      <th>目标</th>
-      <th>采样来源</th>
-      <th>用于<strong>数值</strong></th>
-      <th>用于<strong>梯度</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>反向 KL $D_{\mathrm{KL}}(q \mid p)$</td>
-      <td>$q$</td>
-      <td>$k_1$ 或 $k_3$（无偏）</td>
-      <td>$k_2$</td>
-    </tr>
-    <tr>
-      <td>正向 KL $D_{\mathrm{KL}}(p \mid q)$</td>
-      <td>$q$</td>
-      <td>$\mathbb{E}_q[r\log r]$</td>
-      <td>$k_3$</td>
-    </tr>
-  </tbody>
-</table>
+|                目标                 | 采样来源 |      用于**数值**       | 用于**梯度** |
+| :---------------------------------: | :------: | :---------------------: | :----------: |
+| 反向 KL $D_{\mathrm{KL}}(q \mid p)$ |   $q$    | $k_1$ 或 $k_3$（无偏）  |    $k_2$     |
+| 正向 KL $D_{\mathrm{KL}}(p \mid q)$ |   $q$    | $\mathbb{E}_q[r\log r]$ |    $k_3$     |
 
 
 ## 常见实现陷阱
 
 **陷阱 1：把 $k_1$ 直接当 loss 反传**
 
-$k_1$ 的梯度期望恒为零（$\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$），作为 loss 完全无效。
+$k_1$ 的梯度期望恒为零（$\mathbb{E}\_q[\nabla k\_1] = \mathbb{E}\_q[s\_\theta] = 0$），作为 loss 完全无效。
 
 > **解决**：reward shaping 用 $k_1$ 或 $k_3$（不需要梯度），loss 用 $k_2$ 或 $k_3$。
 
