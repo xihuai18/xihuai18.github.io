@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation | Xihuai Wang's Page</title>
+    <meta name="author" content="Xihuai Leo Wang" />
+    <meta name="description" content="In reinforcement learning, how we approximate KL divergence directly affects training stability. This post systematically dissects three classic estimators k1, k2, and k3, and gives practical guidelines for choosing them for reward penalties vs. gradient-based losses." />
+    <meta name="keywords" content="Reinforcement Learning, Multi-agent System" />
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous" />
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" />
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/monokai.css" media="none" id="highlight_theme_dark" />
+
+    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/dark_mode.js"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header --><header>
+
+  <!-- Nav Bar -->
+  <nav id="navbar"
+    class="navbar navbar-light navbar-expand-sm fixed-top">
+    <div class="container">
+      <a class="navbar-brand title font-weight-lighter" href="/">Xihuai Wang's Page</a>
+      <!-- Navbar Toggle -->
+      <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar top-bar"></span>
+        <span class="icon-bar middle-bar"></span>
+        <span class="icon-bar bottom-bar"></span>
+      </button>
+
+      <div class="collapse navbar-collapse text-right" id="navbarNav">
+        <ul class="navbar-nav ml-auto flex-nowrap">
+
+          <!-- About -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/">about</a>
+          </li>
+          
+
+          <!-- CV -->
+          <!-- 
+          <li class="nav-item ">
+            <a class="nav-link" href="/assets/pdf/" target="_blank"
+              rel="noopener noreferrer">cv</a>
+          </li> -->
+          <!-- Other pages -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/blog/">Xihuai's Blog</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/publications/">publications</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/cv/">cv</a>
+          </li>
+
+          <!-- Toogle theme mode -->
+          <li class="toggle-container">
+            <button id="light-toggle" title="Change theme">
+              <i class="fas fa-moon"></i>
+              <i class="fas fa-sun"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Scrolling Progress Bar -->
+  <progress id="progress" value="0">
+    <div class="progress-container">
+      <span class="progress-bar"></span>
+    </div>
+  </progress>
+</header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      <!-- _layouts/post.html -->
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</h1>
+    <p class="post-meta">December 1, 2025</p>
+    <p class="post-tags">
+  <a href="/blog/2025"> 📅 2025 </a>
+      &nbsp; &middot; &nbsp;
+        <a href="/blog/category/reinforcement-learning">
+          🏷️ reinforcement-learning</a> &nbsp;
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    <ul id="markdown-toc">
+  <li><a href="#introduction-the-role-of-kl-divergence-in-reinforcement-learning" id="markdown-toc-introduction-the-role-of-kl-divergence-in-reinforcement-learning">Introduction: The Role of KL Divergence in Reinforcement Learning</a>    <ul>
+      <li><a href="#forward-vs-reverse-kl" id="markdown-toc-forward-vs-reverse-kl">Forward vs. Reverse KL</a></li>
+    </ul>
+  </li>
+  <li><a href="#three-estimators-definitions-and-design-principles" id="markdown-toc-three-estimators-definitions-and-design-principles">Three Estimators: Definitions and Design Principles</a>    <ul>
+      <li><a href="#k_1-the-most-naive-estimator" id="markdown-toc-k_1-the-most-naive-estimator">$k_1$: The Most Naive Estimator</a></li>
+      <li><a href="#k_2-a-low-variance-estimator-from-f-divergences" id="markdown-toc-k_2-a-low-variance-estimator-from-f-divergences">$k_2$: A Low-Variance Estimator from f-Divergences</a></li>
+      <li><a href="#k_3-a-best-of-both-worlds-estimator-via-control-variates" id="markdown-toc-k_3-a-best-of-both-worlds-estimator-via-control-variates">$k_3$: A “Best of Both Worlds” Estimator via Control Variates</a></li>
+      <li><a href="#summary-comparing-the-three-estimators" id="markdown-toc-summary-comparing-the-three-estimators">Summary: Comparing the Three Estimators</a></li>
+    </ul>
+  </li>
+  <li><a href="#core-analysis" id="markdown-toc-core-analysis">Core Analysis</a>    <ul>
+      <li><a href="#bias-and-variance-for-estimating-the-kl-value" id="markdown-toc-bias-and-variance-for-estimating-the-kl-value">Bias and Variance for Estimating the KL Value</a></li>
+      <li><a href="#the-crucial-distinction-when-estimating-kl-gradients" id="markdown-toc-the-crucial-distinction-when-estimating-kl-gradients">The Crucial Distinction When Estimating KL Gradients</a>        <ul>
+          <li><a href="#true-gradients-of-forward-and-reverse-kl" id="markdown-toc-true-gradients-of-forward-and-reverse-kl">True Gradients of Forward and Reverse KL</a></li>
+          <li><a href="#two-orders-of-operations-for-gradients" id="markdown-toc-two-orders-of-operations-for-gradients">Two Orders of Operations for Gradients</a></li>
+          <li><a href="#gradients-of-the-three-estimators" id="markdown-toc-gradients-of-the-three-estimators">Gradients of the Three Estimators</a></li>
+          <li><a href="#expectation-then-gradient-vs-gradient-then-expectation" id="markdown-toc-expectation-then-gradient-vs-gradient-then-expectation">“Expectation-then-gradient” vs. “Gradient-then-expectation”</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#practical-guidelines-for-rl" id="markdown-toc-practical-guidelines-for-rl">Practical Guidelines for RL</a>    <ul>
+      <li><a href="#kl-as-a-reward-penalty-no-gradient-needed" id="markdown-toc-kl-as-a-reward-penalty-no-gradient-needed">KL as a Reward Penalty (No Gradient Needed)</a></li>
+      <li><a href="#kl-as-a-loss-gradient-required" id="markdown-toc-kl-as-a-loss-gradient-required">KL as a Loss (Gradient Required)</a>        <ul>
+          <li><a href="#optimizing-reverse-kl-most-common-case" id="markdown-toc-optimizing-reverse-kl-most-common-case">Optimizing Reverse KL (Most Common Case)</a></li>
+          <li><a href="#optimizing-forward-kl-coverage-oriented-settings" id="markdown-toc-optimizing-forward-kl-coverage-oriented-settings">Optimizing Forward KL (Coverage-Oriented Settings)</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#a-ready-to-use-cheat-sheet" id="markdown-toc-a-ready-to-use-cheat-sheet">A Ready-to-Use Cheat Sheet</a></li>
+  <li><a href="#common-implementation-pitfalls" id="markdown-toc-common-implementation-pitfalls">Common Implementation Pitfalls</a></li>
+  <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
+  <li><a href="#references" id="markdown-toc-references">References</a></li>
+</ul>
+
+<blockquote>
+  <p>In reinforcement learning, how we approximate KL divergence directly affects training stability. This post systematically analyzes the differences between three classic estimators $k_1, k_2, k_3$ and provides practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
+</blockquote>
+
+<p><a href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html">中文版</a></p>
+
+<h2 id="introduction-the-role-of-kl-divergence-in-reinforcement-learning">Introduction: The Role of KL Divergence in Reinforcement Learning</h2>
+
+<p>In policy optimization (PPO, GRPO, etc.) or alignment training (RLHF/RLAIF), <strong>KL regularization</strong> is the core mechanism that constrains the new policy from drifting too far away from a reference policy, in order to prevent unstable training or policy collapse.</p>
+
+<h3 id="forward-vs-reverse-kl">Forward vs. Reverse KL</h3>
+
+<p>Let $q_\theta$ be the current actor policy and $p$ be the reference policy. The two directions of KL divergence are</p>
+
+<p><strong>Reverse KL</strong>:
+\(D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_\theta(x)}{p(x)}\right]\)</p>
+
+<figure style="text-align:center;">
+	<img src="/assets/img/kl-estimator-reverse.png" style="width:95%;max-width:100%;" />
+	<figcaption style="font-size:0.9em;color:gray;">Image credit: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+</figure>
+
+<p><strong>Forward KL</strong>:
+\(D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\theta(x)}\right]\)</p>
+
+<figure style="text-align:center;">
+	<img src="/assets/img/kl-estimator-forward.png" style="width:95%;max-width:100%;" />
+	<figcaption style="font-size:0.9em;color:gray;">Image credit: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+</figure>
+
+<p><strong>Intuition</strong>:</p>
+<ul>
+  <li><strong>Reverse KL</strong> is typically <strong>mode-seeking</strong> – the policy concentrates on high-density regions of the reference distribution and may sacrifice diversity.</li>
+  <li><strong>Forward KL</strong> is typically <strong>mass-covering</strong> – the policy tries to cover the full support of the reference distribution.</li>
+</ul>
+
+<p>In mainstream RLHF implementations, <strong>reverse KL</strong> is more common, because we want the actor not to drift too far away from the reference policy, rather than forcing it to cover all modes.</p>
+
+<h2 id="three-estimators-definitions-and-design-principles">Three Estimators: Definitions and Design Principles</h2>
+
+<p>Let the ratio be $r(x) = \frac{p(x)}{q_\theta(x)}$. John Schulman introduced the following three single-sample estimators:</p>
+
+<h3 id="k_1-the-most-naive-estimator">$k_1$: The Most Naive Estimator</h3>
+
+\[k_1(x) = -\log r = \log q_\theta(x) - \log p(x)\]
+
+<p>This is the most direct definition – simply taking the negative log-ratio. It is an <strong>unbiased</strong> estimator of reverse KL, but it has a fatal issue: it <strong>can be negative</strong>, whereas KL divergence is always non-negative. This leads to extremely high variance because positive and negative samples can cancel each other out.</p>
+
+<h3 id="k_2-a-low-variance-estimator-from-f-divergences">$k_2$: A Low-Variance Estimator from f-Divergences</h3>
+
+\[k_2(x) = \frac{1}{2}(\log r)^2\]
+
+<p><strong>Design motivation</strong>: The problem with $k_1$ is that it can be both positive and negative. $k_2$ squares the log-ratio, ensuring that <strong>every sample is positive</strong>. Intuitively, each sample tells you “how far apart” $p$ and $q$ are.</p>
+
+<p><strong>Why is the bias small?</strong> $k_2$ is essentially an <strong>f-divergence</strong> with $f(x) = \frac{1}{2}(\log x)^2$. f-divergences have a nice property: <strong>for any differentiable $f$-divergence, when $q \approx p$, the second-order expansion has the form</strong></p>
+
+\[D_f(p, q_\theta) = \frac{f''(1)}{2} \theta^T F \theta + O(\theta^3)\]
+
+<p>where $F$ is the Fisher information matrix. KL divergence corresponds to $f(x) = -\log x$, with $f’‘(1) = 1$; $k_2$ corresponds to $f(x) = \frac{1}{2}(\log x)^2$, which also satisfies $f’‘(1) = 1$. This means that <strong>when the policies are close, $k_2$ behaves almost identically to the true KL</strong>, and the bias only appears in higher-order terms.</p>
+
+<h3 id="k_3-a-best-of-both-worlds-estimator-via-control-variates">$k_3$: A “Best of Both Worlds” Estimator via Control Variates</h3>
+
+\[k_3(x) = r - 1 - \log r\]
+
+<p><strong>Design motivation</strong>: We would like an estimator that is <strong>both unbiased and low variance</strong>. A standard trick is to add a <strong>control variate</strong> – a zero-mean term that is negatively correlated with the original estimator.</p>
+
+<p>Note that $\mathbb{E}_q[r - 1] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$. Therefore, for any $\lambda$,</p>
+
+\[k_1 + \lambda(r - 1) = -\log r + \lambda(r - 1)\]
+
+<p>remains an unbiased estimator.</p>
+
+<p><strong>Why choose $\lambda = 1$?</strong> Since $\log$ is concave, we have $\log x \leq x - 1$, so</p>
+
+\[k_3 = (r - 1) - \log r \geq 0\]
+
+<p>which is <strong>always non-negative</strong>. This guarantees that each sample contributes information in the “same direction” and eliminates the cancellation problem of $k_1$.</p>
+
+<p><strong>Geometric intuition</strong>: $k_3$ is in fact a <strong>Bregman divergence</strong>. Consider the convex function $\phi(x) = -\log x$. The tangent at $x = 1$ is $y = 1 - x$. The Bregman divergence between $r$ and 1 is</p>
+
+\[D_\phi(r, 1) = \phi(r) - \phi(1) - \phi'(1)(r - 1) = -\log r - 0 - (-1)(r - 1) = r - 1 - \log r = k_3.\]
+
+<p>Since a convex function always lies above its tangents, this difference is <strong>naturally non-negative</strong>. More importantly, as $r \to 1$, the function and its tangent “stick together” more tightly, and the gap shrinks at the rate of $(r-1)^2$. This is exactly why $k_3$ has small variance when the policies are close.</p>
+
+<h3 id="summary-comparing-the-three-estimators">Summary: Comparing the Three Estimators</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: left">Definition</th>
+      <th style="text-align: left">Design principle</th>
+      <th style="text-align: center">Value bias</th>
+      <th style="text-align: left">Variance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: left">$-\log r$</td>
+      <td style="text-align: left">Naive definition</td>
+      <td style="text-align: center">Unbiased</td>
+      <td style="text-align: left">High (can be neg.)</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: left">$\frac{1}{2}(\log r)^2$</td>
+      <td style="text-align: left">f-divergence, 2nd-order matches KL</td>
+      <td style="text-align: center">Biased (small)</td>
+      <td style="text-align: left">Low (always pos.)</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: left">$r - 1 - \log r$</td>
+      <td style="text-align: left">Control variate + Bregman divergence</td>
+      <td style="text-align: center">Unbiased</td>
+      <td style="text-align: left">Low (always pos.)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>From a pure <strong>value estimation</strong> perspective, $k_3$ looks like the “best of both worlds”: <strong>unbiased + low variance</strong>. However, as we will see, the <strong>story is completely different at the gradient level</strong>.</p>
+
+<h2 id="core-analysis">Core Analysis</h2>
+
+<h3 id="bias-and-variance-for-estimating-the-kl-value">Bias and Variance for Estimating the KL Value</h3>
+
+<p>Assume we sample from $q_\theta$ to estimate the reverse KL $D_{\mathrm{KL}}(q_\theta | p)$.</p>
+
+<p><strong>Unbiasedness</strong>:</p>
+
+\[\mathbb{E}_q[k_1] = \mathbb{E}_q\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\]
+
+\[\mathbb{E}_q[k_3] = \mathbb{E}_q[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\]
+
+\[\mathbb{E}_q[k_2] = \frac{1}{2}\mathbb{E}_q[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(biased)}\]
+
+<p><strong>Conclusion</strong>: For estimating the <strong>value</strong> of the reverse KL, $k_1$ and $k_3$ are unbiased, whereas $k_2$ is biased.</p>
+
+<p><strong>Bias–variance trade-off</strong>:</p>
+
+<p>In John Schulman’s experiment with $q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$ and true KL = 0.005, the statistics are</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">bias/true</th>
+      <th style="text-align: center">stdev/true</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">20</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">0.002</td>
+      <td style="text-align: center">1.42</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">1.42</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>When KL is larger ($p = \mathcal{N}(1,1)$, true KL = 0.5):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">bias/true</th>
+      <th style="text-align: center">stdev/true</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">2</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">0.25</td>
+      <td style="text-align: center">1.73</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">1.7</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Intuition</strong>:</p>
+<ul>
+  <li>$k_1 = -\log r$ starts with a first-order term. When $r$ is close to 1, its fluctuations are large and it can be negative.</li>
+  <li>$k_3 = r - 1 - \log r$ is second-order around $r = 1$ and always non-negative, so it has smaller variance when policies are close.</li>
+  <li>When coverage is very poor (i.e., $r$ can explode), the variance of $k_3$ can blow up due to the heavy tails of $r$; in that regime, $k_1$ can be more stable.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Note</strong>: To estimate the <strong>forward KL value</strong> $D_{\mathrm{KL}}(p | q) = \mathbb{E}_p[\log r]$ using samples from $q$, you can use importance sampling $\mathbb{E}_q[r \log r]$.</p>
+</blockquote>
+
+<h3 id="the-crucial-distinction-when-estimating-kl-gradients">The Crucial Distinction When Estimating KL Gradients</h3>
+
+<p><strong>This is the most confusing yet practically important part.</strong></p>
+
+<h4 id="true-gradients-of-forward-and-reverse-kl">True Gradients of Forward and Reverse KL</h4>
+
+<p>Before analyzing the estimators, let us derive the <strong>true gradients</strong> of forward and reverse KL with respect to $\theta$.</p>
+
+<p>Denote the score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$. A key property is $\mathbb{E}<em>{q</em>\theta}[s_\theta] = 0$ (since $\int \nabla_\theta q_\theta dx = \nabla_\theta 1 = 0$).</p>
+
+<p><strong>Gradient of reverse KL</strong>:</p>
+
+\[D_{\mathrm{KL}}(q_\theta \| p) = \int q_\theta(x) \log \frac{q_\theta(x)}{p(x)} dx.\]
+
+<p>Taking the gradient with respect to $\theta$ (using the product rule):</p>
+
+\[\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \int \nabla_\theta q_\theta \cdot \log \frac{q_\theta}{p} dx + \int q_\theta \cdot \nabla_\theta \log \frac{q_\theta}{p} dx.\]
+
+<p>Using $\nabla_\theta q_\theta = q_\theta s_\theta$, $\nabla_\theta \log q_\theta = s_\theta$, and $\nabla_\theta \log p = 0$ gives</p>
+
+\[= \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] + \mathbb{E}_q[s_\theta] = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right].\]
+
+<p>Thus</p>
+
+\[\boxed{\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] = -\mathbb{E}_q[s_\theta \cdot \log r]}\]
+
+<p><strong>Gradient of forward KL</strong>:</p>
+
+\[D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \log \frac{p(x)}{q_\theta(x)} dx.\]
+
+<p>Since $p(x)$ is independent of $\theta$,</p>
+
+\[\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \cdot \nabla_\theta(-\log q_\theta(x)) dx = -\mathbb{E}_p[s_\theta].\]
+
+<p>To estimate this using samples from $q$, we use importance sampling:</p>
+
+\[-\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} s_\theta\right] = -\mathbb{E}_q[r s_\theta].\]
+
+<p>Using $\mathbb{E}<em>q[s</em>\theta] = 0$, we can rewrite this as</p>
+
+\[\boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q[(1 - r) s_\theta]}\]
+
+<p>These two ground-truth gradients will be our reference when judging what each estimator’s gradient actually corresponds to.</p>
+
+<h4 id="two-orders-of-operations-for-gradients">Two Orders of Operations for Gradients</h4>
+
+<p>In implementation, there are two conceptual orders of operations:</p>
+
+<ol>
+  <li><strong>Gradient-then-expectation</strong>: compute $\nabla_\theta k_i(x)$ for each sample and then average (Monte Carlo estimator).</li>
+  <li><strong>Expectation-then-gradient</strong>: treat $\mathbb{E}_q[k_i]$ as a function of $\theta$ and differentiate analytically.</li>
+</ol>
+
+<p><strong>In typical deep learning code, we do (1)</strong>: autodiff computes the gradient per sample and then the batch average.</p>
+
+<h4 id="gradients-of-the-three-estimators">Gradients of the Three Estimators</h4>
+
+<p>Now we compute the gradients of the three estimators and see which KL gradient each one matches in expectation.</p>
+
+<p><strong>Gradient of $k_1$</strong>:</p>
+
+\[k_1 = -\log r = -\log \frac{p(x)}{q_\theta(x)} = \log q_\theta(x) - \log p(x),\]
+
+<p>so</p>
+
+\[\nabla_\theta k_1 = \nabla_\theta \log q_\theta(x) - \nabla_\theta \log p(x) = s_\theta - 0 = s_\theta.\]
+
+<p><strong>Gradient of $k_2$</strong>:</p>
+
+\[k_2 = \frac{1}{2}(\log r)^2.\]
+
+<p>By the chain rule</p>
+
+\[\nabla_\theta k_2 = (\log r) \cdot \nabla_\theta(\log r) = (\log r) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) = (\log r)(-s_\theta) = - (\log r) s_\theta.\]
+
+<p><strong>Gradient of $k_3$</strong>:</p>
+
+\[k_3 = r - 1 - \log r.\]
+
+<p>First compute $\nabla_\theta r$. Since $r = p(x) q_\theta(x)^{-1}$,</p>
+
+\[\nabla_\theta r = p(x)(-1) q_\theta(x)^{-2} \nabla_\theta q_\theta(x) = -\frac{p(x)}{q_\theta(x)} \cdot \frac{\nabla_\theta q_\theta(x)}{q_\theta(x)} = -r s_\theta.\]
+
+<p>Then</p>
+
+\[\nabla_\theta \log r = \frac{1}{r} \nabla_\theta r = \frac{1}{r}(-r s_\theta) = -s_\theta,\]
+
+<p>so</p>
+
+\[\nabla_\theta k_3 = \nabla_\theta r - 0 - \nabla_\theta \log r = -r s_\theta - (-s_\theta) = (1 - r) s_\theta.\]
+
+<p>Taking expectations under $q_\theta$:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: left">$\mathbb{E}<em>q[\nabla</em>\theta k_i]$</th>
+      <th style="text-align: left">Equals</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: left">$\mathbb{E}<em>q[s</em>\theta] = 0$</td>
+      <td style="text-align: left"><strong>Zero (useless as loss)</strong></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: left">$-\mathbb{E}<em>q[(\log r) s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: left"><strong>Gradient of reverse KL</strong></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: left">$\mathbb{E}<em>q[(1 - r) s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$</td>
+      <td style="text-align: left"><strong>Gradient of forward KL</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Key takeaways</strong>:</p>
+<ul>
+  <li>The <strong>gradient of $k_2$</strong> matches the true gradient of <strong>reverse KL</strong> – this is the correct choice if your goal is to constrain the policy not to drift from the reference.</li>
+  <li>The <strong>gradient of $k_3$</strong> matches the true gradient of <strong>forward KL</strong> – this corresponds to a coverage-style objective.</li>
+  <li>The <strong>expected gradient of $k_1$ is always zero</strong> – using $k_1$ directly as a loss is pointless.</li>
+</ul>
+
+<h4 id="expectation-then-gradient-vs-gradient-then-expectation">“Expectation-then-gradient” vs. “Gradient-then-expectation”</h4>
+
+<p>If, analytically, you first compute $\mathbb{E}_q[k_i]$ and then differentiate (i.e., <strong>expectation-then-gradient</strong>), you obtain</p>
+
+\[\nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p)\]
+
+<p>and</p>
+
+\[\nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p).\]
+
+<p>Both give the gradient of reverse KL. But when you implement $k_3$ as a <strong>sample-wise loss in code</strong> and call <code class="language-plaintext highlighter-rouge">backward</code> on the batch mean, autodiff is effectively computing $\mathbb{E}<em>q[\nabla</em>\theta k_3]$, which, as shown above, is actually the gradient of <strong>forward KL</strong>.</p>
+
+<p>This subtle difference is crucial: <strong>for the same estimator, changing the order of expectation and gradient can lead to completely different optimization objectives</strong>.</p>
+
+<h2 id="practical-guidelines-for-rl">Practical Guidelines for RL</h2>
+
+<h3 id="kl-as-a-reward-penalty-no-gradient-needed">KL as a Reward Penalty (No Gradient Needed)</h3>
+
+<p>When KL is only used as a scalar penalty in reward shaping, we only care about an accurate <strong>value estimate</strong>, and we do not backpropagate through it.</p>
+
+<p><strong>Recommendations</strong>:</p>
+<ul>
+  <li>Use <strong>$k_1$</strong> or <strong>$k_3$</strong> (both are unbiased for the reverse KL value).</li>
+  <li>When the policy is already close to the reference, $k_3$ often has lower variance.</li>
+  <li>When coverage is poor or there is severe tail mismatch, $k_1$ can be more robust.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Note</strong>: If you want a <strong>forward KL penalty</strong> (to encourage coverage of the behavior distribution), you can use $\mathbb{E}_q[r \log r]$ or, if you can sample from $p$, directly use $\mathbb{E}_p[\log r]$.</p>
+</blockquote>
+
+<h3 id="kl-as-a-loss-gradient-required">KL as a Loss (Gradient Required)</h3>
+
+<p>When KL is part of the loss that you differentiate, you must ensure that the gradient matches your intended objective.</p>
+
+<h4 id="optimizing-reverse-kl-most-common-case">Optimizing Reverse KL (Most Common Case)</h4>
+
+<p>Goal: constrain the actor not to drift far from the reference policy.</p>
+
+<p><strong>Correct choice</strong>: use <strong>$k_2$</strong> as the loss.</p>
+
+\[\mathcal{L}_{k_2} = \frac{1}{2}(\log r)^2.\]
+
+<p>Its gradient expectation $\mathbb{E}<em>q[\nabla k_2] = \nabla</em>\theta D_{\mathrm{KL}}(q | p)$ is exactly the true gradient of reverse KL.</p>
+
+<h4 id="optimizing-forward-kl-coverage-oriented-settings">Optimizing Forward KL (Coverage-Oriented Settings)</h4>
+
+<p>Goal: make the policy cover the support of the reference distribution (e.g., in offline RL or imitation learning).</p>
+
+<p><strong>Correct choice</strong>: use <strong>$k_3$</strong> as the loss.</p>
+
+\[\mathbb{E}_q[\nabla k_3] = \mathbb{E}_q[(1 - r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q).\]
+
+<p>If you backpropagate through the batch mean of $k_3$, autodiff computes exactly this forward-KL gradient – no extra tricks needed.</p>
+
+<h2 id="a-ready-to-use-cheat-sheet">A Ready-to-Use Cheat Sheet</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Objective</th>
+      <th style="text-align: center">Sampling dist.</th>
+      <th style="text-align: left">For <strong>value estimate</strong></th>
+      <th style="text-align: left">For <strong>gradient (loss)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Reverse KL $D_{\mathrm{KL}}(q|p)$</td>
+      <td style="text-align: center">$q$</td>
+      <td style="text-align: left">$k_1$ or $k_3$ (unbiased)</td>
+      <td style="text-align: left">$k_2$</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Forward KL $D_{\mathrm{KL}}(p|q)$</td>
+      <td style="text-align: center">$q$</td>
+      <td style="text-align: left">$\mathbb{E}_q[r\log r]$</td>
+      <td style="text-align: left">$k_3$</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="common-implementation-pitfalls">Common Implementation Pitfalls</h2>
+
+<p><strong>Pitfall 1: Using $k_1$ Directly as a Loss</strong></p>
+
+<p>The expected gradient of $k_1$ is zero ($\mathbb{E}<em>q[\nabla k_1] = \mathbb{E}_q[s</em>\theta] = 0$), so as a loss it is ineffective.</p>
+
+<blockquote>
+  <p><strong>Fix</strong>: Use $k_1$ or $k_3$ only when you need a scalar KL penalty in rewards (no gradient), and use $k_2$ or $k_3$ when you actually want a loss with a meaningful gradient.</p>
+</blockquote>
+
+<p><strong>Pitfall 2: Confusing $k_3$’s Unbiased Value with Its Gradient Objective</strong></p>
+
+<p>$k_3$ is an <strong>unbiased value estimator of the reverse KL</strong>, but its <strong>gradient</strong> corresponds to the <strong>forward KL</strong>. If your goal is to optimize reverse KL but you use $k_3$ as a loss, you are in fact optimizing forward KL.</p>
+
+<blockquote>
+  <p><strong>Fix</strong>: Be explicit about your objective. Use $k_2$ when optimizing reverse KL; use $k_3$ only when you intentionally optimize forward KL.</p>
+</blockquote>
+
+<p><strong>Pitfall 3: Heavy-Tailed $r$ Causing Variance Explosion</strong></p>
+
+<p>When the policy and reference distribution are very different, $r = p/q$ can have extreme values, causing the variance of $k_3$ (and importance-sampling-based estimators) to blow up.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p><strong>One-line summary</strong>:</p>
+
+<ul>
+  <li><strong>KL for value only (reward penalty)</strong>: use $k_1$ or $k_3$ (both are unbiased for reverse KL).</li>
+  <li><strong>KL as a differentiable loss (needs gradients)</strong>:
+    <ul>
+      <li>To optimize <strong>reverse KL</strong>, use $k_2$.</li>
+      <li>To optimize <strong>forward KL</strong>, use $k_3$.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Once you keep clear <strong>who you sample from</strong>, <strong>which KL you estimate</strong>, and <strong>with respect to which quantity you differentiate</strong>, the three estimators become much less confusing.</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+  <li>Dibya Ghosh. “KL Divergence for Machine Learning”. https://dibyaghosh.com/blog/probability/kldivergence</li>
+  <li>John Schulman. “Approximating KL Divergence”. https://joschu.net/blog/kl-approx.html</li>
+  <li>Verl Documentation. “Proximal Policy Optimization (PPO)”. https://verl.readthedocs.io/en/latest/algo/ppo.html</li>
+  <li>初七123334. “Approximate KL in RLHF/RLVR Training: A Brief Analysis of k1 / k2 / k3” (in Chinese). https://zhuanlan.zhihu.com/p/1966872846212010437</li>
+  <li>Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. “Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization”. https://arxiv.org/abs/2510.01555</li>
+</ol>
+
+<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
+	<span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
+	<span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding {KL} Divergence Estimators in {RL}: From Value Approximation to Gradient Estimation}</span><span class="p">,</span>
+	<span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+	<span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
+	<span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
+	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+
+  </article></div>
+
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        &copy; Copyright 2025 Xihuai Leo Wang. Last updated: December 01, 2025.
+      </div>
+    </footer>
+
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    <!-- Load Common JS -->
+  <script defer src="/assets/js/common.js"></script>
+  <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams',
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2923RQZBXG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-2923RQZBXG');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar,
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+  </body>
+</html>

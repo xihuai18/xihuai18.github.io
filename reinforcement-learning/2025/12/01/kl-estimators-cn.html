@@ -172,6 +172,8 @@
   <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
 </blockquote>
 
+<p><a href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html">English Version</a></p>
+
 <h2 id="引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</h2>
 
 <p>在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。</p>
@@ -638,6 +640,16 @@
     <p>Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. “Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization”. https://arxiv.org/abs/2510.01555</p>
   </li>
 </ol>
+
+<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
+  <span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
+  <span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding {KL} Divergence Estimators in {RL}: From Value Approximation to Gradient Estimation}</span><span class="p">,</span>
+  <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+  <span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
+  <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
+  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
   </article></div>
 
