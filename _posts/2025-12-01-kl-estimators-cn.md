@@ -76,10 +76,10 @@ $$
 **为什么偏差很小？** $k_2$ 本质上是一个 **f-散度**（f-divergence），其中 $f(x) = \frac{1}{2}(\log x)^2$。f-散度有一个优美的性质：**所有可微的 f-散度在 $q \approx p$ 时，二阶展开都形如**
 
 $$
-D_f(p, q_\theta) = \frac{f''(1)}{2} \theta^T F \theta + O(\theta^3)
+D_f(p, q_\theta) = \frac{f^{\prime\prime}(1)}{2} \theta^T F \theta + O(\theta^3)
 $$
 
-其中 $F$ 是 Fisher 信息矩阵。KL 散度对应 $f(x) = -\log x$，有 $f''(1) = 1$；而 $k_2$ 对应的 $f(x) = \frac{1}{2}(\log x)^2$，同样有 $f''(1) = 1$。这意味着**当策略接近时，$k_2$ 与真实 KL 的行为几乎一致**，偏差仅体现在高阶项。
+其中 $F$ 是 Fisher 信息矩阵。KL 散度对应 $f(x) = -\log x$，有 $f^{\prime\prime}(1) = 1$；而 $k_2$ 对应的 $f(x) = \frac{1}{2}(\log x)^2$，同样有 $f^{\prime\prime}(1) = 1$。这意味着**当策略接近时，$k_2$ 与真实 KL 的行为几乎一致**，偏差仅体现在高阶项。
 
 ### $k_3$：控制变量法构造的「最优」估计器
 
@@ -121,11 +121,40 @@ $$
 
 ### 三者对比总结
 
-| 估计器 | 定义                    | 设计原理                   |  对数值的偏差  | 方差特性       |
-| :----: | :---------------------- | :------------------------- | :------------: | :------------- |
-| $k_1$  | $-\log r$               | 最朴素定义                 |      无偏      | 高（可正可负） |
-| $k_2$  | $\frac{1}{2}(\log r)^2$ | f-散度，二阶行为与 KL 一致 | 有偏（但极小） | 低（恒正）     |
-| $k_3$  | $r - 1 - \log r$        | 控制变量 + Bregman 散度    |      无偏      | 低（恒正）     |
+<table style="width:100%; text-align:center;">
+  <thead>
+    <tr>
+      <th>估计器</th>
+      <th>定义</th>
+      <th>设计原理</th>
+      <th>对数值的偏差</th>
+      <th>方差特性</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$k_1$</td>
+      <td>$-\log r$</td>
+      <td>最朴素定义</td>
+      <td>无偏</td>
+      <td>高（可正可负）</td>
+    </tr>
+    <tr>
+      <td>$k_2$</td>
+      <td>$\frac{1}{2}(\log r)^2$</td>
+      <td>f-散度，二阶行为与 KL 一致</td>
+      <td>有偏（但极小）</td>
+      <td>低（恒正）</td>
+    </tr>
+    <tr>
+      <td>$k_3$</td>
+      <td>$r - 1 - \log r$</td>
+      <td>控制变量 + Bregman 散度</td>
+      <td>无偏</td>
+      <td>低（恒正）</td>
+    </tr>
+  </tbody>
+</table>
 
 从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，**梯度层面的故事完全不同**。
 
@@ -304,11 +333,32 @@ $$
 
 对它们在 $q_\theta$ 下取期望：
 
-| 估计器 | $\mathbb{E}_{q}[\nabla_\theta k_i]$                                                | 等价于               |
-| :----: | :--------------------------------------------------------------------------------- | :------------------- |
-| $k_1$  | $\mathbb{E}_{q}[s_\theta] = 0$                                                     | **无意义（恒为零）** |
-| $k_2$  | $-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ | **反向 KL 的真梯度** |
-| $k_3$  | $\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$     | **正向 KL 的真梯度** |
+<table style="width:100%; text-align:center;">
+  <thead>
+    <tr>
+      <th>Estimator</th>
+      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th>Equals</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$k_1$</td>
+      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td><strong>Zero (useless as loss)</strong></td>
+    </tr>
+    <tr>
+      <td>$k_2$</td>
+      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
+      <td><strong>Gradient of reverse KL</strong></td>
+    </tr>
+    <tr>
+      <td>$k_3$</td>
+      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
+      <td><strong>Gradient of forward KL</strong></td>
+    </tr>
+  </tbody>
+</table>
 
 **关键洞察**：
 - **$k_2$ 的梯度**等价于反向 KL 的真梯度——这是优化「约束策略不偏离 ref」的正确选择
@@ -376,10 +426,30 @@ $$
 
 ## 一份「拿来就用」的对照表
 
-| 目标                            | 采样来源 | 用于**数值**            | 用于**梯度** |
-| :------------------------------ | :------: | :---------------------- | :----------- |
-| 反向 KL $D_{\mathrm{KL}}(q\|p)$ |   $q$    | $k_1$ 或 $k_3$（无偏）  | $k_2$        |
-| 正向 KL $D_{\mathrm{KL}}(p\|q)$ |   $q$    | $\mathbb{E}_q[r\log r]$ | $k_3$        |
+<table style="width:100%; text-align:center;">
+  <thead>
+    <tr>
+      <th>目标</th>
+      <th>采样来源</th>
+      <th>用于<strong>数值</strong></th>
+      <th>用于<strong>梯度</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>反向 KL $D_{\mathrm{KL}}(q \mid p)$</td>
+      <td>$q$</td>
+      <td>$k_1$ 或 $k_3$（无偏）</td>
+      <td>$k_2$</td>
+    </tr>
+    <tr>
+      <td>正向 KL $D_{\mathrm{KL}}(p \mid q)$</td>
+      <td>$q$</td>
+      <td>$\mathbb{E}_q[r\log r]$</td>
+      <td>$k_3$</td>
+    </tr>
+  </tbody>
+</table>
 
 
 ## 常见实现陷阱

@@ -74,10 +74,10 @@ $$
 **Why is the bias small?** $k_2$ is essentially an **f-divergence** with $f(x) = \frac{1}{2}(\log x)^2$. f-divergences have a nice property: **for any differentiable $f$-divergence, when $q \approx p$, the second-order expansion has the form**
 
 $$
-D_f(p, q_\theta) = \frac{f''(1)}{2} \theta^T F \theta + O(\theta^3)
+D_f(p, q_\theta) = \frac{f^{\prime\prime}(1)}{2} \theta^T F \theta + O(\theta^3)
 $$
 
-where $F$ is the Fisher information matrix. KL divergence corresponds to $f(x) = -\log x$, with $f''(1) = 1$; $k_2$ corresponds to $f(x) = \frac{1}{2}(\log x)^2$, which also satisfies $f''(1) = 1$. This means that **when the policies are close, $k_2$ behaves almost identically to the true KL**, and the bias only appears in higher-order terms.
+where $F$ is the Fisher information matrix. KL divergence corresponds to $f(x) = -\log x$, with $f^{\prime\prime}(1) = 1$; $k_2$ corresponds to $f(x) = \frac{1}{2}(\log x)^2$, which also satisfies $f^{\prime\prime}(1) = 1$. This means that **when the policies are close, $k_2$ behaves almost identically to the true KL**, and the bias only appears in higher-order terms.
 
 ### $k_3$: A “Best of Both Worlds” Estimator via Control Variates
 
@@ -119,11 +119,40 @@ Since a convex function always lies above its tangents, this difference is **nat
 
 ### Summary: Comparing the Three Estimators
 
-| Estimator | Definition              | Design principle                     |   Value bias   | Variance           |
-| :-------: | :---------------------- | :----------------------------------- | :------------: | :----------------- |
-|   $k_1$   | $-\log r$               | Naive definition                     |    Unbiased    | High (can be neg.) |
-|   $k_2$   | $\frac{1}{2}(\log r)^2$ | f-divergence, 2nd-order matches KL   | Biased (small) | Low (always pos.)  |
-|   $k_3$   | $r - 1 - \log r$        | Control variate + Bregman divergence |    Unbiased    | Low (always pos.)  |
+<table style="width:100%; text-align:center;">
+  <thead>
+    <tr>
+      <th>Estimator</th>
+      <th>Definition</th>
+      <th>Design principle</th>
+      <th>Value bias</th>
+      <th>Variance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$k_1$</td>
+      <td>$-\log r$</td>
+      <td>Naive definition</td>
+      <td>Unbiased</td>
+      <td>High (can be neg.)</td>
+    </tr>
+    <tr>
+      <td>$k_2$</td>
+      <td>$\frac{1}{2}(\log r)^2$</td>
+      <td>f-divergence, 2nd-order matches KL</td>
+      <td>Biased (small)</td>
+      <td>Low (always pos.)</td>
+    </tr>
+    <tr>
+      <td>$k_3$</td>
+      <td>$r - 1 - \log r$</td>
+      <td>Control variate + Bregman divergence</td>
+      <td>Unbiased</td>
+      <td>Low (always pos.)</td>
+    </tr>
+  </tbody>
+</table>
 
 From a pure **value estimation** perspective, $k_3$ looks like the “best of both worlds”: **unbiased + low variance**. However, as we will see, the **story is completely different at the gradient level**.
 
@@ -303,11 +332,32 @@ $$
 
 Taking expectations under $q_\theta$:
 
-| Estimator | $\mathbb{E}_q[\nabla_\theta k_i]$                                          | Equals                     |
-| :-------: | :------------------------------------------------------------------------- | :------------------------- |
-|   $k_1$   | $\mathbb{E}_q[s_\theta] = 0$                                               | **Zero (useless as loss)** |
-|   $k_2$   | $-\mathbb{E}_q[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ | **Gradient of reverse KL** |
-|   $k_3$   | $\mathbb{E}_q[(1 - r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$   | **Gradient of forward KL** |
+<table style="width:100%; text-align:center;">
+  <thead>
+    <tr>
+      <th>Estimator</th>
+      <th>$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th>Equals</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$k_1$</td>
+      <td>$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td><strong>Zero (useless as loss)</strong></td>
+    </tr>
+    <tr>
+      <td>$k_2$</td>
+      <td>$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \mid p)$</td>
+      <td><strong>Gradient of reverse KL</strong></td>
+    </tr>
+    <tr>
+      <td>$k_3$</td>
+      <td>$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \mid q)$</td>
+      <td><strong>Gradient of forward KL</strong></td>
+    </tr>
+  </tbody>
+</table>
 
 **Key takeaways**:
 - The **gradient of $k_2$** matches the true gradient of **reverse KL** – this is the correct choice if your goal is to constrain the policy not to drift from the reference.
@@ -377,10 +427,30 @@ If you backpropagate through the batch mean of $k_3$, autodiff computes exactly 
 
 ## A Ready-to-Use Cheat Sheet
 
-| Objective                          | Sampling dist. | For **value estimate**    | For **gradient (loss)** |
-| :--------------------------------- | :------------: | :------------------------ | :---------------------- |
-| Reverse KL $D_{\mathrm{KL}}(q\|p)$ |      $q$       | $k_1$ or $k_3$ (unbiased) | $k_2$                   |
-| Forward KL $D_{\mathrm{KL}}(p\|q)$ |      $q$       | $\mathbb{E}_q[r\log r]$   | $k_3$                   |
+<table style="width:100%; text-align:center;">
+  <thead>
+    <tr>
+      <th>Objective</th>
+      <th>Sampling dist.</th>
+      <th>For <strong>value estimate</strong></th>
+      <th>For <strong>gradient (loss)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Reverse KL $D_{\mathrm{KL}}(q \mid p)$</td>
+      <td>$q$</td>
+      <td>$k_1$ or $k_3$ (unbiased)</td>
+      <td>$k_2$</td>
+    </tr>
+    <tr>
+      <td>Forward KL $D_{\mathrm{KL}}(p \mid q)$</td>
+      <td>$q$</td>
+      <td>$\mathbb{E}_q[r\log r]$</td>
+      <td>$k_3$</td>
+    </tr>
+  </tbody>
+</table>
 
 
 ## Common Implementation Pitfalls
