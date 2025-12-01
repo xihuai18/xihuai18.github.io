@@ -306,11 +306,13 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Unbiasedness</strong>:</p>
 
-\[\mathbb{E}_q[k_1] = \mathbb{E}_q\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\]
-
-\[\mathbb{E}_q[k_3] = \mathbb{E}_q[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\]
-
-\[\mathbb{E}_q[k_2] = \frac{1}{2}\mathbb{E}_q[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(biased)}\]
+\[\begin{aligned}
+\mathbb{E}_{q}[k_1] &amp;= \mathbb{E}_{q}\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(Unbiased)}\\
+\mathbb{E}_{q}[k_3] &amp;= \mathbb{E}_{q}[r - 1 - \log r] \\
+&amp;= 1 - 1 + D_{\mathrm{KL}}(q \| p) \\
+&amp;= D_{\mathrm{KL}}(q \| p) \quad \textbf{(Unbiased)}\\
+\mathbb{E}_{q}[k_2] &amp;= \frac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(Biased)}
+\end{aligned}\]
 
 <p><strong>Conclusion</strong>: For estimating the <strong>value</strong> of the reverse KL, $k_1$ and $k_3$ are unbiased, whereas $k_2$ is biased.</p>
 

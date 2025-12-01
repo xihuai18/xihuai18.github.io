@@ -306,11 +306,13 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>无偏性分析</strong>：</p>
 
-\[\mathbb{E}_{q}[k_1] = \mathbb{E}_{q}\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\]
-
-\[\mathbb{E}_{q}[k_3] = \mathbb{E}_{q}[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\]
-
-\[\mathbb{E}_{q}[k_2] = \frac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{（有偏）}\]
+\[\begin{aligned}
+\mathbb{E}_{q}[k_1] &amp;= \mathbb{E}_{q}\left[\log \frac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\\
+\mathbb{E}_{q}[k_3] &amp;= \mathbb{E}_{q}[r - 1 - \log r] \\
+&amp;= 1 - 1 + D_{\mathrm{KL}}(q \| p) \\
+&amp;= D_{\mathrm{KL}}(q \| p) \quad \textbf{（无偏）}\\
+\mathbb{E}_{q}[k_2] &amp;= \frac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{（有偏）}
+\end{aligned}\]
 
 <p><strong>结论</strong>：对于估计反向 KL 的<strong>数值</strong>，$k_1$ 和 $k_3$ 是无偏估计，而 $k_2$ 是有偏的。</p>
 
