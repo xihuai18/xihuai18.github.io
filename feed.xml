@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-02T13:04:21+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-02T13:09:51+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
       <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
@@ -1088,7 +1088,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
 </ul>
 
-<p><a href="/reinforcement-learning/2025/11/15/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="/reinforcement-learning/2025/11/20/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <p><img src="/assets/img/three-policy-mini-class-cn.jpg" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
@@ -1795,7 +1795,7 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
   <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
   <span class="na">month</span>        <span class="p">=</span> <span class="nv">nov</span><span class="p">,</span>
   <span class="na">day</span>          <span class="p">=</span> <span class="s">{15}</span><span class="p">,</span>
-  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html}</span><span class="p">,</span>
+  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/20/three-policy-en.html}</span><span class="p">,</span>
   <span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-11-23}</span>
 <span class="p">}</span>
 </code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。]]></summary></entry><entry xml:lang="en"><title type="html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" rel="alternate" type="text/html" title="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html"><![CDATA[<ul id="markdown-toc">
@@ -1825,7 +1825,7 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
   <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
 </ul>
 
-<p><a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="/reinforcement-learning/2025/11/20/three-policy-cn.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <p><img src="/assets/img/three-policy-mini-class-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
@@ -2576,7 +2576,7 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
   <span class="na">month</span>        <span class="p">=</span> <span class="nv">nov</span><span class="p">,</span>
   <span class="na">day</span>          <span class="p">=</span> <span class="s">{15}</span><span class="p">,</span>
-  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html}</span><span class="p">,</span>
+  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/20/three-policy-en.html}</span><span class="p">,</span>
   <span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-11-23}</span>
 <span class="p">}</span>
 </code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.]]></summary></entry></feed>
