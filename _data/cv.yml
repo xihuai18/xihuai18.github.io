@@ -6,7 +6,7 @@
     - name: email
       value: leoxhwang@sjtu.edu.cn
     - name: CV Updated Time
-      value: 2024-09-17
+      value: 2025-12-02
 
 - title: Education
   type: time_table
@@ -21,30 +21,28 @@
 - title: Experience
   type: time_table
   contents:
-    - title: Research Intern
-      institution: Tencent AI Platform
-      year: 2020-2021
+    - title: Beidou Intern
+      institution: Meituan LongCat Team
+      year: 2024-present
     - title: Research Intern
       institution: Shanghai Digital Brain Lab
       year: 2022-2023
+    - title: Research Intern
+      institution: Tencent AI Platform
+      year: 2020-2021
 
 - title: Honors and Awards
   type: time_table
   contents:
-    - year: 2017
+    - year: 2021-2025
       items:
-        - National Scholarships
+        - Wen-Tsun Wu AI Honorary Doctoral Scholarship
     - year: 2018
       items:
         - National Scholarships
-
-- title: Services
-  type: map
-  contents:
-    - name: Conference Reviewer / PC Member
-      value: NeurIPS 2024/2022/2021, ICML 2024/2023/2022, AAMAS 2024, ICLR 2025
-    - name: Journal Reviewer
-      value: TPAMI, Machine Learning, Frontiers of Computer Science
+    - year: 2017
+      items:
+        - National Scholarships
 
 - title: Other Interests
   type: list
