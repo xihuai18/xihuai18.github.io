@@ -87,7 +87,7 @@ $$
 
 **Design motivation**: We would like an estimator that is **both unbiased and low variance**. A standard trick is to add a **control variate** – a zero-mean term that is negatively correlated with the original estimator.
 
-Note that $\mathbb{E}_q[r - 1] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$. Therefore, for any $\lambda$,
+Note that $\mathbb{E}\_q[r - 1] = \mathbb{E}\_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$. Therefore, for any $\lambda$,
 
 $$
 k_1 + \lambda(r - 1) = -\log r + \lambda(r - 1)
@@ -456,8 +456,8 @@ When sampling from $x \sim \mu$, we use the batch mean of $w(x) k_i(x)$ as the l
 
 A key difference is:
 
-> **Previously**, the expectation was $\mathbb{E}_{q_{\theta}}[\cdot]$, where the distribution itself depended on $\theta$.
-> **Now**, the expectation is $\mathbb{E}_{\mu}[\cdot]$, and $\mu$ is independent of $\theta$.
+> **Previously**, the expectation was $\mathbb{E}\_{q\_{\theta}}[\cdot]$, where the distribution itself depended on $\theta$.
+> **Now**, the expectation is $\mathbb{E}\_{\mu}[\cdot]$, and $\mu$ is independent of $\theta$.
 
 This fundamentally changes the relationship between "expectation-then-gradient" and "gradient-then-expectation".
 
@@ -477,7 +477,7 @@ This is a fundamental difference from the on-policy case.
 
 #### Numerical Level: Unbiasedness Holds
 
-From the standard importance sampling relation $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$, we have
+From the standard importance sampling relation $\mathbb{E}\_\mu[w \cdot f] = \mathbb{E}\_{q\_\theta}[f]$, we have
 
 $$
 \mathbb{E}_\mu[w k_1] = D_{\mathrm{KL}}(q_\theta \| p), \quad
@@ -532,23 +532,23 @@ $$
 
 #### Which Ones Give the Unbiased Reverse KL Gradient?
 
-Using $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$ and $\mathbb{E}_{q_\theta}[s_\theta] = 0$:
+Using $\mathbb{E}\_\mu[w \cdot f] = \mathbb{E}\_{q\_\theta}[f]$ and $\mathbb{E}\_{q\_\theta}[s\_\theta] = 0$:
 
-**$\mathbb{E}_\mu[\nabla_\theta(w k_1)]$**:
+**$\mathbb{E}\_\mu[\nabla\_\theta(w k\_1)]$**:
 
 $$
 \mathbb{E}_\mu[w s_\theta (k_1 + 1)] = \mathbb{E}_{q}[s_\theta k_1] + \underbrace{\mathbb{E}_{q}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
 $$
 
-**$\mathbb{E}_\mu[\nabla_\theta(w k_2)]$**:
+**$\mathbb{E}\_\mu[\nabla\_\theta(w k\_2)]$**:
 
 $$
 \mathbb{E}_\mu[w s_\theta (k_2 - \log r)] = \mathbb{E}_{q}[s_\theta (k_2 - \log r)] = \nabla_\theta \mathbb{E}_{q}[k_2]
 $$
 
-This is the true gradient of the f-divergence $\mathbb{E}_q[k_2]$, **not** the gradient of reverse KL.
+This is the true gradient of the f-divergence $\mathbb{E}\_q[k\_2]$, **not** the gradient of reverse KL.
 
-**$\mathbb{E}_\mu[\nabla_\theta(\bar{w} k_2)]$** (where $\bar{w} = \text{sg}(w)$ denotes detached weights):
+**$\mathbb{E}\_\mu[\nabla\_\theta(\bar{w} k\_2)]$** (where $\bar{w} = \text{sg}(w)$ denotes detached weights):
 
 If we treat the importance weight as a constant (detach it in code), then:
 
@@ -564,7 +564,7 @@ $$
 
 This is exactly the true gradient of reverse KL!
 
-**$\mathbb{E}_\mu[\nabla_\theta(w k_3)]$**:
+**$\mathbb{E}\_\mu[\nabla\_\theta(w k\_3)]$**:
 
 $$
 \mathbb{E}_\mu[w s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
@@ -624,13 +624,13 @@ $$
 g_3(x) := \nabla_\theta(w k_3) = w(x) s_\theta(x) k_1(x)
 $$
 
-Both have the same expectation $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$, but there is a simple relationship:
+Both have the same expectation $\nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$, but there is a simple relationship:
 
 $$
 g_1(x) - g_3(x) = w(x) s_\theta(x)
 $$
 
-And since $\mathbb{E}_\mu[w s_\theta] = \mathbb{E}_{q_\theta}[s_\theta] = 0$, we know that $w s_\theta$ is a **zero-mean "pure noise term"**.
+And since $\mathbb{E}\_\mu[w s\_\theta] = \mathbb{E}\_{q\_\theta}[s\_\theta] = 0$, we know that $w s\_\theta$ is a **zero-mean "pure noise term"**.
 
 **First-Order Expansion Analysis**:
 
@@ -685,9 +685,9 @@ This is why the DeepSeek v3.2 technical report uses $\frac{q_\theta}{\mu} k_3$ a
 - When sampling from a behavior policy $\mu$, the natural off-policy KL estimator is $\frac{q_\theta}{\mu} k_i$.
 - **Numerically**, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ remain unbiased estimates of reverse KL.
 - **Gradient-wise**, since $\mu$ is independent of $\theta$, "expectation-then-gradient" and "gradient-then-expectation" are equivalent:
-  - $\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_1)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$
-  - $\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_3)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$
-  - $\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_2)] \neq \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$
+  - $\mathbb{E}\_\mu[\nabla\_\theta(\frac{q\_\theta}{\mu} k\_1)] = \nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$
+  - $\mathbb{E}\_\mu[\nabla\_\theta(\frac{q\_\theta}{\mu} k\_3)] = \nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$
+  - $\mathbb{E}\_\mu[\nabla\_\theta(\frac{q\_\theta}{\mu} k\_2)] \neq \nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$
 - **Variance-wise**, the gradient of $\frac{q_\theta}{\mu} k_3$ can be seen as the gradient of $\frac{q_\theta}{\mu} k_1$ minus a zero-mean noise term $w s_\theta$. When $q_\theta \approx p \approx \mu$ and importance weights are not too extreme, **the gradient of $\frac{q_\theta}{\mu} k_3$ is more stable and has lower variance**.
 
 ### Gradient Estimation Overview
@@ -877,7 +877,7 @@ This way, the gradient becomes $\bar{w} \cdot (-\log r) s_\theta$, whose expecta
 
 **Pitfall 1: Using $k_1$ Directly as a Loss (On-Policy)**
 
-The expected gradient of $k_1$ is zero ($\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$), so as a loss it is ineffective.
+The expected gradient of $k_1$ is zero ($\mathbb{E}\_q[\nabla k\_1] = \mathbb{E}\_q[s\_\theta] = 0$), so as a loss it is ineffective.
 
 > **Fix**: Use $k_1$ or $k_3$ only when you need a scalar KL penalty in rewards (no gradient), and use $k_2$ or $k_3$ when you actually want a loss with a meaningful gradient.
 
