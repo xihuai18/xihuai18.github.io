@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-04T05:09:24+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-04T06:14:46+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
       <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
@@ -514,6 +514,18 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>这是 $\mathbb{E}_q[k_2]$ 这个 f-散度的真梯度，<strong>不是</strong>反向 KL 的梯度。</p>
 
+<p><strong>$\mathbb{E}_\mu[\nabla_\theta(\bar{w} k_2)]$</strong>（$\bar{w} = \text{sg}(w)$ 表示 detach）：</p>
+
+<p>如果把重要性权重视为常数（在代码中 detach 掉），则：</p>
+
+\[\nabla_\theta(\bar{w} k_2) = \bar{w} \cdot \nabla_\theta k_2 = \bar{w} \cdot (-\log r) s_\theta\]
+
+<p>取期望：</p>
+
+\[\mathbb{E}_\mu[\bar{w} \cdot (-\log r) s_\theta] = \mathbb{E}_{q}[(-\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
+
+<p>这正是反向 KL 的真梯度！</p>
+
 <p><strong>$\mathbb{E}_\mu[\nabla_\theta(w k_3)]$</strong>：</p>
 
 \[\mathbb{E}_\mu[w s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
@@ -541,6 +553,11 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
       <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$，<strong>不是</strong>反向 KL ✗</td>
     </tr>
     <tr>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\mathbb{E}_q[k_2]$（f-散度）</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
+    </tr>
+    <tr>
       <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
       <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
@@ -553,7 +570,8 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <ul>
   <li>On-policy 时，用 $k_2$ 做 loss 的梯度是反向 KL，而 $k_1$ 的梯度期望恒为零</li>
-  <li>Off-policy + 重要性加权时，$\frac{q_\theta}{\mu} k_1$ 和 $\frac{q_\theta}{\mu} k_3$ 给出反向 KL 的真梯度，而 $\frac{q_\theta}{\mu} k_2$ <strong>不再适用</strong></li>
+  <li>Off-policy + 重要性加权时，$\frac{q_\theta}{\mu} k_1$ 和 $\frac{q_\theta}{\mu} k_3$ 给出反向 KL 的真梯度，而 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）<strong>不再适用</strong></li>
+  <li>但如果把重要性权重 <strong>detach</strong> 掉，$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ 的梯度也是反向 KL 的真梯度</li>
 </ul>
 
 <h4 id="fracq_thetamu-k_3-的梯度方差是否更低">$\frac{q_\theta}{\mu} k_3$ 的梯度方差是否更低？</h4>
@@ -684,6 +702,13 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>反向 KL</strong></td>
+      <td style="text-align: center;">✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mu$ (off)</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>反向 KL</strong></td>
@@ -697,8 +722,14 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <ol>
   <li><strong>On-policy 优化反向 KL</strong>：唯一正确选择是 $k_2$</li>
-  <li><strong>Off-policy 优化反向 KL</strong>：$\frac{q}{\mu} k_1$ 和 $\frac{q}{\mu} k_3$ 都正确，但 $\frac{q}{\mu} k_3$ 方差更低</li>
-  <li><strong>$k_2$ 在 off-policy 下失效</strong>：这是一个容易被忽视的陷阱</li>
+  <li><strong>Off-policy 优化反向 KL</strong>：有三个正确选项：
+    <ul>
+      <li>$\frac{q}{\mu} k_1$：无偏但方差较高</li>
+      <li>$\text{sg}\left(\frac{q}{\mu}\right) k_2$：无偏，类似于 on-policy $k_2$ 的表现</li>
+      <li>$\frac{q}{\mu} k_3$：无偏且方差更低（推荐）</li>
+    </ul>
+  </li>
+  <li><strong>$\frac{q}{\mu} k_2$（权重参与梯度）在 off-policy 下失效</strong>：这是一个容易被忽视的陷阱</li>
 </ol>
 
 <h2 id="rl-实践指南">RL 实践指南</h2>
@@ -747,7 +778,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>目标：数据来自行为策略 $\mu$，仍希望优化反向 KL。</p>
 
-<p><strong>正确做法</strong>：使用 <strong>$\frac{q_\theta}{\mu} k_3$</strong> 作为 loss。</p>
+<p><strong>推荐做法</strong>：使用 <strong>$\frac{q_\theta}{\mu} k_3$</strong> 作为 loss。</p>
 
 \[\mathcal{L} = \frac{q_\theta(x)}{\mu(x)} \cdot \left(\frac{p(x)}{q_\theta(x)} - 1 - \log \frac{p(x)}{q_\theta(x)}\right)\]
 
@@ -756,9 +787,15 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li>当 $q_\theta \approx p$ 时方差显著更低</li>
 </ul>
 
-<p><strong>备选方案</strong>：使用 $\frac{q_\theta}{\mu} k_1$（梯度同样无偏，但方差更高）</p>
+<p><strong>备选方案 1</strong>：使用 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将重要性权重 detach 掉）</p>
 
-<p><strong>避免</strong>：使用 $\frac{q_\theta}{\mu} k_2$（梯度有偏，不是反向 KL 的正确方向）</p>
+\[\mathcal{L} = \text{sg}\left(\frac{q_\theta(x)}{\mu(x)}\right) \cdot \frac{1}{2}\left(\log \frac{p(x)}{q_\theta(x)}\right)^2\]
+
+<p>这样梯度就变为 $\bar{w} \cdot (-\log r) s_\theta$，期望仍然是反向 KL 的真梯度。这个方法在形式上类似于 on-policy 的 $k_2$，只是多了一个不参与梯度的重要性权重。</p>
+
+<p><strong>备选方案 2</strong>：使用 $\frac{q_\theta}{\mu} k_1$（梯度同样无偏，但方差更高）</p>
+
+<p><strong>避免</strong>：使用 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）——梯度有偏，不是反向 KL 的正确方向</p>
 
 <h2 id="一份拿来就用的对照表">一份「拿来就用」的对照表</h2>
 
@@ -783,7 +820,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
       <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;">$\mu$（off-policy）</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏）</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_3$（推荐）或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
     </tr>
     <tr>
       <td style="text-align: center;">正向 KL $D_{\mathrm{KL}}(p \| q)$</td>
@@ -821,24 +858,29 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <p><strong>解决</strong>：控制 KL 约束，或对 $r$ 进行 clipping。</p>
 </blockquote>
 
-<p><strong>陷阱 4：离策略下仍用 $k_2$ 或 $\frac{q_\theta}{\mu} k_2$</strong></p>
+<p><strong>陷阱 4：离策略下仍用 $k_2$ 或 $\frac{q_\theta}{\mu} k_2$（权重参与梯度）</strong></p>
 
 <p>在 on-policy 下，$k_2$ 是优化反向 KL 的正确选择。但如果数据来自 $\mu \neq q_\theta$：</p>
 <ul>
   <li>直接用 $k_2$（不加权）：期望不是在 $q_\theta$ 下取的，估计器完全失效</li>
-  <li>用 $\frac{q_\theta}{\mu} k_2$：梯度有偏，不是反向 KL 的真梯度</li>
+  <li>用 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）：梯度有偏，不是反向 KL 的真梯度</li>
 </ul>
 
 <blockquote>
-  <p><strong>解决</strong>：离策略场景下，改用 $\frac{q_\theta}{\mu} k_3$（推荐）或 $\frac{q_\theta}{\mu} k_1$。</p>
+  <p><strong>解决</strong>：离策略场景下，改用 $\frac{q_\theta}{\mu} k_3$（推荐）、$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将权重 detach）或 $\frac{q_\theta}{\mu} k_1$。</p>
 </blockquote>
 
-<p><strong>陷阱 5：把重要性权重 detach 掉</strong></p>
+<p><strong>陷阱 5：对重要性权重的 detach 处理不当</strong></p>
 
-<p>代码实现中，$w = q_\theta / \mu$ 通常通过 <code class="language-plaintext highlighter-rouge">log_prob_q - log_prob_mu</code> 再取 <code class="language-plaintext highlighter-rouge">exp</code> 计算得到。如果把 $w$ 当作常数（detach），则丢失了 $\nabla_\theta w = w s_\theta$ 这一项，导致梯度错误。</p>
+<p>代码实现中，$w = q_\theta / \mu$ 通常通过 <code class="language-plaintext highlighter-rouge">log_prob_q - log_prob_mu</code> 再取 <code class="language-plaintext highlighter-rouge">exp</code> 计算得到。是否对 $w$ 进行 detach 会导致完全不同的结果：</p>
+
+<ul>
+  <li><strong>使用 $k_1$ 或 $k_3$ 时</strong>：$w$ <strong>应该参与梯度计算</strong>（不要 detach），否则会丢失 $\nabla_\theta w = w s_\theta$ 这一项，导致梯度错误</li>
+  <li><strong>使用 $k_2$ 时</strong>：$w$ <strong>应该被 detach</strong>，这样才能得到反向 KL 的真梯度。如果让 $w$ 参与梯度计算，得到的是 f-散度的梯度，不是反向 KL</li>
+</ul>
 
 <blockquote>
-  <p><strong>解决</strong>：确保 $w$ 参与计算图，让自动微分正确计算完整的 $\nabla_\theta(w k_i)$。</p>
+  <p><strong>总结</strong>：选择不同的估计器时，要注意匹配正确的 detach 策略。</p>
 </blockquote>
 
 <h2 id="总结">总结</h2>
@@ -850,12 +892,12 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li><strong>需要梯度（KL 作为 loss）</strong>：
     <ul>
       <li><strong>On-policy</strong>：优化反向 KL → 用 $k_2$；优化正向 KL → 用 $k_3$</li>
-      <li><strong>Off-policy</strong>：优化反向 KL → 用 $\frac{q_\theta}{\mu} k_3$（无偏 + 低方差）</li>
+      <li><strong>Off-policy</strong>：优化反向 KL → 用 $\frac{q_\theta}{\mu} k_3$（推荐，无偏 + 低方差）或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将权重 detach）</li>
     </ul>
   </li>
 </ul>
 
-<p>把「<strong>从谁采样</strong>」、「<strong>估计谁的值</strong>」、「<strong>对谁求梯度</strong>」这三个问题捋清楚，三种估计器就不再让人混淆了。特别注意：<strong>on-policy 和 off-policy 下，优化反向 KL 的正确选择是不同的</strong>——前者用 $k_2$，后者用 $\frac{q_\theta}{\mu} k_3$。</p>
+<p>把「<strong>从谁采样</strong>」、「<strong>估计谁的值</strong>」、「<strong>对谁求梯度</strong>」这三个问题捋清楚，三种估计器就不再让人混淆了。特别注意：<strong>on-policy 和 off-policy 下，优化反向 KL 的正确选择是不同的</strong>——前者用 $k_2$，后者用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$。</p>
 
 <h2 id="参考文献">参考文献</h2>
 
@@ -1407,6 +1449,18 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>This is the true gradient of the f-divergence $\mathbb{E}_q[k_2]$, <strong>not</strong> the gradient of reverse KL.</p>
 
+<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(\bar{w} k_2)]$</strong> (where $\bar{w} = \text{sg}(w)$ denotes detached weights):</p>
+
+<p>If we treat the importance weight as a constant (detach it in code), then:</p>
+
+\[\nabla_\theta(\bar{w} k_2) = \bar{w} \cdot \nabla_\theta k_2 = \bar{w} \cdot (-\log r) s_\theta\]
+
+<p>Taking expectation:</p>
+
+\[\mathbb{E}_\mu[\bar{w} \cdot (-\log r) s_\theta] = \mathbb{E}_{q}[(-\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
+
+<p>This is exactly the true gradient of reverse KL!</p>
+
 <p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(w k_3)]$</strong>:</p>
 
 \[\mathbb{E}_\mu[w s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
@@ -1434,6 +1488,11 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
       <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$, <strong>NOT</strong> Reverse KL ✗</td>
     </tr>
     <tr>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (Reverse KL) ✓</td>
+    </tr>
+    <tr>
       <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
       <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (Reverse KL) ✓</td>
@@ -1446,7 +1505,8 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <ul>
   <li>In on-policy, the gradient of $k_2$ as a loss is the reverse KL, while the expected gradient of $k_1$ is zero.</li>
-  <li>In off-policy + importance weighting, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ give the true gradient of reverse KL, while $\frac{q_\theta}{\mu} k_2$ <strong>is no longer applicable</strong>.</li>
+  <li>In off-policy + importance weighting, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ give the true gradient of reverse KL, while $\frac{q_\theta}{\mu} k_2$ (with weights in the gradient) <strong>is no longer applicable</strong>.</li>
+  <li>However, if we <strong>detach</strong> the importance weights, $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ also gives the true gradient of reverse KL.</li>
 </ul>
 
 <h4 id="does-fracq_thetamu-k_3-have-lower-gradient-variance">Does $\frac{q_\theta}{\mu} k_3$ Have Lower Gradient Variance?</h4>
@@ -1577,6 +1637,13 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>Reverse KL</strong></td>
+      <td style="text-align: center;">✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mu$ (off)</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>Reverse KL</strong></td>
@@ -1590,8 +1657,14 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <ol>
   <li><strong>On-policy optimizing Reverse KL</strong>: The only correct choice is $k_2$.</li>
-  <li><strong>Off-policy optimizing Reverse KL</strong>: Both $\frac{q}{\mu} k_1$ and $\frac{q}{\mu} k_3$ are correct, but $\frac{q}{\mu} k_3$ has lower variance.</li>
-  <li><strong>$k_2$ fails in off-policy</strong>: This is a trap that is easily overlooked.</li>
+  <li><strong>Off-policy optimizing Reverse KL</strong>: Three correct options:
+    <ul>
+      <li>$\frac{q}{\mu} k_1$: Unbiased but high variance</li>
+      <li>$\text{sg}\left(\frac{q}{\mu}\right) k_2$: Unbiased, similar behavior to on-policy $k_2$</li>
+      <li>$\frac{q}{\mu} k_3$: Unbiased and lower variance (recommended)</li>
+    </ul>
+  </li>
+  <li><strong>$\frac{q}{\mu} k_2$ (weights in gradient) fails in off-policy</strong>: This is a trap that is easily overlooked.</li>
 </ol>
 
 <h2 id="practical-guidelines-for-rl">Practical Guidelines for RL</h2>
@@ -1640,7 +1713,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>Goal: Data comes from behavior policy $\mu$, but we still want to optimize reverse KL.</p>
 
-<p><strong>Correct choice</strong>: use <strong>$\frac{q_\theta}{\mu} k_3$</strong> as the loss.</p>
+<p><strong>Recommended</strong>: use <strong>$\frac{q_\theta}{\mu} k_3$</strong> as the loss.</p>
 
 \[\mathcal{L} = \frac{q_\theta(x)}{\mu(x)} \cdot \left(\frac{p(x)}{q_\theta(x)} - 1 - \log \frac{p(x)}{q_\theta(x)}\right)\]
 
@@ -1649,9 +1722,15 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li>Significantly lower variance when $q_\theta \approx p$.</li>
 </ul>
 
-<p><strong>Alternative</strong>: Use $\frac{q_\theta}{\mu} k_1$ (gradient is also unbiased, but variance is higher).</p>
+<p><strong>Alternative 1</strong>: Use $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ (detach the importance weights).</p>
 
-<p><strong>Avoid</strong>: Using $\frac{q_\theta}{\mu} k_2$ (gradient is biased, not the correct direction for reverse KL).</p>
+\[\mathcal{L} = \text{sg}\left(\frac{q_\theta(x)}{\mu(x)}\right) \cdot \frac{1}{2}\left(\log \frac{p(x)}{q_\theta(x)}\right)^2\]
+
+<p>This way, the gradient becomes $\bar{w} \cdot (-\log r) s_\theta$, whose expectation is still the true gradient of reverse KL. This approach is similar in form to on-policy $k_2$, just with an additional importance weight that does not participate in the gradient.</p>
+
+<p><strong>Alternative 2</strong>: Use $\frac{q_\theta}{\mu} k_1$ (gradient is also unbiased, but variance is higher).</p>
+
+<p><strong>Avoid</strong>: Using $\frac{q_\theta}{\mu} k_2$ (with weights in gradient) — the gradient is biased, not the correct direction for reverse KL.</p>
 
 <h2 id="a-ready-to-use-cheat-sheet">A Ready-to-Use Cheat Sheet</h2>
 
@@ -1676,7 +1755,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
       <td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;">$\mu$ (off-policy)</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_1$ or $\frac{q}{\mu} k_3$ (unbiased)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_3$ (recommended) or $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
     </tr>
     <tr>
       <td style="text-align: center;">Forward KL $D_{\mathrm{KL}}(p \| q)$</td>
@@ -1714,24 +1793,29 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <p><strong>Fix</strong>: Control the KL constraint or clip $r$.</p>
 </blockquote>
 
-<p><strong>Pitfall 4: Using $k_2$ or $\frac{q_\theta}{\mu} k_2$ in Off-Policy Settings</strong></p>
+<p><strong>Pitfall 4: Using $k_2$ or $\frac{q_\theta}{\mu} k_2$ (with weights in gradient) in Off-Policy Settings</strong></p>
 
 <p>In on-policy settings, $k_2$ is the correct choice for optimizing reverse KL. However, if data comes from $\mu \neq q_\theta$:</p>
 <ul>
   <li>Using $k_2$ directly (unweighted): The expectation is not over $q_\theta$, so the estimator fails.</li>
-  <li>Using $\frac{q_\theta}{\mu} k_2$: The gradient is biased and does not point to the reverse KL direction.</li>
+  <li>Using $\frac{q_\theta}{\mu} k_2$ (with weights in gradient): The gradient is biased and does not point to the reverse KL direction.</li>
 </ul>
 
 <blockquote>
-  <p><strong>Fix</strong>: In off-policy scenarios, switch to $\frac{q_\theta}{\mu} k_3$ (recommended) or $\frac{q_\theta}{\mu} k_1$.</p>
+  <p><strong>Fix</strong>: In off-policy scenarios, switch to $\frac{q_\theta}{\mu} k_3$ (recommended), $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ (detach weights), or $\frac{q_\theta}{\mu} k_1$.</p>
 </blockquote>
 
-<p><strong>Pitfall 5: Detaching Importance Weights</strong></p>
+<p><strong>Pitfall 5: Improper Handling of Importance Weight Detachment</strong></p>
 
-<p>In implementation, $w = q_\theta / \mu$ is usually computed via <code class="language-plaintext highlighter-rouge">exp(log_prob_q - log_prob_mu)</code>. If you treat $w$ as a constant (detach it), you lose the $\nabla_\theta w = w s_\theta$ term, leading to incorrect gradients.</p>
+<p>In implementation, $w = q_\theta / \mu$ is usually computed via <code class="language-plaintext highlighter-rouge">exp(log_prob_q - log_prob_mu)</code>. Whether to detach $w$ leads to completely different results:</p>
+
+<ul>
+  <li><strong>When using $k_1$ or $k_3$</strong>: $w$ <strong>should participate in gradient computation</strong> (do not detach), otherwise you lose the $\nabla_\theta w = w s_\theta$ term, leading to incorrect gradients.</li>
+  <li><strong>When using $k_2$</strong>: $w$ <strong>should be detached</strong>, so that you get the true gradient of reverse KL. If $w$ participates in gradient computation, you get the gradient of an f-divergence, not reverse KL.</li>
+</ul>
 
 <blockquote>
-  <p><strong>Fix</strong>: Ensure $w$ is part of the computation graph so that autodiff correctly computes the full $\nabla_\theta(w k_i)$.</p>
+  <p><strong>Summary</strong>: When choosing different estimators, make sure to match the correct detach strategy.</p>
 </blockquote>
 
 <h2 id="conclusion">Conclusion</h2>
@@ -1743,12 +1827,12 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li><strong>KL as a differentiable loss (needs gradients)</strong>:
     <ul>
       <li><strong>On-policy</strong>: To optimize <strong>reverse KL</strong>, use $k_2$; to optimize <strong>forward KL</strong>, use $k_3$.</li>
-      <li><strong>Off-policy</strong>: To optimize <strong>reverse KL</strong>, use $\frac{q_\theta}{\mu} k_3$ (unbiased + low variance).</li>
+      <li><strong>Off-policy</strong>: To optimize <strong>reverse KL</strong>, use $\frac{q_\theta}{\mu} k_3$ (recommended, unbiased + low variance) or $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ (detach weights).</li>
     </ul>
   </li>
 </ul>
 
-<p>Once you keep clear <strong>who you sample from</strong>, <strong>which KL you estimate</strong>, and <strong>with respect to which quantity you differentiate</strong>, the three estimators become much less confusing. Especially note: <strong>the correct choice for optimizing reverse KL differs between on-policy ($k_2$) and off-policy ($\frac{q_\theta}{\mu} k_3$)</strong>.</p>
+<p>Once you keep clear <strong>who you sample from</strong>, <strong>which KL you estimate</strong>, and <strong>with respect to which quantity you differentiate</strong>, the three estimators become much less confusing. Especially note: <strong>the correct choice for optimizing reverse KL differs between on-policy ($k_2$) and off-policy ($\frac{q_\theta}{\mu} k_3$ or $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$)</strong>.</p>
 
 <h2 id="references">References</h2>
 
