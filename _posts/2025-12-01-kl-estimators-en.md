@@ -548,6 +548,22 @@ $$
 
 This is the true gradient of the f-divergence $\mathbb{E}_q[k_2]$, **not** the gradient of reverse KL.
 
+**$\mathbb{E}_\mu[\nabla_\theta(\bar{w} k_2)]$** (where $\bar{w} = \text{sg}(w)$ denotes detached weights):
+
+If we treat the importance weight as a constant (detach it in code), then:
+
+$$
+\nabla_\theta(\bar{w} k_2) = \bar{w} \cdot \nabla_\theta k_2 = \bar{w} \cdot (-\log r) s_\theta
+$$
+
+Taking expectation:
+
+$$
+\mathbb{E}_\mu[\bar{w} \cdot (-\log r) s_\theta] = \mathbb{E}_{q}[(-\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
+$$
+
+This is exactly the true gradient of reverse KL!
+
 **$\mathbb{E}_\mu[\nabla_\theta(w k_3)]$**:
 
 $$
@@ -577,6 +593,11 @@ $$
       <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$, <strong>NOT</strong> Reverse KL ✗</td>
     </tr>
     <tr>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (Reverse KL) ✓</td>
+    </tr>
+    <tr>
       <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
       <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (Reverse KL) ✓</td>
@@ -588,7 +609,8 @@ $$
 **Comparison with On-Policy Case — An Interesting Reversal**:
 
 - In on-policy, the gradient of $k_2$ as a loss is the reverse KL, while the expected gradient of $k_1$ is zero.
-- In off-policy + importance weighting, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ give the true gradient of reverse KL, while $\frac{q_\theta}{\mu} k_2$ **is no longer applicable**.
+- In off-policy + importance weighting, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ give the true gradient of reverse KL, while $\frac{q_\theta}{\mu} k_2$ (with weights in the gradient) **is no longer applicable**.
+- However, if we **detach** the importance weights, $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ also gives the true gradient of reverse KL.
 
 #### Does $\frac{q_\theta}{\mu} k_3$ Have Lower Gradient Variance?
 
@@ -721,6 +743,13 @@ The following table summarizes the expected gradients and corresponding optimiza
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>Reverse KL</strong></td>
+      <td style="text-align: center;">✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mu$ (off)</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>Reverse KL</strong></td>
@@ -733,8 +762,11 @@ The following table summarizes the expected gradients and corresponding optimiza
 **Key Conclusions**:
 
 1. **On-policy optimizing Reverse KL**: The only correct choice is $k_2$.
-2. **Off-policy optimizing Reverse KL**: Both $\frac{q}{\mu} k_1$ and $\frac{q}{\mu} k_3$ are correct, but $\frac{q}{\mu} k_3$ has lower variance.
-3. **$k_2$ fails in off-policy**: This is a trap that is easily overlooked.
+2. **Off-policy optimizing Reverse KL**: Three correct options:
+   - $\frac{q}{\mu} k_1$: Unbiased but high variance
+   - $\text{sg}\left(\frac{q}{\mu}\right) k_2$: Unbiased, similar behavior to on-policy $k_2$
+   - $\frac{q}{\mu} k_3$: Unbiased and lower variance (recommended)
+3. **$\frac{q}{\mu} k_2$ (weights in gradient) fails in off-policy**: This is a trap that is easily overlooked.
 
 
 ## Practical Guidelines for RL
@@ -783,7 +815,7 @@ If you backpropagate through the batch mean of $k_3$, autodiff computes exactly 
 
 Goal: Data comes from behavior policy $\mu$, but we still want to optimize reverse KL.
 
-**Correct choice**: use **$\frac{q_\theta}{\mu} k_3$** as the loss.
+**Recommended**: use **$\frac{q_\theta}{\mu} k_3$** as the loss.
 
 $$
 \mathcal{L} = \frac{q_\theta(x)}{\mu(x)} \cdot \left(\frac{p(x)}{q_\theta(x)} - 1 - \log \frac{p(x)}{q_\theta(x)}\right)
@@ -792,9 +824,17 @@ $$
 - Unbiased gradient.
 - Significantly lower variance when $q_\theta \approx p$.
 
-**Alternative**: Use $\frac{q_\theta}{\mu} k_1$ (gradient is also unbiased, but variance is higher).
+**Alternative 1**: Use $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ (detach the importance weights).
 
-**Avoid**: Using $\frac{q_\theta}{\mu} k_2$ (gradient is biased, not the correct direction for reverse KL).
+$$
+\mathcal{L} = \text{sg}\left(\frac{q_\theta(x)}{\mu(x)}\right) \cdot \frac{1}{2}\left(\log \frac{p(x)}{q_\theta(x)}\right)^2
+$$
+
+This way, the gradient becomes $\bar{w} \cdot (-\log r) s_\theta$, whose expectation is still the true gradient of reverse KL. This approach is similar in form to on-policy $k_2$, just with an additional importance weight that does not participate in the gradient.
+
+**Alternative 2**: Use $\frac{q_\theta}{\mu} k_1$ (gradient is also unbiased, but variance is higher).
+
+**Avoid**: Using $\frac{q_\theta}{\mu} k_2$ (with weights in gradient) — the gradient is biased, not the correct direction for reverse KL.
 
 
 ## A Ready-to-Use Cheat Sheet
@@ -820,7 +860,7 @@ $$
       <td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;">$\mu$ (off-policy)</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_1$ or $\frac{q}{\mu} k_3$ (unbiased)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_3$ (recommended) or $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
     </tr>
     <tr>
       <td style="text-align: center;">Forward KL $D_{\mathrm{KL}}(p \| q)$</td>
@@ -853,19 +893,22 @@ When the policy and reference distribution are very different, $r = p/q$ can hav
 
 > **Fix**: Control the KL constraint or clip $r$.
 
-**Pitfall 4: Using $k_2$ or $\frac{q_\theta}{\mu} k_2$ in Off-Policy Settings**
+**Pitfall 4: Using $k_2$ or $\frac{q_\theta}{\mu} k_2$ (with weights in gradient) in Off-Policy Settings**
 
 In on-policy settings, $k_2$ is the correct choice for optimizing reverse KL. However, if data comes from $\mu \neq q_\theta$:
 - Using $k_2$ directly (unweighted): The expectation is not over $q_\theta$, so the estimator fails.
-- Using $\frac{q_\theta}{\mu} k_2$: The gradient is biased and does not point to the reverse KL direction.
+- Using $\frac{q_\theta}{\mu} k_2$ (with weights in gradient): The gradient is biased and does not point to the reverse KL direction.
 
-> **Fix**: In off-policy scenarios, switch to $\frac{q_\theta}{\mu} k_3$ (recommended) or $\frac{q_\theta}{\mu} k_1$.
+> **Fix**: In off-policy scenarios, switch to $\frac{q_\theta}{\mu} k_3$ (recommended), $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ (detach weights), or $\frac{q_\theta}{\mu} k_1$.
 
-**Pitfall 5: Detaching Importance Weights**
+**Pitfall 5: Improper Handling of Importance Weight Detachment**
 
-In implementation, $w = q_\theta / \mu$ is usually computed via `exp(log_prob_q - log_prob_mu)`. If you treat $w$ as a constant (detach it), you lose the $\nabla_\theta w = w s_\theta$ term, leading to incorrect gradients.
+In implementation, $w = q_\theta / \mu$ is usually computed via `exp(log_prob_q - log_prob_mu)`. Whether to detach $w$ leads to completely different results:
 
-> **Fix**: Ensure $w$ is part of the computation graph so that autodiff correctly computes the full $\nabla_\theta(w k_i)$.
+- **When using $k_1$ or $k_3$**: $w$ **should participate in gradient computation** (do not detach), otherwise you lose the $\nabla_\theta w = w s_\theta$ term, leading to incorrect gradients.
+- **When using $k_2$**: $w$ **should be detached**, so that you get the true gradient of reverse KL. If $w$ participates in gradient computation, you get the gradient of an f-divergence, not reverse KL.
+
+> **Summary**: When choosing different estimators, make sure to match the correct detach strategy.
 
 
 ## Conclusion
@@ -875,9 +918,9 @@ In implementation, $w = q_\theta / \mu$ is usually computed via `exp(log_prob_q 
 - **KL for value only (reward penalty)**: use $k_1$ or $k_3$ (both are unbiased for reverse KL); add importance weights if off-policy.
 - **KL as a differentiable loss (needs gradients)**:
 	- **On-policy**: To optimize **reverse KL**, use $k_2$; to optimize **forward KL**, use $k_3$.
-	- **Off-policy**: To optimize **reverse KL**, use $\frac{q_\theta}{\mu} k_3$ (unbiased + low variance).
+	- **Off-policy**: To optimize **reverse KL**, use $\frac{q_\theta}{\mu} k_3$ (recommended, unbiased + low variance) or $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ (detach weights).
 
-Once you keep clear **who you sample from**, **which KL you estimate**, and **with respect to which quantity you differentiate**, the three estimators become much less confusing. Especially note: **the correct choice for optimizing reverse KL differs between on-policy ($k_2$) and off-policy ($\frac{q_\theta}{\mu} k_3$)**.
+Once you keep clear **who you sample from**, **which KL you estimate**, and **with respect to which quantity you differentiate**, the three estimators become much less confusing. Especially note: **the correct choice for optimizing reverse KL differs between on-policy ($k_2$) and off-policy ($\frac{q_\theta}{\mu} k_3$ or $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$)**.
 
 
 ## References

@@ -547,6 +547,22 @@ $$
 
 这是 $\mathbb{E}\_q[k\_2]$ 这个 f-散度的真梯度，**不是**反向 KL 的梯度。
 
+**$\mathbb{E}\_\mu[\nabla\_\theta(\bar{w} k\_2)]$**（$\bar{w} = \text{sg}(w)$ 表示 detach）：
+
+如果把重要性权重视为常数（在代码中 detach 掉），则：
+
+$$
+\nabla_\theta(\bar{w} k_2) = \bar{w} \cdot \nabla_\theta k_2 = \bar{w} \cdot (-\log r) s_\theta
+$$
+
+取期望：
+
+$$
+\mathbb{E}_\mu[\bar{w} \cdot (-\log r) s_\theta] = \mathbb{E}_{q}[(-\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
+$$
+
+这正是反向 KL 的真梯度！
+
 **$\mathbb{E}\_\mu[\nabla\_\theta(w k\_3)]$**：
 
 $$
@@ -576,6 +592,11 @@ $$
       <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$，<strong>不是</strong>反向 KL ✗</td>
     </tr>
     <tr>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\mathbb{E}_q[k_2]$（f-散度）</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
+    </tr>
+    <tr>
       <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
       <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
@@ -587,7 +608,8 @@ $$
 **与 on-policy 情形的对比——一个有趣的反转**：
 
 - On-policy 时，用 $k_2$ 做 loss 的梯度是反向 KL，而 $k_1$ 的梯度期望恒为零
-- Off-policy + 重要性加权时，$\frac{q_\theta}{\mu} k_1$ 和 $\frac{q_\theta}{\mu} k_3$ 给出反向 KL 的真梯度，而 $\frac{q_\theta}{\mu} k_2$ **不再适用**
+- Off-policy + 重要性加权时，$\frac{q_\theta}{\mu} k_1$ 和 $\frac{q_\theta}{\mu} k_3$ 给出反向 KL 的真梯度，而 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）**不再适用**
+- 但如果把重要性权重 **detach** 掉，$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ 的梯度也是反向 KL 的真梯度
 
 #### $\frac{q_\theta}{\mu} k_3$ 的梯度方差是否更低？
 
@@ -720,6 +742,13 @@ $$
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>反向 KL</strong></td>
+      <td style="text-align: center;">✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mu$ (off)</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
       <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>反向 KL</strong></td>
@@ -732,8 +761,11 @@ $$
 **关键结论**：
 
 1. **On-policy 优化反向 KL**：唯一正确选择是 $k_2$
-2. **Off-policy 优化反向 KL**：$\frac{q}{\mu} k_1$ 和 $\frac{q}{\mu} k_3$ 都正确，但 $\frac{q}{\mu} k_3$ 方差更低
-3. **$k_2$ 在 off-policy 下失效**：这是一个容易被忽视的陷阱
+2. **Off-policy 优化反向 KL**：有三个正确选项：
+   - $\frac{q}{\mu} k_1$：无偏但方差较高
+   - $\text{sg}\left(\frac{q}{\mu}\right) k_2$：无偏，类似于 on-policy $k_2$ 的表现
+   - $\frac{q}{\mu} k_3$：无偏且方差更低（推荐）
+3. **$\frac{q}{\mu} k_2$（权重参与梯度）在 off-policy 下失效**：这是一个容易被忽视的陷阱
 
 
 ## RL 实践指南
@@ -782,7 +814,7 @@ $$
 
 目标：数据来自行为策略 $\mu$，仍希望优化反向 KL。
 
-**正确做法**：使用 **$\frac{q_\theta}{\mu} k_3$** 作为 loss。
+**推荐做法**：使用 **$\frac{q_\theta}{\mu} k_3$** 作为 loss。
 
 $$
 \mathcal{L} = \frac{q_\theta(x)}{\mu(x)} \cdot \left(\frac{p(x)}{q_\theta(x)} - 1 - \log \frac{p(x)}{q_\theta(x)}\right)
@@ -791,9 +823,17 @@ $$
 - 梯度无偏
 - 当 $q_\theta \approx p$ 时方差显著更低
 
-**备选方案**：使用 $\frac{q_\theta}{\mu} k_1$（梯度同样无偏，但方差更高）
+**备选方案 1**：使用 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将重要性权重 detach 掉）
 
-**避免**：使用 $\frac{q_\theta}{\mu} k_2$（梯度有偏，不是反向 KL 的正确方向）
+$$
+\mathcal{L} = \text{sg}\left(\frac{q_\theta(x)}{\mu(x)}\right) \cdot \frac{1}{2}\left(\log \frac{p(x)}{q_\theta(x)}\right)^2
+$$
+
+这样梯度就变为 $\bar{w} \cdot (-\log r) s_\theta$，期望仍然是反向 KL 的真梯度。这个方法在形式上类似于 on-policy 的 $k_2$，只是多了一个不参与梯度的重要性权重。
+
+**备选方案 2**：使用 $\frac{q_\theta}{\mu} k_1$（梯度同样无偏，但方差更高）
+
+**避免**：使用 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）——梯度有偏，不是反向 KL 的正确方向
 
 
 ## 一份「拿来就用」的对照表
@@ -819,7 +859,7 @@ $$
       <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;">$\mu$（off-policy）</td>
       <td style="text-align: center;">$\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏）</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_3$（推荐）或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
     </tr>
     <tr>
       <td style="text-align: center;">正向 KL $D_{\mathrm{KL}}(p \| q)$</td>
@@ -852,19 +892,22 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 
 > **解决**：控制 KL 约束，或对 $r$ 进行 clipping。
 
-**陷阱 4：离策略下仍用 $k_2$ 或 $\frac{q_\theta}{\mu} k_2$**
+**陷阱 4：离策略下仍用 $k_2$ 或 $\frac{q_\theta}{\mu} k_2$（权重参与梯度）**
 
 在 on-policy 下，$k_2$ 是优化反向 KL 的正确选择。但如果数据来自 $\mu \neq q_\theta$：
 - 直接用 $k_2$（不加权）：期望不是在 $q_\theta$ 下取的，估计器完全失效
-- 用 $\frac{q_\theta}{\mu} k_2$：梯度有偏，不是反向 KL 的真梯度
+- 用 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）：梯度有偏，不是反向 KL 的真梯度
 
-> **解决**：离策略场景下，改用 $\frac{q_\theta}{\mu} k_3$（推荐）或 $\frac{q_\theta}{\mu} k_1$。
+> **解决**：离策略场景下，改用 $\frac{q_\theta}{\mu} k_3$（推荐）、$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将权重 detach）或 $\frac{q_\theta}{\mu} k_1$。
 
-**陷阱 5：把重要性权重 detach 掉**
+**陷阱 5：对重要性权重的 detach 处理不当**
 
-代码实现中，$w = q_\theta / \mu$ 通常通过 `log_prob_q - log_prob_mu` 再取 `exp` 计算得到。如果把 $w$ 当作常数（detach），则丢失了 $\nabla_\theta w = w s_\theta$ 这一项，导致梯度错误。
+代码实现中，$w = q_\theta / \mu$ 通常通过 `log_prob_q - log_prob_mu` 再取 `exp` 计算得到。是否对 $w$ 进行 detach 会导致完全不同的结果：
 
-> **解决**：确保 $w$ 参与计算图，让自动微分正确计算完整的 $\nabla_\theta(w k_i)$。
+- **使用 $k_1$ 或 $k_3$ 时**：$w$ **应该参与梯度计算**（不要 detach），否则会丢失 $\nabla_\theta w = w s_\theta$ 这一项，导致梯度错误
+- **使用 $k_2$ 时**：$w$ **应该被 detach**，这样才能得到反向 KL 的真梯度。如果让 $w$ 参与梯度计算，得到的是 f-散度的梯度，不是反向 KL
+
+> **总结**：选择不同的估计器时，要注意匹配正确的 detach 策略。
 
 
 ## 总结
@@ -874,9 +917,9 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 - **只要数值（KL 作为 reward 惩罚）**：选 $k_1$ 或 $k_3$（均对反向 KL 无偏）；off-policy 时加重要性权重即可
 - **需要梯度（KL 作为 loss）**：
   - **On-policy**：优化反向 KL → 用 $k_2$；优化正向 KL → 用 $k_3$
-  - **Off-policy**：优化反向 KL → 用 $\frac{q_\theta}{\mu} k_3$（无偏 + 低方差）
+  - **Off-policy**：优化反向 KL → 用 $\frac{q_\theta}{\mu} k_3$（推荐，无偏 + 低方差）或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将权重 detach）
 
-把「**从谁采样**」、「**估计谁的值**」、「**对谁求梯度**」这三个问题捋清楚，三种估计器就不再让人混淆了。特别注意：**on-policy 和 off-policy 下，优化反向 KL 的正确选择是不同的**——前者用 $k_2$，后者用 $\frac{q_\theta}{\mu} k_3$。
+把「**从谁采样**」、「**估计谁的值**」、「**对谁求梯度**」这三个问题捋清楚，三种估计器就不再让人混淆了。特别注意：**on-policy 和 off-policy 下，优化反向 KL 的正确选择是不同的**——前者用 $k_2$，后者用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$。
 
 
 ## 参考文献
