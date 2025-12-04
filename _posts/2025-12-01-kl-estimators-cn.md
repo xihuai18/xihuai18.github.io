@@ -121,11 +121,42 @@ $$
 
 ### 三者对比总结
 
-| 估计器 |          定义           |          设计原理          |  对数值的偏差  |    方差特性    |
-| :----: | :---------------------: | :------------------------: | :------------: | :------------: |
-| $k_1$  |        $\log r$         |         最朴素定义         |      无偏      | 高（可正可负） |
-| $k_2$  | $\frac{1}{2}(\log r)^2$ | f-散度，二阶行为与 KL 一致 | 有偏（但极小） |   低（恒正）   |
-| $k_3$  |    $r - 1 - \log r$     |  控制变量 + Bregman 散度   |      无偏      |   低（恒正）   |
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">估计器</th>
+      <th style="text-align: center;">定义</th>
+      <th style="text-align: center;">设计原理</th>
+      <th style="text-align: center;">对数值的偏差</th>
+      <th style="text-align: center;">方差特性</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">$\log r$</td>
+      <td style="text-align: center;">最朴素定义</td>
+      <td style="text-align: center;">无偏</td>
+      <td style="text-align: center;">高（可正可负）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">$\frac{1}{2}(\log r)^2$</td>
+      <td style="text-align: center;">f-散度，二阶行为与 KL 一致</td>
+      <td style="text-align: center;">有偏（但极小）</td>
+      <td style="text-align: center;">低（恒正）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">$r - 1 - \log r$</td>
+      <td style="text-align: center;">控制变量 + Bregman 散度</td>
+      <td style="text-align: center;">无偏</td>
+      <td style="text-align: center;">低（恒正）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，**梯度层面的故事完全不同**。
 
@@ -154,19 +185,65 @@ $$
 
 John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）表明：
 
-| 估计器 | bias/true | stdev/true |
-| :----: | :-------: | :--------: |
-| $k_1$  |     0     |     20     |
-| $k_2$  |   0.002   |    1.42    |
-| $k_3$  |     0     |    1.42    |
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">估计器</th>
+      <th style="text-align: center;">bias/true</th>
+      <th style="text-align: center;">stdev/true</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">0</td>
+      <td style="text-align: center;">20</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">0.002</td>
+      <td style="text-align: center;">1.42</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">0</td>
+      <td style="text-align: center;">1.42</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 当 KL 较大时（$p = \mathcal{N}(1,1)$，真实 KL = 0.5）：
 
-| 估计器 | bias/true | stdev/true |
-| :----: | :-------: | :--------: |
-| $k_1$  |     0     |     2      |
-| $k_2$  |   0.25    |    1.73    |
-| $k_3$  |     0     |    1.7     |
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">估计器</th>
+      <th style="text-align: center;">bias/true</th>
+      <th style="text-align: center;">stdev/true</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">0</td>
+      <td style="text-align: center;">2</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">0.25</td>
+      <td style="text-align: center;">1.73</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">0</td>
+      <td style="text-align: center;">1.7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **核心直觉**：
 - $k_1 = -\log r$ 以一阶项起步，当 $r$ 接近 1 时波动较大，且可能取负值
@@ -304,11 +381,34 @@ $$
 
 对它们在 $q_\theta$ 下取期望：
 
-| Estimator |                          $\mathbb{E}\_{q}[\nabla\_\theta k\_i]$                          |           Equals           |
-| :-------: | :--------------------------------------------------------------------------------------: | :------------------------: |
-|   $k_1$   |                             $\mathbb{E}\_{q}[s\_\theta] = 0$                             | **Zero (useless as loss)** |
-|   $k_2$   | $-\mathbb{E}\_{q}[(\log r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(q \mid p)$ | **Gradient of reverse KL** |
-|   $k_3$   |   $\mathbb{E}\_{q}[(1-r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(p \mid q)$   | **Gradient of forward KL** |
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">Estimator</th>
+      <th style="text-align: center;">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th style="text-align: center;">Equals</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td style="text-align: center;"><strong>Zero (useless as loss)</strong></td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>Gradient of reverse KL</strong></td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+      <td style="text-align: center;"><strong>Gradient of forward KL</strong></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **关键洞察**：
 - **$k_2$ 的梯度**等价于反向 KL 的真梯度——这是优化「约束策略不偏离 ref」的正确选择
@@ -341,7 +441,7 @@ $$
 
 这时，如果我们仍然希望优化**反向 KL** $D_{\mathrm{KL}}(q_\theta \| p)$，就必须引入**重要性权重**。
 
-关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：[离线 RL 与经验回放中的策略优化](/reinforcement-learning/2025/11/20/three-policy-cn.html)。
+关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：[从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展](/reinforcement-learning/2025/11/15/three-policy-cn.html)。
 
 #### 设置与记号
 
@@ -455,11 +555,34 @@ $$
 
 **总结表格**：
 
-| 加权估计器                 | 期望对应的目标                   | 梯度期望对应的真梯度                                        |
-| -------------------------- | -------------------------------- | ----------------------------------------------------------- |
-| $\frac{q_\theta}{\mu} k_1$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓ |
-| $\frac{q_\theta}{\mu} k_2$ | $\mathbb{E}_q[k_2]$（f-散度）    | $\nabla_\theta \mathbb{E}_q[k_2]$，**不是**反向 KL ✗        |
-| $\frac{q_\theta}{\mu} k_3$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓ |
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">加权估计器</th>
+      <th style="text-align: center;">期望对应的目标</th>
+      <th style="text-align: center;">梯度期望对应的真梯度</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_1$</td>
+      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_2$</td>
+      <td style="text-align: center;">$\mathbb{E}_q[k_2]$（f-散度）</td>
+      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$，<strong>不是</strong>反向 KL ✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
+      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **与 on-policy 情形的对比——一个有趣的反转**：
 
@@ -541,14 +664,63 @@ $$
 
 下表汇总了 on-policy 与 off-policy 两种场景下，各估计器的梯度期望及其对应的优化目标：
 
-|  采样来源   |        Loss         |        $\nabla\_\theta$ Loss 的期望         |  对应的优化目标  | 能否用于优化反向 KL？ |
-| :---------: | :-----------------: | :-----------------------------------------: | :--------------: | :-------------------: |
-|  $q$ (on)   |        $k_1$        |       $\mathbb{E}\_q[s\_\theta] = 0$        | 无（梯度恒为零） |           ✗           |
-|  $q$ (on)   |        $k_2$        | $\nabla\_\theta D\_{\mathrm{KL}}(q \mid p)$ |   **反向 KL**    |           ✓           |
-|  $q$ (on)   |        $k_3$        | $\nabla\_\theta D\_{\mathrm{KL}}(p \mid q)$ |     正向 KL      |           ✗           |
-| $\mu$ (off) | $\frac{q}{\mu} k_1$ | $\nabla\_\theta D\_{\mathrm{KL}}(q \mid p)$ |   **反向 KL**    |    ✓（但方差较高）    |
-| $\mu$ (off) | $\frac{q}{\mu} k_2$ |    $\nabla\_\theta \mathbb{E}\_q[k\_2]$     | f-散度（非 KL）  |           ✗           |
-| $\mu$ (off) | $\frac{q}{\mu} k_3$ | $\nabla\_\theta D\_{\mathrm{KL}}(q \mid p)$ |   **反向 KL**    |   ✓（推荐，低方差）   |
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center; white-space: nowrap;">采样来源</th>
+      <th style="text-align: center;">Loss</th>
+      <th style="text-align: center;">$\nabla_\theta$ Loss 的期望</th>
+      <th style="text-align: center;">对应的优化目标</th>
+      <th style="text-align: center; white-space: nowrap;">能否用于优化反向 KL？</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$q$ (on)</td>
+      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">$\mathbb{E}_q[s_\theta] = 0$</td>
+      <td style="text-align: center;">无（梯度恒为零）</td>
+      <td style="text-align: center;">✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$q$ (on)</td>
+      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>反向 KL</strong></td>
+      <td style="text-align: center;">✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$q$ (on)</td>
+      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+      <td style="text-align: center;">正向 KL</td>
+      <td style="text-align: center;">✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mu$ (off)</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_1$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>反向 KL</strong></td>
+      <td style="text-align: center;">✓（但方差较高）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mu$ (off)</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_2$</td>
+      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
+      <td style="text-align: center;">f-散度（非 KL）</td>
+      <td style="text-align: center;">✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mu$ (off)</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
+      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;"><strong>反向 KL</strong></td>
+      <td style="text-align: center;">✓（推荐，低方差）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **关键结论**：
 
@@ -619,11 +791,38 @@ $$
 
 ## 一份「拿来就用」的对照表
 
-|                目标                 |      采样来源       |                    用于**数值**                    |    用于**梯度**     |
-| :---------------------------------: | :-----------------: | :------------------------------------------------: | :-----------------: |
-| 反向 KL $D_{\mathrm{KL}}(q \mid p)$ |  $q$（on-policy）   |               $k_1$ 或 $k_3$（无偏）               |        $k_2$        |
-| 反向 KL $D_{\mathrm{KL}}(q \mid p)$ | $\mu$（off-policy） | $\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏） | $\frac{q}{\mu} k_3$ |
-| 正向 KL $D_{\mathrm{KL}}(p \mid q)$ |         $q$         |              $\mathbb{E}_q[r\log r]$               |        $k_3$        |
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">目标</th>
+      <th style="text-align: center;">采样来源</th>
+      <th style="text-align: center;">用于<strong>数值</strong></th>
+      <th style="text-align: center;">用于<strong>梯度</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;">$q$（on-policy）</td>
+      <td style="text-align: center;">$k_1$ 或 $k_3$（无偏）</td>
+      <td style="text-align: center;">$k_2$</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;">$\mu$（off-policy）</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏）</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">正向 KL $D_{\mathrm{KL}}(p \| q)$</td>
+      <td style="text-align: center;">$q$</td>
+      <td style="text-align: center;">$\mathbb{E}_q[r\log r]$</td>
+      <td style="text-align: center;">$k_3$</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 
 ## 常见实现陷阱
