@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-04T06:41:41+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-04T07:33:54+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
       <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
@@ -1378,7 +1378,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 <p>A key difference is:</p>
 
 <blockquote>
-  <p><strong>Previously</strong>, the expectation was $\mathbb{E}<em>{q</em>{\theta}}[\cdot]$, where the distribution itself depended on $\theta$.
+  <p><strong>Previously</strong>, the expectation was $\mathbb{E}_{q_{\theta}}[\cdot]$, where the distribution itself depended on $\theta$.
 <strong>Now</strong>, the expectation is $\mathbb{E}_{\mu}[\cdot]$, and $\mu$ is independent of $\theta$.</p>
 </blockquote>
 
@@ -1398,7 +1398,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h4 id="numerical-level-unbiasedness-holds">Numerical Level: Unbiasedness Holds</h4>
 
-<p>From the standard importance sampling relation $\mathbb{E}<em>\mu[w \cdot f] = \mathbb{E}</em>{q_\theta}[f]$, we have</p>
+<p>From the standard importance sampling relation $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$, we have</p>
 
 \[\mathbb{E}_\mu[w k_1] = D_{\mathrm{KL}}(q_\theta \| p), \quad
 \mathbb{E}_\mu[w k_3] = D_{\mathrm{KL}}(q_\theta \| p) \quad \textbf{(Unbiased)}\]
@@ -1437,19 +1437,19 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h4 id="which-ones-give-the-unbiased-reverse-kl-gradient">Which Ones Give the Unbiased Reverse KL Gradient?</h4>
 
-<p>Using $\mathbb{E}<em>\mu[w \cdot f] = \mathbb{E}</em>{q_\theta}[f]$ and $\mathbb{E}<em>{q</em>\theta}[s_\theta] = 0$:</p>
+<p>Using $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$ and $\mathbb{E}_{q_\theta}[s_\theta] = 0$:</p>
 
-<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(w k_1)]$</strong>:</p>
+<p><strong>$\mathbb{E}_\mu[\nabla_\theta(w k_1)]$</strong>:</p>
 
 \[\mathbb{E}_\mu[w s_\theta (k_1 + 1)] = \mathbb{E}_{q}[s_\theta k_1] + \underbrace{\mathbb{E}_{q}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
 
-<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(w k_2)]$</strong>:</p>
+<p><strong>$\mathbb{E}_\mu[\nabla_\theta(w k_2)]$</strong>:</p>
 
 \[\mathbb{E}_\mu[w s_\theta (k_2 - \log r)] = \mathbb{E}_{q}[s_\theta (k_2 - \log r)] = \nabla_\theta \mathbb{E}_{q}[k_2]\]
 
 <p>This is the true gradient of the f-divergence $\mathbb{E}_q[k_2]$, <strong>not</strong> the gradient of reverse KL.</p>
 
-<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(\bar{w} k_2)]$</strong> (where $\bar{w} = \text{sg}(w)$ denotes detached weights):</p>
+<p><strong>$\mathbb{E}_\mu[\nabla_\theta(\bar{w} k_2)]$</strong> (where $\bar{w} = \text{sg}(w)$ denotes detached weights):</p>
 
 <p>If we treat the importance weight as a constant (detach it in code), then:</p>
 
@@ -1461,7 +1461,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>This is exactly the true gradient of reverse KL!</p>
 
-<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(w k_3)]$</strong>:</p>
+<p><strong>$\mathbb{E}_\mu[\nabla_\theta(w k_3)]$</strong>:</p>
 
 \[\mathbb{E}_\mu[w s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
 
@@ -1521,7 +1521,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 \[g_1(x) - g_3(x) = w(x) s_\theta(x)\]
 
-<p>And since $\mathbb{E}<em>\mu[w s</em>\theta] = \mathbb{E}<em>{q</em>\theta}[s_\theta] = 0$, we know that $w s_\theta$ is a <strong>zero-mean “pure noise term”</strong>.</p>
+<p>And since $\mathbb{E}_\mu[w s_\theta] = \mathbb{E}_{q_\theta}[s_\theta] = 0$, we know that $w s_\theta$ is a <strong>zero-mean “pure noise term”</strong>.</p>
 
 <p><strong>First-Order Expansion Analysis</strong>:</p>
 
@@ -1576,9 +1576,9 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li><strong>Numerically</strong>, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ remain unbiased estimates of reverse KL.</li>
   <li><strong>Gradient-wise</strong>, since $\mu$ is independent of $\theta$, “expectation-then-gradient” and “gradient-then-expectation” are equivalent:
     <ul>
-      <li>$\mathbb{E}<em>\mu[\nabla</em>\theta(\frac{q_\theta}{\mu} k_1)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
-      <li>$\mathbb{E}<em>\mu[\nabla</em>\theta(\frac{q_\theta}{\mu} k_3)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
-      <li>$\mathbb{E}<em>\mu[\nabla</em>\theta(\frac{q_\theta}{\mu} k_2)] \neq \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
+      <li>$\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_1)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
+      <li>$\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_3)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
+      <li>$\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_2)] \neq \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
     </ul>
   </li>
   <li><strong>Variance-wise</strong>, the gradient of $\frac{q_\theta}{\mu} k_3$ can be seen as the gradient of $\frac{q_\theta}{\mu} k_1$ minus a zero-mean noise term $w s_\theta$. When $q_\theta \approx p \approx \mu$ and importance weights are not too extreme, <strong>the gradient of $\frac{q_\theta}{\mu} k_3$ is more stable and has lower variance</strong>.</li>
@@ -1771,7 +1771,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Pitfall 1: Using $k_1$ Directly as a Loss (On-Policy)</strong></p>
 
-<p>The expected gradient of $k_1$ is zero ($\mathbb{E}<em>q[\nabla k_1] = \mathbb{E}_q[s</em>\theta] = 0$), so as a loss it is ineffective.</p>
+<p>The expected gradient of $k_1$ is zero ($\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$), so as a loss it is ineffective.</p>
 
 <blockquote>
   <p><strong>Fix</strong>: Use $k_1$ or $k_3$ only when you need a scalar KL penalty in rewards (no gradient), and use $k_2$ or $k_3$ when you actually want a loss with a meaningful gradient.</p>
