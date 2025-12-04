@@ -10,7 +10,7 @@ lang: zh
 * TOC
 {:toc}
 
-![Mini-class](/assets/img/kl-estimator-cn.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![Mini-class](/assets/img/kl-estimators/kl-estimator-cn.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。
 
@@ -32,7 +32,7 @@ D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_
 $$
 
 <figure style="text-align:center;">
-  <img src="/assets/img/kl-estimator-reverse.png" style="width:95%;max-width:100%;">
+  <img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:95%;max-width:100%;">
   <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -42,7 +42,7 @@ D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\
 $$
 
 <figure style="text-align:center;">
-  <img src="/assets/img/kl-estimator-forward.png" style="width:95%;max-width:100%;">
+  <img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:95%;max-width:100%;">
   <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -649,6 +649,13 @@ $$
 不过，在 RL 实践中我们通常会控制 KL 约束、限制 off-policy 程度（比如使用近邻策略 $\mu = q_{\theta_\text{old}}$），在这个常见的 regime 里，可以相当有信心地说：
 
 > **如果已经决定用 off-policy + 重要性采样来优化反向 KL，用 $\frac{q_\theta}{\mu} k_3$ 做 loss，通常比 $\frac{q_\theta}{\mu} k_1$ 有更低的梯度方差。**
+
+这就是为什么 DeepSeek v3.2 技术报告中使用的是 $\frac{q_\theta}{\mu} k_3$ 作为 off-policy KL 惩罚的估计器。
+
+<figure style="text-align:center;">
+  <img src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;">
+  <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://arxiv.org/pdf/2512.02556v1">DeepSeek v3.2 技术报告 3.1 章节</a></figcaption>
+</figure>
 
 #### 小结
 

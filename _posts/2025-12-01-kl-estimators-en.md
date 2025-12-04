@@ -10,7 +10,7 @@ lang: en
 * TOC
 {:toc}
 
-![Mini-class](/assets/img/kl-estimator-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![Mini-class](/assets/img/kl-estimators/kl-estimator-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > In reinforcement learning, how we approximate KL divergence directly affects training stability. This post systematically analyzes the differences between three classic estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and provides practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.
 
@@ -30,7 +30,7 @@ D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_
 $$
 
 <figure style="text-align:center;">
-	<img src="/assets/img/kl-estimator-reverse.png" style="width:95%;max-width:100%;">
+	<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:95%;max-width:100%;">
 	<figcaption style="font-size:0.9em;color:gray;">Image credit: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -40,7 +40,7 @@ D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\
 $$
 
 <figure style="text-align:center;">
-	<img src="/assets/img/kl-estimator-forward.png" style="width:95%;max-width:100%;">
+	<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:95%;max-width:100%;">
 	<figcaption style="font-size:0.9em;color:gray;">Image credit: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -650,6 +650,13 @@ When $\mu$ differs greatly from $q_\theta$ — for example, $\mu$ has almost no 
 However, in RL practice, we usually control the KL constraint and limit the degree of off-policy (e.g., using a proximal policy $\mu = q_{\theta_\text{old}}$). In this common regime, we can say with considerable confidence:
 
 > **If you have decided to use off-policy + importance sampling to optimize reverse KL, using $\frac{q_\theta}{\mu} k_3$ as the loss usually yields lower gradient variance than $\frac{q_\theta}{\mu} k_1$.**
+
+This is why the DeepSeek v3.2 technical report uses $\frac{q_\theta}{\mu} k_3$ as the estimator for off-policy KL penalty.
+
+<figure style="text-align:center;">
+  <img src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;">
+  <figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://arxiv.org/pdf/2512.02556v1">DeepSeek v3.2 Technical Report Section 3.1</a></figcaption>
+</figure>
 
 #### Summary
 

@@ -12,7 +12,7 @@ lang: zh
 
 [English Version](/reinforcement-learning/2025/11/15/three-policy-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
-![Mini-class](/assets/img/three-policy-mini-class-cn.jpg){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![Mini-class](/assets/img/three-policy/three-policy-mini-class-cn.jpg){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 ## 训推不一致和异步框架
 
