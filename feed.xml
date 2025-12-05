@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-04T07:33:54+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-05T06:25:45+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
       <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
@@ -26,7 +26,7 @@
           <li><a href="#数值层面无偏性仍然保持" id="markdown-toc-数值层面无偏性仍然保持">数值层面：无偏性仍然保持</a></li>
           <li><a href="#梯度推导" id="markdown-toc-梯度推导">梯度推导</a></li>
           <li><a href="#哪些给出无偏的反向-kl-梯度" id="markdown-toc-哪些给出无偏的反向-kl-梯度">哪些给出无偏的反向 KL 梯度？</a></li>
-          <li><a href="#fracq_thetamu-k_3-的梯度方差是否更低" id="markdown-toc-fracq_thetamu-k_3-的梯度方差是否更低">$\frac{q_\theta}{\mu} k_3$ 的梯度方差是否更低？</a></li>
+          <li><a href="#三个无偏梯度估计器的方差对比" id="markdown-toc-三个无偏梯度估计器的方差对比">三个无偏梯度估计器的方差对比</a></li>
           <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
         </ul>
       </li>
@@ -574,57 +574,145 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li>但如果把重要性权重 <strong>detach</strong> 掉，$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ 的梯度也是反向 KL 的真梯度</li>
 </ul>
 
-<h4 id="fracq_thetamu-k_3-的梯度方差是否更低">$\frac{q_\theta}{\mu} k_3$ 的梯度方差是否更低？</h4>
+<h4 id="三个无偏梯度估计器的方差对比">三个无偏梯度估计器的方差对比</h4>
 
-<p>现在我们关心的梯度随机变量为：</p>
+<p>前一小节我们看到，在 off-policy + 重要性采样的设置下，下面三个 loss 都给出<strong>反向 KL</strong> 的无偏梯度估计：</p>
 
-\[g_1(x) := \nabla_\theta(w k_1) = w(x) s_\theta(x) (k_1(x) + 1)\]
+\[L_1(x) = w(x) k_1(x),\qquad
+L_2(x) = \bar w(x) k_2(x),\qquad
+L_3(x) = w(x) k_3(x),\]
 
-\[g_3(x) := \nabla_\theta(w k_3) = w(x) s_\theta(x) k_1(x)\]
+<p>其中 $w = \dfrac{q_\theta}{\mu}$，$\bar w = \mathrm{sg}(w)$ 表示对权重做 stop-gradient。它们对应的梯度随机变量为：</p>
 
-<p>两者的期望相同，都是 $\nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$，但存在一个简单的关系：</p>
+\[g_1(x) := \nabla_\theta L_1(x),\quad
+g_2(x) := \nabla_\theta L_2(x),\quad
+g_3(x) := \nabla_\theta L_3(x).\]
 
-\[g_1(x) - g_3(x) = w(x) s_\theta(x)\]
-
-<p>又因为 $\mathbb{E}_\mu[w s_\theta] = \mathbb{E}_{q_\theta}[s_\theta] = 0$，可知 $w s_\theta$ 是一个<strong>零均值的「纯噪声项」</strong>。</p>
-
-<p><strong>一阶展开分析</strong>：</p>
-
-<p>在 KL 惩罚常用的 regime 下，三个分布彼此接近：$q_\theta \approx p \approx \mu$。此时令 $r(x) = 1 + \varepsilon(x)$，$\vert \varepsilon \vert \ll 1$，做一阶展开：</p>
-
-\[k_1 = -\log r \approx -\varepsilon + O(\varepsilon^2)\]
-
-<p>代入 $g_1, g_3$ 的系数：</p>
-
-\[k_1 + 1 \approx 1 - \varepsilon + O(\varepsilon^2), \quad k_1 \approx -\varepsilon + O(\varepsilon^2)\]
-
-<p>于是：</p>
-
-\[g_1(x) \approx w(x) s_\theta(x) \cdot \big(1 - \varepsilon(x) + O(\varepsilon^2)\big)\]
-
-\[g_3(x) \approx w(x) s_\theta(x) \cdot \big(-\varepsilon(x) + O(\varepsilon^2)\big)\]
-
-<p><strong>核心直觉</strong>：</p>
+<p>利用前文已推导的结果：</p>
 
 <ul>
-  <li>$g_1$ 含有一个「量级为 1 但期望为零」的常数项 $w s_\theta$。真梯度是这部分与其它项相互抵消后的<strong>微小差值</strong>，因此单样本方差很大。</li>
-  <li>$g_3$ 在解析形式上已经把这个常数项消掉了，剩下的是与偏差 $\varepsilon(x) = r(x) - 1$ 成正比的<strong>一阶小量</strong>。当策略接近时 $\vert \varepsilon \vert$ 很小，$g_3$ 的波动自然显著更小。</li>
+  <li>$\nabla_\theta w = w s_\theta$;</li>
+  <li>$\nabla_\theta k_1 = s_\theta$;</li>
+  <li>$\nabla_\theta k_2 = - (\log r) s_\theta = k_1 s_\theta$;</li>
+  <li>$\nabla_\theta k_3 = (1-r) s_\theta$.</li>
 </ul>
 
-<p>这与前文「数值估计」一节的直觉完全一致：$k_3$ 在 $r = 1$ 处是二阶小量，而 $k_1$ 是一阶量。加上重要性权重后，这一性质被保留到了梯度估计中。</p>
+<p>有：</p>
+
+\[\begin{aligned}
+g_1(x)
+&amp;= \nabla_\theta(w k_1)
+= w s_\theta k_1 + w s_\theta
+= w(x) s_\theta(x)\big(k_1(x)+1\big),\\
+g_2(x)
+&amp;= \nabla_\theta(\bar w k_2)
+= \bar w \,\nabla_\theta k_2
+= w \, k_1 s_\theta
+= w(x) s_\theta(x) k_1(x),\\
+g_3(x)
+&amp;= \nabla_\theta(w k_3)
+= w s_\theta k_3 + w(1-r)s_\theta
+= w s_\theta (k_3 + 1 - r)
+= w(x) s_\theta(x) k_1(x).
+\end{aligned}\]
+
+<p>最后一步用到了 $k_3 + 1 - r = (r - 1 - \log r) + 1 - r = -\log r = k_1$。于是出现了一个非常关键的事实：</p>
 
 <blockquote>
-  <p><strong>结论</strong>：在 $q_\theta \approx p \approx \mu$ 的典型 KL 惩罚场景下，$\frac{q_\theta}{\mu} k_3$ 对应的<strong>梯度方差严格低阶</strong>于 $\frac{q_\theta}{\mu} k_1$，是「无偏 + 低方差」的选择。</p>
+  <p>在 off-policy + detach 权重的情况下，$\bar w k_2$ 与 $w k_3$ 的梯度完全一样：$g_2(x) \equiv g_3(x)$。</p>
+</blockquote>
+
+<p>换言之，三个 loss 实际上只对应<strong>两种</strong>不同的梯度随机变量：$g_1$ 与 $g_\star := g_2 = g_3$。</p>
+
+<p>下面就比较这两种随机变量的方差。</p>
+
+<p>为简化记号，令</p>
+
+\[A(x) := w(x) s_\theta(x), \quad B(x) := k_1(x),\]
+
+<p>则</p>
+
+\[g_1 = A(B+1),\qquad g_\star = A B.\]
+
+<p>两者的期望都等于 $\nabla_\theta D_{\mathrm{KL}}(q_\theta|p)$，因此有相同的均值项。展开方差定义并相减得到：</p>
+
+\[\boxed{
+\mathrm{Var}_\mu(g_1) - \mathrm{Var}_\mu(g_\star)
+= \mathbb{E}_\mu\big[A^2((B+1)^2 - B^2)\big]
+= \mathbb{E}_\mu\big[A^2 (2B+1)\big]
+}\]
+
+<p>也就是</p>
+
+\[\mathrm{Var}_\mu(g_1) - \mathrm{Var}_\mu(g_\star)
+= \mathbb{E}_\mu\Big[w(x)^2 s_\theta(x)^2 \big(2k_1(x)+1\big)\Big].\]
+
+<p>在常见的 KL 惩罚 regime 下，$q_\theta \approx p \approx \mu$，取 $r(x)=1+\varepsilon(x)$，$\lvert \varepsilon\rvert \ll1$。此时 $k_1 = -\log r \approx -\varepsilon$，因此 $2k_1+1 \approx 1 - 2\varepsilon$，主导项为正的 $O(1)$ 常数。这意味着上式右侧近似为 $\mathbb{E}_\mu[w^2 s_\theta^2] &gt; 0$，从而 $\mathrm{Var}_\mu(g_1) &gt; \mathrm{Var}_\mu(g_\star)$。</p>
+
+<p>更具体地，一阶近似</p>
+
+\[k_1 \approx -\varepsilon,\quad k_1+1 \approx 1-\varepsilon.\]
+
+<p>于是</p>
+
+\[g_1(x) \approx w(x) s_\theta(x)(1 - \varepsilon(x)),\quad g_\star(x) \approx w(x) s_\theta(x)(-\varepsilon(x)).\]
+
+<p>核心直觉：</p>
+
+<ul>
+  <li>$g_1$ 包含一个量级为 $O(1)$ 的零均值噪声项 $w s_\theta$，导致单样本方差较大；</li>
+  <li>$g_\star$ 已把该常数噪声项消去，剩下与 $\varepsilon$ 成正比的一阶小量，方差为 $O(\varepsilon^2)$，显著更小。</li>
+</ul>
+
+<p>小结表格：</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center; white-space: nowrap;">估计器</th>
+      <th style="text-align: center; white-space: nowrap;">梯度随机变量</th>
+      <th style="text-align: center; white-space: nowrap;">系数量级（$r\approx1$）</th>
+      <th style="text-align: center;">方差</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$w k_1$</td>
+      <td style="text-align: center;">$w s_\theta (k_1+1)$</td>
+      <td style="text-align: center;">$O(1)$</td>
+      <td style="text-align: center;">高</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mathrm{sg}(w) k_2$</td>
+      <td style="text-align: center;">$w s_\theta k_1$</td>
+      <td style="text-align: center;">$O(\varepsilon)$</td>
+      <td style="text-align: center;">低</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$w k_3$</td>
+      <td style="text-align: center;">$w s_\theta k_1$</td>
+      <td style="text-align: center;">$O(\varepsilon)$</td>
+      <td style="text-align: center;">低</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>结论：在 off-policy + 重要性采样的设置下，给出反向 KL 真梯度的无偏估计器有三个：$w k_1,\; \bar w k_2,\; w k_3$。其中 $\bar w k_2$ 与 $w k_3$ 在梯度层面完全等价——同均值、同方差、同高阶矩；相比之下，$w k_1$ 的梯度多了一个零均值的常数噪声项 $w s_\theta$，在典型的 KL 惩罚 regime 下其方差大约高一个量级。</p>
+
+<blockquote>
+  <p>实践建议：若在 off-policy 场景下优化反向 KL，首选 $w k_3$ 或 $\mathrm{sg}(w) k_2$（两者梯度等价且方差低）；$w k_1$ 虽无偏但方差高，可作为备选并需配合 clipping/正则化。</p>
 </blockquote>
 
 <p><strong>极度 off-policy 时的警示</strong>：</p>
 
-<p>当 $\mu$ 与 $q_\theta$ 差异很大——比如 $\mu$ 在 $q_\theta$ 的高密度区域几乎没有采样，或 $w = q_\theta / \mu$ 在尾部爆炸——任何基于 $\frac{q_\theta}{\mu}$ 的方法都会遭遇严重的方差问题。此时 $\frac{q_\theta}{\mu} k_3$ 相对 $\frac{q_\theta}{\mu} k_1$ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。</p>
+<p>当 $\mu$ 与 $q_\theta$ 差异很大——比如 $\mu$ 在 $q_\theta$ 的高密度区域几乎没有采样，或 $w = q_\theta / \mu$ 在尾部爆炸——任何基于 $\frac{q_\theta}{\mu}$ 的方法都会遭遇严重的方差问题。此时 $\frac{q_\theta}{\mu} k_3$（或 $\mathrm{sg}\left(\frac{q_\theta}{\mu}\right) k_2$）相对 $\frac{q_\theta}{\mu} k_1$ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。</p>
 
 <p>不过，在 RL 实践中我们通常会控制 KL 约束、限制 off-policy 程度（比如使用近邻策略 $\mu = q_{\theta_\text{old}}$），在这个常见的 regime 里，可以相当有信心地说：</p>
 
 <blockquote>
-  <p><strong>如果已经决定用 off-policy + 重要性采样来优化反向 KL，用 $\frac{q_\theta}{\mu} k_3$ 做 loss，通常比 $\frac{q_\theta}{\mu} k_1$ 有更低的梯度方差。</strong></p>
+  <p><strong>如果已经决定用 off-policy + 重要性采样来优化反向 KL，推荐使用 $\dfrac{q_\theta}{\mu} k_3$ 或 $\mathrm{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$（两者梯度等价且方差低）；相较之下，$\dfrac{q_\theta}{\mu} k_1$ 方差更高。</strong></p>
 </blockquote>
 
 <p>这就是为什么 DeepSeek v3.2 技术报告中使用的是 $\frac{q_\theta}{\mu} k_3$ 作为 off-policy KL 惩罚的估计器。</p>
@@ -646,7 +734,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
       <li>$\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_2)] \neq \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
     </ul>
   </li>
-  <li><strong>方差上</strong>，$\frac{q_\theta}{\mu} k_3$ 的梯度可以看作对 $\frac{q_\theta}{\mu} k_1$ 梯度减去了一个零均值的噪声项 $w s_\theta$。在 $q_\theta \approx p \approx \mu$ 且重要性权重不过于极端时，<strong>$\frac{q_\theta}{\mu} k_3$ 的梯度更平稳、方差更低</strong>。</li>
+  <li><strong>方差上</strong>，$\frac{q_\theta}{\mu} k_3$ 与 $\mathrm{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ 的梯度<strong>完全相同</strong>（两者都是 $w s_\theta k_1$），在统计性质上等价。相比之下，$\frac{q_\theta}{\mu} k_1$ 的梯度多了一个零均值噪声项 $w s_\theta$，在 $q_\theta \approx p \approx \mu$ 的典型场景下方差显著更高。</li>
 </ul>
 
 <h3 id="梯度估计总览">梯度估计总览</h3>
@@ -725,8 +813,8 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li><strong>Off-policy 优化反向 KL</strong>：有三个正确选项：
     <ul>
       <li>$\frac{q}{\mu} k_1$：无偏但方差较高</li>
-      <li>$\text{sg}\left(\frac{q}{\mu}\right) k_2$：无偏，类似于 on-policy $k_2$ 的表现</li>
-      <li>$\frac{q}{\mu} k_3$：无偏且方差更低（推荐）</li>
+      <li>$\text{sg}\left(\frac{q}{\mu}\right) k_2$：无偏，与 $\frac{q}{\mu} k_3$ <strong>梯度完全等价</strong></li>
+      <li>$\frac{q}{\mu} k_3$：无偏且方差更低（与上一项等价，均为推荐选择）</li>
     </ul>
   </li>
   <li><strong>$\frac{q}{\mu} k_2$（权重参与梯度）在 off-policy 下失效</strong>：这是一个容易被忽视的陷阱</li>
@@ -778,24 +866,22 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>目标：数据来自行为策略 $\mu$，仍希望优化反向 KL。</p>
 
-<p><strong>推荐做法</strong>：使用 <strong>$\frac{q_\theta}{\mu} k_3$</strong> 作为 loss。</p>
+<p><strong>推荐做法</strong>：使用 <strong>$\dfrac{q_\theta}{\mu} k_3$</strong> 或 <strong>$\mathrm{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$</strong> 作为 loss（两者梯度完全等价）。</p>
 
-\[\mathcal{L} = \frac{q_\theta(x)}{\mu(x)} \cdot \left(\frac{p(x)}{q_\theta(x)} - 1 - \log \frac{p(x)}{q_\theta(x)}\right)\]
+\[\mathcal{L} = \dfrac{q_\theta(x)}{\mu(x)} \cdot \left(\dfrac{p(x)}{q_\theta(x)} - 1 - \log \dfrac{p(x)}{q_\theta(x)}\right)\]
+
+<p>或</p>
+
+\[\mathcal{L} = \mathrm{sg}\left(\dfrac{q_\theta(x)}{\mu(x)}\right) \cdot \dfrac{1}{2}\left(\log \dfrac{p(x)}{q_\theta(x)}\right)^2\]
 
 <ul>
   <li>梯度无偏</li>
-  <li>当 $q_\theta \approx p$ 时方差显著更低</li>
+  <li>在 $q_\theta \approx p$ 时方差都显著更低</li>
 </ul>
 
-<p><strong>备选方案 1</strong>：使用 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将重要性权重 detach 掉）</p>
+<p><strong>备选方案</strong>：使用 $\dfrac{q_\theta}{\mu} k_1$（梯度同样无偏，但方差更高）</p>
 
-\[\mathcal{L} = \text{sg}\left(\frac{q_\theta(x)}{\mu(x)}\right) \cdot \frac{1}{2}\left(\log \frac{p(x)}{q_\theta(x)}\right)^2\]
-
-<p>这样梯度就变为 $\bar{w} \cdot (-\log r) s_\theta$，期望仍然是反向 KL 的真梯度。这个方法在形式上类似于 on-policy 的 $k_2$，只是多了一个不参与梯度的重要性权重。</p>
-
-<p><strong>备选方案 2</strong>：使用 $\frac{q_\theta}{\mu} k_1$（梯度同样无偏，但方差更高）</p>
-
-<p><strong>避免</strong>：使用 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）——梯度有偏，不是反向 KL 的正确方向</p>
+<p><strong>避免</strong>：使用 $\dfrac{q_\theta}{\mu} k_2$（权重参与梯度计算）——梯度有偏，不是反向 KL 的正确方向</p>
 
 <h2 id="一份拿来就用的对照表">一份「拿来就用」的对照表</h2>
 
@@ -892,7 +978,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li><strong>需要梯度（KL 作为 loss）</strong>：
     <ul>
       <li><strong>On-policy</strong>：优化反向 KL → 用 $k_2$；优化正向 KL → 用 $k_3$</li>
-      <li><strong>Off-policy</strong>：优化反向 KL → 用 $\frac{q_\theta}{\mu} k_3$（推荐，无偏 + 低方差）或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将权重 detach）</li>
+      <li><strong>Off-policy</strong>：优化反向 KL → 用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（两者梯度等价，均为无偏 + 低方差的推荐选择）</li>
     </ul>
   </li>
 </ul>
@@ -957,7 +1043,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
           <li><a href="#numerical-level-unbiasedness-holds" id="markdown-toc-numerical-level-unbiasedness-holds">Numerical Level: Unbiasedness Holds</a></li>
           <li><a href="#gradient-derivation" id="markdown-toc-gradient-derivation">Gradient Derivation</a></li>
           <li><a href="#which-ones-give-the-unbiased-reverse-kl-gradient" id="markdown-toc-which-ones-give-the-unbiased-reverse-kl-gradient">Which Ones Give the Unbiased Reverse KL Gradient?</a></li>
-          <li><a href="#does-fracq_thetamu-k_3-have-lower-gradient-variance" id="markdown-toc-does-fracq_thetamu-k_3-have-lower-gradient-variance">Does $\frac{q_\theta}{\mu} k_3$ Have Lower Gradient Variance?</a></li>
+          <li><a href="#do-the-three-unbiased-gradient-estimators-differ-in-variance" id="markdown-toc-do-the-three-unbiased-gradient-estimators-differ-in-variance">Do the Three Unbiased Gradient Estimators Differ in Variance?</a></li>
           <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
         </ul>
       </li>
@@ -1086,21 +1172,21 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">$k\_1$</td>
       <td style="text-align: center;">$-\log r$</td>
       <td style="text-align: center;">Naive definition</td>
       <td style="text-align: center;">Unbiased</td>
       <td style="text-align: center;">High (can be neg.)</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">$k\_2$</td>
       <td style="text-align: center;">$\frac{1}{2}(\log r)^2$</td>
       <td style="text-align: center;">f-divergence, 2nd-order matches KL</td>
       <td style="text-align: center;">Biased (small)</td>
       <td style="text-align: center;">Low (always pos.)</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">$k\_3$</td>
       <td style="text-align: center;">$r - 1 - \log r$</td>
       <td style="text-align: center;">Control variate + Bregman divergence</td>
       <td style="text-align: center;">Unbiased</td>
@@ -1145,17 +1231,17 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">$k\_1$</td>
       <td style="text-align: center;">0</td>
       <td style="text-align: center;">20</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">$k\_2$</td>
       <td style="text-align: center;">0.002</td>
       <td style="text-align: center;">1.42</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">$k\_3$</td>
       <td style="text-align: center;">0</td>
       <td style="text-align: center;">1.42</td>
     </tr>
@@ -1176,17 +1262,17 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
+      <td style="text-align: center;">$k\_1$</td>
       <td style="text-align: center;">0</td>
       <td style="text-align: center;">2</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">$k\_2$</td>
       <td style="text-align: center;">0.25</td>
       <td style="text-align: center;">1.73</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">$k\_3$</td>
       <td style="text-align: center;">0</td>
       <td style="text-align: center;">1.7</td>
     </tr>
@@ -1309,24 +1395,24 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <thead>
     <tr style="background-color: var(--global-bg-color);">
       <th style="text-align: center;">Estimator</th>
-      <th style="text-align: center;">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+      <th style="text-align: center;">$\mathbb{E}\_{q}[\nabla\_\theta k\_i]$</th>
       <th style="text-align: center;">Equals</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\mathbb{E}_{q}[s_\theta] = 0$</td>
+      <td style="text-align: center;">$k\_1$</td>
+      <td style="text-align: center;">$\mathbb{E}\_{q}[s\_\theta] = 0$</td>
       <td style="text-align: center;"><strong>Zero (useless as loss)</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;">$k\_2$</td>
+      <td style="text-align: center;">$-\mathbb{E}\_{q}[(\log r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>Gradient of reverse KL</strong></td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+      <td style="text-align: center;">$k\_3$</td>
+      <td style="text-align: center;">$\mathbb{E}\_{q}[(1-r) \cdot s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(p \| q)$</td>
       <td style="text-align: center;"><strong>Gradient of forward KL</strong></td>
     </tr>
   </tbody>
@@ -1439,11 +1525,11 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>Using $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$ and $\mathbb{E}_{q_\theta}[s_\theta] = 0$:</p>
 
-<p><strong>$\mathbb{E}_\mu[\nabla_\theta(w k_1)]$</strong>:</p>
+<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(w k_1)]$</strong>:</p>
 
 \[\mathbb{E}_\mu[w s_\theta (k_1 + 1)] = \mathbb{E}_{q}[s_\theta k_1] + \underbrace{\mathbb{E}_{q}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
 
-<p><strong>$\mathbb{E}_\mu[\nabla_\theta(w k_2)]$</strong>:</p>
+<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(w k_2)]$</strong>:</p>
 
 \[\mathbb{E}_\mu[w s_\theta (k_2 - \log r)] = \mathbb{E}_{q}[s_\theta (k_2 - \log r)] = \nabla_\theta \mathbb{E}_{q}[k_2]\]
 
@@ -1461,7 +1547,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>This is exactly the true gradient of reverse KL!</p>
 
-<p><strong>$\mathbb{E}_\mu[\nabla_\theta(w k_3)]$</strong>:</p>
+<p><strong>$\mathbb{E}<em>\mu[\nabla</em>\theta(w k_3)]$</strong>:</p>
 
 \[\mathbb{E}_\mu[w s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark\]
 
@@ -1478,24 +1564,24 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_1$</td>
-      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (Reverse KL) ✓</td>
+      <td style="text-align: center;">$\frac{q\_\theta}{\mu} k\_1$</td>
+      <td style="text-align: center;">$D\_{\mathrm{KL}}(q\_\theta \| p)$</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$ (Reverse KL) ✓</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_2$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$, <strong>NOT</strong> Reverse KL ✗</td>
+      <td style="text-align: center;">$\frac{q\_\theta}{\mu} k\_2$</td>
+      <td style="text-align: center;">$\mathbb{E}\_q[k\_2]$ (f-divergence)</td>
+      <td style="text-align: center;">$\nabla\_\theta \mathbb{E}\_q[k\_2]$, <strong>NOT</strong> Reverse KL ✗</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (Reverse KL) ✓</td>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q\_\theta}{\mu}\right) k\_2$</td>
+      <td style="text-align: center;">$\mathbb{E}\_q[k\_2]$ (f-divergence)</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$ (Reverse KL) ✓</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
-      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (Reverse KL) ✓</td>
+      <td style="text-align: center;">$\frac{q\_\theta}{\mu} k\_3$</td>
+      <td style="text-align: center;">$D\_{\mathrm{KL}}(q\_\theta \| p)$</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$ (Reverse KL) ✓</td>
     </tr>
   </tbody>
 </table>
@@ -1509,57 +1595,92 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <li>However, if we <strong>detach</strong> the importance weights, $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ also gives the true gradient of reverse KL.</li>
 </ul>
 
-<h4 id="does-fracq_thetamu-k_3-have-lower-gradient-variance">Does $\frac{q_\theta}{\mu} k_3$ Have Lower Gradient Variance?</h4>
+<h4 id="do-the-three-unbiased-gradient-estimators-differ-in-variance">Do the Three Unbiased Gradient Estimators Differ in Variance?</h4>
 
-<p>Now we care about the gradient random variables:</p>
+<p>In the off-policy + importance sampling setting, <strong>three losses give an unbiased gradient of reverse KL</strong>:</p>
 
-\[g_1(x) := \nabla_\theta(w k_1) = w(x) s_\theta(x) (k_1(x) + 1)\]
+\[L_1(x) = w(x) k_1(x), \qquad
+L_2(x) = \bar{w}(x) k_2(x), \qquad
+L_3(x) = w(x) k_3(x),\]
 
-\[g_3(x) := \nabla_\theta(w k_3) = w(x) s_\theta(x) k_1(x)\]
+<p>where $w = \dfrac{q_\theta}{\mu}$ and $\bar{w} = \mathrm{sg}(w)$ denotes a detached weight. Their gradient random variables are</p>
 
-<p>Both have the same expectation $\nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$, but there is a simple relationship:</p>
+\[g_1(x) := \nabla_\theta L_1(x), \qquad
+g_2(x) := \nabla_\theta L_2(x), \qquad
+g_3(x) := \nabla_\theta L_3(x).\]
 
-\[g_1(x) - g_3(x) = w(x) s_\theta(x)\]
+<p>Using previously derived results ($\nabla_\theta w = w s_\theta$, $\nabla_\theta k_1 = s_\theta$, $\nabla_\theta k_2 = - (\log r) s_\theta = k_1 s_\theta$, $\nabla_\theta k_3 = (1 - r) s_\theta$), we get</p>
 
-<p>And since $\mathbb{E}_\mu[w s_\theta] = \mathbb{E}_{q_\theta}[s_\theta] = 0$, we know that $w s_\theta$ is a <strong>zero-mean “pure noise term”</strong>.</p>
+\[g_1(x) = w(x) s_\theta(x)\big(k_1(x)+1\big),\]
 
-<p><strong>First-Order Expansion Analysis</strong>:</p>
+\[g_2(x) = \bar{w}(x)\, k_1(x) s_\theta(x) = w(x) s_\theta(x) k_1(x),\]
 
-<p>In the common regime of KL penalties, the three distributions are close: $q_\theta \approx p \approx \mu$. Let $r(x) = 1 + \varepsilon(x)$ with $\vert \varepsilon \vert \ll 1$, and perform a first-order expansion:</p>
+\[g_3(x) = w(x) s_\theta(x)\big(k_3(x) + 1 - r(x)\big) = w(x) s_\theta(x) k_1(x).\]
 
-\[k_1 = -\log r \approx -\varepsilon + O(\varepsilon^2)\]
+<p>So in gradient space <strong>$g_2(x) \equiv g_3(x)$ exactly</strong> (same mean, same variance, same higher moments). Both share the correct expectation $\nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$. Compared with $g_1$, the only difference is a zero-mean extra term $w s_\theta$:</p>
 
-<p>Substituting into the coefficients of $g_1, g_3$:</p>
+\[g\_1(x) - g\_3(x) = w(x) s\_\theta(x), \qquad \mathbb{E}\_\mu[w s\_\theta] = \mathbb{E}\_{q\_\theta}[s\_\theta] = 0.\]
 
-\[k_1 + 1 \approx 1 - \varepsilon + O(\varepsilon^2), \quad k_1 \approx -\varepsilon + O(\varepsilon^2)\]
+<p>Define $A(x) := w(x) s_\theta(x)$ and $B(x) := k_1(x)$. Then $g_1 = A(B+1)$ and $g_\star := g_2 = g_3 = A B$. Their variance difference is</p>
 
-<p>Thus:</p>
+\[\mathrm{Var}_\mu(g_1) - \mathrm{Var}_\mu(g_\star) = \mathbb{E}_\mu\big[A^2 \big((B+1)^2 - B^2\big)\big] = \mathbb{E}_\mu\big[A^2 (2B + 1)\big]\]
 
-\[g_1(x) \approx w(x) s_\theta(x) \cdot \big(1 - \varepsilon(x) + O(\varepsilon^2)\big)\]
+<p>or explicitly</p>
 
-\[g_3(x) \approx w(x) s_\theta(x) \cdot \big(-\varepsilon(x) + O(\varepsilon^2)\big)\]
+\[\mathrm{Var}\_\mu(g\_1) - \mathrm{Var}\_\mu(g\_\star) = \mathbb{E}\_\mu\Big[w(x)^2 s\_\theta(x)^2 \big(2 k\_1(x) + 1\big)\Big].\]
 
-<p><strong>Core Intuition</strong>:</p>
+<p>In the typical KL-penalty regime $q_\theta \approx p \approx \mu$, let $r(x) = 1 + \varepsilon(x)$ with $\lvert\varepsilon\rvert \ll 1$. Then $k_1 = -\log r \approx -\varepsilon$, so $2k_1 + 1 \approx 1 - 2\varepsilon$, with the leading term being a positive $O(1)$ constant. This means the right-hand side is approximately $\mathbb{E}_\mu[w^2 s_\theta^2] &gt; 0$, and therefore $\mathrm{Var}_\mu(g_1) &gt; \mathrm{Var}_\mu(g_\star)$.</p>
 
-<ul>
-  <li>$g_1$ contains a constant term $w s_\theta$ with “magnitude 1 but expectation 0”. The true gradient is the <strong>tiny difference</strong> after this part cancels out with other terms, so the single-sample variance is large.</li>
-  <li>$g_3$ analytically eliminates this constant term, leaving a <strong>first-order small quantity</strong> proportional to the bias $\varepsilon(x) = r(x) - 1$. When policies are close, $\vert \varepsilon \vert$ is small, so the fluctuation of $g_3$ is naturally significantly smaller.</li>
-</ul>
+<p>More specifically, with first-order approximation $k_1 \approx -\varepsilon$ and $k_1 + 1 \approx 1 - \varepsilon$, we have</p>
 
-<p>This is completely consistent with the intuition in the “Value Estimation” section: $k_3$ is a second-order small quantity at $r=1$, while $k_1$ is a first-order quantity. With importance weights, this property is preserved in the gradient estimation.</p>
+\[g_1(x) \approx w(x) s_\theta(x)\big(1 - \varepsilon(x)\big), \qquad
+g_\star(x) \approx w(x) s_\theta(x)\big(-\varepsilon(x)\big).\]
 
-<blockquote>
-  <p><strong>Conclusion</strong>: In the typical KL penalty scenario where $q_\theta \approx p \approx \mu$, the gradient variance of $\frac{q_\theta}{\mu} k_3$ is <strong>strictly lower order</strong> than that of $\frac{q_\theta}{\mu} k_1$, making it the “unbiased + low variance” choice.</p>
-</blockquote>
+<p>Intuition: $g_1$ keeps an $O(1)$ zero-mean noise term $w s_\theta$, while $g_\star$ is an $O(\varepsilon)$ term. When policies are close, $\lvert\varepsilon\rvert$ is small, so $g_\star$ (i.e., $\bar{w} k_2$ or $w k_3$) has much lower variance than $g_1$ ($w k_1$).</p>
+
+<p>Summary table:</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center; white-space: nowrap;">Estimator</th>
+      <th style="text-align: center; white-space: nowrap;">Gradient RV</th>
+      <th style="text-align: center; white-space: nowrap;">Scale ($r\approx1$)</th>
+      <th style="text-align: center;">Variance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">$w k\_1$</td>
+      <td style="text-align: center;">$w s\_\theta (k\_1+1)$</td>
+      <td style="text-align: center;">$O(1)$</td>
+      <td style="text-align: center;">High</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$\mathrm{sg}(w) k\_2$</td>
+      <td style="text-align: center;">$w s\_\theta k\_1$</td>
+      <td style="text-align: center;">$O(\varepsilon)$</td>
+      <td style="text-align: center;">Low</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">$w k\_3$</td>
+      <td style="text-align: center;">$w s\_\theta k\_1$</td>
+      <td style="text-align: center;">$O(\varepsilon)$</td>
+      <td style="text-align: center;">Low</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 <p><strong>Warning for Extreme Off-Policy</strong>:</p>
 
-<p>When $\mu$ differs greatly from $q_\theta$ — for example, $\mu$ has almost no samples in the high-density regions of $q_\theta$, or $w = q_\theta / \mu$ explodes in the tails — any method based on $\frac{q_\theta}{\mu}$ will suffer from severe variance problems. In this case, the advantage of $\frac{q_\theta}{\mu} k_3$ over $\frac{q_\theta}{\mu} k_1$ is no longer theoretically guaranteed, and strategies like clipping or regularization are needed.</p>
+<p>When $\mu$ differs greatly from $q_\theta$ — for example, $\mu$ has almost no samples in the high-density regions of $q_\theta$, or $w = q_\theta / \mu$ explodes in the tails — any method based on $\frac{q_\theta}{\mu}$ will suffer from severe variance problems. In this case, the advantage of $w k_3$ (or $\mathrm{sg}(w) k_2$) over $w k_1$ is no longer theoretically guaranteed, and strategies like clipping or regularization are needed.</p>
 
 <p>However, in RL practice, we usually control the KL constraint and limit the degree of off-policy (e.g., using a proximal policy $\mu = q_{\theta_\text{old}}$). In this common regime, we can say with considerable confidence:</p>
 
 <blockquote>
-  <p><strong>If you have decided to use off-policy + importance sampling to optimize reverse KL, using $\frac{q_\theta}{\mu} k_3$ as the loss usually yields lower gradient variance than $\frac{q_\theta}{\mu} k_1$.</strong></p>
+  <p><strong>If you have decided to use off-policy + importance sampling to optimize reverse KL, prefer $w k_3$ or $\mathrm{sg}(w) k_2$; $w k_1$ is unbiased but noisier.</strong></p>
 </blockquote>
 
 <p>This is why the DeepSeek v3.2 technical report uses $\frac{q_\theta}{\mu} k_3$ as the estimator for off-policy KL penalty.</p>
@@ -1573,15 +1694,15 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <ul>
   <li>When sampling from a behavior policy $\mu$, the natural off-policy KL estimator is $\frac{q_\theta}{\mu} k_i$.</li>
-  <li><strong>Numerically</strong>, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ remain unbiased estimates of reverse KL.</li>
-  <li><strong>Gradient-wise</strong>, since $\mu$ is independent of $\theta$, “expectation-then-gradient” and “gradient-then-expectation” are equivalent:
+  <li><strong>Numerically</strong>, $\frac{q_\theta}{\mu} k_1$ and $\frac{q_\theta}{\mu} k_3$ remain unbiased for reverse KL; $\frac{q_\theta}{\mu} k_2$ is biased.</li>
+  <li><strong>Gradient-wise</strong>, because $\mu$ is independent of $\theta$:
     <ul>
       <li>$\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_1)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
+      <li>$\mathbb{E}_\mu[\nabla_\theta(\mathrm{sg}(\frac{q_\theta}{\mu}) k_2)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
       <li>$\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_3)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
-      <li>$\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_2)] \neq \nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$</li>
     </ul>
   </li>
-  <li><strong>Variance-wise</strong>, the gradient of $\frac{q_\theta}{\mu} k_3$ can be seen as the gradient of $\frac{q_\theta}{\mu} k_1$ minus a zero-mean noise term $w s_\theta$. When $q_\theta \approx p \approx \mu$ and importance weights are not too extreme, <strong>the gradient of $\frac{q_\theta}{\mu} k_3$ is more stable and has lower variance</strong>.</li>
+  <li><strong>Variance-wise</strong>, $\mathrm{sg}(w) k_2$ and $w k_3$ have identical gradients and lower variance; $w k_1$ is unbiased but noisier unless clipped.</li>
 </ul>
 
 <h3 id="gradient-estimation-overview">Gradient Estimation Overview</h3>
@@ -1594,7 +1715,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
     <tr style="background-color: var(--global-bg-color);">
       <th style="text-align: center; white-space: nowrap;">Sampling Source</th>
       <th style="text-align: center;">Loss</th>
-      <th style="text-align: center;">Expected $\nabla_\theta$ Loss</th>
+      <th style="text-align: center;">Expected $\nabla\_\theta$ Loss</th>
       <th style="text-align: center;">Corresponding Objective</th>
       <th style="text-align: center; white-space: nowrap;">Can Optimize Reverse KL?</th>
     </tr>
@@ -1602,50 +1723,50 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
   <tbody>
     <tr>
       <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[s_\theta] = 0$</td>
+      <td style="text-align: center;">$k\_1$</td>
+      <td style="text-align: center;">$\mathbb{E}\_q[s\_\theta] = 0$</td>
       <td style="text-align: center;">None (Gradient is zero)</td>
       <td style="text-align: center;">✗</td>
     </tr>
     <tr>
       <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;">$k\_2$</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>Reverse KL</strong></td>
       <td style="text-align: center;">✓</td>
     </tr>
     <tr>
       <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+      <td style="text-align: center;">$k\_3$</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(p \| q)$</td>
       <td style="text-align: center;">Forward KL</td>
       <td style="text-align: center;">✗</td>
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_1$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k\_1$</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>Reverse KL</strong></td>
       <td style="text-align: center;">✓ (High Variance)</td>
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k\_2$</td>
+      <td style="text-align: center;">$\nabla\_\theta \mathbb{E}\_q[k\_2]$</td>
       <td style="text-align: center;">f-divergence (Not KL)</td>
       <td style="text-align: center;">✗</td>
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k\_2$</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>Reverse KL</strong></td>
       <td style="text-align: center;">✓</td>
     </tr>
     <tr>
       <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k\_3$</td>
+      <td style="text-align: center;">$\nabla\_\theta D\_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;"><strong>Reverse KL</strong></td>
       <td style="text-align: center;">✓ (Recommended, Low Var)</td>
     </tr>
@@ -1695,7 +1816,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Correct choice</strong>: use <strong>$k_2$</strong> as the loss.</p>
 
-\[\mathcal{L}_{k_2} = \frac{1}{2}(\log r)^2.\]
+\[\mathcal{L}\_{k\_2} = \frac{1}{2}(\log r)^2.\]
 
 <p>Its gradient expectation $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q | p)$ is exactly the true gradient of reverse KL.</p>
 
@@ -1705,7 +1826,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Correct choice</strong>: use <strong>$k_3$</strong> as the loss.</p>
 
-\[\mathbb{E}_q[\nabla k_3] = \mathbb{E}_q[(1 - r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q).\]
+\[\mathbb{E}\_q[\nabla k\_3] = \mathbb{E}\_q[(1 - r) s\_\theta] = \nabla\_\theta D\_{\mathrm{KL}}(p \| q).\]
 
 <p>If you backpropagate through the batch mean of $k_3$, autodiff computes exactly this forward-KL gradient – no extra tricks needed.</p>
 
@@ -1715,7 +1836,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Recommended</strong>: use <strong>$\frac{q_\theta}{\mu} k_3$</strong> as the loss.</p>
 
-\[\mathcal{L} = \frac{q_\theta(x)}{\mu(x)} \cdot \left(\frac{p(x)}{q_\theta(x)} - 1 - \log \frac{p(x)}{q_\theta(x)}\right)\]
+\[\mathcal{L} = \frac{q\_\theta(x)}{\mu(x)} \cdot \left(\frac{p(x)}{q\_\theta(x)} - 1 - \log \frac{p(x)}{q\_\theta(x)}\right)\]
 
 <ul>
   <li>Unbiased gradient.</li>
@@ -1724,7 +1845,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>Alternative 1</strong>: Use $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ (detach the importance weights).</p>
 
-\[\mathcal{L} = \text{sg}\left(\frac{q_\theta(x)}{\mu(x)}\right) \cdot \frac{1}{2}\left(\log \frac{p(x)}{q_\theta(x)}\right)^2\]
+\[\mathcal{L} = \text{sg}\left(\frac{q\_\theta(x)}{\mu(x)}\right) \cdot \frac{1}{2}\left(\log \frac{p(x)}{q\_\theta(x)}\right)^2\]
 
 <p>This way, the gradient becomes $\bar{w} \cdot (-\log r) s_\theta$, whose expectation is still the true gradient of reverse KL. This approach is similar in form to on-policy $k_2$, just with an additional importance weight that does not participate in the gradient.</p>
 
@@ -1748,20 +1869,20 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
     <tr>
       <td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;">$q$ (on-policy)</td>
-      <td style="text-align: center;">$k_1$ or $k_3$ (unbiased)</td>
-      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center;">$k\_1$ or $k\_3$ (unbiased)</td>
+      <td style="text-align: center;">$k\_2$</td>
     </tr>
     <tr>
       <td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center;">$\mu$ (off-policy)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_1$ or $\frac{q}{\mu} k_3$ (unbiased)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$ (recommended) or $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k\_1$ or $\frac{q}{\mu} k\_3$ (unbiased)</td>
+      <td style="text-align: center;">$\frac{q}{\mu} k\_3$ (recommended) or $\text{sg}\left(\frac{q}{\mu}\right) k\_2$</td>
     </tr>
     <tr>
       <td style="text-align: center;">Forward KL $D_{\mathrm{KL}}(p \| q)$</td>
       <td style="text-align: center;">$q$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[r\log r]$</td>
-      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center;">$\mathbb{E}\_q[r\log r]$</td>
+      <td style="text-align: center;">$k\_3$</td>
     </tr>
   </tbody>
 </table>

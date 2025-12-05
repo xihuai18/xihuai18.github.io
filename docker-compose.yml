@@ -6,8 +6,16 @@ services:
     command: bash -c "
       rm -f Gemfile.lock
       && bundle install
-      && bundle exec jekyll serve --watch --port=10086 --host=0.0.0.0 --livereload --verbose --trace"
+      && bundle exec jekyll serve \
+        --watch \
+        --port=10086 \
+        --host=0.0.0.0 \
+        --livereload \
+        --livereload-port 35729 \
+        --verbose \
+        --trace"
     ports:
       - 10086:10086
+      - 35729:35729
     volumes:
       - .:/srv/jekyll
