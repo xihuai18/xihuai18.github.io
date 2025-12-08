@@ -19,7 +19,7 @@ lang: en
 
 ## Introduction: What KL Does in RL
 
-In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), **KL penalty** keeps the new policy from drifting too far from a reference policy, preventing instability or collapse.
+In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), **KL penalty** keeps the new policy from drifting too far from a reference policy, preventing instability or collapse. However, implementing KL penalty involves multiple layers of choices: **which estimator** ($k_1$, $k_2$, $k_3$), **who to sample from** (on-policy vs off-policy), and **how to use it** (as reward shaping or as a loss for backpropagation). This post systematically dissects these choices and their interrelationships.
 
 ### Forward vs. reverse KL
 
@@ -156,7 +156,7 @@ Convexity keeps $\phi$ above its tangent, so this gap is **nonnegative**. As $r 
 </table>
 </div>
 
-For estimating the KL **value**, $k_3$ is "unbiased + low variance"; but for gradients, the story is different.
+For estimating the KL **value**, $k_3$ is "unbiased + low variance"; but as we'll analyze, **the gradient story is completely different** — different estimators' gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.
 
 
 ## Core analysis
@@ -596,12 +596,127 @@ Conclusion: off-policy IS with reverse-KL gradients has three unbiased options: 
 2) **Off-policy reverse KL:** three correct options: $\tfrac{q}{\mu} k_1$ (unbiased, higher var); $\text{sg}(\tfrac{q}{\mu}) k_2$ (unbiased, equals next); $\tfrac{q}{\mu} k_3$ (unbiased, lower var; equals previous).
 3) **$\tfrac{q}{\mu} k_2$ with weight in grad is wrong** for reverse KL.
 
+However, before choosing an estimator, there's a more fundamental question to answer: **should KL be added to rewards, or be part of the loss?** This choice fundamentally affects optimization behavior and credit assignment.
+
+## Two Ways to Use KL: As Reward vs. As Loss
+
+In practice, KL penalty can be used in two fundamentally different ways: added to rewards for shaping (no gradient backpropagation needed), or as part of the loss for backpropagation (gradient needed).
+
+These two approaches may seem like just a `detach` difference in code, but they correspond to completely different optimization behaviors.
+
+### Definitions
+
+**KL as Reward (stop-gradient):**
+
+```python
+kl = compute_kl(log_prob_q, log_prob_p).detach()
+shaped_reward = reward - beta * kl
+```
+
+Use shaped reward for standard actor-critic updates.
+
+**KL as Loss (backprop):**
+
+```python
+actor_loss = -advantage * log_prob + beta * kl  # kl participates in gradient
+```
+
+Critic only learns environment value; KL is a regularization term for the actor that backpropagates gradients.
+
+### Key Difference 1: Optimization Target
+
+**KL as Reward:** Optimizes a **regularized new MDP** where the reward function becomes $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$.
+
+**KL as Loss:** Optimizes the **original task + supervised regularization**; KL doesn't change the MDP definition, it's just an external constraint term.
+
+**Intuition:** The former "changes the game rules"; the latter "adds constraints under the original rules".
+
+### Key Difference 2: Actor Gradient
+
+**KL as Reward:** Single policy gradient, KL influence is **reflected indirectly through advantage**:
+
+$$
+g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ based on } (r_t - \beta \cdot \text{KL}_t)
+$$
+
+**KL as Loss:** Gradient splits into two independent paths:
+
+$$
+g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL gradient}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla_\theta \text{KL}_t\right]}_{\text{KL explicit gradient}}
+$$
+
+**Key distinction:** Is KL's force "multiplied on advantage" or "a separate force"? The latter's KL gradient is deterministic, unaffected by critic quality.
+
+### Key Difference 3: Critic Learning Target
+
+**KL as Reward:** Critic learns mixed value
+
+$$
+V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]
+$$
+
+**KL as Loss:** Critic only learns environment value
+
+$$
+V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]
+$$
+
+The latter has cleaner separation, making it easier to monitor task return and KL divergence separately.
+
+### Key Difference 4: Credit Assignment
+
+Consider a scenario: first few steps are routing behavior, final step has high reward but also high KL.
+
+**KL as Reward:** The large KL at the terminal state is **propagated back to all previous steps** through TD, so the policy tends to **fundamentally avoid** high-KL regions — this is "planning-based KL budget allocation".
+
+**KL as Loss:** The terminal state's KL only appears in that state's gradient term; the policy is still willing to **visit high-reward regions but locally correct** behavior.
+
+### Summary
+
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">Dimension</th>
+      <th style="text-align: center;">KL as Reward (stop-grad)</th>
+      <th style="text-align: center;">KL as Loss (backprop)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">Optimization target</td>
+      <td style="text-align: center;">Regularized new MDP</td>
+      <td style="text-align: center;">Original task + supervised regularization</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Actor gradient</td>
+      <td style="text-align: center;">Single PG, based on shaped advantage</td>
+      <td style="text-align: center;">RL gradient + explicit KL gradient</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Critic</td>
+      <td style="text-align: center;">Learns $V^{\text{reg}}$: reward + KL mixed</td>
+      <td style="text-align: center;">Learns $V^{\text{env}}$: only environment reward</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Credit Assignment</td>
+      <td style="text-align: center;">Multi-step backprop, planning-capable</td>
+      <td style="text-align: center;">Local per-state, no planning</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+**One-liner:** KL as reward makes the agent "plan to avoid high-KL paths" — constraints are more global and thorough; KL as loss makes the agent "visit but locally correct" — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be "preventive" or "corrective".
+
 
 ## RL practice guide
 
+Combining the preceding analysis of "estimator mathematical properties" and "usage modes", this section provides practical recommendations for specific scenarios.
+
 ### KL as reward penalty (no gradient needed)
 
-When KL is a scalar penalty in rewards, we only need accurate **values**, no backprop.
+When KL is a scalar penalty in rewards, we only need accurate **values**, no backprop. Refer to the earlier section on "Bias and variance for KL values".
 
 **Recommend:**
 - Use **$k_1$** or **$k_3$** (both unbiased for reverse KL value).
@@ -657,14 +772,16 @@ $$
 
 ## "Grab-and-use" crib sheet
 
+The table below provides recommended estimator choices along three dimensions: "target KL direction" × "sampling source" × "usage mode". "For **value**" corresponds to KL as reward penalty (no gradient needed); "For **gradient**" corresponds to KL as loss (gradient backpropagation needed).
+
 <div class="table-responsive" markdown="0">
 <table class="table table-bordered" style="font-size: 0.95em;">
 	<thead>
 		<tr style="background-color: var(--global-bg-color);">
 			<th style="text-align: center;">Target</th>
 			<th style="text-align: center;">Sampling</th>
-			<th style="text-align: center;">For <strong>value</strong></th>
-			<th style="text-align: center;">For <strong>gradient</strong></th>
+			<th style="text-align: center;">For <strong>value</strong> (KL as Reward)</th>
+			<th style="text-align: center;">For <strong>gradient</strong> (KL as Loss)</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -695,9 +812,9 @@ $$
 
 **Trap 1: Using $k_1$ directly as loss (on-policy)**
 
-$k_1$ gradient expectation is zero ($\mathbb{E}\_q[s\_\theta]=0$); as a loss it does nothing.
+When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}\_q[s\_\theta]=0$); as a loss it does nothing.
 
-> **Fix:** use $k_1$ or $k_3$ for reward shaping (no grad), use $k_2$ or $k_3$ for losses.
+> **Fix:** First clarify the KL usage mode. For reward shaping (no gradient needed), both $k_1$ and $k_3$ work; for losses (gradient needed), use $k_2$ (reverse KL) or $k_3$ (forward KL) on-policy.
 
 **Trap 2: Mixing up $k_3$ value-unbiasedness vs. gradient target**
 
@@ -738,7 +855,13 @@ $w = q_\theta / \mu$ often comes from `log_prob_q - log_prob_mu` then `exp`. Det
 	- **On-policy:** reverse KL -> $k_2$; forward KL -> $k_3$.
 	- **Off-policy:** reverse KL -> $\tfrac{q\_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q\_\theta}{\mu}) k_2$ (same gradient, low variance); fallback $\tfrac{q\_\theta}{\mu} k_1$ (unbiased but noisier).
 
-Keep three questions clear: **who do we sample from, whose value do we estimate, whose gradient do we need?** Especially note: **on-policy vs. off-policy choose different estimators for reverse KL** — on-policy use $k_2$, off-policy use $\tfrac{q\_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q\_\theta}{\mu}) k_2$.
+Keep three questions clear: **who do we sample from, whose value do we estimate, whose gradient do we need?** Especially note: **on-policy vs. off-policy choose different estimators for reverse KL** — on-policy use $k_2$, off-policy use $\tfrac{q_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$.
+
+Additionally, don't forget to determine **the KL usage mode** before choosing an estimator:
+- **KL as reward:** Constraints act on the policy indirectly through shaped advantage, with cross-timestep credit assignment capability; agent will "plan to avoid high-KL paths"
+- **KL as loss:** Constraints act on the policy directly as an independent gradient term; agent will "visit but locally correct"
+
+This choice is more fundamental than the estimator itself, depending on whether you want constraints to be "preventive" or "corrective".
 
 
 ## References

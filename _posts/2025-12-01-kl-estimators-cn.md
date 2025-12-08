@@ -20,7 +20,7 @@ lang: zh
 
 ## 引言：KL 散度在强化学习中的角色
 
-在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。
+在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：**用哪个估计器**（$k_1$, $k_2$, $k_3$）、**从谁采样**（on-policy vs off-policy）、以及**如何使用**（作为 reward shaping 还是作为 loss 回传）。本文将系统地拆解这些选择及其相互关系。
 
 ### 正向 KL 与反向 KL 的区别
 
@@ -158,7 +158,7 @@ $$
 </table>
 </div>
 
-从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，**梯度层面的故事完全不同**。
+从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，**梯度层面的故事完全不同**——不同估计器的梯度可能对应不同的优化目标。此外，KL 是加入 reward 做 shaping，还是作为 loss 直接回传梯度，也会根本性地影响训练行为。
 
 
 ## 核心分析
@@ -855,12 +855,128 @@ $$
   - $\frac{q}{\mu} k_3$：无偏且方差更低（与上一项等价，均为推荐选择）
 3. **$\frac{q}{\mu} k_2$（权重参与梯度）在 off-policy 下失效**：这是一个容易被忽视的陷阱
 
+然而，在选定估计器之前，还有一个更基础的问题需要回答：**KL 应该加进 reward 里，还是作为 loss 的一部分？** 这一选择会从根本上影响优化行为和 credit assignment。
+
+## KL 的两种使用方式：作为 Reward vs 作为 Loss
+
+在实际实现中，KL 惩罚有两种截然不同的使用方式：加入 reward 进行 shaping（不需要回传梯度），或作为 loss 的一部分参与反传（需要梯度）。
+
+这两种做法看似只是代码里一个 `detach` 的区别，实际上对应着截然不同的优化行为。
+
+### 两种用法的定义
+
+**KL 作为 Reward（stop-gradient）**：
+
+```python
+kl = compute_kl(log_prob_q, log_prob_p).detach()
+shaped_reward = reward - beta * kl
+```
+
+用 shaped reward 做标准 actor-critic 更新。
+
+**KL 作为 Loss（backprop）**：
+
+```python
+actor_loss = -advantage * log_prob + beta * kl  # kl 参与梯度计算
+```
+
+Critic 只学环境价值，KL 作为 actor 的正则项回传梯度。
+
+### 核心差异一：更新目标
+
+**KL 作为 Reward**：优化一个**正则化后的新 MDP**，奖励函数变为 $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$。
+
+**KL 作为 Loss**：优化**原任务 + 监督正则**，KL 不改变 MDP 定义，只是外挂的约束项。
+
+**直觉**：前者是「改变游戏规则」，后者是「在原规则下加约束」。
+
+### 核心差异二：Actor 梯度
+
+**KL 作为 Reward**：单一 policy gradient，KL 的影响**通过 advantage 间接体现**：
+
+$$
+g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ 基于 } (r_t - \beta \cdot \text{KL}_t)
+$$
+
+**KL 作为 Loss**：梯度分成两条独立路径：
+
+$$
+g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}*{\text{RL 梯度}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla*\theta \text{KL}*t\right]}*{\text{KL 显式梯度}}
+$$
+
+**关键区别**：KL 的力量是「乘在 advantage 上」还是「单独一股力」。后者的 KL 梯度是确定性的，不受 critic 质量影响。
+
+### 核心差异三：Critic 学习目标
+
+**KL 作为 Reward**：Critic 学混合价值
+
+$$
+V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]
+$$
+
+**KL 作为 Loss**：Critic 只学环境价值
+
+$$
+V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]
+$$
+
+后者分工更清晰，便于分别监控任务回报和 KL 散度。
+
+### 核心差异四：Credit Assignment
+
+考虑场景：前几步是路由行为，最后一步 reward 高但 KL 也大。
+
+**KL 作为 Reward**：末状态的大 KL 通过 TD **回传到前面所有步骤**，策略倾向于**从根本上避开**高 KL 区域——这是「规划性的 KL 预算分配」。
+
+**KL 作为 Loss**：末状态的 KL 只在该状态的梯度项里体现，策略仍愿意**访问高回报区域，但局部修正**行为。
+
+### 小结
+
+<div class="table-responsive" markdown="0">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">维度</th>
+      <th style="text-align: center;">KL 作为 Reward（stop-grad）</th>
+      <th style="text-align: center;">KL 作为 Loss（backprop）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">更新目标</td>
+      <td style="text-align: center;">正则化后的新 MDP</td>
+      <td style="text-align: center;">原任务 + 监督正则</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Actor 梯度</td>
+      <td style="text-align: center;">单一 PG，基于 shaped advantage</td>
+      <td style="text-align: center;">RL 梯度 + 显式 KL 梯度</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Critic</td>
+      <td style="text-align: center;">学 $V^{\text{reg}}$：reward + KL 混合</td>
+      <td style="text-align: center;">学 $V^{\text{env}}$：只看环境 reward</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Credit Assignment</td>
+      <td style="text-align: center;">多步回传，有规划性</td>
+      <td style="text-align: center;">局部 per-state，无规划性</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+**一句话总结**：KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底；KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活。选择取决于你是否需要跨时间步的 KL 预算分配能力，以及希望约束是「预防性」还是「修正性」的。
+
+
 
 ## RL 实践指南
 
+结合前面对「估计器数学性质」和「使用方式」的分析，本节给出具体场景下的实践建议。
+
 ### KL 作为 Reward 惩罚（不需要梯度）
 
-当 KL 仅作为标量惩罚加入 reward shaping 时，我们只需要准确的**数值估计**，不需要反传梯度。
+当 KL 仅作为标量惩罚加入 reward shaping 时，我们只需要准确的**数值估计**，不需要反传梯度。此时应参考前文「估计 KL 数值时的偏差与方差」中的分析。
 
 **推荐**：
 - 使用 **$k_1$** 或 **$k_3$**（两者对反向 KL 数值均无偏）
@@ -925,14 +1041,16 @@ $$
 
 ## 一份「拿来就用」的对照表
 
+下表按「目标 KL 方向」×「采样来源」×「使用方式」三个维度给出推荐的估计器选择。其中「用于**数值**」对应 KL 作为 reward 惩罚（不需要梯度），「用于**梯度**」对应 KL 作为 loss（需要反传梯度）。
+
 <div class="table-responsive" markdown="0">
 <table class="table table-bordered" style="font-size: 0.95em;">
   <thead>
     <tr style="background-color: var(--global-bg-color);">
       <th style="text-align: center;">目标</th>
       <th style="text-align: center;">采样来源</th>
-      <th style="text-align: center;">用于<strong>数值</strong></th>
-      <th style="text-align: center;">用于<strong>梯度</strong></th>
+      <th style="text-align: center;">用于<strong>数值</strong>（KL 作为 Reward）</th>
+      <th style="text-align: center;">用于<strong>梯度</strong>（KL 作为 Loss）</th>
     </tr>
   </thead>
   <tbody>
@@ -963,9 +1081,9 @@ $$
 
 **陷阱 1：把 $k_1$ 直接当 loss 反传（on-policy）**
 
-$k_1$ 的梯度期望恒为零（$\mathbb{E}\_q[\nabla k\_1] = \mathbb{E}\_q[s\_\theta] = 0$），作为 loss 完全无效。
+当 KL 作为 loss 使用时，$k_1$ 的梯度期望恒为零（$\mathbb{E}\_q[\nabla k\_1] = \mathbb{E}\_q[s\_\theta] = 0$），作为 loss 完全无效。
 
-> **解决**：reward shaping 用 $k_1$ 或 $k_3$（不需要梯度），loss 用 $k_2$ 或 $k_3$。
+> **解决**：首先明确 KL 的使用方式。如果是 reward shaping（不需要梯度），用 $k_1$ 或 $k_3$ 均可；如果是 loss（需要梯度），on-policy 下用 $k_2$（反向 KL）或 $k_3$（正向 KL）。
 
 **陷阱 2：混淆 $k_3$ 的「数值无偏性」与「梯度对应的目标」**
 
@@ -1007,6 +1125,12 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
   - **Off-policy**：优化反向 KL → 用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（两者梯度等价，均为无偏 + 低方差的推荐选择）
 
 把「**从谁采样**」、「**估计谁的值**」、「**对谁求梯度**」这三个问题捋清楚，三种估计器就不再让人混淆了。特别注意：**on-policy 和 off-policy 下，优化反向 KL 的正确选择是不同的**——前者用 $k_2$，后者用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$。
+
+此外，别忘了在选择估计器之前先确定 **KL 的使用方式**：
+- **KL 作为 reward**：约束通过 shaped advantage 间接作用于策略，具有跨时间步的 credit assignment 能力，agent 会「规划性地避开高 KL 路径」
+- **KL 作为 loss**：约束作为独立梯度项直接作用于策略，agent 会「访问但局部修正」
+
+这一选择比估计器本身更根本，取决于你希望约束是「预防性」还是「修正性」的。
 
 
 ## 参考文献
