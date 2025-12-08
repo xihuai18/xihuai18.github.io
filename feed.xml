@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-05T07:23:32+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-08T10:53:41+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
       <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
@@ -33,6 +33,15 @@
       <li><a href="#梯度估计总览" id="markdown-toc-梯度估计总览">梯度估计总览</a></li>
     </ul>
   </li>
+  <li><a href="#kl-的两种使用方式作为-reward-vs-作为-loss" id="markdown-toc-kl-的两种使用方式作为-reward-vs-作为-loss">KL 的两种使用方式：作为 Reward vs 作为 Loss</a>    <ul>
+      <li><a href="#两种用法的定义" id="markdown-toc-两种用法的定义">两种用法的定义</a></li>
+      <li><a href="#核心差异一更新目标" id="markdown-toc-核心差异一更新目标">核心差异一：更新目标</a></li>
+      <li><a href="#核心差异二actor-梯度" id="markdown-toc-核心差异二actor-梯度">核心差异二：Actor 梯度</a></li>
+      <li><a href="#核心差异三critic-学习目标" id="markdown-toc-核心差异三critic-学习目标">核心差异三：Critic 学习目标</a></li>
+      <li><a href="#核心差异四credit-assignment" id="markdown-toc-核心差异四credit-assignment">核心差异四：Credit Assignment</a></li>
+      <li><a href="#小结-1" id="markdown-toc-小结-1">小结</a></li>
+    </ul>
+  </li>
   <li><a href="#rl-实践指南" id="markdown-toc-rl-实践指南">RL 实践指南</a>    <ul>
       <li><a href="#kl-作为-reward-惩罚不需要梯度" id="markdown-toc-kl-作为-reward-惩罚不需要梯度">KL 作为 Reward 惩罚（不需要梯度）</a></li>
       <li><a href="#kl-作为-loss需要梯度回传" id="markdown-toc-kl-作为-loss需要梯度回传">KL 作为 Loss（需要梯度回传）</a>        <ul>
@@ -59,7 +68,7 @@
 
 <h2 id="引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</h2>
 
-<p>在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。</p>
+<p>在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：<strong>用哪个估计器</strong>（$k_1$, $k_2$, $k_3$）、<strong>从谁采样</strong>（on-policy vs off-policy）、以及<strong>如何使用</strong>（作为 reward shaping 还是作为 loss 回传）。本文将系统地拆解这些选择及其相互关系。</p>
 
 <h3 id="正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</h3>
 
@@ -179,7 +188,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 </table>
 </div>
 
-<p>从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，<strong>梯度层面的故事完全不同</strong>。</p>
+<p>从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，<strong>梯度层面的故事完全不同</strong>——不同估计器的梯度可能对应不同的优化目标。此外，KL 是加入 reward 做 shaping，还是作为 loss 直接回传梯度，也会根本性地影响训练行为。</p>
 
 <h2 id="核心分析">核心分析</h2>
 
@@ -820,11 +829,116 @@ g_3(x)
   <li><strong>$\frac{q}{\mu} k_2$（权重参与梯度）在 off-policy 下失效</strong>：这是一个容易被忽视的陷阱</li>
 </ol>
 
+<p>然而，在选定估计器之前，还有一个更基础的问题需要回答：<strong>KL 应该加进 reward 里，还是作为 loss 的一部分？</strong> 这一选择会从根本上影响优化行为和 credit assignment。</p>
+
+<h2 id="kl-的两种使用方式作为-reward-vs-作为-loss">KL 的两种使用方式：作为 Reward vs 作为 Loss</h2>
+
+<p>在实际实现中，KL 惩罚有两种截然不同的使用方式：加入 reward 进行 shaping（不需要回传梯度），或作为 loss 的一部分参与反传（需要梯度）。</p>
+
+<p>这两种做法看似只是代码里一个 <code class="language-plaintext highlighter-rouge">detach</code> 的区别，实际上对应着截然不同的优化行为。</p>
+
+<h3 id="两种用法的定义">两种用法的定义</h3>
+
+<p><strong>KL 作为 Reward（stop-gradient）</strong>：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kl</span> <span class="o">=</span> <span class="nf">compute_kl</span><span class="p">(</span><span class="n">log_prob_q</span><span class="p">,</span> <span class="n">log_prob_p</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+<span class="n">shaped_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
+</code></pre></div></div>
+
+<p>用 shaped reward 做标准 actor-critic 更新。</p>
+
+<p><strong>KL 作为 Loss（backprop）</strong>：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actor_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantage</span> <span class="o">*</span> <span class="n">log_prob</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>  <span class="c1"># kl 参与梯度计算
+</span></code></pre></div></div>
+
+<p>Critic 只学环境价值，KL 作为 actor 的正则项回传梯度。</p>
+
+<h3 id="核心差异一更新目标">核心差异一：更新目标</h3>
+
+<p><strong>KL 作为 Reward</strong>：优化一个<strong>正则化后的新 MDP</strong>，奖励函数变为 $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$。</p>
+
+<p><strong>KL 作为 Loss</strong>：优化<strong>原任务 + 监督正则</strong>，KL 不改变 MDP 定义，只是外挂的约束项。</p>
+
+<p><strong>直觉</strong>：前者是「改变游戏规则」，后者是「在原规则下加约束」。</p>
+
+<h3 id="核心差异二actor-梯度">核心差异二：Actor 梯度</h3>
+
+<p><strong>KL 作为 Reward</strong>：单一 policy gradient，KL 的影响<strong>通过 advantage 间接体现</strong>：</p>
+
+\[g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ 基于 } (r_t - \beta \cdot \text{KL}_t)\]
+
+<p><strong>KL 作为 Loss</strong>：梯度分成两条独立路径：</p>
+
+\[g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}*{\text{RL 梯度}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla*\theta \text{KL}*t\right]}*{\text{KL 显式梯度}}\]
+
+<p><strong>关键区别</strong>：KL 的力量是「乘在 advantage 上」还是「单独一股力」。后者的 KL 梯度是确定性的，不受 critic 质量影响。</p>
+
+<h3 id="核心差异三critic-学习目标">核心差异三：Critic 学习目标</h3>
+
+<p><strong>KL 作为 Reward</strong>：Critic 学混合价值</p>
+
+\[V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]\]
+
+<p><strong>KL 作为 Loss</strong>：Critic 只学环境价值</p>
+
+\[V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]\]
+
+<p>后者分工更清晰，便于分别监控任务回报和 KL 散度。</p>
+
+<h3 id="核心差异四credit-assignment">核心差异四：Credit Assignment</h3>
+
+<p>考虑场景：前几步是路由行为，最后一步 reward 高但 KL 也大。</p>
+
+<p><strong>KL 作为 Reward</strong>：末状态的大 KL 通过 TD <strong>回传到前面所有步骤</strong>，策略倾向于<strong>从根本上避开</strong>高 KL 区域——这是「规划性的 KL 预算分配」。</p>
+
+<p><strong>KL 作为 Loss</strong>：末状态的 KL 只在该状态的梯度项里体现，策略仍愿意<strong>访问高回报区域，但局部修正</strong>行为。</p>
+
+<h3 id="小结-1">小结</h3>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">维度</th>
+      <th style="text-align: center;">KL 作为 Reward（stop-grad）</th>
+      <th style="text-align: center;">KL 作为 Loss（backprop）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">更新目标</td>
+      <td style="text-align: center;">正则化后的新 MDP</td>
+      <td style="text-align: center;">原任务 + 监督正则</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Actor 梯度</td>
+      <td style="text-align: center;">单一 PG，基于 shaped advantage</td>
+      <td style="text-align: center;">RL 梯度 + 显式 KL 梯度</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Critic</td>
+      <td style="text-align: center;">学 $V^{\text{reg}}$：reward + KL 混合</td>
+      <td style="text-align: center;">学 $V^{\text{env}}$：只看环境 reward</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Credit Assignment</td>
+      <td style="text-align: center;">多步回传，有规划性</td>
+      <td style="text-align: center;">局部 per-state，无规划性</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>一句话总结</strong>：KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底；KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活。选择取决于你是否需要跨时间步的 KL 预算分配能力，以及希望约束是「预防性」还是「修正性」的。</p>
+
 <h2 id="rl-实践指南">RL 实践指南</h2>
+
+<p>结合前面对「估计器数学性质」和「使用方式」的分析，本节给出具体场景下的实践建议。</p>
 
 <h3 id="kl-作为-reward-惩罚不需要梯度">KL 作为 Reward 惩罚（不需要梯度）</h3>
 
-<p>当 KL 仅作为标量惩罚加入 reward shaping 时，我们只需要准确的<strong>数值估计</strong>，不需要反传梯度。</p>
+<p>当 KL 仅作为标量惩罚加入 reward shaping 时，我们只需要准确的<strong>数值估计</strong>，不需要反传梯度。此时应参考前文「估计 KL 数值时的偏差与方差」中的分析。</p>
 
 <p><strong>推荐</strong>：</p>
 <ul>
@@ -885,14 +999,16 @@ g_3(x)
 
 <h2 id="一份拿来就用的对照表">一份「拿来就用」的对照表</h2>
 
+<p>下表按「目标 KL 方向」×「采样来源」×「使用方式」三个维度给出推荐的估计器选择。其中「用于<strong>数值</strong>」对应 KL 作为 reward 惩罚（不需要梯度），「用于<strong>梯度</strong>」对应 KL 作为 loss（需要反传梯度）。</p>
+
 <div class="table-responsive">
 <table class="table table-bordered" style="font-size: 0.95em;">
   <thead>
     <tr style="background-color: var(--global-bg-color);">
       <th style="text-align: center;">目标</th>
       <th style="text-align: center;">采样来源</th>
-      <th style="text-align: center;">用于<strong>数值</strong></th>
-      <th style="text-align: center;">用于<strong>梯度</strong></th>
+      <th style="text-align: center;">用于<strong>数值</strong>（KL 作为 Reward）</th>
+      <th style="text-align: center;">用于<strong>梯度</strong>（KL 作为 Loss）</th>
     </tr>
   </thead>
   <tbody>
@@ -922,10 +1038,10 @@ g_3(x)
 
 <p><strong>陷阱 1：把 $k_1$ 直接当 loss 反传（on-policy）</strong></p>
 
-<p>$k_1$ 的梯度期望恒为零（$\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$），作为 loss 完全无效。</p>
+<p>当 KL 作为 loss 使用时，$k_1$ 的梯度期望恒为零（$\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$），作为 loss 完全无效。</p>
 
 <blockquote>
-  <p><strong>解决</strong>：reward shaping 用 $k_1$ 或 $k_3$（不需要梯度），loss 用 $k_2$ 或 $k_3$。</p>
+  <p><strong>解决</strong>：首先明确 KL 的使用方式。如果是 reward shaping（不需要梯度），用 $k_1$ 或 $k_3$ 均可；如果是 loss（需要梯度），on-policy 下用 $k_2$（反向 KL）或 $k_3$（正向 KL）。</p>
 </blockquote>
 
 <p><strong>陷阱 2：混淆 $k_3$ 的「数值无偏性」与「梯度对应的目标」</strong></p>
@@ -984,6 +1100,14 @@ g_3(x)
 </ul>
 
 <p>把「<strong>从谁采样</strong>」、「<strong>估计谁的值</strong>」、「<strong>对谁求梯度</strong>」这三个问题捋清楚，三种估计器就不再让人混淆了。特别注意：<strong>on-policy 和 off-policy 下，优化反向 KL 的正确选择是不同的</strong>——前者用 $k_2$，后者用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$。</p>
+
+<p>此外，别忘了在选择估计器之前先确定 <strong>KL 的使用方式</strong>：</p>
+<ul>
+  <li><strong>KL 作为 reward</strong>：约束通过 shaped advantage 间接作用于策略，具有跨时间步的 credit assignment 能力，agent 会「规划性地避开高 KL 路径」</li>
+  <li><strong>KL 作为 loss</strong>：约束作为独立梯度项直接作用于策略，agent 会「访问但局部修正」</li>
+</ul>
+
+<p>这一选择比估计器本身更根本，取决于你希望约束是「预防性」还是「修正性」的。</p>
 
 <h2 id="参考文献">参考文献</h2>
 
@@ -1048,6 +1172,15 @@ g_3(x)
       <li><a href="#gradient-cheat-sheet" id="markdown-toc-gradient-cheat-sheet">Gradient cheat sheet</a></li>
     </ul>
   </li>
+  <li><a href="#two-ways-to-use-kl-as-reward-vs-as-loss" id="markdown-toc-two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</a>    <ul>
+      <li><a href="#definitions" id="markdown-toc-definitions">Definitions</a></li>
+      <li><a href="#key-difference-1-optimization-target" id="markdown-toc-key-difference-1-optimization-target">Key Difference 1: Optimization Target</a></li>
+      <li><a href="#key-difference-2-actor-gradient" id="markdown-toc-key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</a></li>
+      <li><a href="#key-difference-3-critic-learning-target" id="markdown-toc-key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</a></li>
+      <li><a href="#key-difference-4-credit-assignment" id="markdown-toc-key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</a></li>
+      <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
+    </ul>
+  </li>
   <li><a href="#rl-practice-guide" id="markdown-toc-rl-practice-guide">RL practice guide</a>    <ul>
       <li><a href="#kl-as-reward-penalty-no-gradient-needed" id="markdown-toc-kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</a></li>
       <li><a href="#kl-as-loss-needs-gradients" id="markdown-toc-kl-as-loss-needs-gradients">KL as loss (needs gradients)</a>        <ul>
@@ -1060,7 +1193,7 @@ g_3(x)
   </li>
   <li><a href="#grab-and-use-crib-sheet" id="markdown-toc-grab-and-use-crib-sheet">“Grab-and-use” crib sheet</a></li>
   <li><a href="#common-implementation-traps" id="markdown-toc-common-implementation-traps">Common implementation traps</a></li>
-  <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
+  <li><a href="#summary-1" id="markdown-toc-summary-1">Summary</a></li>
   <li><a href="#references" id="markdown-toc-references">References</a></li>
 </ul>
 
@@ -1074,7 +1207,7 @@ g_3(x)
 
 <h2 id="introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</h2>
 
-<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> keeps the new policy from drifting too far from a reference policy, preventing instability or collapse.</p>
+<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> keeps the new policy from drifting too far from a reference policy, preventing instability or collapse. However, implementing KL penalty involves multiple layers of choices: <strong>which estimator</strong> ($k_1$, $k_2$, $k_3$), <strong>who to sample from</strong> (on-policy vs off-policy), and <strong>how to use it</strong> (as reward shaping or as a loss for backpropagation). This post systematically dissects these choices and their interrelationships.</p>
 
 <h3 id="forward-vs-reverse-kl">Forward vs. reverse KL</h3>
 
@@ -1193,7 +1326,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 </table>
 </div>
 
-<p>For estimating the KL <strong>value</strong>, $k_3$ is “unbiased + low variance”; but for gradients, the story is different.</p>
+<p>For estimating the KL <strong>value</strong>, $k_3$ is “unbiased + low variance”; but as we’ll analyze, <strong>the gradient story is completely different</strong> — different estimators’ gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.</p>
 
 <h2 id="core-analysis">Core analysis</h2>
 
@@ -1601,11 +1734,116 @@ g_3 &amp;= w s_\theta k_1.
 2) <strong>Off-policy reverse KL:</strong> three correct options: $\tfrac{q}{\mu} k_1$ (unbiased, higher var); $\text{sg}(\tfrac{q}{\mu}) k_2$ (unbiased, equals next); $\tfrac{q}{\mu} k_3$ (unbiased, lower var; equals previous).
 3) <strong>$\tfrac{q}{\mu} k_2$ with weight in grad is wrong</strong> for reverse KL.</p>
 
+<p>However, before choosing an estimator, there’s a more fundamental question to answer: <strong>should KL be added to rewards, or be part of the loss?</strong> This choice fundamentally affects optimization behavior and credit assignment.</p>
+
+<h2 id="two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</h2>
+
+<p>In practice, KL penalty can be used in two fundamentally different ways: added to rewards for shaping (no gradient backpropagation needed), or as part of the loss for backpropagation (gradient needed).</p>
+
+<p>These two approaches may seem like just a <code class="language-plaintext highlighter-rouge">detach</code> difference in code, but they correspond to completely different optimization behaviors.</p>
+
+<h3 id="definitions">Definitions</h3>
+
+<p><strong>KL as Reward (stop-gradient):</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kl</span> <span class="o">=</span> <span class="nf">compute_kl</span><span class="p">(</span><span class="n">log_prob_q</span><span class="p">,</span> <span class="n">log_prob_p</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+<span class="n">shaped_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
+</code></pre></div></div>
+
+<p>Use shaped reward for standard actor-critic updates.</p>
+
+<p><strong>KL as Loss (backprop):</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actor_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantage</span> <span class="o">*</span> <span class="n">log_prob</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>  <span class="c1"># kl participates in gradient
+</span></code></pre></div></div>
+
+<p>Critic only learns environment value; KL is a regularization term for the actor that backpropagates gradients.</p>
+
+<h3 id="key-difference-1-optimization-target">Key Difference 1: Optimization Target</h3>
+
+<p><strong>KL as Reward:</strong> Optimizes a <strong>regularized new MDP</strong> where the reward function becomes $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$.</p>
+
+<p><strong>KL as Loss:</strong> Optimizes the <strong>original task + supervised regularization</strong>; KL doesn’t change the MDP definition, it’s just an external constraint term.</p>
+
+<p><strong>Intuition:</strong> The former “changes the game rules”; the latter “adds constraints under the original rules”.</p>
+
+<h3 id="key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</h3>
+
+<p><strong>KL as Reward:</strong> Single policy gradient, KL influence is <strong>reflected indirectly through advantage</strong>:</p>
+
+\[g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ based on } (r_t - \beta \cdot \text{KL}_t)\]
+
+<p><strong>KL as Loss:</strong> Gradient splits into two independent paths:</p>
+
+\[g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL gradient}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla_\theta \text{KL}_t\right]}_{\text{KL explicit gradient}}\]
+
+<p><strong>Key distinction:</strong> Is KL’s force “multiplied on advantage” or “a separate force”? The latter’s KL gradient is deterministic, unaffected by critic quality.</p>
+
+<h3 id="key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</h3>
+
+<p><strong>KL as Reward:</strong> Critic learns mixed value</p>
+
+\[V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]\]
+
+<p><strong>KL as Loss:</strong> Critic only learns environment value</p>
+
+\[V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]\]
+
+<p>The latter has cleaner separation, making it easier to monitor task return and KL divergence separately.</p>
+
+<h3 id="key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</h3>
+
+<p>Consider a scenario: first few steps are routing behavior, final step has high reward but also high KL.</p>
+
+<p><strong>KL as Reward:</strong> The large KL at the terminal state is <strong>propagated back to all previous steps</strong> through TD, so the policy tends to <strong>fundamentally avoid</strong> high-KL regions — this is “planning-based KL budget allocation”.</p>
+
+<p><strong>KL as Loss:</strong> The terminal state’s KL only appears in that state’s gradient term; the policy is still willing to <strong>visit high-reward regions but locally correct</strong> behavior.</p>
+
+<h3 id="summary">Summary</h3>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">Dimension</th>
+      <th style="text-align: center;">KL as Reward (stop-grad)</th>
+      <th style="text-align: center;">KL as Loss (backprop)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">Optimization target</td>
+      <td style="text-align: center;">Regularized new MDP</td>
+      <td style="text-align: center;">Original task + supervised regularization</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Actor gradient</td>
+      <td style="text-align: center;">Single PG, based on shaped advantage</td>
+      <td style="text-align: center;">RL gradient + explicit KL gradient</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Critic</td>
+      <td style="text-align: center;">Learns $V^{\text{reg}}$: reward + KL mixed</td>
+      <td style="text-align: center;">Learns $V^{\text{env}}$: only environment reward</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Credit Assignment</td>
+      <td style="text-align: center;">Multi-step backprop, planning-capable</td>
+      <td style="text-align: center;">Local per-state, no planning</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>One-liner:</strong> KL as reward makes the agent “plan to avoid high-KL paths” — constraints are more global and thorough; KL as loss makes the agent “visit but locally correct” — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be “preventive” or “corrective”.</p>
+
 <h2 id="rl-practice-guide">RL practice guide</h2>
+
+<p>Combining the preceding analysis of “estimator mathematical properties” and “usage modes”, this section provides practical recommendations for specific scenarios.</p>
 
 <h3 id="kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</h3>
 
-<p>When KL is a scalar penalty in rewards, we only need accurate <strong>values</strong>, no backprop.</p>
+<p>When KL is a scalar penalty in rewards, we only need accurate <strong>values</strong>, no backprop. Refer to the earlier section on “Bias and variance for KL values”.</p>
 
 <p><strong>Recommend:</strong></p>
 <ul>
@@ -1660,14 +1898,16 @@ g_3 &amp;= w s_\theta k_1.
 
 <h2 id="grab-and-use-crib-sheet">“Grab-and-use” crib sheet</h2>
 
+<p>The table below provides recommended estimator choices along three dimensions: “target KL direction” × “sampling source” × “usage mode”. “For <strong>value</strong>” corresponds to KL as reward penalty (no gradient needed); “For <strong>gradient</strong>” corresponds to KL as loss (gradient backpropagation needed).</p>
+
 <div class="table-responsive">
 <table class="table table-bordered" style="font-size: 0.95em;">
 	<thead>
 		<tr style="background-color: var(--global-bg-color);">
 			<th style="text-align: center;">Target</th>
 			<th style="text-align: center;">Sampling</th>
-			<th style="text-align: center;">For <strong>value</strong></th>
-			<th style="text-align: center;">For <strong>gradient</strong></th>
+			<th style="text-align: center;">For <strong>value</strong> (KL as Reward)</th>
+			<th style="text-align: center;">For <strong>gradient</strong> (KL as Loss)</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -1697,10 +1937,10 @@ g_3 &amp;= w s_\theta k_1.
 
 <p><strong>Trap 1: Using $k_1$ directly as loss (on-policy)</strong></p>
 
-<p>$k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
+<p>When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
 
 <blockquote>
-  <p><strong>Fix:</strong> use $k_1$ or $k_3$ for reward shaping (no grad), use $k_2$ or $k_3$ for losses.</p>
+  <p><strong>Fix:</strong> First clarify the KL usage mode. For reward shaping (no gradient needed), both $k_1$ and $k_3$ work; for losses (gradient needed), use $k_2$ (reverse KL) or $k_3$ (forward KL) on-policy.</p>
 </blockquote>
 
 <p><strong>Trap 2: Mixing up $k_3$ value-unbiasedness vs. gradient target</strong></p>
@@ -1744,7 +1984,7 @@ g_3 &amp;= w s_\theta k_1.
   <p><strong>Summary:</strong> match estimator with the right detach strategy.</p>
 </blockquote>
 
-<h2 id="summary">Summary</h2>
+<h2 id="summary-1">Summary</h2>
 
 <p><strong>One-liners:</strong></p>
 
@@ -1759,6 +1999,14 @@ g_3 &amp;= w s_\theta k_1.
 </ul>
 
 <p>Keep three questions clear: <strong>who do we sample from, whose value do we estimate, whose gradient do we need?</strong> Especially note: <strong>on-policy vs. off-policy choose different estimators for reverse KL</strong> — on-policy use $k_2$, off-policy use $\tfrac{q_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$.</p>
+
+<p>Additionally, don’t forget to determine <strong>the KL usage mode</strong> before choosing an estimator:</p>
+<ul>
+  <li><strong>KL as reward:</strong> Constraints act on the policy indirectly through shaped advantage, with cross-timestep credit assignment capability; agent will “plan to avoid high-KL paths”</li>
+  <li><strong>KL as loss:</strong> Constraints act on the policy directly as an independent gradient term; agent will “visit but locally correct”</li>
+</ul>
+
+<p>This choice is more fundamental than the estimator itself, depending on whether you want constraints to be “preventive” or “corrective”.</p>
 
 <h2 id="references">References</h2>
 

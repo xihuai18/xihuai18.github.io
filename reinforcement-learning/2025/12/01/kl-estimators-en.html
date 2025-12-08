@@ -162,6 +162,15 @@
       <li><a href="#gradient-cheat-sheet" id="markdown-toc-gradient-cheat-sheet">Gradient cheat sheet</a></li>
     </ul>
   </li>
+  <li><a href="#two-ways-to-use-kl-as-reward-vs-as-loss" id="markdown-toc-two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</a>    <ul>
+      <li><a href="#definitions" id="markdown-toc-definitions">Definitions</a></li>
+      <li><a href="#key-difference-1-optimization-target" id="markdown-toc-key-difference-1-optimization-target">Key Difference 1: Optimization Target</a></li>
+      <li><a href="#key-difference-2-actor-gradient" id="markdown-toc-key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</a></li>
+      <li><a href="#key-difference-3-critic-learning-target" id="markdown-toc-key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</a></li>
+      <li><a href="#key-difference-4-credit-assignment" id="markdown-toc-key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</a></li>
+      <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
+    </ul>
+  </li>
   <li><a href="#rl-practice-guide" id="markdown-toc-rl-practice-guide">RL practice guide</a>    <ul>
       <li><a href="#kl-as-reward-penalty-no-gradient-needed" id="markdown-toc-kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</a></li>
       <li><a href="#kl-as-loss-needs-gradients" id="markdown-toc-kl-as-loss-needs-gradients">KL as loss (needs gradients)</a>        <ul>
@@ -174,7 +183,7 @@
   </li>
   <li><a href="#grab-and-use-crib-sheet" id="markdown-toc-grab-and-use-crib-sheet">“Grab-and-use” crib sheet</a></li>
   <li><a href="#common-implementation-traps" id="markdown-toc-common-implementation-traps">Common implementation traps</a></li>
-  <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
+  <li><a href="#summary-1" id="markdown-toc-summary-1">Summary</a></li>
   <li><a href="#references" id="markdown-toc-references">References</a></li>
 </ul>
 
@@ -188,7 +197,7 @@
 
 <h2 id="introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</h2>
 
-<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> keeps the new policy from drifting too far from a reference policy, preventing instability or collapse.</p>
+<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> keeps the new policy from drifting too far from a reference policy, preventing instability or collapse. However, implementing KL penalty involves multiple layers of choices: <strong>which estimator</strong> ($k_1$, $k_2$, $k_3$), <strong>who to sample from</strong> (on-policy vs off-policy), and <strong>how to use it</strong> (as reward shaping or as a loss for backpropagation). This post systematically dissects these choices and their interrelationships.</p>
 
 <h3 id="forward-vs-reverse-kl">Forward vs. reverse KL</h3>
 
@@ -307,7 +316,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 </table>
 </div>
 
-<p>For estimating the KL <strong>value</strong>, $k_3$ is “unbiased + low variance”; but for gradients, the story is different.</p>
+<p>For estimating the KL <strong>value</strong>, $k_3$ is “unbiased + low variance”; but as we’ll analyze, <strong>the gradient story is completely different</strong> — different estimators’ gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.</p>
 
 <h2 id="core-analysis">Core analysis</h2>
 
@@ -715,11 +724,116 @@ g_3 &amp;= w s_\theta k_1.
 2) <strong>Off-policy reverse KL:</strong> three correct options: $\tfrac{q}{\mu} k_1$ (unbiased, higher var); $\text{sg}(\tfrac{q}{\mu}) k_2$ (unbiased, equals next); $\tfrac{q}{\mu} k_3$ (unbiased, lower var; equals previous).
 3) <strong>$\tfrac{q}{\mu} k_2$ with weight in grad is wrong</strong> for reverse KL.</p>
 
+<p>However, before choosing an estimator, there’s a more fundamental question to answer: <strong>should KL be added to rewards, or be part of the loss?</strong> This choice fundamentally affects optimization behavior and credit assignment.</p>
+
+<h2 id="two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</h2>
+
+<p>In practice, KL penalty can be used in two fundamentally different ways: added to rewards for shaping (no gradient backpropagation needed), or as part of the loss for backpropagation (gradient needed).</p>
+
+<p>These two approaches may seem like just a <code class="language-plaintext highlighter-rouge">detach</code> difference in code, but they correspond to completely different optimization behaviors.</p>
+
+<h3 id="definitions">Definitions</h3>
+
+<p><strong>KL as Reward (stop-gradient):</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kl</span> <span class="o">=</span> <span class="nf">compute_kl</span><span class="p">(</span><span class="n">log_prob_q</span><span class="p">,</span> <span class="n">log_prob_p</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+<span class="n">shaped_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
+</code></pre></div></div>
+
+<p>Use shaped reward for standard actor-critic updates.</p>
+
+<p><strong>KL as Loss (backprop):</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actor_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantage</span> <span class="o">*</span> <span class="n">log_prob</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>  <span class="c1"># kl participates in gradient
+</span></code></pre></div></div>
+
+<p>Critic only learns environment value; KL is a regularization term for the actor that backpropagates gradients.</p>
+
+<h3 id="key-difference-1-optimization-target">Key Difference 1: Optimization Target</h3>
+
+<p><strong>KL as Reward:</strong> Optimizes a <strong>regularized new MDP</strong> where the reward function becomes $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$.</p>
+
+<p><strong>KL as Loss:</strong> Optimizes the <strong>original task + supervised regularization</strong>; KL doesn’t change the MDP definition, it’s just an external constraint term.</p>
+
+<p><strong>Intuition:</strong> The former “changes the game rules”; the latter “adds constraints under the original rules”.</p>
+
+<h3 id="key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</h3>
+
+<p><strong>KL as Reward:</strong> Single policy gradient, KL influence is <strong>reflected indirectly through advantage</strong>:</p>
+
+\[g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ based on } (r_t - \beta \cdot \text{KL}_t)\]
+
+<p><strong>KL as Loss:</strong> Gradient splits into two independent paths:</p>
+
+\[g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL gradient}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla_\theta \text{KL}_t\right]}_{\text{KL explicit gradient}}\]
+
+<p><strong>Key distinction:</strong> Is KL’s force “multiplied on advantage” or “a separate force”? The latter’s KL gradient is deterministic, unaffected by critic quality.</p>
+
+<h3 id="key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</h3>
+
+<p><strong>KL as Reward:</strong> Critic learns mixed value</p>
+
+\[V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]\]
+
+<p><strong>KL as Loss:</strong> Critic only learns environment value</p>
+
+\[V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]\]
+
+<p>The latter has cleaner separation, making it easier to monitor task return and KL divergence separately.</p>
+
+<h3 id="key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</h3>
+
+<p>Consider a scenario: first few steps are routing behavior, final step has high reward but also high KL.</p>
+
+<p><strong>KL as Reward:</strong> The large KL at the terminal state is <strong>propagated back to all previous steps</strong> through TD, so the policy tends to <strong>fundamentally avoid</strong> high-KL regions — this is “planning-based KL budget allocation”.</p>
+
+<p><strong>KL as Loss:</strong> The terminal state’s KL only appears in that state’s gradient term; the policy is still willing to <strong>visit high-reward regions but locally correct</strong> behavior.</p>
+
+<h3 id="summary">Summary</h3>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">Dimension</th>
+      <th style="text-align: center;">KL as Reward (stop-grad)</th>
+      <th style="text-align: center;">KL as Loss (backprop)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">Optimization target</td>
+      <td style="text-align: center;">Regularized new MDP</td>
+      <td style="text-align: center;">Original task + supervised regularization</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Actor gradient</td>
+      <td style="text-align: center;">Single PG, based on shaped advantage</td>
+      <td style="text-align: center;">RL gradient + explicit KL gradient</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Critic</td>
+      <td style="text-align: center;">Learns $V^{\text{reg}}$: reward + KL mixed</td>
+      <td style="text-align: center;">Learns $V^{\text{env}}$: only environment reward</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Credit Assignment</td>
+      <td style="text-align: center;">Multi-step backprop, planning-capable</td>
+      <td style="text-align: center;">Local per-state, no planning</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>One-liner:</strong> KL as reward makes the agent “plan to avoid high-KL paths” — constraints are more global and thorough; KL as loss makes the agent “visit but locally correct” — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be “preventive” or “corrective”.</p>
+
 <h2 id="rl-practice-guide">RL practice guide</h2>
+
+<p>Combining the preceding analysis of “estimator mathematical properties” and “usage modes”, this section provides practical recommendations for specific scenarios.</p>
 
 <h3 id="kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</h3>
 
-<p>When KL is a scalar penalty in rewards, we only need accurate <strong>values</strong>, no backprop.</p>
+<p>When KL is a scalar penalty in rewards, we only need accurate <strong>values</strong>, no backprop. Refer to the earlier section on “Bias and variance for KL values”.</p>
 
 <p><strong>Recommend:</strong></p>
 <ul>
@@ -774,14 +888,16 @@ g_3 &amp;= w s_\theta k_1.
 
 <h2 id="grab-and-use-crib-sheet">“Grab-and-use” crib sheet</h2>
 
+<p>The table below provides recommended estimator choices along three dimensions: “target KL direction” × “sampling source” × “usage mode”. “For <strong>value</strong>” corresponds to KL as reward penalty (no gradient needed); “For <strong>gradient</strong>” corresponds to KL as loss (gradient backpropagation needed).</p>
+
 <div class="table-responsive">
 <table class="table table-bordered" style="font-size: 0.95em;">
 	<thead>
 		<tr style="background-color: var(--global-bg-color);">
 			<th style="text-align: center;">Target</th>
 			<th style="text-align: center;">Sampling</th>
-			<th style="text-align: center;">For <strong>value</strong></th>
-			<th style="text-align: center;">For <strong>gradient</strong></th>
+			<th style="text-align: center;">For <strong>value</strong> (KL as Reward)</th>
+			<th style="text-align: center;">For <strong>gradient</strong> (KL as Loss)</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -811,10 +927,10 @@ g_3 &amp;= w s_\theta k_1.
 
 <p><strong>Trap 1: Using $k_1$ directly as loss (on-policy)</strong></p>
 
-<p>$k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
+<p>When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
 
 <blockquote>
-  <p><strong>Fix:</strong> use $k_1$ or $k_3$ for reward shaping (no grad), use $k_2$ or $k_3$ for losses.</p>
+  <p><strong>Fix:</strong> First clarify the KL usage mode. For reward shaping (no gradient needed), both $k_1$ and $k_3$ work; for losses (gradient needed), use $k_2$ (reverse KL) or $k_3$ (forward KL) on-policy.</p>
 </blockquote>
 
 <p><strong>Trap 2: Mixing up $k_3$ value-unbiasedness vs. gradient target</strong></p>
@@ -858,7 +974,7 @@ g_3 &amp;= w s_\theta k_1.
   <p><strong>Summary:</strong> match estimator with the right detach strategy.</p>
 </blockquote>
 
-<h2 id="summary">Summary</h2>
+<h2 id="summary-1">Summary</h2>
 
 <p><strong>One-liners:</strong></p>
 
@@ -873,6 +989,14 @@ g_3 &amp;= w s_\theta k_1.
 </ul>
 
 <p>Keep three questions clear: <strong>who do we sample from, whose value do we estimate, whose gradient do we need?</strong> Especially note: <strong>on-policy vs. off-policy choose different estimators for reverse KL</strong> — on-policy use $k_2$, off-policy use $\tfrac{q_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$.</p>
+
+<p>Additionally, don’t forget to determine <strong>the KL usage mode</strong> before choosing an estimator:</p>
+<ul>
+  <li><strong>KL as reward:</strong> Constraints act on the policy indirectly through shaped advantage, with cross-timestep credit assignment capability; agent will “plan to avoid high-KL paths”</li>
+  <li><strong>KL as loss:</strong> Constraints act on the policy directly as an independent gradient term; agent will “visit but locally correct”</li>
+</ul>
+
+<p>This choice is more fundamental than the estimator itself, depending on whether you want constraints to be “preventive” or “corrective”.</p>
 
 <h2 id="references">References</h2>
 
@@ -902,7 +1026,7 @@ g_3 &amp;= w s_\theta k_1.
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
-        &copy; Copyright 2025 Xihuai Leo Wang. Last updated: December 05, 2025.
+        &copy; Copyright 2025 Xihuai Leo Wang. Last updated: December 08, 2025.
       </div>
     </footer>
 
