@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="zh-CN">
 
   <!-- Head -->
   <head>    <!-- Metadata, OpenGraph and Schema.org -->
@@ -13,6 +12,39 @@
     <meta name="author" content="Xihuai Leo Wang" />
     <meta name="description" content="在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。" />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
+
+    <!-- OpenGraph -->
+    <meta property="og:site_name" content="Xihuai Wang's Page" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Xihuai Wang's Page | 简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" />
+    <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html" />
+    <meta property="og:description" content="在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" />
+    <meta name="twitter:description" content="在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。" />
+    
+    
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+      {
+        "author":
+        {
+          "@type": "Person",
+          "name": "Xihuai Leo Wang"
+        },
+        "url": "https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html",
+        "@type": "WebSite",
+        "description": "在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。",
+        "headline": "简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计",
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "name": "Xihuai Leo Wang",
+        "@context": "https://schema.org"
+      }
+    </script>
 
 
     <!-- Bootstrap & MDB -->
@@ -32,7 +64,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html">
+    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html">
 
     <!-- Dark Mode -->
     
@@ -189,7 +221,7 @@
   <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
 </ul>
 
-<p><img src="/assets/img/kl-estimators/kl-estimator-cn.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+<p><img src="/assets/img/kl-estimators/kl-estimator-zh.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
@@ -570,7 +602,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>这时，如果我们仍然希望优化<strong>反向 KL</strong> $D_{\mathrm{KL}}(q_\theta | p)$，就必须引入<strong>重要性权重</strong>。</p>
 
-<p>关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：<a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>。</p>
+<p>关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：<a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>。</p>
 
 <h4 id="设置与记号">设置与记号</h4>
 

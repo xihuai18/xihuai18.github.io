@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="zh-CN">
 
   <!-- Head -->
   <head>    <!-- Metadata, OpenGraph and Schema.org -->
@@ -13,6 +12,39 @@
     <meta name="author" content="Xihuai Leo Wang" />
     <meta name="description" content="现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。" />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
+
+    <!-- OpenGraph -->
+    <meta property="og:site_name" content="Xihuai Wang's Page" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Xihuai Wang's Page | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
+    <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html" />
+    <meta property="og:description" content="现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
+    <meta name="twitter:description" content="现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。" />
+    
+    
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+      {
+        "author":
+        {
+          "@type": "Person",
+          "name": "Xihuai Leo Wang"
+        },
+        "url": "https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html",
+        "@type": "WebSite",
+        "description": "现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。",
+        "headline": "从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展",
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "name": "Xihuai Leo Wang",
+        "@context": "https://schema.org"
+      }
+    </script>
 
 
     <!-- Bootstrap & MDB -->
@@ -32,7 +64,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-cn.html">
+    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html">
 
     <!-- Dark Mode -->
     
@@ -159,7 +191,7 @@
 
 <p><a href="/reinforcement-learning/2025/11/15/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
-<p><img src="/assets/img/three-policy/three-policy-mini-class-cn.jpg" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+<p><img src="/assets/img/three-policy/three-policy-mini-class-zh.jpg" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <h2 id="训推不一致和异步框架">训推不一致和异步框架</h2>
 

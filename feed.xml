@@ -1,5 +1,892 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-12T16:09:45+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
-</subtitle><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html"><![CDATA[<ul id="markdown-toc">
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-12T16:47:54+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+</subtitle><entry xml:lang="en"><title type="html">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html" rel="alternate" type="text/html" title="Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html"><![CDATA[<ul id="markdown-toc">
+  <li><a href="#introduction-what-kl-does-in-rl" id="markdown-toc-introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</a>    <ul>
+      <li><a href="#forward-vs-reverse-kl" id="markdown-toc-forward-vs-reverse-kl">Forward vs. reverse KL</a></li>
+    </ul>
+  </li>
+  <li><a href="#three-estimators-definitions-and-design" id="markdown-toc-three-estimators-definitions-and-design">Three estimators: definitions and design</a>    <ul>
+      <li><a href="#k_1-the-naive-estimator" id="markdown-toc-k_1-the-naive-estimator">$k_1$: the naive estimator</a></li>
+      <li><a href="#k_2-an-f-divergence-lower-variance" id="markdown-toc-k_2-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</a></li>
+      <li><a href="#k_3-control-variate-optimal-shape" id="markdown-toc-k_3-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</a></li>
+      <li><a href="#quick-comparison" id="markdown-toc-quick-comparison">Quick comparison</a></li>
+    </ul>
+  </li>
+  <li><a href="#core-analysis" id="markdown-toc-core-analysis">Core analysis</a>    <ul>
+      <li><a href="#bias-and-variance-for-kl-values" id="markdown-toc-bias-and-variance-for-kl-values">Bias and variance for KL values</a></li>
+      <li><a href="#gradient-estimation-the-crucial-distinction" id="markdown-toc-gradient-estimation-the-crucial-distinction">Gradient estimation: the crucial distinction</a>        <ul>
+          <li><a href="#true-gradients-for-reference" id="markdown-toc-true-gradients-for-reference">True gradients for reference</a></li>
+          <li><a href="#two-differentiation-orders" id="markdown-toc-two-differentiation-orders">Two differentiation orders</a></li>
+          <li><a href="#gradients-of-the-three-estimators-on-policy" id="markdown-toc-gradients-of-the-three-estimators-on-policy">Gradients of the three estimators (on-policy)</a></li>
+          <li><a href="#expectation-then-grad-vs-grad-then-expectation" id="markdown-toc-expectation-then-grad-vs-grad-then-expectation">Expectation-then-grad vs. grad-then-expectation</a></li>
+        </ul>
+      </li>
+      <li><a href="#off-policy-gradients-with-importance-sampling" id="markdown-toc-off-policy-gradients-with-importance-sampling">Off-policy gradients with importance sampling</a>        <ul>
+          <li><a href="#setup" id="markdown-toc-setup">Setup</a></li>
+          <li><a href="#crucial-observation-the-two-orders-coincide" id="markdown-toc-crucial-observation-the-two-orders-coincide">Crucial observation: the two orders coincide</a></li>
+          <li><a href="#value-unbiasedness-remains" id="markdown-toc-value-unbiasedness-remains">Value unbiasedness remains</a></li>
+          <li><a href="#gradients-with-weights" id="markdown-toc-gradients-with-weights">Gradients with weights</a></li>
+          <li><a href="#variance-of-the-three-unbiased-off-policy-gradient-estimators" id="markdown-toc-variance-of-the-three-unbiased-off-policy-gradient-estimators">Variance of the three unbiased off-policy gradient estimators</a></li>
+        </ul>
+      </li>
+      <li><a href="#gradient-cheat-sheet" id="markdown-toc-gradient-cheat-sheet">Gradient cheat sheet</a></li>
+    </ul>
+  </li>
+  <li><a href="#two-ways-to-use-kl-as-reward-vs-as-loss" id="markdown-toc-two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</a>    <ul>
+      <li><a href="#definitions" id="markdown-toc-definitions">Definitions</a></li>
+      <li><a href="#key-difference-1-optimization-target" id="markdown-toc-key-difference-1-optimization-target">Key Difference 1: Optimization Target</a></li>
+      <li><a href="#key-difference-2-actor-gradient" id="markdown-toc-key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</a></li>
+      <li><a href="#key-difference-3-critic-learning-target" id="markdown-toc-key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</a></li>
+      <li><a href="#key-difference-4-credit-assignment" id="markdown-toc-key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</a></li>
+      <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
+    </ul>
+  </li>
+  <li><a href="#rl-practice-guide" id="markdown-toc-rl-practice-guide">RL practice guide</a>    <ul>
+      <li><a href="#kl-as-reward-penalty-no-gradient-needed" id="markdown-toc-kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</a></li>
+      <li><a href="#kl-as-loss-needs-gradients" id="markdown-toc-kl-as-loss-needs-gradients">KL as loss (needs gradients)</a>        <ul>
+          <li><a href="#on-policy-optimize-reverse-kl-most-common" id="markdown-toc-on-policy-optimize-reverse-kl-most-common">On-policy: optimize reverse KL (most common)</a></li>
+          <li><a href="#on-policy-optimize-forward-kl-coverage" id="markdown-toc-on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</a></li>
+          <li><a href="#off-policy-optimize-reverse-kl" id="markdown-toc-off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#grab-and-use-crib-sheet" id="markdown-toc-grab-and-use-crib-sheet">“Grab-and-use” crib sheet</a></li>
+  <li><a href="#common-implementation-traps" id="markdown-toc-common-implementation-traps">Common implementation traps</a></li>
+  <li><a href="#summary-1" id="markdown-toc-summary-1">Summary</a></li>
+  <li><a href="#references" id="markdown-toc-references">References</a></li>
+</ul>
+
+<p><img src="/assets/img/kl-estimators/kl-estimator-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+
+<blockquote>
+  <p>How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
+</blockquote>
+
+<p><a href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+
+<h2 id="introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</h2>
+
+<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> keeps the new policy from drifting too far from a reference policy, preventing instability or collapse. However, implementing KL penalty involves multiple layers of choices: <strong>which estimator</strong> ($k_1$, $k_2$, $k_3$), <strong>who to sample from</strong> (on-policy vs off-policy), and <strong>how to use it</strong> (as reward shaping or as a loss for backpropagation). This post systematically dissects these choices and their interrelationships.</p>
+
+<h3 id="forward-vs-reverse-kl">Forward vs. reverse KL</h3>
+
+<p>Let $q_\theta$ be the current actor, $p$ the reference policy. The two directions are:</p>
+
+<p><strong>Reverse KL:</strong>
+\(D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_\theta(x)}{p(x)}\right]\)</p>
+
+<figure style="text-align:center;">
+	<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:95%;max-width:100%;" />
+	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+</figure>
+
+<p><strong>Forward KL:</strong>
+\(D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\theta(x)}\right]\)</p>
+
+<figure style="text-align:center;">
+	<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:95%;max-width:100%;" />
+	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+</figure>
+
+<p><strong>Intuition:</strong></p>
+<ul>
+  <li><strong>Reverse KL</strong> is mode-seeking: policy concentrates on high-probability regions of $p$, possibly sacrificing diversity.</li>
+  <li><strong>Forward KL</strong> is mass-covering: policy tries to cover the support of $p$.</li>
+</ul>
+
+<p>RLHF typically uses <strong>reverse KL</strong> because we want the actor not to move too far from the reference, not necessarily to cover every mode.</p>
+
+<h2 id="three-estimators-definitions-and-design">Three estimators: definitions and design</h2>
+
+<p>Let $r(x) = \dfrac{p(x)}{q_\theta(x)}$. John Schulman defined three single-sample estimators:</p>
+
+<h3 id="k_1-the-naive-estimator">$k_1$: the naive estimator</h3>
+
+\[k_1(x) = -\log r = \log q_\theta(x) - \log p(x)\]
+
+<p>Direct log-ratio. It is unbiased for reverse KL, but <strong>can be negative</strong> while KL is always nonnegative, giving huge variance because positive and negative samples cancel.</p>
+
+<h3 id="k_2-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</h3>
+
+\[k_2(x) = \frac{1}{2}(\log r)^2\]
+
+<p><strong>Motivation:</strong> $k_1$ can be positive or negative; $k_2$ squares it so <strong>every sample is positive</strong>, each telling you how far $p$ and $q$ differ.</p>
+
+<p><strong>Why tiny bias?</strong> $k_2$ is an <strong>f-divergence</strong> with $f(x) = \tfrac{1}{2}(\log x)^2$. All smooth f-divergences have the same second-order expansion near $q \approx p$:</p>
+
+\[D_f(p, q_\theta) = \frac{f^{\prime\prime}(1)}{2} \theta^T F \theta + O(\theta^3)\]
+
+<p>KL corresponds to $f(x) = -\log x$, so $f^{\prime\prime}(1) = 1$. For $k_2$, $f^{\prime\prime}(1) = 1$ as well. <strong>When policies are close, $k_2$ tracks true KL almost identically</strong>, bias only appears in higher-order terms.</p>
+
+<h3 id="k_3-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</h3>
+
+\[k_3(x) = r - 1 - \log r\]
+
+<p><strong>Motivation:</strong> we want <strong>unbiased and low variance</strong>. Add a <strong>control variate</strong> to $k_1$: something zero-mean and negatively correlated.</p>
+
+<p>Because $\mathbb{E}_q[r - 1] = 1 - 1 = 0$, for any $\lambda$:</p>
+
+\[k_1 + \lambda(r - 1) = -\log r + \lambda(r - 1)\]
+
+<p>is still unbiased.</p>
+
+<p><strong>Why $\lambda = 1$?</strong> By concavity of $\log$, $\log x \le x - 1$, so</p>
+
+\[k_3 = (r - 1) - \log r \ge 0\]
+
+<p>It is <strong>always nonnegative</strong>, avoiding the cancelation problem.</p>
+
+<p><strong>Geometric view:</strong> $k_3$ is a <strong>Bregman divergence</strong> for $\phi(x) = -\log x$. Its tangent at $x=1$ is $y = 1 - x$, so</p>
+
+\[\begin{aligned}
+D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
+&amp;= -\log r - 0 - (-1)(r - 1) \\
+&amp;= r - 1 - \log r = k_3.
+\end{aligned}\]
+
+<p>Convexity keeps $\phi$ above its tangent, so this gap is <strong>nonnegative</strong>. As $r \to 1$, the gap shrinks quadratically $(r-1)^2$, explaining the low variance when policies are close.</p>
+
+<h3 id="quick-comparison">Quick comparison</h3>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center;">Estimator</th>
+			<th style="text-align: center;">Definition</th>
+			<th style="text-align: center;">Design idea</th>
+			<th style="text-align: center;">Bias (value)</th>
+			<th style="text-align: center;">Variance</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">$k_1$</td>
+			<td style="text-align: center;">$\log r$</td>
+			<td style="text-align: center;">Naive log-ratio</td>
+			<td style="text-align: center;">Unbiased</td>
+			<td style="text-align: center;">High (can be negative)</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_2$</td>
+			<td style="text-align: center;">$\tfrac{1}{2}(\log r)^2$</td>
+			<td style="text-align: center;">f-divergence, KL-matching 2nd order</td>
+			<td style="text-align: center;">Biased (very small)</td>
+			<td style="text-align: center;">Low (always positive)</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_3$</td>
+			<td style="text-align: center;">$r - 1 - \log r$</td>
+			<td style="text-align: center;">Control variate + Bregman</td>
+			<td style="text-align: center;">Unbiased</td>
+			<td style="text-align: center;">Low (always positive)</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<p>For estimating the KL <strong>value</strong>, $k_3$ is “unbiased + low variance”; but as we’ll analyze, <strong>the gradient story is completely different</strong> — different estimators’ gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.</p>
+
+<h2 id="core-analysis">Core analysis</h2>
+
+<h3 id="bias-and-variance-for-kl-values">Bias and variance for KL values</h3>
+
+<p>Assume samples from $q_\theta$ to estimate reverse KL $D_{\mathrm{KL}}(q_\theta | p)$.</p>
+
+<p><strong>Unbiasedness:</strong></p>
+
+\[\begin{aligned}
+\mathbb{E}_{q}[k_1] &amp;= \mathbb{E}_{q}\left[\log \tfrac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\\
+\mathbb{E}_{q}[k_3] &amp;= \mathbb{E}_{q}[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\\
+\mathbb{E}_{q}[k_2] &amp;= \tfrac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(biased)}
+\end{aligned}\]
+
+<p><strong>Variance trade-off:</strong></p>
+
+<p>John Schulman’s toy experiments ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005):</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center;">Estimator</th>
+			<th style="text-align: center;">bias/true</th>
+			<th style="text-align: center;">stdev/true</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">$k_1$</td>
+			<td style="text-align: center;">0</td>
+			<td style="text-align: center;">20</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_2$</td>
+			<td style="text-align: center;">0.002</td>
+			<td style="text-align: center;">1.42</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_3$</td>
+			<td style="text-align: center;">0</td>
+			<td style="text-align: center;">1.42</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<p>When KL is large ($p = \mathcal{N}(1,1)$, true KL = 0.5):</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center;">Estimator</th>
+			<th style="text-align: center;">bias/true</th>
+			<th style="text-align: center;">stdev/true</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">$k_1$</td>
+			<td style="text-align: center;">0</td>
+			<td style="text-align: center;">2</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_2$</td>
+			<td style="text-align: center;">0.25</td>
+			<td style="text-align: center;">1.73</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_3$</td>
+			<td style="text-align: center;">0</td>
+			<td style="text-align: center;">1.7</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<p><strong>Intuition:</strong></p>
+<ul>
+  <li>$k_1 = -\log r$ is first-order around $r=1$, can be negative, so variance explodes when close.</li>
+  <li>$k_3 = r - 1 - \log r$ is second-order near $r=1$ and always positive, so lower variance when close.</li>
+  <li>When coverage is poor (heavy tails in $r$), $k_3$ can explode; then $k_1$ can be more stable.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Note:</strong> To estimate <strong>forward KL value</strong> $D_{\mathrm{KL}}(p | q) = \mathbb{E}_p[\log r]$ but only sample from $q$, use importance sampling $\mathbb{E}_q[r \log r]$.</p>
+</blockquote>
+
+<h3 id="gradient-estimation-the-crucial-distinction">Gradient estimation: the crucial distinction</h3>
+
+<p>This is the easiest part to get wrong. First analyze <strong>on-policy</strong> (samples from $q_\theta$), then extend to <strong>off-policy</strong> (samples from behavior $\mu$).</p>
+
+<h4 id="true-gradients-for-reference">True gradients for reference</h4>
+
+<p>Let score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$, with key property $\mathbb{E}_{q_\theta}[s_\theta] = 0$.</p>
+
+<p><strong>Reverse KL gradient:</strong></p>
+
+\[D_{\mathrm{KL}}(q_\theta \| p) = \int q_\theta(x) \log \frac{q_\theta(x)}{p(x)} dx\]
+
+<p>Product rule and $\nabla_\theta q_\theta = q_\theta s_\theta$, $\nabla_\theta \log p = 0$ give</p>
+
+\[\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q\left[s_\theta \log \tfrac{q_\theta}{p}\right] = -\mathbb{E}_q[s_\theta \log r].\]
+
+<p><strong>Forward KL gradient:</strong></p>
+
+\[D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \log \frac{p(x)}{q_\theta(x)} dx\]
+
+<p>Since $p$ is $\theta$-independent,</p>
+
+\[\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = -\mathbb{E}_p[s_\theta] = -\mathbb{E}_q[r s_\theta] = \mathbb{E}_q[(1-r) s_\theta].\]
+
+<p>These baselines tell us what each estimator’s expected gradient really targets.</p>
+
+<h4 id="two-differentiation-orders">Two differentiation orders</h4>
+
+<p>1) <strong>Grad then expectation:</strong> autograd on each sample, then batch average (what DL code actually does).
+2) <strong>Expectation then grad:</strong> treat $\mathbb{E}_q[k_i]$ as a function of $\theta$ and differentiate analytically.</p>
+
+<p>Typical code does (1).</p>
+
+<h4 id="gradients-of-the-three-estimators-on-policy">Gradients of the three estimators (on-policy)</h4>
+
+\[\nabla_\theta k_1 = s_\theta\]
+
+\[\nabla_\theta k_2 = (\log r) \nabla_\theta(\log r) = (\log r)(-s_\theta) = - (\log r) s_\theta\]
+
+\[\nabla_\theta k_3 = (1 - r) s_\theta\]
+
+<p>Taking expectation under $q_\theta$:</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center;">Estimator</th>
+			<th style="text-align: center;">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
+			<th style="text-align: center;">Equals</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">$k_1$</td>
+			<td style="text-align: center;">$\mathbb{E}_{q}[s_\theta] = 0$</td>
+			<td style="text-align: center;"><strong>Zero (useless as loss)</strong></td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_2$</td>
+			<td style="text-align: center;">$-\mathbb{E}_{q}[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+			<td style="text-align: center;"><strong>Gradient of reverse KL</strong></td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$k_3$</td>
+			<td style="text-align: center;">$\mathbb{E}_{q}[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+			<td style="text-align: center;"><strong>Gradient of forward KL</strong></td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<p><strong>Key takeaways:</strong></p>
+<ul>
+  <li><strong>$k_2$ gradient</strong> matches reverse KL gradient (the usual “stay near ref” objective).</li>
+  <li><strong>$k_3$ gradient</strong> matches forward KL gradient (coverage objective).</li>
+  <li><strong>$k_1$ gradient expectation is zero</strong> — useless as a loss.</li>
+</ul>
+
+<h4 id="expectation-then-grad-vs-grad-then-expectation">Expectation-then-grad vs. grad-then-expectation</h4>
+
+<p>If you first form $\mathbb{E}_q[k_i]$ and then differentiate (expectation-then-grad):</p>
+
+\[\nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p), \quad \nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p).\]
+
+<p>Both give reverse KL. But autograd on per-sample $k_3$ averages (grad-then-expectation) yields <strong>forward KL gradient</strong>. Same estimator, different order, different result.</p>
+
+<h3 id="off-policy-gradients-with-importance-sampling">Off-policy gradients with importance sampling</h3>
+
+<p>Real RL often samples from a behavior policy $\mu$ (old or mixed policy, replay buffer). To optimize <strong>reverse KL</strong> you need <strong>importance weights</strong>.</p>
+
+<p>See also my earlier post: <a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">Three-policy TRPO extension for LLM RL</a>.</p>
+
+<h4 id="setup">Setup</h4>
+
+<p>Define importance weight</p>
+
+\[w(x) = \frac{q_\theta(x)}{\mu(x)}.\]
+
+<p>Using batch loss $w(x) k_i(x)$ with autograd, what gradients do we get?</p>
+
+<p>A key difference:</p>
+<ul>
+  <li>Previously expectations were under $q_\theta$ (depends on $\theta$).</li>
+  <li>Now expectations are under $\mu$ (independent of $\theta$).</li>
+</ul>
+
+<h4 id="crucial-observation-the-two-orders-coincide">Crucial observation: the two orders coincide</h4>
+
+<p>Because $\mu$ is $\theta$-independent,</p>
+
+\[\nabla_\theta \mathbb{E}_{\mu}[f_\theta] = \mathbb{E}_{\mu}[\nabla_\theta f_\theta].\]
+
+<p>So autograd on sample means (grad-then-expectation) equals expectation-then-grad. For $k_1$ and $k_3$, both value-unbiased for reverse KL, their gradient expectations also match reverse KL.</p>
+
+<h4 id="value-unbiasedness-remains">Value unbiasedness remains</h4>
+
+<p>By $\mathbb{E}_\mu[w f] = \mathbb{E}_q[f]$:</p>
+
+\[\mathbb{E}_\mu[w k_1] = D_{\mathrm{KL}}(q_\theta \| p), \quad \mathbb{E}_\mu[w k_3] = D_{\mathrm{KL}}(q_\theta \| p) \quad \textbf{(unbiased)}\]
+
+\[\mathbb{E}_\mu[w k_2] = \mathbb{E}_{q_\theta}[k_2] \neq D_{\mathrm{KL}}(q_\theta \| p) \quad \textbf{(biased)}\]
+
+<h4 id="gradients-with-weights">Gradients with weights</h4>
+
+<p>Gradient of weight: $\nabla_\theta w = w s_\theta$. Using product rule:</p>
+
+<p>\(\nabla_\theta(w k_1) = w s_\theta (k_1 + 1)\)
+\(\nabla_\theta(w k_2) = w s_\theta (k_2 - \log r)\)
+\(\nabla_\theta(w k_3) = w s_\theta (k_3 + 1 - r) = w s_\theta k_1\)</p>
+
+<p>Which give expected gradients:</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center;">Weighted estimator</th>
+			<th style="text-align: center;">Value target</th>
+			<th style="text-align: center;">Expected gradient</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_1$</td>
+			<td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_2$</td>
+			<td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
+			<td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$, <strong>not</strong> reverse KL ✗</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\text{sg}\left(\tfrac{q_\theta}{\mu}\right) k_2$</td>
+			<td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_3$</td>
+			<td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<p><strong>Interesting reversal vs. on-policy:</strong></p>
+<ul>
+  <li>On-policy: $k_2$ as loss gives reverse KL gradient; $k_1$ gradient is zero.</li>
+  <li>Off-policy + weights: $\tfrac{q}{\mu}k_1$ and $\tfrac{q}{\mu}k_3$ give reverse KL gradients; $\tfrac{q}{\mu}k_2$ (with weight in grad) fails.</li>
+  <li>Detaching the weight makes $\text{sg}(\tfrac{q}{\mu}) k_2$ also give reverse KL gradient.</li>
+</ul>
+
+<h4 id="variance-of-the-three-unbiased-off-policy-gradient-estimators">Variance of the three unbiased off-policy gradient estimators</h4>
+
+<p>Unbiased reverse-KL gradient estimators (off-policy + IS):</p>
+
+\[L_1 = w k_1, \quad L_2 = \bar w k_2, \quad L_3 = w k_3,\]
+
+<p>With $w = \tfrac{q_\theta}{\mu}$, $\bar w = \mathrm{sg}(w)$. Using $\nabla_\theta w = w s_\theta$, $\nabla_\theta k_1 = s_\theta$, $\nabla_\theta k_2 = k_1 s_\theta$, $\nabla_\theta k_3 = (1-r) s_\theta$:</p>
+
+\[\begin{aligned}
+g_1 &amp;= w s_\theta (k_1+1),\\
+g_2 &amp;= w s_\theta k_1,\\
+g_3 &amp;= w s_\theta k_1.
+\end{aligned}\]
+
+<p>So <strong>$g_2 \equiv g_3$</strong>. Only two distinct variance behaviors: $g_1$ vs. $g_\star := g_2 = g_3$.</p>
+
+<p>Let $A = w s_\theta, B = k_1$. Then</p>
+
+\[g_1 = A(B+1), \quad g_\star = A B.\]
+
+<p>Variance difference:</p>
+
+\[\boxed{\mathrm{Var}_\mu(g_1) - \mathrm{Var}_\mu(g_\star) = \mathbb{E}_\mu[A^2(2B+1)]} = \mathbb{E}_\mu\big[w^2 s_\theta^2 (2k_1+1)\big].\]
+
+<p>In the typical KL-penalty regime $q_\theta \approx p \approx \mu$, write $r = 1 + \varepsilon$, $\lvert\varepsilon\rvert \ll 1$, so $k_1 \approx -\varepsilon$, $2k_1+1 \approx 1 - 2\varepsilon &gt; 0$. Thus $\mathrm{Var}(g_1) &gt; \mathrm{Var}(g_\star)$.</p>
+
+<p>Intuition:</p>
+<ul>
+  <li>$g_1$ includes an $O(1)$ zero-mean noise term $w s_\theta$.</li>
+  <li>$g_\star$ cancels that term; remaining magnitude is $O(\varepsilon)$, giving much lower variance.</li>
+</ul>
+
+<p>Table summary:</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center; white-space: nowrap;">Estimator</th>
+			<th style="text-align: center; white-space: nowrap;">Gradient rv</th>
+			<th style="text-align: center; white-space: nowrap;">Scale ($r\approx1$)</th>
+			<th style="text-align: center;">Variance</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">$w k_1$</td>
+			<td style="text-align: center;">$w s_\theta (k_1+1)$</td>
+			<td style="text-align: center;">$O(1)$</td>
+			<td style="text-align: center;">High</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\mathrm{sg}(w) k_2$</td>
+			<td style="text-align: center;">$w s_\theta k_1$</td>
+			<td style="text-align: center;">$O(\varepsilon)$</td>
+			<td style="text-align: center;">Low</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$w k_3$</td>
+			<td style="text-align: center;">$w s_\theta k_1$</td>
+			<td style="text-align: center;">$O(\varepsilon)$</td>
+			<td style="text-align: center;">Low</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<p>Conclusion: off-policy IS with reverse-KL gradients has three unbiased options: $w k_1$, $\bar w k_2$, $w k_3$. The latter two are identical in gradient and variance and are preferred; $w k_1$ is unbiased but noisier.</p>
+
+<p><strong>When far off-policy:</strong> If $w$ explodes (little overlap), any $\tfrac{q}{\mu}$ method suffers. Then the variance advantage of $k_3$ over $k_1$ is not guaranteed; clipping/regularization becomes necessary.</p>
+
+<h3 id="gradient-cheat-sheet">Gradient cheat sheet</h3>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center; white-space: nowrap;">Sampling</th>
+			<th style="text-align: center;">Loss</th>
+			<th style="text-align: center;">$\mathbb{E}[\nabla_\theta \text{Loss}]$</th>
+			<th style="text-align: center;">Optimizes</th>
+			<th style="text-align: center; white-space: nowrap;">Right for reverse KL?</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">$q$ (on)</td>
+			<td style="text-align: center;">$k_1$</td>
+			<td style="text-align: center;">$\mathbb{E}_q[s_\theta] = 0$</td>
+			<td style="text-align: center;">None (zero grad)</td>
+			<td style="text-align: center;">✗</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$q$ (on)</td>
+			<td style="text-align: center;">$k_2$</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+			<td style="text-align: center;"><strong>Reverse KL</strong></td>
+			<td style="text-align: center;">✓</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$q$ (on)</td>
+			<td style="text-align: center;">$k_3$</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+			<td style="text-align: center;">Forward KL</td>
+			<td style="text-align: center;">✗</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\mu$ (off)</td>
+			<td style="text-align: center;">$\tfrac{q}{\mu} k_1$</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+			<td style="text-align: center;"><strong>Reverse KL</strong></td>
+			<td style="text-align: center;">✓ (higher var)</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\mu$ (off)</td>
+			<td style="text-align: center;">$\tfrac{q}{\mu} k_2$</td>
+			<td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
+			<td style="text-align: center;">f-divergence (not KL)</td>
+			<td style="text-align: center;">✗</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\mu$ (off)</td>
+			<td style="text-align: center;">$\text{sg}\left(\tfrac{q}{\mu}\right) k_2$</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+			<td style="text-align: center;"><strong>Reverse KL</strong></td>
+			<td style="text-align: center;">✓</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">$\mu$ (off)</td>
+			<td style="text-align: center;">$\tfrac{q}{\mu} k_3$</td>
+			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+			<td style="text-align: center;"><strong>Reverse KL</strong></td>
+			<td style="text-align: center;">✓ (recommended, low var)</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<p><strong>Key conclusions:</strong>
+1) <strong>On-policy reverse KL:</strong> use $k_2$ (only correct choice).
+2) <strong>Off-policy reverse KL:</strong> three correct options: $\tfrac{q}{\mu} k_1$ (unbiased, higher var); $\text{sg}(\tfrac{q}{\mu}) k_2$ (unbiased, equals next); $\tfrac{q}{\mu} k_3$ (unbiased, lower var; equals previous).
+3) <strong>$\tfrac{q}{\mu} k_2$ with weight in grad is wrong</strong> for reverse KL.</p>
+
+<p>However, before choosing an estimator, there’s a more fundamental question to answer: <strong>should KL be added to rewards, or be part of the loss?</strong> This choice fundamentally affects optimization behavior and credit assignment.</p>
+
+<h2 id="two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</h2>
+
+<p>In practice, KL penalty can be used in two fundamentally different ways: added to rewards for shaping (no gradient backpropagation needed), or as part of the loss for backpropagation (gradient needed).</p>
+
+<p>These two approaches may seem like just a <code class="language-plaintext highlighter-rouge">detach</code> difference in code, but they correspond to completely different optimization behaviors.</p>
+
+<h3 id="definitions">Definitions</h3>
+
+<p><strong>KL as Reward (stop-gradient):</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kl</span> <span class="o">=</span> <span class="nf">compute_kl</span><span class="p">(</span><span class="n">log_prob_q</span><span class="p">,</span> <span class="n">log_prob_p</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+<span class="n">shaped_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
+</code></pre></div></div>
+
+<p>Use shaped reward for standard actor-critic updates.</p>
+
+<p><strong>KL as Loss (backprop):</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actor_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantage</span> <span class="o">*</span> <span class="n">log_prob</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>  <span class="c1"># kl participates in gradient
+</span></code></pre></div></div>
+
+<p>Critic only learns environment value; KL is a regularization term for the actor that backpropagates gradients.</p>
+
+<h3 id="key-difference-1-optimization-target">Key Difference 1: Optimization Target</h3>
+
+<p><strong>KL as Reward:</strong> Optimizes a <strong>regularized new MDP</strong> where the reward function becomes $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$.</p>
+
+<p><strong>KL as Loss:</strong> Optimizes the <strong>original task + supervised regularization</strong>; KL doesn’t change the MDP definition, it’s just an external constraint term.</p>
+
+<p><strong>Intuition:</strong> The former “changes the game rules”; the latter “adds constraints under the original rules”.</p>
+
+<h3 id="key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</h3>
+
+<p><strong>KL as Reward:</strong> Single policy gradient, KL influence is <strong>reflected indirectly through advantage</strong>:</p>
+
+\[g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ based on } (r_t - \beta \cdot \text{KL}_t)\]
+
+<p><strong>KL as Loss:</strong> Gradient splits into two independent paths:</p>
+
+\[g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL gradient}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla_\theta \text{KL}_t\right]}_{\text{KL explicit gradient}}\]
+
+<p><strong>Key distinction:</strong> Is KL’s force “multiplied on advantage” or “a separate force”? The latter’s KL gradient is deterministic, unaffected by critic quality.</p>
+
+<h3 id="key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</h3>
+
+<p><strong>KL as Reward:</strong> Critic learns mixed value</p>
+
+\[V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]\]
+
+<p><strong>KL as Loss:</strong> Critic only learns environment value</p>
+
+\[V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]\]
+
+<p>The latter has cleaner separation, making it easier to monitor task return and KL divergence separately.</p>
+
+<h3 id="key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</h3>
+
+<p>Consider a scenario: first few steps are routing behavior, final step has high reward but also high KL.</p>
+
+<p><strong>KL as Reward:</strong> The large KL at the terminal state is <strong>propagated back to all previous steps</strong> through TD, so the policy tends to <strong>fundamentally avoid</strong> high-KL regions — this is “planning-based KL budget allocation”.</p>
+
+<p><strong>KL as Loss:</strong> The terminal state’s KL only appears in that state’s gradient term; the policy is still willing to <strong>visit high-reward regions but locally correct</strong> behavior.</p>
+
+<h3 id="summary">Summary</h3>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+  <thead>
+    <tr style="background-color: var(--global-bg-color);">
+      <th style="text-align: center;">Dimension</th>
+      <th style="text-align: center;">KL as Reward (stop-grad)</th>
+      <th style="text-align: center;">KL as Loss (backprop)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center;">Optimization target</td>
+      <td style="text-align: center;">Regularized new MDP</td>
+      <td style="text-align: center;">Original task + supervised regularization</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Actor gradient</td>
+      <td style="text-align: center;">Single PG, based on shaped advantage</td>
+      <td style="text-align: center;">RL gradient + explicit KL gradient</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Critic</td>
+      <td style="text-align: center;">Learns $V^{\text{reg}}$: reward + KL mixed</td>
+      <td style="text-align: center;">Learns $V^{\text{env}}$: only environment reward</td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">Credit Assignment</td>
+      <td style="text-align: center;">Multi-step backprop, planning-capable</td>
+      <td style="text-align: center;">Local per-state, no planning</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>One-liner:</strong> KL as reward makes the agent “plan to avoid high-KL paths” — constraints are more global and thorough; KL as loss makes the agent “visit but locally correct” — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be “preventive” or “corrective”.</p>
+
+<h2 id="rl-practice-guide">RL practice guide</h2>
+
+<p>Combining the preceding analysis of “estimator mathematical properties” and “usage modes”, this section provides practical recommendations for specific scenarios.</p>
+
+<h3 id="kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</h3>
+
+<p>When KL is a scalar penalty in rewards, we only need accurate <strong>values</strong>, no backprop. Refer to the earlier section on “Bias and variance for KL values”.</p>
+
+<p><strong>Recommend:</strong></p>
+<ul>
+  <li>Use <strong>$k_1$</strong> or <strong>$k_3$</strong> (both unbiased for reverse KL value).</li>
+  <li>When policies are close, $k_3$ is typically lower variance.</li>
+  <li>With poor coverage or heavy tails, $k_1$ is more robust.</li>
+  <li>Off-policy: multiply by $\tfrac{q_\theta}{\mu}$.</li>
+</ul>
+
+<blockquote>
+  <p>For a <strong>forward KL penalty</strong>, use $\mathbb{E}_q[r \log r]$ or (if sampling from $p$) $\mathbb{E}_p[\log r]$.</p>
+</blockquote>
+
+<h3 id="kl-as-loss-needs-gradients">KL as loss (needs gradients)</h3>
+
+<h4 id="on-policy-optimize-reverse-kl-most-common">On-policy: optimize reverse KL (most common)</h4>
+
+<p>Goal: keep actor near reference.</p>
+
+<p><strong>Use $k_2$ as loss.</strong></p>
+
+\[\mathcal{L}_{k_2} = \tfrac{1}{2}(\log r)^2\]
+
+<p>Then $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q | p)$.</p>
+
+<h4 id="on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</h4>
+
+<p>Goal: cover the reference distribution (offline RL, imitation, etc.).</p>
+
+<p><strong>Use $k_3$ as loss.</strong> Autograd on sample means gives $\mathbb{E}_q[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$.</p>
+
+<h4 id="off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</h4>
+
+<p>Goal: samples from behavior $\mu$, still optimize reverse KL.</p>
+
+<p><strong>Recommended:</strong> $\dfrac{q_\theta}{\mu} k_3$ or $\mathrm{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$ (identical gradients).</p>
+
+\[\mathcal{L} = \dfrac{q_\theta(x)}{\mu(x)} \Big( \dfrac{p(x)}{q_\theta(x)} - 1 - \log \dfrac{p(x)}{q_\theta(x)} \Big)\]
+
+<p>or</p>
+
+\[\mathcal{L} = \mathrm{sg}\left(\dfrac{q_\theta(x)}{\mu(x)}\right) \cdot \tfrac{1}{2}\left(\log \dfrac{p(x)}{q_\theta(x)}\right)^2.\]
+
+<ul>
+  <li>Gradients are unbiased.</li>
+  <li>When $q_\theta \approx p$, both have much lower variance.</li>
+</ul>
+
+<p><strong>Fallback:</strong> $\dfrac{q_\theta}{\mu} k_1$ (unbiased but higher variance).</p>
+
+<p><strong>Avoid:</strong> $\dfrac{q_\theta}{\mu} k_2$ with weight in gradient — biased for reverse KL.</p>
+
+<h2 id="grab-and-use-crib-sheet">“Grab-and-use” crib sheet</h2>
+
+<p>The table below provides recommended estimator choices along three dimensions: “target KL direction” × “sampling source” × “usage mode”. “For <strong>value</strong>” corresponds to KL as reward penalty (no gradient needed); “For <strong>gradient</strong>” corresponds to KL as loss (gradient backpropagation needed).</p>
+
+<div class="table-responsive">
+<table class="table table-bordered" style="font-size: 0.95em;">
+	<thead>
+		<tr style="background-color: var(--global-bg-color);">
+			<th style="text-align: center;">Target</th>
+			<th style="text-align: center;">Sampling</th>
+			<th style="text-align: center;">For <strong>value</strong> (KL as Reward)</th>
+			<th style="text-align: center;">For <strong>gradient</strong> (KL as Loss)</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
+			<td style="text-align: center;">$q$ (on-policy)</td>
+			<td style="text-align: center;">$k_1$ or $k_3$ (unbiased)</td>
+			<td style="text-align: center;">$k_2$</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
+			<td style="text-align: center;">$\mu$ (off-policy)</td>
+			<td style="text-align: center;">$\tfrac{q}{\mu} k_1$ or $\tfrac{q}{\mu} k_3$ (unbiased)</td>
+			<td style="text-align: center;">$\tfrac{q}{\mu} k_3$ (recommended) or $\text{sg}(\tfrac{q}{\mu}) k_2$</td>
+		</tr>
+		<tr>
+			<td style="text-align: center;">Forward KL $D_{\mathrm{KL}}(p \| q)$</td>
+			<td style="text-align: center;">$q$</td>
+			<td style="text-align: center;">$\mathbb{E}_q[r\log r]$</td>
+			<td style="text-align: center;">$k_3$</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<h2 id="common-implementation-traps">Common implementation traps</h2>
+
+<p><strong>Trap 1: Using $k_1$ directly as loss (on-policy)</strong></p>
+
+<p>When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
+
+<blockquote>
+  <p><strong>Fix:</strong> First clarify the KL usage mode. For reward shaping (no gradient needed), both $k_1$ and $k_3$ work; for losses (gradient needed), use $k_2$ (reverse KL) or $k_3$ (forward KL) on-policy.</p>
+</blockquote>
+
+<p><strong>Trap 2: Mixing up $k_3$ value-unbiasedness vs. gradient target</strong></p>
+
+<p>$k_3$ is value-unbiased for reverse KL, but its <strong>gradient</strong> is <strong>forward KL</strong>. If you want reverse KL and backprop $k_3$, you are actually optimizing forward KL.</p>
+
+<blockquote>
+  <p><strong>Fix:</strong> be explicit: reverse KL -&gt; $k_2$; forward KL -&gt; $k_3$.</p>
+</blockquote>
+
+<p><strong>Trap 3: Heavy-tailed $r$ blows up variance</strong></p>
+
+<p>If $r = p/q$ has extreme values, $k_3$ variance can explode.</p>
+
+<blockquote>
+  <p><strong>Fix:</strong> enforce KL constraint or clip $r$.</p>
+</blockquote>
+
+<p><strong>Trap 4: Off-policy but still using $k_2$ or $\tfrac{q_\theta}{\mu} k_2$ (with grad on weight)</strong></p>
+
+<p>If $\mu \neq q_\theta$:</p>
+<ul>
+  <li>Plain $k_2$ (no weight): expectation is under $\mu$, estimator fails.</li>
+  <li>$\tfrac{q_\theta}{\mu} k_2$ with weight in grad: gradient is biased (f-divergence), not reverse KL.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Fix:</strong> off-policy reverse KL -&gt; use $\tfrac{q_\theta}{\mu} k_3$ (recommended), $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$, or $\tfrac{q_\theta}{\mu} k_1$.</p>
+</blockquote>
+
+<p><strong>Trap 5: Wrong detach on importance weights</strong></p>
+
+<p>$w = q_\theta / \mu$ often comes from <code class="language-plaintext highlighter-rouge">log_prob_q - log_prob_mu</code> then <code class="language-plaintext highlighter-rouge">exp</code>. Detaching $w$ matters:</p>
+
+<ul>
+  <li><strong>Using $k_1$ or $k_3$:</strong> $w$ <strong>must participate in gradient</strong> (do not detach), otherwise you drop $\nabla_\theta w = w s_\theta$ and get wrong gradients.</li>
+  <li><strong>Using $k_2$:</strong> <strong>detach $w$</strong> to get reverse KL gradient. If $w$ stays in the graph, you get f-divergence gradient instead.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Summary:</strong> match estimator with the right detach strategy.</p>
+</blockquote>
+
+<h2 id="summary-1">Summary</h2>
+
+<p><strong>One-liners:</strong></p>
+
+<ul>
+  <li><strong>Only value (reward penalty):</strong> use $k_1$ or $k_3$ (both unbiased for reverse KL value); off-policy multiply by $\tfrac{q_\theta}{\mu}$.</li>
+  <li><strong>Need gradients (loss):</strong>
+    <ul>
+      <li><strong>On-policy:</strong> reverse KL -&gt; $k_2$; forward KL -&gt; $k_3$.</li>
+      <li><strong>Off-policy:</strong> reverse KL -&gt; $\tfrac{q_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$ (same gradient, low variance); fallback $\tfrac{q_\theta}{\mu} k_1$ (unbiased but noisier).</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Keep three questions clear: <strong>who do we sample from, whose value do we estimate, whose gradient do we need?</strong> Especially note: <strong>on-policy vs. off-policy choose different estimators for reverse KL</strong> — on-policy use $k_2$, off-policy use $\tfrac{q_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$.</p>
+
+<p>Additionally, don’t forget to determine <strong>the KL usage mode</strong> before choosing an estimator:</p>
+<ul>
+  <li><strong>KL as reward:</strong> Constraints act on the policy indirectly through shaped advantage, with cross-timestep credit assignment capability; agent will “plan to avoid high-KL paths”</li>
+  <li><strong>KL as loss:</strong> Constraints act on the policy directly as an independent gradient term; agent will “visit but locally correct”</li>
+</ul>
+
+<p>This choice is more fundamental than the estimator itself, depending on whether you want constraints to be “preventive” or “corrective”.</p>
+
+<h2 id="references">References</h2>
+
+<ol>
+  <li>Dibya Ghosh. “KL Divergence for Machine Learning”. <a href="https://dibyaghosh.com/blog/probability/kldivergence">https://dibyaghosh.com/blog/probability/kldivergence</a></li>
+  <li>John Schulman. “Approximating KL Divergence”. <a href="https://joschu.net/blog/kl-approx.html">https://joschu.net/blog/kl-approx.html</a></li>
+  <li>Verl Documentation. “Proximal Policy Optimization (PPO)”. <a href="https://verl.readthedocs.io/en/latest/algo/ppo.html">https://verl.readthedocs.io/en/latest/algo/ppo.html</a></li>
+  <li>初七123334. “RLHF/RLVR 训练中的 KL 近似方法浅析（k1 / k2 / k3)”. <a href="https://zhuanlan.zhihu.com/p/1966872846212010437">https://zhuanlan.zhihu.com/p/1966872846212010437</a></li>
+  <li>Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. “Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization”. <a href="https://arxiv.org/abs/2510.01555">https://arxiv.org/abs/2510.01555</a></li>
+  <li>Yifan Zhang, Yiping Ji, Gavin Brown, et al. “On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning”. <a href="https://arxiv.org/abs/2505.17508">https://arxiv.org/abs/2505.17508</a></li>
+</ol>
+
+<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
+	<span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
+	<span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding {KL} Divergence Estimators in {RL}: From Value Approximation to Gradient Estimation}</span><span class="p">,</span>
+	<span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+	<span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
+	<span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
+	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
+<span class="p">}</span>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate.]]></summary></entry><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
       <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
     </ul>
@@ -58,7 +945,7 @@
   <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
 </ul>
 
-<p><img src="/assets/img/kl-estimators/kl-estimator-cn.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+<p><img src="/assets/img/kl-estimators/kl-estimator-zh.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
@@ -439,7 +1326,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>这时，如果我们仍然希望优化<strong>反向 KL</strong> $D_{\mathrm{KL}}(q_\theta | p)$，就必须引入<strong>重要性权重</strong>。</p>
 
-<p>关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：<a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>。</p>
+<p>关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：<a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>。</p>
 
 <h4 id="设置与记号">设置与记号</h4>
 
@@ -1140,1631 +2027,7 @@ g_3(x)
   <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
   <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。]]></summary></entry><entry xml:lang="en"><title type="html">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html" rel="alternate" type="text/html" title="Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#introduction-what-kl-does-in-rl" id="markdown-toc-introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</a>    <ul>
-      <li><a href="#forward-vs-reverse-kl" id="markdown-toc-forward-vs-reverse-kl">Forward vs. reverse KL</a></li>
-    </ul>
-  </li>
-  <li><a href="#three-estimators-definitions-and-design" id="markdown-toc-three-estimators-definitions-and-design">Three estimators: definitions and design</a>    <ul>
-      <li><a href="#k_1-the-naive-estimator" id="markdown-toc-k_1-the-naive-estimator">$k_1$: the naive estimator</a></li>
-      <li><a href="#k_2-an-f-divergence-lower-variance" id="markdown-toc-k_2-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</a></li>
-      <li><a href="#k_3-control-variate-optimal-shape" id="markdown-toc-k_3-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</a></li>
-      <li><a href="#quick-comparison" id="markdown-toc-quick-comparison">Quick comparison</a></li>
-    </ul>
-  </li>
-  <li><a href="#core-analysis" id="markdown-toc-core-analysis">Core analysis</a>    <ul>
-      <li><a href="#bias-and-variance-for-kl-values" id="markdown-toc-bias-and-variance-for-kl-values">Bias and variance for KL values</a></li>
-      <li><a href="#gradient-estimation-the-crucial-distinction" id="markdown-toc-gradient-estimation-the-crucial-distinction">Gradient estimation: the crucial distinction</a>        <ul>
-          <li><a href="#true-gradients-for-reference" id="markdown-toc-true-gradients-for-reference">True gradients for reference</a></li>
-          <li><a href="#two-differentiation-orders" id="markdown-toc-two-differentiation-orders">Two differentiation orders</a></li>
-          <li><a href="#gradients-of-the-three-estimators-on-policy" id="markdown-toc-gradients-of-the-three-estimators-on-policy">Gradients of the three estimators (on-policy)</a></li>
-          <li><a href="#expectation-then-grad-vs-grad-then-expectation" id="markdown-toc-expectation-then-grad-vs-grad-then-expectation">Expectation-then-grad vs. grad-then-expectation</a></li>
-        </ul>
-      </li>
-      <li><a href="#off-policy-gradients-with-importance-sampling" id="markdown-toc-off-policy-gradients-with-importance-sampling">Off-policy gradients with importance sampling</a>        <ul>
-          <li><a href="#setup" id="markdown-toc-setup">Setup</a></li>
-          <li><a href="#crucial-observation-the-two-orders-coincide" id="markdown-toc-crucial-observation-the-two-orders-coincide">Crucial observation: the two orders coincide</a></li>
-          <li><a href="#value-unbiasedness-remains" id="markdown-toc-value-unbiasedness-remains">Value unbiasedness remains</a></li>
-          <li><a href="#gradients-with-weights" id="markdown-toc-gradients-with-weights">Gradients with weights</a></li>
-          <li><a href="#variance-of-the-three-unbiased-off-policy-gradient-estimators" id="markdown-toc-variance-of-the-three-unbiased-off-policy-gradient-estimators">Variance of the three unbiased off-policy gradient estimators</a></li>
-        </ul>
-      </li>
-      <li><a href="#gradient-cheat-sheet" id="markdown-toc-gradient-cheat-sheet">Gradient cheat sheet</a></li>
-    </ul>
-  </li>
-  <li><a href="#two-ways-to-use-kl-as-reward-vs-as-loss" id="markdown-toc-two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</a>    <ul>
-      <li><a href="#definitions" id="markdown-toc-definitions">Definitions</a></li>
-      <li><a href="#key-difference-1-optimization-target" id="markdown-toc-key-difference-1-optimization-target">Key Difference 1: Optimization Target</a></li>
-      <li><a href="#key-difference-2-actor-gradient" id="markdown-toc-key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</a></li>
-      <li><a href="#key-difference-3-critic-learning-target" id="markdown-toc-key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</a></li>
-      <li><a href="#key-difference-4-credit-assignment" id="markdown-toc-key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</a></li>
-      <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
-    </ul>
-  </li>
-  <li><a href="#rl-practice-guide" id="markdown-toc-rl-practice-guide">RL practice guide</a>    <ul>
-      <li><a href="#kl-as-reward-penalty-no-gradient-needed" id="markdown-toc-kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</a></li>
-      <li><a href="#kl-as-loss-needs-gradients" id="markdown-toc-kl-as-loss-needs-gradients">KL as loss (needs gradients)</a>        <ul>
-          <li><a href="#on-policy-optimize-reverse-kl-most-common" id="markdown-toc-on-policy-optimize-reverse-kl-most-common">On-policy: optimize reverse KL (most common)</a></li>
-          <li><a href="#on-policy-optimize-forward-kl-coverage" id="markdown-toc-on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</a></li>
-          <li><a href="#off-policy-optimize-reverse-kl" id="markdown-toc-off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li><a href="#grab-and-use-crib-sheet" id="markdown-toc-grab-and-use-crib-sheet">“Grab-and-use” crib sheet</a></li>
-  <li><a href="#common-implementation-traps" id="markdown-toc-common-implementation-traps">Common implementation traps</a></li>
-  <li><a href="#summary-1" id="markdown-toc-summary-1">Summary</a></li>
-  <li><a href="#references" id="markdown-toc-references">References</a></li>
-</ul>
-
-<p><img src="/assets/img/kl-estimators/kl-estimator-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
-
-<blockquote>
-  <p>How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
-</blockquote>
-
-<p><a href="/reinforcement-learning/2025/12/01/kl-estimators-cn.html">中文版</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
-
-<h2 id="introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</h2>
-
-<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> keeps the new policy from drifting too far from a reference policy, preventing instability or collapse. However, implementing KL penalty involves multiple layers of choices: <strong>which estimator</strong> ($k_1$, $k_2$, $k_3$), <strong>who to sample from</strong> (on-policy vs off-policy), and <strong>how to use it</strong> (as reward shaping or as a loss for backpropagation). This post systematically dissects these choices and their interrelationships.</p>
-
-<h3 id="forward-vs-reverse-kl">Forward vs. reverse KL</h3>
-
-<p>Let $q_\theta$ be the current actor, $p$ the reference policy. The two directions are:</p>
-
-<p><strong>Reverse KL:</strong>
-\(D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_\theta(x)}{p(x)}\right]\)</p>
-
-<figure style="text-align:center;">
-	<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:95%;max-width:100%;" />
-	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
-</figure>
-
-<p><strong>Forward KL:</strong>
-\(D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\theta(x)}\right]\)</p>
-
-<figure style="text-align:center;">
-	<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:95%;max-width:100%;" />
-	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
-</figure>
-
-<p><strong>Intuition:</strong></p>
-<ul>
-  <li><strong>Reverse KL</strong> is mode-seeking: policy concentrates on high-probability regions of $p$, possibly sacrificing diversity.</li>
-  <li><strong>Forward KL</strong> is mass-covering: policy tries to cover the support of $p$.</li>
-</ul>
-
-<p>RLHF typically uses <strong>reverse KL</strong> because we want the actor not to move too far from the reference, not necessarily to cover every mode.</p>
-
-<h2 id="three-estimators-definitions-and-design">Three estimators: definitions and design</h2>
-
-<p>Let $r(x) = \dfrac{p(x)}{q_\theta(x)}$. John Schulman defined three single-sample estimators:</p>
-
-<h3 id="k_1-the-naive-estimator">$k_1$: the naive estimator</h3>
-
-\[k_1(x) = -\log r = \log q_\theta(x) - \log p(x)\]
-
-<p>Direct log-ratio. It is unbiased for reverse KL, but <strong>can be negative</strong> while KL is always nonnegative, giving huge variance because positive and negative samples cancel.</p>
-
-<h3 id="k_2-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</h3>
-
-\[k_2(x) = \frac{1}{2}(\log r)^2\]
-
-<p><strong>Motivation:</strong> $k_1$ can be positive or negative; $k_2$ squares it so <strong>every sample is positive</strong>, each telling you how far $p$ and $q$ differ.</p>
-
-<p><strong>Why tiny bias?</strong> $k_2$ is an <strong>f-divergence</strong> with $f(x) = \tfrac{1}{2}(\log x)^2$. All smooth f-divergences have the same second-order expansion near $q \approx p$:</p>
-
-\[D_f(p, q_\theta) = \frac{f^{\prime\prime}(1)}{2} \theta^T F \theta + O(\theta^3)\]
-
-<p>KL corresponds to $f(x) = -\log x$, so $f^{\prime\prime}(1) = 1$. For $k_2$, $f^{\prime\prime}(1) = 1$ as well. <strong>When policies are close, $k_2$ tracks true KL almost identically</strong>, bias only appears in higher-order terms.</p>
-
-<h3 id="k_3-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</h3>
-
-\[k_3(x) = r - 1 - \log r\]
-
-<p><strong>Motivation:</strong> we want <strong>unbiased and low variance</strong>. Add a <strong>control variate</strong> to $k_1$: something zero-mean and negatively correlated.</p>
-
-<p>Because $\mathbb{E}_q[r - 1] = 1 - 1 = 0$, for any $\lambda$:</p>
-
-\[k_1 + \lambda(r - 1) = -\log r + \lambda(r - 1)\]
-
-<p>is still unbiased.</p>
-
-<p><strong>Why $\lambda = 1$?</strong> By concavity of $\log$, $\log x \le x - 1$, so</p>
-
-\[k_3 = (r - 1) - \log r \ge 0\]
-
-<p>It is <strong>always nonnegative</strong>, avoiding the cancelation problem.</p>
-
-<p><strong>Geometric view:</strong> $k_3$ is a <strong>Bregman divergence</strong> for $\phi(x) = -\log x$. Its tangent at $x=1$ is $y = 1 - x$, so</p>
-
-\[\begin{aligned}
-D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
-&amp;= -\log r - 0 - (-1)(r - 1) \\
-&amp;= r - 1 - \log r = k_3.
-\end{aligned}\]
-
-<p>Convexity keeps $\phi$ above its tangent, so this gap is <strong>nonnegative</strong>. As $r \to 1$, the gap shrinks quadratically $(r-1)^2$, explaining the low variance when policies are close.</p>
-
-<h3 id="quick-comparison">Quick comparison</h3>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">Definition</th>
-			<th style="text-align: center;">Design idea</th>
-			<th style="text-align: center;">Bias (value)</th>
-			<th style="text-align: center;">Variance</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">$\log r$</td>
-			<td style="text-align: center;">Naive log-ratio</td>
-			<td style="text-align: center;">Unbiased</td>
-			<td style="text-align: center;">High (can be negative)</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">$\tfrac{1}{2}(\log r)^2$</td>
-			<td style="text-align: center;">f-divergence, KL-matching 2nd order</td>
-			<td style="text-align: center;">Biased (very small)</td>
-			<td style="text-align: center;">Low (always positive)</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">$r - 1 - \log r$</td>
-			<td style="text-align: center;">Control variate + Bregman</td>
-			<td style="text-align: center;">Unbiased</td>
-			<td style="text-align: center;">Low (always positive)</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<p>For estimating the KL <strong>value</strong>, $k_3$ is “unbiased + low variance”; but as we’ll analyze, <strong>the gradient story is completely different</strong> — different estimators’ gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.</p>
-
-<h2 id="core-analysis">Core analysis</h2>
-
-<h3 id="bias-and-variance-for-kl-values">Bias and variance for KL values</h3>
-
-<p>Assume samples from $q_\theta$ to estimate reverse KL $D_{\mathrm{KL}}(q_\theta | p)$.</p>
-
-<p><strong>Unbiasedness:</strong></p>
-
-\[\begin{aligned}
-\mathbb{E}_{q}[k_1] &amp;= \mathbb{E}_{q}\left[\log \tfrac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\\
-\mathbb{E}_{q}[k_3] &amp;= \mathbb{E}_{q}[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\\
-\mathbb{E}_{q}[k_2] &amp;= \tfrac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(biased)}
-\end{aligned}\]
-
-<p><strong>Variance trade-off:</strong></p>
-
-<p>John Schulman’s toy experiments ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005):</p>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">bias/true</th>
-			<th style="text-align: center;">stdev/true</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">20</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">0.002</td>
-			<td style="text-align: center;">1.42</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">1.42</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<p>When KL is large ($p = \mathcal{N}(1,1)$, true KL = 0.5):</p>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">bias/true</th>
-			<th style="text-align: center;">stdev/true</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">2</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">0.25</td>
-			<td style="text-align: center;">1.73</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">1.7</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<p><strong>Intuition:</strong></p>
-<ul>
-  <li>$k_1 = -\log r$ is first-order around $r=1$, can be negative, so variance explodes when close.</li>
-  <li>$k_3 = r - 1 - \log r$ is second-order near $r=1$ and always positive, so lower variance when close.</li>
-  <li>When coverage is poor (heavy tails in $r$), $k_3$ can explode; then $k_1$ can be more stable.</li>
-</ul>
-
-<blockquote>
-  <p><strong>Note:</strong> To estimate <strong>forward KL value</strong> $D_{\mathrm{KL}}(p | q) = \mathbb{E}_p[\log r]$ but only sample from $q$, use importance sampling $\mathbb{E}_q[r \log r]$.</p>
-</blockquote>
-
-<h3 id="gradient-estimation-the-crucial-distinction">Gradient estimation: the crucial distinction</h3>
-
-<p>This is the easiest part to get wrong. First analyze <strong>on-policy</strong> (samples from $q_\theta$), then extend to <strong>off-policy</strong> (samples from behavior $\mu$).</p>
-
-<h4 id="true-gradients-for-reference">True gradients for reference</h4>
-
-<p>Let score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$, with key property $\mathbb{E}_{q_\theta}[s_\theta] = 0$.</p>
-
-<p><strong>Reverse KL gradient:</strong></p>
-
-\[D_{\mathrm{KL}}(q_\theta \| p) = \int q_\theta(x) \log \frac{q_\theta(x)}{p(x)} dx\]
-
-<p>Product rule and $\nabla_\theta q_\theta = q_\theta s_\theta$, $\nabla_\theta \log p = 0$ give</p>
-
-\[\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q\left[s_\theta \log \tfrac{q_\theta}{p}\right] = -\mathbb{E}_q[s_\theta \log r].\]
-
-<p><strong>Forward KL gradient:</strong></p>
-
-\[D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \log \frac{p(x)}{q_\theta(x)} dx\]
-
-<p>Since $p$ is $\theta$-independent,</p>
-
-\[\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = -\mathbb{E}_p[s_\theta] = -\mathbb{E}_q[r s_\theta] = \mathbb{E}_q[(1-r) s_\theta].\]
-
-<p>These baselines tell us what each estimator’s expected gradient really targets.</p>
-
-<h4 id="two-differentiation-orders">Two differentiation orders</h4>
-
-<p>1) <strong>Grad then expectation:</strong> autograd on each sample, then batch average (what DL code actually does).
-2) <strong>Expectation then grad:</strong> treat $\mathbb{E}_q[k_i]$ as a function of $\theta$ and differentiate analytically.</p>
-
-<p>Typical code does (1).</p>
-
-<h4 id="gradients-of-the-three-estimators-on-policy">Gradients of the three estimators (on-policy)</h4>
-
-\[\nabla_\theta k_1 = s_\theta\]
-
-\[\nabla_\theta k_2 = (\log r) \nabla_\theta(\log r) = (\log r)(-s_\theta) = - (\log r) s_\theta\]
-
-\[\nabla_\theta k_3 = (1 - r) s_\theta\]
-
-<p>Taking expectation under $q_\theta$:</p>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-			<th style="text-align: center;">Equals</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">$\mathbb{E}_{q}[s_\theta] = 0$</td>
-			<td style="text-align: center;"><strong>Zero (useless as loss)</strong></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">$-\mathbb{E}_{q}[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Gradient of reverse KL</strong></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">$\mathbb{E}_{q}[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-			<td style="text-align: center;"><strong>Gradient of forward KL</strong></td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<p><strong>Key takeaways:</strong></p>
-<ul>
-  <li><strong>$k_2$ gradient</strong> matches reverse KL gradient (the usual “stay near ref” objective).</li>
-  <li><strong>$k_3$ gradient</strong> matches forward KL gradient (coverage objective).</li>
-  <li><strong>$k_1$ gradient expectation is zero</strong> — useless as a loss.</li>
-</ul>
-
-<h4 id="expectation-then-grad-vs-grad-then-expectation">Expectation-then-grad vs. grad-then-expectation</h4>
-
-<p>If you first form $\mathbb{E}_q[k_i]$ and then differentiate (expectation-then-grad):</p>
-
-\[\nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p), \quad \nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p).\]
-
-<p>Both give reverse KL. But autograd on per-sample $k_3$ averages (grad-then-expectation) yields <strong>forward KL gradient</strong>. Same estimator, different order, different result.</p>
-
-<h3 id="off-policy-gradients-with-importance-sampling">Off-policy gradients with importance sampling</h3>
-
-<p>Real RL often samples from a behavior policy $\mu$ (old or mixed policy, replay buffer). To optimize <strong>reverse KL</strong> you need <strong>importance weights</strong>.</p>
-
-<p>See also my earlier post: <a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">Three-policy TRPO extension for LLM RL</a>.</p>
-
-<h4 id="setup">Setup</h4>
-
-<p>Define importance weight</p>
-
-\[w(x) = \frac{q_\theta(x)}{\mu(x)}.\]
-
-<p>Using batch loss $w(x) k_i(x)$ with autograd, what gradients do we get?</p>
-
-<p>A key difference:</p>
-<ul>
-  <li>Previously expectations were under $q_\theta$ (depends on $\theta$).</li>
-  <li>Now expectations are under $\mu$ (independent of $\theta$).</li>
-</ul>
-
-<h4 id="crucial-observation-the-two-orders-coincide">Crucial observation: the two orders coincide</h4>
-
-<p>Because $\mu$ is $\theta$-independent,</p>
-
-\[\nabla_\theta \mathbb{E}_{\mu}[f_\theta] = \mathbb{E}_{\mu}[\nabla_\theta f_\theta].\]
-
-<p>So autograd on sample means (grad-then-expectation) equals expectation-then-grad. For $k_1$ and $k_3$, both value-unbiased for reverse KL, their gradient expectations also match reverse KL.</p>
-
-<h4 id="value-unbiasedness-remains">Value unbiasedness remains</h4>
-
-<p>By $\mathbb{E}_\mu[w f] = \mathbb{E}_q[f]$:</p>
-
-\[\mathbb{E}_\mu[w k_1] = D_{\mathrm{KL}}(q_\theta \| p), \quad \mathbb{E}_\mu[w k_3] = D_{\mathrm{KL}}(q_\theta \| p) \quad \textbf{(unbiased)}\]
-
-\[\mathbb{E}_\mu[w k_2] = \mathbb{E}_{q_\theta}[k_2] \neq D_{\mathrm{KL}}(q_\theta \| p) \quad \textbf{(biased)}\]
-
-<h4 id="gradients-with-weights">Gradients with weights</h4>
-
-<p>Gradient of weight: $\nabla_\theta w = w s_\theta$. Using product rule:</p>
-
-<p>\(\nabla_\theta(w k_1) = w s_\theta (k_1 + 1)\)
-\(\nabla_\theta(w k_2) = w s_\theta (k_2 - \log r)\)
-\(\nabla_\theta(w k_3) = w s_\theta (k_3 + 1 - r) = w s_\theta k_1\)</p>
-
-<p>Which give expected gradients:</p>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Weighted estimator</th>
-			<th style="text-align: center;">Value target</th>
-			<th style="text-align: center;">Expected gradient</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_1$</td>
-			<td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_2$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-			<td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$, <strong>not</strong> reverse KL ✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\text{sg}\left(\tfrac{q_\theta}{\mu}\right) k_2$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_3$</td>
-			<td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<p><strong>Interesting reversal vs. on-policy:</strong></p>
-<ul>
-  <li>On-policy: $k_2$ as loss gives reverse KL gradient; $k_1$ gradient is zero.</li>
-  <li>Off-policy + weights: $\tfrac{q}{\mu}k_1$ and $\tfrac{q}{\mu}k_3$ give reverse KL gradients; $\tfrac{q}{\mu}k_2$ (with weight in grad) fails.</li>
-  <li>Detaching the weight makes $\text{sg}(\tfrac{q}{\mu}) k_2$ also give reverse KL gradient.</li>
-</ul>
-
-<h4 id="variance-of-the-three-unbiased-off-policy-gradient-estimators">Variance of the three unbiased off-policy gradient estimators</h4>
-
-<p>Unbiased reverse-KL gradient estimators (off-policy + IS):</p>
-
-\[L_1 = w k_1, \quad L_2 = \bar w k_2, \quad L_3 = w k_3,\]
-
-<p>With $w = \tfrac{q_\theta}{\mu}$, $\bar w = \mathrm{sg}(w)$. Using $\nabla_\theta w = w s_\theta$, $\nabla_\theta k_1 = s_\theta$, $\nabla_\theta k_2 = k_1 s_\theta$, $\nabla_\theta k_3 = (1-r) s_\theta$:</p>
-
-\[\begin{aligned}
-g_1 &amp;= w s_\theta (k_1+1),\\
-g_2 &amp;= w s_\theta k_1,\\
-g_3 &amp;= w s_\theta k_1.
-\end{aligned}\]
-
-<p>So <strong>$g_2 \equiv g_3$</strong>. Only two distinct variance behaviors: $g_1$ vs. $g_\star := g_2 = g_3$.</p>
-
-<p>Let $A = w s_\theta, B = k_1$. Then</p>
-
-\[g_1 = A(B+1), \quad g_\star = A B.\]
-
-<p>Variance difference:</p>
-
-\[\boxed{\mathrm{Var}_\mu(g_1) - \mathrm{Var}_\mu(g_\star) = \mathbb{E}_\mu[A^2(2B+1)]} = \mathbb{E}_\mu\big[w^2 s_\theta^2 (2k_1+1)\big].\]
-
-<p>In the typical KL-penalty regime $q_\theta \approx p \approx \mu$, write $r = 1 + \varepsilon$, $\lvert\varepsilon\rvert \ll 1$, so $k_1 \approx -\varepsilon$, $2k_1+1 \approx 1 - 2\varepsilon &gt; 0$. Thus $\mathrm{Var}(g_1) &gt; \mathrm{Var}(g_\star)$.</p>
-
-<p>Intuition:</p>
-<ul>
-  <li>$g_1$ includes an $O(1)$ zero-mean noise term $w s_\theta$.</li>
-  <li>$g_\star$ cancels that term; remaining magnitude is $O(\varepsilon)$, giving much lower variance.</li>
-</ul>
-
-<p>Table summary:</p>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center; white-space: nowrap;">Estimator</th>
-			<th style="text-align: center; white-space: nowrap;">Gradient rv</th>
-			<th style="text-align: center; white-space: nowrap;">Scale ($r\approx1$)</th>
-			<th style="text-align: center;">Variance</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$w k_1$</td>
-			<td style="text-align: center;">$w s_\theta (k_1+1)$</td>
-			<td style="text-align: center;">$O(1)$</td>
-			<td style="text-align: center;">High</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mathrm{sg}(w) k_2$</td>
-			<td style="text-align: center;">$w s_\theta k_1$</td>
-			<td style="text-align: center;">$O(\varepsilon)$</td>
-			<td style="text-align: center;">Low</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$w k_3$</td>
-			<td style="text-align: center;">$w s_\theta k_1$</td>
-			<td style="text-align: center;">$O(\varepsilon)$</td>
-			<td style="text-align: center;">Low</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<p>Conclusion: off-policy IS with reverse-KL gradients has three unbiased options: $w k_1$, $\bar w k_2$, $w k_3$. The latter two are identical in gradient and variance and are preferred; $w k_1$ is unbiased but noisier.</p>
-
-<p><strong>When far off-policy:</strong> If $w$ explodes (little overlap), any $\tfrac{q}{\mu}$ method suffers. Then the variance advantage of $k_3$ over $k_1$ is not guaranteed; clipping/regularization becomes necessary.</p>
-
-<h3 id="gradient-cheat-sheet">Gradient cheat sheet</h3>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center; white-space: nowrap;">Sampling</th>
-			<th style="text-align: center;">Loss</th>
-			<th style="text-align: center;">$\mathbb{E}[\nabla_\theta \text{Loss}]$</th>
-			<th style="text-align: center;">Optimizes</th>
-			<th style="text-align: center; white-space: nowrap;">Right for reverse KL?</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$q$ (on)</td>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[s_\theta] = 0$</td>
-			<td style="text-align: center;">None (zero grad)</td>
-			<td style="text-align: center;">✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$q$ (on)</td>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$q$ (on)</td>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-			<td style="text-align: center;">Forward KL</td>
-			<td style="text-align: center;">✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_1$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓ (higher var)</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_2$</td>
-			<td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
-			<td style="text-align: center;">f-divergence (not KL)</td>
-			<td style="text-align: center;">✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\text{sg}\left(\tfrac{q}{\mu}\right) k_2$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_3$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓ (recommended, low var)</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<p><strong>Key conclusions:</strong>
-1) <strong>On-policy reverse KL:</strong> use $k_2$ (only correct choice).
-2) <strong>Off-policy reverse KL:</strong> three correct options: $\tfrac{q}{\mu} k_1$ (unbiased, higher var); $\text{sg}(\tfrac{q}{\mu}) k_2$ (unbiased, equals next); $\tfrac{q}{\mu} k_3$ (unbiased, lower var; equals previous).
-3) <strong>$\tfrac{q}{\mu} k_2$ with weight in grad is wrong</strong> for reverse KL.</p>
-
-<p>However, before choosing an estimator, there’s a more fundamental question to answer: <strong>should KL be added to rewards, or be part of the loss?</strong> This choice fundamentally affects optimization behavior and credit assignment.</p>
-
-<h2 id="two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</h2>
-
-<p>In practice, KL penalty can be used in two fundamentally different ways: added to rewards for shaping (no gradient backpropagation needed), or as part of the loss for backpropagation (gradient needed).</p>
-
-<p>These two approaches may seem like just a <code class="language-plaintext highlighter-rouge">detach</code> difference in code, but they correspond to completely different optimization behaviors.</p>
-
-<h3 id="definitions">Definitions</h3>
-
-<p><strong>KL as Reward (stop-gradient):</strong></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kl</span> <span class="o">=</span> <span class="nf">compute_kl</span><span class="p">(</span><span class="n">log_prob_q</span><span class="p">,</span> <span class="n">log_prob_p</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
-<span class="n">shaped_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
-</code></pre></div></div>
-
-<p>Use shaped reward for standard actor-critic updates.</p>
-
-<p><strong>KL as Loss (backprop):</strong></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actor_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantage</span> <span class="o">*</span> <span class="n">log_prob</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>  <span class="c1"># kl participates in gradient
-</span></code></pre></div></div>
-
-<p>Critic only learns environment value; KL is a regularization term for the actor that backpropagates gradients.</p>
-
-<h3 id="key-difference-1-optimization-target">Key Difference 1: Optimization Target</h3>
-
-<p><strong>KL as Reward:</strong> Optimizes a <strong>regularized new MDP</strong> where the reward function becomes $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$.</p>
-
-<p><strong>KL as Loss:</strong> Optimizes the <strong>original task + supervised regularization</strong>; KL doesn’t change the MDP definition, it’s just an external constraint term.</p>
-
-<p><strong>Intuition:</strong> The former “changes the game rules”; the latter “adds constraints under the original rules”.</p>
-
-<h3 id="key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</h3>
-
-<p><strong>KL as Reward:</strong> Single policy gradient, KL influence is <strong>reflected indirectly through advantage</strong>:</p>
-
-\[g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ based on } (r_t - \beta \cdot \text{KL}_t)\]
-
-<p><strong>KL as Loss:</strong> Gradient splits into two independent paths:</p>
-
-\[g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL gradient}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla_\theta \text{KL}_t\right]}_{\text{KL explicit gradient}}\]
-
-<p><strong>Key distinction:</strong> Is KL’s force “multiplied on advantage” or “a separate force”? The latter’s KL gradient is deterministic, unaffected by critic quality.</p>
-
-<h3 id="key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</h3>
-
-<p><strong>KL as Reward:</strong> Critic learns mixed value</p>
-
-\[V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]\]
-
-<p><strong>KL as Loss:</strong> Critic only learns environment value</p>
-
-\[V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]\]
-
-<p>The latter has cleaner separation, making it easier to monitor task return and KL divergence separately.</p>
-
-<h3 id="key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</h3>
-
-<p>Consider a scenario: first few steps are routing behavior, final step has high reward but also high KL.</p>
-
-<p><strong>KL as Reward:</strong> The large KL at the terminal state is <strong>propagated back to all previous steps</strong> through TD, so the policy tends to <strong>fundamentally avoid</strong> high-KL regions — this is “planning-based KL budget allocation”.</p>
-
-<p><strong>KL as Loss:</strong> The terminal state’s KL only appears in that state’s gradient term; the policy is still willing to <strong>visit high-reward regions but locally correct</strong> behavior.</p>
-
-<h3 id="summary">Summary</h3>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">Dimension</th>
-      <th style="text-align: center;">KL as Reward (stop-grad)</th>
-      <th style="text-align: center;">KL as Loss (backprop)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">Optimization target</td>
-      <td style="text-align: center;">Regularized new MDP</td>
-      <td style="text-align: center;">Original task + supervised regularization</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Actor gradient</td>
-      <td style="text-align: center;">Single PG, based on shaped advantage</td>
-      <td style="text-align: center;">RL gradient + explicit KL gradient</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Critic</td>
-      <td style="text-align: center;">Learns $V^{\text{reg}}$: reward + KL mixed</td>
-      <td style="text-align: center;">Learns $V^{\text{env}}$: only environment reward</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Credit Assignment</td>
-      <td style="text-align: center;">Multi-step backprop, planning-capable</td>
-      <td style="text-align: center;">Local per-state, no planning</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<p><strong>One-liner:</strong> KL as reward makes the agent “plan to avoid high-KL paths” — constraints are more global and thorough; KL as loss makes the agent “visit but locally correct” — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be “preventive” or “corrective”.</p>
-
-<h2 id="rl-practice-guide">RL practice guide</h2>
-
-<p>Combining the preceding analysis of “estimator mathematical properties” and “usage modes”, this section provides practical recommendations for specific scenarios.</p>
-
-<h3 id="kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</h3>
-
-<p>When KL is a scalar penalty in rewards, we only need accurate <strong>values</strong>, no backprop. Refer to the earlier section on “Bias and variance for KL values”.</p>
-
-<p><strong>Recommend:</strong></p>
-<ul>
-  <li>Use <strong>$k_1$</strong> or <strong>$k_3$</strong> (both unbiased for reverse KL value).</li>
-  <li>When policies are close, $k_3$ is typically lower variance.</li>
-  <li>With poor coverage or heavy tails, $k_1$ is more robust.</li>
-  <li>Off-policy: multiply by $\tfrac{q_\theta}{\mu}$.</li>
-</ul>
-
-<blockquote>
-  <p>For a <strong>forward KL penalty</strong>, use $\mathbb{E}_q[r \log r]$ or (if sampling from $p$) $\mathbb{E}_p[\log r]$.</p>
-</blockquote>
-
-<h3 id="kl-as-loss-needs-gradients">KL as loss (needs gradients)</h3>
-
-<h4 id="on-policy-optimize-reverse-kl-most-common">On-policy: optimize reverse KL (most common)</h4>
-
-<p>Goal: keep actor near reference.</p>
-
-<p><strong>Use $k_2$ as loss.</strong></p>
-
-\[\mathcal{L}_{k_2} = \tfrac{1}{2}(\log r)^2\]
-
-<p>Then $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q | p)$.</p>
-
-<h4 id="on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</h4>
-
-<p>Goal: cover the reference distribution (offline RL, imitation, etc.).</p>
-
-<p><strong>Use $k_3$ as loss.</strong> Autograd on sample means gives $\mathbb{E}_q[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$.</p>
-
-<h4 id="off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</h4>
-
-<p>Goal: samples from behavior $\mu$, still optimize reverse KL.</p>
-
-<p><strong>Recommended:</strong> $\dfrac{q_\theta}{\mu} k_3$ or $\mathrm{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$ (identical gradients).</p>
-
-\[\mathcal{L} = \dfrac{q_\theta(x)}{\mu(x)} \Big( \dfrac{p(x)}{q_\theta(x)} - 1 - \log \dfrac{p(x)}{q_\theta(x)} \Big)\]
-
-<p>or</p>
-
-\[\mathcal{L} = \mathrm{sg}\left(\dfrac{q_\theta(x)}{\mu(x)}\right) \cdot \tfrac{1}{2}\left(\log \dfrac{p(x)}{q_\theta(x)}\right)^2.\]
-
-<ul>
-  <li>Gradients are unbiased.</li>
-  <li>When $q_\theta \approx p$, both have much lower variance.</li>
-</ul>
-
-<p><strong>Fallback:</strong> $\dfrac{q_\theta}{\mu} k_1$ (unbiased but higher variance).</p>
-
-<p><strong>Avoid:</strong> $\dfrac{q_\theta}{\mu} k_2$ with weight in gradient — biased for reverse KL.</p>
-
-<h2 id="grab-and-use-crib-sheet">“Grab-and-use” crib sheet</h2>
-
-<p>The table below provides recommended estimator choices along three dimensions: “target KL direction” × “sampling source” × “usage mode”. “For <strong>value</strong>” corresponds to KL as reward penalty (no gradient needed); “For <strong>gradient</strong>” corresponds to KL as loss (gradient backpropagation needed).</p>
-
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Target</th>
-			<th style="text-align: center;">Sampling</th>
-			<th style="text-align: center;">For <strong>value</strong> (KL as Reward)</th>
-			<th style="text-align: center;">For <strong>gradient</strong> (KL as Loss)</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;">$q$ (on-policy)</td>
-			<td style="text-align: center;">$k_1$ or $k_3$ (unbiased)</td>
-			<td style="text-align: center;">$k_2$</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;">$\mu$ (off-policy)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_1$ or $\tfrac{q}{\mu} k_3$ (unbiased)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_3$ (recommended) or $\text{sg}(\tfrac{q}{\mu}) k_2$</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Forward KL $D_{\mathrm{KL}}(p \| q)$</td>
-			<td style="text-align: center;">$q$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[r\log r]$</td>
-			<td style="text-align: center;">$k_3$</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
-<h2 id="common-implementation-traps">Common implementation traps</h2>
-
-<p><strong>Trap 1: Using $k_1$ directly as loss (on-policy)</strong></p>
-
-<p>When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
-
-<blockquote>
-  <p><strong>Fix:</strong> First clarify the KL usage mode. For reward shaping (no gradient needed), both $k_1$ and $k_3$ work; for losses (gradient needed), use $k_2$ (reverse KL) or $k_3$ (forward KL) on-policy.</p>
-</blockquote>
-
-<p><strong>Trap 2: Mixing up $k_3$ value-unbiasedness vs. gradient target</strong></p>
-
-<p>$k_3$ is value-unbiased for reverse KL, but its <strong>gradient</strong> is <strong>forward KL</strong>. If you want reverse KL and backprop $k_3$, you are actually optimizing forward KL.</p>
-
-<blockquote>
-  <p><strong>Fix:</strong> be explicit: reverse KL -&gt; $k_2$; forward KL -&gt; $k_3$.</p>
-</blockquote>
-
-<p><strong>Trap 3: Heavy-tailed $r$ blows up variance</strong></p>
-
-<p>If $r = p/q$ has extreme values, $k_3$ variance can explode.</p>
-
-<blockquote>
-  <p><strong>Fix:</strong> enforce KL constraint or clip $r$.</p>
-</blockquote>
-
-<p><strong>Trap 4: Off-policy but still using $k_2$ or $\tfrac{q_\theta}{\mu} k_2$ (with grad on weight)</strong></p>
-
-<p>If $\mu \neq q_\theta$:</p>
-<ul>
-  <li>Plain $k_2$ (no weight): expectation is under $\mu$, estimator fails.</li>
-  <li>$\tfrac{q_\theta}{\mu} k_2$ with weight in grad: gradient is biased (f-divergence), not reverse KL.</li>
-</ul>
-
-<blockquote>
-  <p><strong>Fix:</strong> off-policy reverse KL -&gt; use $\tfrac{q_\theta}{\mu} k_3$ (recommended), $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$, or $\tfrac{q_\theta}{\mu} k_1$.</p>
-</blockquote>
-
-<p><strong>Trap 5: Wrong detach on importance weights</strong></p>
-
-<p>$w = q_\theta / \mu$ often comes from <code class="language-plaintext highlighter-rouge">log_prob_q - log_prob_mu</code> then <code class="language-plaintext highlighter-rouge">exp</code>. Detaching $w$ matters:</p>
-
-<ul>
-  <li><strong>Using $k_1$ or $k_3$:</strong> $w$ <strong>must participate in gradient</strong> (do not detach), otherwise you drop $\nabla_\theta w = w s_\theta$ and get wrong gradients.</li>
-  <li><strong>Using $k_2$:</strong> <strong>detach $w$</strong> to get reverse KL gradient. If $w$ stays in the graph, you get f-divergence gradient instead.</li>
-</ul>
-
-<blockquote>
-  <p><strong>Summary:</strong> match estimator with the right detach strategy.</p>
-</blockquote>
-
-<h2 id="summary-1">Summary</h2>
-
-<p><strong>One-liners:</strong></p>
-
-<ul>
-  <li><strong>Only value (reward penalty):</strong> use $k_1$ or $k_3$ (both unbiased for reverse KL value); off-policy multiply by $\tfrac{q_\theta}{\mu}$.</li>
-  <li><strong>Need gradients (loss):</strong>
-    <ul>
-      <li><strong>On-policy:</strong> reverse KL -&gt; $k_2$; forward KL -&gt; $k_3$.</li>
-      <li><strong>Off-policy:</strong> reverse KL -&gt; $\tfrac{q_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$ (same gradient, low variance); fallback $\tfrac{q_\theta}{\mu} k_1$ (unbiased but noisier).</li>
-    </ul>
-  </li>
-</ul>
-
-<p>Keep three questions clear: <strong>who do we sample from, whose value do we estimate, whose gradient do we need?</strong> Especially note: <strong>on-policy vs. off-policy choose different estimators for reverse KL</strong> — on-policy use $k_2$, off-policy use $\tfrac{q_\theta}{\mu} k_3$ or $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$.</p>
-
-<p>Additionally, don’t forget to determine <strong>the KL usage mode</strong> before choosing an estimator:</p>
-<ul>
-  <li><strong>KL as reward:</strong> Constraints act on the policy indirectly through shaped advantage, with cross-timestep credit assignment capability; agent will “plan to avoid high-KL paths”</li>
-  <li><strong>KL as loss:</strong> Constraints act on the policy directly as an independent gradient term; agent will “visit but locally correct”</li>
-</ul>
-
-<p>This choice is more fundamental than the estimator itself, depending on whether you want constraints to be “preventive” or “corrective”.</p>
-
-<h2 id="references">References</h2>
-
-<ol>
-  <li>Dibya Ghosh. “KL Divergence for Machine Learning”. <a href="https://dibyaghosh.com/blog/probability/kldivergence">https://dibyaghosh.com/blog/probability/kldivergence</a></li>
-  <li>John Schulman. “Approximating KL Divergence”. <a href="https://joschu.net/blog/kl-approx.html">https://joschu.net/blog/kl-approx.html</a></li>
-  <li>Verl Documentation. “Proximal Policy Optimization (PPO)”. <a href="https://verl.readthedocs.io/en/latest/algo/ppo.html">https://verl.readthedocs.io/en/latest/algo/ppo.html</a></li>
-  <li>初七123334. “RLHF/RLVR 训练中的 KL 近似方法浅析（k1 / k2 / k3)”. <a href="https://zhuanlan.zhihu.com/p/1966872846212010437">https://zhuanlan.zhihu.com/p/1966872846212010437</a></li>
-  <li>Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. “Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization”. <a href="https://arxiv.org/abs/2510.01555">https://arxiv.org/abs/2510.01555</a></li>
-  <li>Yifan Zhang, Yiping Ji, Gavin Brown, et al. “On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning”. <a href="https://arxiv.org/abs/2505.17508">https://arxiv.org/abs/2505.17508</a></li>
-</ol>
-
-<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
-	<span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
-	<span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding {KL} Divergence Estimators in {RL}: From Value Approximation to Gradient Estimation}</span><span class="p">,</span>
-	<span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
-	<span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
-	<span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
-	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
-<span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate.]]></summary></entry><entry xml:lang="zh"><title type="html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-cn.html" rel="alternate" type="text/html" title="从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-cn</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-cn.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#训推不一致和异步框架" id="markdown-toc-训推不一致和异步框架">训推不一致和异步框架</a></li>
-  <li><a href="#相关工作" id="markdown-toc-相关工作">相关工作</a></li>
-  <li><a href="#三策略-trpo-视角下的最小统一理解" id="markdown-toc-三策略-trpo-视角下的最小统一理解">三策略 TRPO 视角下的最小统一理解</a>    <ul>
-      <li><a href="#三个策略" id="markdown-toc-三个策略">三个策略</a></li>
-      <li><a href="#两策略-trpo" id="markdown-toc-两策略-trpo">两策略 TRPO</a></li>
-      <li><a href="#三策略-trpo" id="markdown-toc-三策略-trpo">三策略 TRPO</a></li>
-      <li><a href="#这两个差异各自怎么约束" id="markdown-toc-这两个差异各自怎么约束">这两个差异各自怎么约束？</a></li>
-    </ul>
-  </li>
-  <li><a href="#重要性采样与掩码四种约束-2-实现" id="markdown-toc-重要性采样与掩码四种约束-2-实现">重要性采样与掩码：四种约束 2 实现</a>    <ul>
-      <li><a href="#1-tistoken-level-截断-is" id="markdown-toc-1-tistoken-level-截断-is">1. TIS：token-level 截断 IS</a></li>
-      <li><a href="#2-icepopmoe-场景下的-token-level-双侧-mask" id="markdown-toc-2-icepopmoe-场景下的-token-level-双侧-mask">2. IcePop：MoE 场景下的 token-level 双侧 Mask</a></li>
-      <li><a href="#3-sequence-level-mis按整条序列-mask-的重要性采样" id="markdown-toc-3-sequence-level-mis按整条序列-mask-的重要性采样">3. sequence-level MIS：按整条序列 Mask 的重要性采样</a></li>
-      <li><a href="#4-worst-token-reject-sampling按最差-token-拒绝整条序列" id="markdown-toc-4-worst-token-reject-sampling按最差-token-拒绝整条序列">4. Worst Token Reject Sampling：按最差 token 拒绝整条序列</a></li>
-    </ul>
-  </li>
-  <li><a href="#moe-路由回放它在三策略-trpo-中到底做了什么" id="markdown-toc-moe-路由回放它在三策略-trpo-中到底做了什么">MoE 路由回放：它在三策略 TRPO 中到底做了什么？</a>    <ul>
-      <li><a href="#moe-下的-surrogate-objective把路由和token-生成拆开" id="markdown-toc-moe-下的-surrogate-objective把路由和token-生成拆开">MoE 下的 surrogate objective：把“路由”和“token 生成”拆开</a></li>
-      <li><a href="#1回放行为策略的路由behavior-router-replay--r3-类" id="markdown-toc-1回放行为策略的路由behavior-router-replay--r3-类">1）回放行为策略的路由（behavior-router replay / R3 类）</a></li>
-      <li><a href="#2回放参考策略的路由reference-router-replay" id="markdown-toc-2回放参考策略的路由reference-router-replay">2）回放参考策略的路由（reference-router replay）</a></li>
-      <li><a href="#路由回放只是在改写-surrogate-objective" id="markdown-toc-路由回放只是在改写-surrogate-objective">路由回放只是在改写 surrogate objective</a></li>
-    </ul>
-  </li>
-  <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
-</ul>
-
-<p><a href="/reinforcement-learning/2025/11/15/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
-
-<p><img src="/assets/img/three-policy/three-policy-mini-class-cn.jpg" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
-
-<h2 id="训推不一致和异步框架">训推不一致和异步框架</h2>
-
-<p>最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都围绕着一个更基础的矛盾——<strong>行为策略（behavior policy）和参考策略（reference policy）不一致。</strong></p>
-
-<p>本文先简单梳理一下我目前看到的相关工作，然后再尝试从“行为策略 vs 参考策略”的角度，把它们串到同一条线上，为读者提供一个补充视角。</p>
-
-<p>在本文中我会用：</p>
-
-<ul>
-  <li><strong>行为策略</strong> $\mu$：实际负责生成 rollout 的策略，也就是“你在什么分布下采样到了这些数据”。在现代 LLM-RL 系统里，它对应的是推理引擎里的那套实现（vLLM / SGLang 等），在异步框架下往往还是<strong>多个 worker 策略的混合分布</strong>。</li>
-  <li><strong>参考策略</strong> $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的“旧策略”（old policy）。</li>
-  <li><strong>目标策略</strong> $\pi_\theta$：训练目标里要优化的策略，也就是“你想让模型变成什么样”。典型地就是 PPO / GRPO 里的“新策略”（new policy）。</li>
-</ul>
-
-<p>在最经典、理想化的设定里，我们通常<strong>默认</strong> $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理 / 训练后端、MoE 路由波动甚至硬件数值差异等因素影响，二者往往会出现不同程度的偏离。</p>
-
-<h2 id="相关工作">相关工作</h2>
-
-<p>下面按时间线简单列一下我印象比较深的一些工作（只代表我个人看到的片面子集）：</p>
-
-<ul>
-  <li>
-    <p><a href="https://arxiv.org/abs/2110.00641">Decoupled PPO</a> 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，“旧策略”（old policy）实际承担了两个不同的角色：一是用于重要性采样进行异策略修正，在这个目的下，“旧策略”用于代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，在这个目的下，“旧策略”被用于衡量新旧策略的变化程度，称作近端策略（proximal policy，对应本文中的“参考策略”）。文章指出这两个目的下的“旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，把“采样用谁”和“对谁做 trust region”在形式上解耦开来。</p>
-  </li>
-  <li>
-    <p><a href="https://arxiv.org/abs/2505.24298">AReaL</a> 关注到了异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将“行为策略分布”和“参考策略”显式区分开来，从而在异步场景下仍然维持类似 PPO 的优化性质。</p>
-  </li>
-  <li>
-    <p><a href="https://arxiv.org/abs/2507.18071">GSPO</a> 从 GRPO 在长序列和 MoE 模型上的稳定性问题出发，指出 token-level 的 PPO / GRPO 在专家路由高度波动（尤其是新旧策略之间的路由差异）时，会引入巨大的方差与不稳定。GSPO 提出在 <strong>sequence-level</strong> 定义 PPO-style 目标与比率约束，用整条序列的比率来约束更新，从而在 MoE 场景下显著缓解由路由不一致带来的训练崩溃问题。</p>
-  </li>
-  <li>
-    <p><a href="https://fengyao.notion.site/off-policy-rl#28b721e3f6c480c3a756f8fb319e860d">Your Efficient RL Framework Secretly Brings You Off-Policy RL Training</a> 关注到了现有的一些大模型强化学习训练框架（如 VeRL）中，推理框架和训练框架在不少相同的功能模块上有不同的实现（例如 vLLM 和 FSDP / Megatron 等算子上的差异），导致行为策略 $\mu$ 与参考策略 $\pi_{\theta_{\text{old}}}$ 不一致。这种不一致使得原本假定为同策略（on-policy）的训练，实际上变成了带有明显偏差的异策略（off-policy）训练。文章总结了两种处理这一问题的现有方法：PPO-IS 与 vanilla-IS，并提出在 <strong>token-level</strong> 做截断重要性采样（truncated IS, TIS），以减少训推不一致程度较重的样本在训练中的影响。作者还写了两篇更为基础的分析文章，从原理上分析训推不一致问题：<a href="https://fengyao.notion.site/pg-seq-token-part1-basics">Part I</a> 和 <a href="https://fengyao.notion.site/pg-seq-token-part2-mismatch">Part II</a>。</p>
-  </li>
-  <li>
-    <p><a href="https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference">Defeating Nondeterminism in LLM Inference</a> 指出，批处理大小不变性（batch-size invariance）的缺失是大模型推理框架随机性的核心来源之一：同一个输入在不同的 batch 组合和 kernel 路径下，得到的概率分布会发生可观差异。这意味着，即便“名义上”是同一套参数，真实运行时的行为策略 $\mu$ 也会因为系统负载和调度差异而波动，从而进一步加剧训推不一致。</p>
-  </li>
-  <li>
-    <p><a href="https://ringtech.notion.site/icepop">Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!</a> 观察到，上述训推不一致问题在 MoE 模型上会进一步加剧：路由本身就对微小扰动高度敏感，再叠加推理 / 训练实现差异和异步采样，很容易放大偏差。文章提出 IcePop 方法：在 <strong>token-level</strong> 通过计算重要性采样比率，对过于大或者过于小的比率进行双侧掩码（masking），将这些“噪声较大”的数据从梯度中丢弃，从而稳定 MoE 上的 RL 训练。</p>
-  </li>
-  <li>
-    <p><a href="https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda">When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch</a> 系统性分析了训推不一致的各种成因，包括智能体工作流中引入的大量分布外和低概率信息、硬件和内核 / kernel 实现带来的计算不确定性，并分析了在 <strong>token-level</strong> 进行重要性采样如何在长序列上引入严重的偏差。文章进一步提出在 <strong>sequence-level</strong> 计算重要性采样掩码（sequence-level masked IS, sequence-level MIS）：只丢弃那些整条序列的重要性采样比率过大的数据，从而在控制偏差的同时，显著抑制由极端样本导致的训练崩溃。文中给出了较为完整的理论推导和丰富的实验支撑。</p>
-  </li>
-  <li>
-    <p><a href="https://arxiv.org/abs/2510.11370">Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers</a> 聚焦于 MoE 架构下特有的 <strong>路由不一致（Routing Inconsistency）</strong> 问题。文章发现，推理端和训练端即便在输入完全相同的情况下，由于算子实现或并行的微小差异，Router 选中的专家往往不同。这种“物理路径”上的不一致，使得行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的差异远超预期，极易导致训练崩溃。文章提出了 <strong>Rollout Routing Replay (R3)</strong>：在推理阶段记录下每个 token 实际命中的专家索引，并在训练阶段<strong>强制回放</strong>这些路由决策，不再重新进行计算。通过这种方式，R3 在 MoE 拓扑结构上强制对齐了训推两端的计算路径。</p>
-  </li>
-  <li>
-    <p><a href="https://zhuanlan.zhihu.com/p/1959976628290590602">RL 老训崩？训推差异是基石</a> 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。</p>
-  </li>
-  <li>
-    <p><a href="https://verl.readthedocs.io/en/latest/algo/rollout_corr.html">verl Rollout Importance Sampling</a> 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 <strong>token-level</strong> 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t &lt; \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种”token 粒度检测、sequence 粒度否决”的设计体现了一种”一票否决”的保守策略。</p>
-  </li>
-  <li>
-    <p><a href="https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf">INTELLECT-3 Technical Report</a> 在其异步分布式 RL 训练框架中采用了类似的拒绝采样策略。INTELLECT-3 对每条 rollout 计算 <strong>token-level</strong> 重要性比率，若任意 token 的比率低于阈值（文中使用 $10^{-5}$），则对整条轨迹进行 masking。</p>
-  </li>
-</ul>
-
-<h2 id="三策略-trpo-视角下的最小统一理解">三策略 TRPO 视角下的最小统一理解</h2>
-
-<p>上面列的这些工作，看上去各自解决的是：</p>
-
-<ul>
-  <li>算法层：PPO / GRPO 的目标怎么写，token-level 还是 sequence-level，用 clip 还是 mask；</li>
-  <li>系统层：推理框架和训练框架怎样对齐；</li>
-  <li>模型层：MoE 模型路由问题如何放大训练不稳定，等等。</li>
-</ul>
-
-<p>但如果我们把“行为策略 vs 参考策略”这条线拉直，会发现相当一部分问题，其实都可以放到一个相对简单的理论框架里理解：<strong>三策略 TRPO</strong>。</p>
-
-<p>下面这节我会用尽量简单的数学，把这个三策略版 TRPO 摊开——它可以被看作是“TRPO + 三角不等式”的一个小扩展，但在分析大模型 RL 里的训推不一致时非常好用：</p>
-
-<ul>
-  <li>一方面让我们重新理解“训推不一致”和“异步训练框架”到底在影响什么；</li>
-  <li>另一方面，也帮我们统一理解 TIS、IcePop、sequence-level MIS 等，在本文的视角下，它们其实都是在实施下文的“<strong>约束 2</strong>”。</li>
-</ul>
-
-<h3 id="三个策略">三个策略</h3>
-
-<p>沿用前文的记号，我们在一个折扣 MDP 上工作，折扣因子为 $\gamma\in(0,1)$：</p>
-
-<ul>
-  <li>状态 $s\in\mathcal{S}$，动作 $a\in\mathcal{A}$；</li>
-  <li>策略 $\pi(a\mid s)$；</li>
-  <li>折扣状态分布：
-\(d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s)。\)</li>
-  <li>回报（episode 视角）：
-\(\mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big]。\)</li>
-  <li>值函数 / 优势函数：
-\(V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s)。\)</li>
-</ul>
-
-<p>稍微赘述一下，在“三策略”设定里，我们有：</p>
-
-<ul>
-  <li><strong>行为策略</strong>（behavior policy）：$\mu$，真正用来 rollout 的策略；数据 $(s,a,r,\dots)$ 都是从它来的。</li>
-  <li><strong>参考策略</strong>（reference policy）：$\pi_{\theta_{\text{old}}}$，优化目标里拿来做 ratio、clip 或 KL 约束的那一份“旧策略”。</li>
-  <li><strong>目标策略</strong>（target policy）：$\pi_\theta$，我们这一步想要优化的策略。</li>
-</ul>
-
-<p>在理想设定里我们默认 $\mu = \pi_{\theta_{\text{old}}}$；现实系统里二者往往不等，这就是“训推不一致”的数学影子。</p>
-
-<h3 id="两策略-trpo">两策略 TRPO</h3>
-
-<blockquote>
-  <p>熟悉 TRPO 的读者可以直接跳到后面的“三策略 TRPO”小节。</p>
-</blockquote>
-
-<p>TRPO 的所有理论保证，都是建立在<strong>某个“基准策略”的优势函数</strong>之上的。既然实际能算清楚的<strong>只有</strong> $A_\mu$（数据是按 $\mu$ 采的），那我们就直接把 $\mu$ 当成基准。</p>
-
-<p>一个经典的结论是 <strong>性能差分引理（Performance Difference Lemma）</strong>：</p>
-
-<blockquote>
-  <p>对任意两策略 $\mu$ 和 $\pi_\theta$，有</p>
-
-\[\mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
-= \frac{1}{1-\gamma}\;
-\mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)]。\]
-</blockquote>
-
-<p>直觉非常简单：</p>
-
-<ul>
-  <li>$A_\mu(s,a)$ 就是在说“如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报会多或少多少”；</li>
-  <li>把所有时刻、所有状态、所有动作的“增益”累积起来，就得到新策略比行为策略总共赚了多少。</li>
-</ul>
-
-<p>TRPO 的问题在于，我们没法准确算</p>
-
-\[\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]，\]
-
-<p>因为 $d_{\pi_\theta}$ 是“新策略”的状态分布，我们没有在它下面采样过。</p>
-
-<p>于是 TRPO 引入了一个替代目标：把状态分布换成行为策略的：</p>
-
-\[L_\mu(\pi_\theta)
-:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)]。\]
-
-<p>$L_\mu$ 的直觉解释是：在行为策略的状态分布下，让新策略试着去选动作，看优势有多大。</p>
-
-<p>从性能差分引理出发，两者之差是：</p>
-
-\[\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)
-= \frac{1}{1-\gamma}\;
-  \sum_s \big(d_{\pi_\theta}(s) - d_\mu(s)\big)
-  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)]。\]
-
-<p>如果我们定义</p>
-
-\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|，\]
-
-<p>那么有一个直接的上界：</p>
-
-<blockquote>
-  <p><strong>Lemma 1</strong></p>
-
-\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
-\le \frac{\epsilon_\mu}{1-\gamma}\;
-    \|d_{\pi_\theta} - d_\mu\|_1。\]
-</blockquote>
-
-<p>这里出现了第一个关键量：</p>
-
-<blockquote>
-  <p><strong>状态分布偏移</strong> $|d_{\pi_\theta} - d_\mu|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。</p>
-</blockquote>
-
-<p>我们通常不会直接对 $|d_{\pi_\theta} - d_\mu|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如 trust region、KL、clip 等。</p>
-
-<p>记总变差距离（total variation）：</p>
-
-\[D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1。\]
-
-<p>假设存在常数 $\beta$，使得</p>
-
-<blockquote>
-  <p>对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：</p>
-
-\[D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta。\]
-</blockquote>
-
-<p>直观含义：在任意状态里，“新策略”和“生成数据的策略”选动作的分布都不会离太远。</p>
-
-<p>一个经典结果（可以用 coupling 证明）是：</p>
-
-<blockquote>
-  <p><strong>Lemma 2</strong>
-在上述条件下有</p>
-
-\[\|d_{\pi_\theta} - d_\mu\|_1
-\le \frac{2\gamma}{1-\gamma}\,\beta。\]
-</blockquote>
-
-<p>把它和 Lemma 1 结合：</p>
-
-\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
-\le \frac{\epsilon_\mu}{1-\gamma}\; \frac{2\gamma}{1-\gamma}\,\beta
-= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。\]
-
-<p>于是我们得到一个形式上相当简洁的<strong>两策略 TRPO 下界（基准为行为策略）</strong>：</p>
-
-<blockquote>
-  <p><strong>Theorem 1（两策略 TRPO）</strong></p>
-
-\[\mathcal{J}(\pi_\theta)
-\;\ge\;
-L_\mu(\pi_\theta)
-\;-\;
-\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。\]
-</blockquote>
-
-<p>这说明：</p>
-
-<ul>
-  <li><strong>真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong>
-\(\beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big)。\)</li>
-</ul>
-
-<p>如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。</p>
-
-<h3 id="三策略-trpo">三策略 TRPO</h3>
-
-<p>现实问题在于：<strong>大模型强化学习训练里我们可能无法直接控制 $\beta$ 本身。</strong></p>
-
-<p>在大部分 PPO / GRPO / GSPO / 现有 RLHF 框架里，实际发生的是：</p>
-
-<ul>
-  <li>rollout 数据是由某个<strong>行为策略</strong> $\mu$ 产生的（推理引擎里的“那一版参数” + 若干系统细节）；</li>
-  <li>更新时，我们希望利用<strong>参考策略</strong> $\pi_{\theta_{\text{old}}}$ 来限制<strong>目标策略</strong> $\pi_\theta$ 的更新幅度。</li>
-</ul>
-
-<p>也就是说，实际可以“动手”的是两个量：</p>
-
-<ol>
-  <li><strong>参考 vs 目标</strong>：我们可以通过 KL / clip 等手段控制
-\(D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。\)</li>
-  <li><strong>行为 vs 参考</strong>：我们希望<strong>间接</strong>控制
-\(D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\)</li>
-</ol>
-
-<p>于是自然就定义两个“proxy 差异”：</p>
-
-<ul>
-  <li><strong>约束 1：参考 vs 目标</strong>
-\(\alpha_0
-:= \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
-                              \pi_\theta(\cdot\mid s)\big)；\)</li>
-  <li><strong>约束 2：行为 vs 参考</strong>
-\(\alpha_1
-:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\)</li>
-</ul>
-
-<p>直觉上：</p>
-
-<ul>
-  <li>$\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是 trust region 控制的那部分；</li>
-  <li>$\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致或异步的影子。</li>
-</ul>
-
-<p>现在，可以把这两个量塞回 TRPO 的下界里。</p>
-
-<p>对任意状态 $s$，有</p>
-
-\[\begin{aligned}
-D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
-&amp;\le
-D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
-\\
-&amp;\quad +
-D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。
-\end{aligned}\]
-
-<p>对 $s$ 取上确界：</p>
-
-\[\beta
-:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
-\;\le\;
-\alpha_1 + \alpha_0。\]
-
-<p>把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里，记</p>
-
-\[C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，\]
-
-<p>即得到：</p>
-
-\[\mathcal{J}(\pi_\theta)
-\;\ge\;
-L_\mu(\pi_\theta)
-\;-\;
-C\,\beta
-\;\ge\;
-L_\mu(\pi_\theta)
-\;-\;
-C\,(\alpha_0 + \alpha_1)。\]
-
-<p>于是，我们得到一个非常直接的<strong>三策略 TRPO 下界</strong>：</p>
-
-<blockquote>
-  <p><strong>Theorem 2（三策略 TRPO）</strong>
-记</p>
-
-\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
-C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，\]
-
-  <p>以及</p>
-
-\[\alpha_0
-:= \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
-                              \pi_\theta(\cdot\mid s)\big)，
-\quad
-\alpha_1
-:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\]
-
-  <p>则对任意目标策略 $\pi_\theta$ 有</p>
-
-\[\boxed{
-\mathcal{J}(\pi_\theta)
-\;\ge\;
-L_\mu(\pi_\theta)
-\;-\; C\,(\alpha_0 + \alpha_1)
-}\]
-
-  <p>其中</p>
-
-\[L_\mu(\pi_\theta)
-:=
-\mathcal{J}(\mu) + \frac{1}{1-\gamma}
-  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)]。\]
-</blockquote>
-
-<p>这个结论的含义其实很直接：</p>
-
-<ul>
-  <li><strong>替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，可以拆成两部分：</strong>
-    <ul>
-      <li>参考 vs 目标的偏移 $\alpha_0$；</li>
-      <li>行为 vs 参考的偏移 $\alpha_1$。</li>
-    </ul>
-  </li>
-</ul>
-
-<p>只要这两个量都小，<strong>优化 $L_\mu$ 就有希望有效提升 $\mathcal{J}$</strong>。</p>
-
-<h3 id="这两个差异各自怎么约束">这两个差异各自怎么约束？</h3>
-
-<p>现在，我们可以从 Theorem 2 回头看各种实际方法：</p>
-
-<ul>
-  <li>绝大多数 “PPO / GRPO / GSPO” 类工作，其实是在控制 <strong>约束 1：$\alpha_0$</strong>；</li>
-  <li>绝大多数 “TIS / IcePop / MIS” 类工作，在本文的统一视角下，可以理解为主要是在控制 <strong>约束 2：$\alpha_1$</strong>。</li>
-</ul>
-
-<p>本文下面只讨论 <strong>约束 2</strong>。</p>
-
-<p>约束 2 的目标是：<strong>保证用来训练的数据，尽可能来自“接近参考策略”的行为策略。</strong></p>
-
-<p>这里通常既有<strong>系统层</strong>的机制，也有<strong>算法层（importance sampling）</strong>的机制。</p>
-
-<ol>
-  <li><strong>系统层：让行为策略别飘太远</strong>
-    <ul>
-      <li>异步框架：给每个样本打上策略版本号，只能用与 $\pi_{\theta_{\text{old}}}$ 相差不大的参数版本采样的数据；</li>
-      <li>训推对齐：强调训练框架和推理框架用相同精度、相同算子、相近的内核 / kernel 行为。</li>
-    </ul>
-
-    <p>这些机制的目标是：从“算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。</p>
-  </li>
-  <li>
-    <p><strong>算法层：样本修正</strong></p>
-
-    <p>在算法层，我们不再试图“纠正整个行为策略”，而是用重要性采样比率在<strong>样本层面</strong>做筛选和重加权，让“真正参与训练的样本子集”上的行为策略尽量接近参考策略，或者减小差异较大的样本在训练上的权重。</p>
-
-    <p>具体来说，就是下面这些方法，它们本质上都可以看作是“实现约束 2 的不同方式”。</p>
-  </li>
-</ol>
-
-<h2 id="重要性采样与掩码四种约束-2-实现">重要性采样与掩码：四种约束 2 实现</h2>
-
-<p>下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为</p>
-
-\[g_\theta(t)
-= \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),\]
-
-<p>其中</p>
-
-\[r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
-\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t)。\]
-
-<p>也就是说：</p>
-
-<ul>
-  <li>$r_t(\theta)$ 是 <strong>目标 vs 参考</strong> 的比率（对应约束 1）；</li>
-  <li>$A_t$ 基于行为策略采样的数据，是我们能估到的优势函数。</li>
-</ul>
-
-<p>为了把 token 级的 $(s_t,a_t)$ 与序列级的 $(x,y)$ 记号打通，在以 RLHF（reinforcement learning from human feedback，人类反馈强化学习）为代表的 LLM-RL 设定中，我们约定：</p>
-
-<ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{</td>
-          <td>y</td>
-          <td>})$；</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-  <li>token 级状态 $s_t := (x, y_{\lt t})$，动作 $a_t := y_t$；</li>
-  <li>因此行为策略和参考策略在序列上的分布可写成
-\(\mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
-\pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t)。\)</li>
-</ul>
-
-<p>此外，为了描述“参考 vs 行为”的偏移，统一定义 token 级重要性比率</p>
-
-\[\rho_t^{(\text{ref}\leftarrow\text{beh})} :=
-\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)}，\]
-
-<p>以及其对应的序列级版本</p>
-
-\[\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)}
-= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}。\]
-
-<p>接下来，TIS / IcePop / MIS 的区别，就体现在“如何利用这些 $\rho$ 来实现约束 2”。</p>
-
-<h3 id="1-tistoken-level-截断-is">1. TIS：token-level 截断 IS</h3>
-
-<p>TIS 直接对上述 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 做截断，记</p>
-
-\[\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}。\]
-
-<p>更新目标写成</p>
-
-\[L_{\text{TIS}}(\theta)
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big]。\]
-
-<ul>
-  <li>蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。</li>
-  <li>从三策略 TRPO 的角度看，这相当于在 <strong>token 分布</strong> 上“软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。</li>
-</ul>
-
-<h3 id="2-icepopmoe-场景下的-token-level-双侧-mask">2. IcePop：MoE 场景下的 token-level 双侧 Mask</h3>
-
-<p>IcePop 同样以 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 为度量，但采用 <strong>双侧掩码</strong>：</p>
-
-\[\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}。\]
-
-<p>更新目标写成</p>
-
-\[L_{\text{IcePop}}(\theta)
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big]。\]
-
-<ul>
-  <li>蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。</li>
-  <li>这相当于硬性裁掉“行为策略和参考策略极度不一致”的 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。</li>
-</ul>
-
-<h3 id="3-sequence-level-mis按整条序列-mask-的重要性采样">3. sequence-level MIS：按整条序列 Mask 的重要性采样</h3>
-
-<p>MIS 的核心操作是：<strong>只保留 IS 比率不超过阈值 $C$ 的序列，其余序列的损失直接置零</strong>。写成</p>
-
-\[\color{blue}{
-\rho(y\mid x)
-\leftarrow
-\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}
-}\]
-
-<p>在统一的损失形式下，可以写成</p>
-
-\[L_{\text{MIS}}(\theta)
-=-\,\mathbb{E}_{(x,y)\sim\mu}
-\Big[
-\color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}}
-\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
-\Big],\]
-
-<p>简而言之：</p>
-
-<ul>
-  <li>对于 <strong>IS 比率较小的序列</strong>：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；</li>
-  <li>对于 <strong>IS 比率超过阈值 $C$ 的序列</strong>：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。</li>
-</ul>
-
-<p>从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在<strong>序列级</strong>筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。</p>
-
-<h3 id="4-worst-token-reject-sampling按最差-token-拒绝整条序列">4. Worst Token Reject Sampling：按最差 token 拒绝整条序列</h3>
-
-<p>verl 中的 veto 机制 与 INTELLECT-3 分别在各自的训练框架中采用了一种可统称为 <strong>Worst Token Reject Sampling（WTRS）</strong> 的拒绝采样策略：</p>
-
-<ul>
-  <li>
-    <p><strong>verl Token Veto</strong>：在其 rollout correction 模块中，若轨迹中存在任意 token 使得 $\min_t \rho_t &lt; \tau_{\text{veto}}$，则通过 response<em>mask 将整条序列剔除。阈值 $\tau</em>{\text{veto}}$ 可由用户配置。</p>
-  </li>
-  <li>
-    <p><strong>INTELLECT-3 Token Masking</strong>：在其异步分布式 RL 框架中，若任意 token 的比率低于 $10^{-5}$，则对整条轨迹进行 masking。</p>
-  </li>
-</ul>
-
-<p>二者的核心操作一致：<strong>若轨迹中存在任意 token 的 IS 比率低于阈值 $\tau$，则将整条序列从训练中剔除</strong>。写成</p>
-
-\[\color{blue}{
-m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})} \ge \tau\Big\}
-}\]
-
-<p>在统一的损失形式下，可以写成</p>
-
-\[L_{\text{WTRS}}(\theta)
-=-\,\mathbb{E}_{(x,y)\sim\mu}
-\Big[
-\color{blue}{m(y\mid x)}
-\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
-\Big],\]
-
-<p>简而言之：</p>
-
-<ul>
-  <li>对于 <strong>所有 token 的 IS 比率均不低于 $\tau$ 的序列</strong>：正常参与训练；</li>
-  <li>对于 <strong>存在任意 token 的 IS 比率低于 $\tau$ 的序列</strong>：整条序列的 policy loss 被 mask 掉。</li>
-</ul>
-
-<p>从三策略 TRPO 的角度看，WTRS 采用了”token 粒度检测、sequence 粒度否决”的混合策略：在 <strong>token-level</strong> 检测极端不一致的信号，一旦发现则在 <strong>sequence-level</strong> 执行拒绝。这种”一票否决”的设计体现了一种保守思路——当轨迹中存在”行为策略生成但参考策略几乎不可能生成”的 token 时，<strong>整条轨迹的可信度都将受到质疑</strong>，从而在 trajectory 粒度上实现对”约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。</p>
-
-<h2 id="moe-路由回放它在三策略-trpo-中到底做了什么">MoE 路由回放：它在三策略 TRPO 中到底做了什么？</h2>
-
-<p>在 MoE（Mixture-of-Experts）模型上，训推不一致往往首先表现为<strong>路由不一致（routing inconsistency）</strong>：即便参数相同，推理端与训练端也可能因为算子、并行或数值细节的微小差异而路由到不同专家。一个很自然的工程应对是<strong>路由回放（routing replay）</strong>：在 rollout（推理）时记录实际命中的专家路径，训练时强制复用这些路由决策。</p>
-
-<p>这类方法经常被直觉性地理解为“在实现约束 2、压小 $\alpha_1$”。但从三策略 TRPO 的视角看，更准确的说法是：</p>
-
-<blockquote>
-  <p><strong>路由回放并不是在原 surrogate objective 上收紧约束，而是在把 surrogate objective 改写成另一个“带路由条件/替换”的目标。</strong>
-它让路由不一致在 loss 里“不可见”，但并没有让真实策略距离里的 $\alpha_0$ 或 $\alpha_1$ 变小。</p>
-</blockquote>
-
-<p>下面用一个<strong>尽量简单</strong>但足够说明问题的建模来把这件事写清楚。</p>
-
-<h3 id="moe-下的-surrogate-objective把路由和token-生成拆开">MoE 下的 surrogate objective：把“路由”和“token 生成”拆开</h3>
-
-<p>把 MoE 抽象成两阶段随机决策：“先选专家 $z$，再在该专家条件下生成 token $a$”。
-因此目标策略可以分解为</p>
-
-\[\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),\]
-
-<p>其中：</p>
-
-<ul>
-  <li>$\omega_\theta(z\mid s)$ 是路由器（router）的分布；</li>
-  <li>$\pi_\theta(a\mid s,z)$ 是在专家 $z$ 条件下的 token 分布。</li>
-</ul>
-
-<p>在三策略 TRPO 中，我们真正想优化的 surrogate objective 为</p>
-
-\[L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
-\mathbb{E}_{s\sim d_\mu}
-\bigg[
-\sum_z \omega_\theta(z\mid s)\,F_\theta(s,z)
-\bigg],\]
-
-<p>其中我把专家层的优势聚合写成</p>
-
-\[F_\theta(s,z)
-:=
-\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z).\]
-
-<p>关键点：<strong>在原始的 $L_\mu(\pi_\theta)$ 里，路由分布是当前要更新的 $\omega_\theta$</strong>。也就是说，MoE 的 RL 训练不仅在更新 token 生成分布，也在更新路由器本身。</p>
-
-<h3 id="1回放行为策略的路由behavior-router-replay--r3-类">1）回放行为策略的路由（behavior-router replay / R3 类）</h3>
-
-<p>R3 的做法是：rollout 时记录推理端实际命中的专家集合 $M_\mu(s)$，训练时强制当前策略<strong>只在该集合内路由</strong>。可以把它写成对路由分布的“条件化投影”：</p>
-
-\[\omega_\theta^{\text{R3}}(z\mid s)
-:=
-\frac{\omega_\theta(z\mid s)\,\mathbf{1}\{z\in M_\mu(s)\}}
-     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .\]
-
-<p>从而训练时实际优化的 surrogate objective 变为</p>
-
-\[L_\mu^{\text{R3}}(\pi_\theta) =
-\mathcal{J}(\mu) +
-\frac{1}{1-\gamma}
-\mathbb{E}_{s\sim d_\mu}
-\bigg[
-\sum_{z\in M_\mu(s)} \omega_\theta^{\text{R3}}(z\mid s)\,F_\theta(s,z)
-\bigg].\]
-
-<p>和原始 $L_\mu(\pi_\theta)$ 对比可以看到，R3 并没有让 $\omega_\theta$ 逼近 $\omega_{\text{old}}$ 或 $\omega_\mu$；它做的是：</p>
-
-<ul>
-  <li><strong>把对 $z\sim\omega_\theta$ 的期望，改成了对 $z\sim\omega_\theta(\cdot\mid z\in M_\mu(s))$ 的条件期望</strong>；</li>
-  <li>等价地说，把路由的可行 support 缩到了 $M_\mu(s)$。</li>
-</ul>
-
-<p>因此 R3 训练的是一个“被行为路由集合条件化后的 surrogate objective”，而不是原来的 $L_\mu(\pi_\theta)$。
-好处是显著降方差、提升稳定性；代价是<strong>在每个状态上都收缩了路由器探索 / 更新的自由度</strong>。</p>
-
-<h3 id="2回放参考策略的路由reference-router-replay">2）回放参考策略的路由（reference-router replay）</h3>
-
-<p>另一类 routing replay 复用的是参考策略（old policy）的路由器 $\omega_{\text{old}}$。这等价于训练一个混合策略</p>
-
-\[\hat\pi_\theta(a,z\mid s)
-:=
-\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),\]
-
-<p>对应 surrogate objective 为</p>
-
-\[L_\mu^{\text{ref-replay}}(\pi_\theta) =
-\mathcal{J}(\mu) +
-\frac{1}{1-\gamma}
-\mathbb{E}_{s\sim d_\mu}
-\bigg[
-\sum_z \omega_{\text{old}}(z\mid s)\,F_\theta(s,z)
-\bigg].\]
-
-<p>这意味着：</p>
-
-<ul>
-  <li>在 surrogate objective 中，路由器被<strong>固定为旧路由器</strong>，路由相关的“参考 vs 目标”差异在 loss 里被直接抹掉；</li>
-  <li>训练对“新路由器 $\omega_\theta$ 是否偏离 $\omega_{\text{old}}$”不再敏感，于是路由不一致导致的不稳定被绕开。</li>
-</ul>
-
-<p>但注意这同样是<strong>换目标</strong>：</p>
-
-<ul>
-  <li>真实策略空间里的 $\alpha_0$ 并没有因此变小，只是被“用旧路由器重定义目标”而在 loss 中不可见；</li>
-  <li>路由器的学习被强行冻结或极度削弱。</li>
-</ul>
-
-<h3 id="路由回放只是在改写-surrogate-objective">路由回放只是在改写 surrogate objective</h3>
-
-<p>把两类 replay 放在一起看，它们的共同点是：</p>
-
-<ol>
-  <li><strong>优化的都不是原始的 $L_\mu(\pi_\theta)$</strong>，而是某个“路由被条件化 / 替换后的 surrogate objective”。</li>
-  <li><strong>它们没有直接收缩三策略 TRPO 下界里的 $\alpha_0,\alpha_1$</strong>。replay 让路由不匹配不再显式出现在 loss 中，但不匹配在真实策略距离里仍然存在。</li>
-  <li><strong>实践上是在“用偏差换方差”</strong>：回放往往显著降低方差、提升稳定性，但也可能限制了 MoE 在 RL 目标下学到更优的路由模式。</li>
-</ol>
-
-<p>所以，从三策略 TRPO 的视角，更准确的理解是：</p>
-
-<blockquote>
-  <p><strong>routing replay 是一种 surrogate objective 的改写，而不是对 $\alpha_0$ 或 $\alpha_1$ 的直接实现。</strong></p>
-</blockquote>
-
-<h2 id="小结">小结</h2>
-
-<p>如果把这篇文章压缩成一句话，就是：</p>
-
-<blockquote>
-  <p><strong>许多“大模型 RL 训推不一致”和“异步训练”问题，在本文的视角下，其实都可以理解为：在 TRPO 框架下，当行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 不一致时，二者之间的偏移（$\alpha_1$）被严重低估了。</strong></p>
-</blockquote>
-
-<p>从两策略到三策略，我们做的事情其实很简单：</p>
-
-<ul>
-  <li>把 TRPO 的下界从“旧策略 vs 新策略”的叙述，改写成“<strong>行为策略 – 参考策略 – 目标策略</strong>”三者的关系；</li>
-  <li>显式地拆出了两个 TV 距离：
-    <ul>
-      <li><strong>约束 1：参考 vs 目标</strong> $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；</li>
-      <li><strong>约束 2：行为 vs 参考</strong> $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；</li>
-    </ul>
-  </li>
-  <li>得到了一个非常直接的结论：
-替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。</li>
-</ul>
-
-<p>在这个视角下（当然这只是众多可能视角之一）：</p>
-
-<ul>
-  <li>Decoupled PPO / AReaL 可以被看作是在<strong>形式上承认“三策略存在”</strong>，并尝试在目标函数上将“行为分布”和“参考策略”解耦；</li>
-  <li>TIS、IcePop、MIS、WTRS 则是通过 IS 或者掩码机制在样本层面实施”约束 2”：
-    <ul>
-      <li>TIS：用 token-level 截断权重削弱比率过大样本的影响；</li>
-      <li>IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃”极端不一致”的 token；</li>
-      <li>MIS：在 sequence-level 直接屏蔽整条”比率过大”的轨迹；</li>
-      <li>WTRS：在 token-level 检测比率过小的信号，一旦发现则在 sequence-level 拒绝整条轨迹；</li>
-    </ul>
-  </li>
-  <li><strong>routing replay（路由回放）在三策略 TRPO 的视角下更像是“改写 surrogate objective”而非“直接实现约束”</strong>：无论回放行为路由（R3 类）还是回放参考路由，它们都把原本的 $L_{\mu}(\pi_{\theta})$ 改成了一个路由被条件化/替换后的 surrogate objective，用<strong>一定的目标偏差与路由学习自由度的收缩</strong>换取<strong>降低方差与提升稳定性</strong>。因此它并不会真正收缩 $\alpha_0$ 或 $\alpha_1$，而是让路由不一致在 loss 中“不可见”；</li>
-  <li>《RL 老训崩？训推差异是基石》、以及前文提到的 <em>Defeating Nondeterminism in LLM Inference</em> 等工程经验，则可以理解为在<strong>系统侧和数值实现侧</strong>，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。</li>
-</ul>
-
-<p>从这个统一视角出发，也许有助于回答几个实际问题（这里只是抛几个开放性问题）：</p>
-
-<ul>
-  <li>在什么条件下，我们还能把“大模型 RL 训练”理解成某种意义上的“近似 TRPO / PPO”？</li>
-  <li>对一个具体的 RL 系统，我们究竟应该把主要精力花在：
-    <ul>
-      <li>收紧 $\alpha_0$（更强的 KL / 更稳的 sequence-level 目标），还是</li>
-      <li>压低 $\alpha_1$（更一致的训推框架、更激进的 MIS / TIS / IcePop）？</li>
-    </ul>
-  </li>
-  <li>在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装“$\mu \approx \pi_{\theta_{\text{old}}}$”多久？</li>
-</ul>
-
-<p>本文只是在 TRPO 这个老框架上做了一个非常“<strong>最小化</strong>”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。难免有理解偏差或遗漏之处，如果你也关注实际大模型 RL 训练的情况，欢迎把你自己的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式，或许会有不一样的直观感受。</p>
-
-<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025ThreePolicyTRPO</span><span class="p">,</span>
-  <span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
-  <span class="na">title</span>        <span class="p">=</span> <span class="s">{From Two Policies to Three: Extending TRPO under Behavior-Reference Policy Mismatch in LLM RL}</span><span class="p">,</span>
-  <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
-  <span class="na">month</span>        <span class="p">=</span> <span class="nv">nov</span><span class="p">,</span>
-  <span class="na">day</span>          <span class="p">=</span> <span class="s">{15}</span><span class="p">,</span>
-  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html}</span><span class="p">,</span>
-  <span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-11-23}</span>
-<span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。]]></summary></entry><entry xml:lang="en"><title type="html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" rel="alternate" type="text/html" title="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html"><![CDATA[<ul id="markdown-toc">
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。]]></summary></entry><entry xml:lang="en"><title type="html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" rel="alternate" type="text/html" title="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html"><![CDATA[<ul id="markdown-toc">
   <li><a href="#traininginference-mismatch-and-asynchronous-frameworks" id="markdown-toc-traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</a></li>
   <li><a href="#related-work" id="markdown-toc-related-work">Related Work</a></li>
   <li><a href="#a-minimally-unified-view-from-a-three-policy-trpo-perspective" id="markdown-toc-a-minimally-unified-view-from-a-three-policy-trpo-perspective">A Minimally Unified View from a Three-Policy TRPO Perspective</a>    <ul>
@@ -2791,7 +2054,7 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
   <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
 </ul>
 
-<p><a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <p><img src="/assets/img/three-policy/three-policy-mini-class-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
@@ -3545,4 +2808,741 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html}</span><span class="p">,</span>
   <span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-11-23}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.]]></summary></entry></feed>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.]]></summary></entry><entry xml:lang="zh"><title type="html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html" rel="alternate" type="text/html" title="从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html"><![CDATA[<ul id="markdown-toc">
+  <li><a href="#训推不一致和异步框架" id="markdown-toc-训推不一致和异步框架">训推不一致和异步框架</a></li>
+  <li><a href="#相关工作" id="markdown-toc-相关工作">相关工作</a></li>
+  <li><a href="#三策略-trpo-视角下的最小统一理解" id="markdown-toc-三策略-trpo-视角下的最小统一理解">三策略 TRPO 视角下的最小统一理解</a>    <ul>
+      <li><a href="#三个策略" id="markdown-toc-三个策略">三个策略</a></li>
+      <li><a href="#两策略-trpo" id="markdown-toc-两策略-trpo">两策略 TRPO</a></li>
+      <li><a href="#三策略-trpo" id="markdown-toc-三策略-trpo">三策略 TRPO</a></li>
+      <li><a href="#这两个差异各自怎么约束" id="markdown-toc-这两个差异各自怎么约束">这两个差异各自怎么约束？</a></li>
+    </ul>
+  </li>
+  <li><a href="#重要性采样与掩码四种约束-2-实现" id="markdown-toc-重要性采样与掩码四种约束-2-实现">重要性采样与掩码：四种约束 2 实现</a>    <ul>
+      <li><a href="#1-tistoken-level-截断-is" id="markdown-toc-1-tistoken-level-截断-is">1. TIS：token-level 截断 IS</a></li>
+      <li><a href="#2-icepopmoe-场景下的-token-level-双侧-mask" id="markdown-toc-2-icepopmoe-场景下的-token-level-双侧-mask">2. IcePop：MoE 场景下的 token-level 双侧 Mask</a></li>
+      <li><a href="#3-sequence-level-mis按整条序列-mask-的重要性采样" id="markdown-toc-3-sequence-level-mis按整条序列-mask-的重要性采样">3. sequence-level MIS：按整条序列 Mask 的重要性采样</a></li>
+      <li><a href="#4-worst-token-reject-sampling按最差-token-拒绝整条序列" id="markdown-toc-4-worst-token-reject-sampling按最差-token-拒绝整条序列">4. Worst Token Reject Sampling：按最差 token 拒绝整条序列</a></li>
+    </ul>
+  </li>
+  <li><a href="#moe-路由回放它在三策略-trpo-中到底做了什么" id="markdown-toc-moe-路由回放它在三策略-trpo-中到底做了什么">MoE 路由回放：它在三策略 TRPO 中到底做了什么？</a>    <ul>
+      <li><a href="#moe-下的-surrogate-objective把路由和token-生成拆开" id="markdown-toc-moe-下的-surrogate-objective把路由和token-生成拆开">MoE 下的 surrogate objective：把“路由”和“token 生成”拆开</a></li>
+      <li><a href="#1回放行为策略的路由behavior-router-replay--r3-类" id="markdown-toc-1回放行为策略的路由behavior-router-replay--r3-类">1）回放行为策略的路由（behavior-router replay / R3 类）</a></li>
+      <li><a href="#2回放参考策略的路由reference-router-replay" id="markdown-toc-2回放参考策略的路由reference-router-replay">2）回放参考策略的路由（reference-router replay）</a></li>
+      <li><a href="#路由回放只是在改写-surrogate-objective" id="markdown-toc-路由回放只是在改写-surrogate-objective">路由回放只是在改写 surrogate objective</a></li>
+    </ul>
+  </li>
+  <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
+</ul>
+
+<p><a href="/reinforcement-learning/2025/11/15/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+
+<p><img src="/assets/img/three-policy/three-policy-mini-class-zh.jpg" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+
+<h2 id="训推不一致和异步框架">训推不一致和异步框架</h2>
+
+<p>最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都围绕着一个更基础的矛盾——<strong>行为策略（behavior policy）和参考策略（reference policy）不一致。</strong></p>
+
+<p>本文先简单梳理一下我目前看到的相关工作，然后再尝试从“行为策略 vs 参考策略”的角度，把它们串到同一条线上，为读者提供一个补充视角。</p>
+
+<p>在本文中我会用：</p>
+
+<ul>
+  <li><strong>行为策略</strong> $\mu$：实际负责生成 rollout 的策略，也就是“你在什么分布下采样到了这些数据”。在现代 LLM-RL 系统里，它对应的是推理引擎里的那套实现（vLLM / SGLang 等），在异步框架下往往还是<strong>多个 worker 策略的混合分布</strong>。</li>
+  <li><strong>参考策略</strong> $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的“旧策略”（old policy）。</li>
+  <li><strong>目标策略</strong> $\pi_\theta$：训练目标里要优化的策略，也就是“你想让模型变成什么样”。典型地就是 PPO / GRPO 里的“新策略”（new policy）。</li>
+</ul>
+
+<p>在最经典、理想化的设定里，我们通常<strong>默认</strong> $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理 / 训练后端、MoE 路由波动甚至硬件数值差异等因素影响，二者往往会出现不同程度的偏离。</p>
+
+<h2 id="相关工作">相关工作</h2>
+
+<p>下面按时间线简单列一下我印象比较深的一些工作（只代表我个人看到的片面子集）：</p>
+
+<ul>
+  <li>
+    <p><a href="https://arxiv.org/abs/2110.00641">Decoupled PPO</a> 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，“旧策略”（old policy）实际承担了两个不同的角色：一是用于重要性采样进行异策略修正，在这个目的下，“旧策略”用于代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，在这个目的下，“旧策略”被用于衡量新旧策略的变化程度，称作近端策略（proximal policy，对应本文中的“参考策略”）。文章指出这两个目的下的“旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，把“采样用谁”和“对谁做 trust region”在形式上解耦开来。</p>
+  </li>
+  <li>
+    <p><a href="https://arxiv.org/abs/2505.24298">AReaL</a> 关注到了异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将“行为策略分布”和“参考策略”显式区分开来，从而在异步场景下仍然维持类似 PPO 的优化性质。</p>
+  </li>
+  <li>
+    <p><a href="https://arxiv.org/abs/2507.18071">GSPO</a> 从 GRPO 在长序列和 MoE 模型上的稳定性问题出发，指出 token-level 的 PPO / GRPO 在专家路由高度波动（尤其是新旧策略之间的路由差异）时，会引入巨大的方差与不稳定。GSPO 提出在 <strong>sequence-level</strong> 定义 PPO-style 目标与比率约束，用整条序列的比率来约束更新，从而在 MoE 场景下显著缓解由路由不一致带来的训练崩溃问题。</p>
+  </li>
+  <li>
+    <p><a href="https://fengyao.notion.site/off-policy-rl#28b721e3f6c480c3a756f8fb319e860d">Your Efficient RL Framework Secretly Brings You Off-Policy RL Training</a> 关注到了现有的一些大模型强化学习训练框架（如 VeRL）中，推理框架和训练框架在不少相同的功能模块上有不同的实现（例如 vLLM 和 FSDP / Megatron 等算子上的差异），导致行为策略 $\mu$ 与参考策略 $\pi_{\theta_{\text{old}}}$ 不一致。这种不一致使得原本假定为同策略（on-policy）的训练，实际上变成了带有明显偏差的异策略（off-policy）训练。文章总结了两种处理这一问题的现有方法：PPO-IS 与 vanilla-IS，并提出在 <strong>token-level</strong> 做截断重要性采样（truncated IS, TIS），以减少训推不一致程度较重的样本在训练中的影响。作者还写了两篇更为基础的分析文章，从原理上分析训推不一致问题：<a href="https://fengyao.notion.site/pg-seq-token-part1-basics">Part I</a> 和 <a href="https://fengyao.notion.site/pg-seq-token-part2-mismatch">Part II</a>。</p>
+  </li>
+  <li>
+    <p><a href="https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference">Defeating Nondeterminism in LLM Inference</a> 指出，批处理大小不变性（batch-size invariance）的缺失是大模型推理框架随机性的核心来源之一：同一个输入在不同的 batch 组合和 kernel 路径下，得到的概率分布会发生可观差异。这意味着，即便“名义上”是同一套参数，真实运行时的行为策略 $\mu$ 也会因为系统负载和调度差异而波动，从而进一步加剧训推不一致。</p>
+  </li>
+  <li>
+    <p><a href="https://ringtech.notion.site/icepop">Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!</a> 观察到，上述训推不一致问题在 MoE 模型上会进一步加剧：路由本身就对微小扰动高度敏感，再叠加推理 / 训练实现差异和异步采样，很容易放大偏差。文章提出 IcePop 方法：在 <strong>token-level</strong> 通过计算重要性采样比率，对过于大或者过于小的比率进行双侧掩码（masking），将这些“噪声较大”的数据从梯度中丢弃，从而稳定 MoE 上的 RL 训练。</p>
+  </li>
+  <li>
+    <p><a href="https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda">When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch</a> 系统性分析了训推不一致的各种成因，包括智能体工作流中引入的大量分布外和低概率信息、硬件和内核 / kernel 实现带来的计算不确定性，并分析了在 <strong>token-level</strong> 进行重要性采样如何在长序列上引入严重的偏差。文章进一步提出在 <strong>sequence-level</strong> 计算重要性采样掩码（sequence-level masked IS, sequence-level MIS）：只丢弃那些整条序列的重要性采样比率过大的数据，从而在控制偏差的同时，显著抑制由极端样本导致的训练崩溃。文中给出了较为完整的理论推导和丰富的实验支撑。</p>
+  </li>
+  <li>
+    <p><a href="https://arxiv.org/abs/2510.11370">Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers</a> 聚焦于 MoE 架构下特有的 <strong>路由不一致（Routing Inconsistency）</strong> 问题。文章发现，推理端和训练端即便在输入完全相同的情况下，由于算子实现或并行的微小差异，Router 选中的专家往往不同。这种“物理路径”上的不一致，使得行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的差异远超预期，极易导致训练崩溃。文章提出了 <strong>Rollout Routing Replay (R3)</strong>：在推理阶段记录下每个 token 实际命中的专家索引，并在训练阶段<strong>强制回放</strong>这些路由决策，不再重新进行计算。通过这种方式，R3 在 MoE 拓扑结构上强制对齐了训推两端的计算路径。</p>
+  </li>
+  <li>
+    <p><a href="https://zhuanlan.zhihu.com/p/1959976628290590602">RL 老训崩？训推差异是基石</a> 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。</p>
+  </li>
+  <li>
+    <p><a href="https://verl.readthedocs.io/en/latest/algo/rollout_corr.html">verl Rollout Importance Sampling</a> 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 <strong>token-level</strong> 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t &lt; \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种”token 粒度检测、sequence 粒度否决”的设计体现了一种”一票否决”的保守策略。</p>
+  </li>
+  <li>
+    <p><a href="https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf">INTELLECT-3 Technical Report</a> 在其异步分布式 RL 训练框架中采用了类似的拒绝采样策略。INTELLECT-3 对每条 rollout 计算 <strong>token-level</strong> 重要性比率，若任意 token 的比率低于阈值（文中使用 $10^{-5}$），则对整条轨迹进行 masking。</p>
+  </li>
+</ul>
+
+<h2 id="三策略-trpo-视角下的最小统一理解">三策略 TRPO 视角下的最小统一理解</h2>
+
+<p>上面列的这些工作，看上去各自解决的是：</p>
+
+<ul>
+  <li>算法层：PPO / GRPO 的目标怎么写，token-level 还是 sequence-level，用 clip 还是 mask；</li>
+  <li>系统层：推理框架和训练框架怎样对齐；</li>
+  <li>模型层：MoE 模型路由问题如何放大训练不稳定，等等。</li>
+</ul>
+
+<p>但如果我们把“行为策略 vs 参考策略”这条线拉直，会发现相当一部分问题，其实都可以放到一个相对简单的理论框架里理解：<strong>三策略 TRPO</strong>。</p>
+
+<p>下面这节我会用尽量简单的数学，把这个三策略版 TRPO 摊开——它可以被看作是“TRPO + 三角不等式”的一个小扩展，但在分析大模型 RL 里的训推不一致时非常好用：</p>
+
+<ul>
+  <li>一方面让我们重新理解“训推不一致”和“异步训练框架”到底在影响什么；</li>
+  <li>另一方面，也帮我们统一理解 TIS、IcePop、sequence-level MIS 等，在本文的视角下，它们其实都是在实施下文的“<strong>约束 2</strong>”。</li>
+</ul>
+
+<h3 id="三个策略">三个策略</h3>
+
+<p>沿用前文的记号，我们在一个折扣 MDP 上工作，折扣因子为 $\gamma\in(0,1)$：</p>
+
+<ul>
+  <li>状态 $s\in\mathcal{S}$，动作 $a\in\mathcal{A}$；</li>
+  <li>策略 $\pi(a\mid s)$；</li>
+  <li>折扣状态分布：
+\(d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s)。\)</li>
+  <li>回报（episode 视角）：
+\(\mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big]。\)</li>
+  <li>值函数 / 优势函数：
+\(V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s)。\)</li>
+</ul>
+
+<p>稍微赘述一下，在“三策略”设定里，我们有：</p>
+
+<ul>
+  <li><strong>行为策略</strong>（behavior policy）：$\mu$，真正用来 rollout 的策略；数据 $(s,a,r,\dots)$ 都是从它来的。</li>
+  <li><strong>参考策略</strong>（reference policy）：$\pi_{\theta_{\text{old}}}$，优化目标里拿来做 ratio、clip 或 KL 约束的那一份“旧策略”。</li>
+  <li><strong>目标策略</strong>（target policy）：$\pi_\theta$，我们这一步想要优化的策略。</li>
+</ul>
+
+<p>在理想设定里我们默认 $\mu = \pi_{\theta_{\text{old}}}$；现实系统里二者往往不等，这就是“训推不一致”的数学影子。</p>
+
+<h3 id="两策略-trpo">两策略 TRPO</h3>
+
+<blockquote>
+  <p>熟悉 TRPO 的读者可以直接跳到后面的“三策略 TRPO”小节。</p>
+</blockquote>
+
+<p>TRPO 的所有理论保证，都是建立在<strong>某个“基准策略”的优势函数</strong>之上的。既然实际能算清楚的<strong>只有</strong> $A_\mu$（数据是按 $\mu$ 采的），那我们就直接把 $\mu$ 当成基准。</p>
+
+<p>一个经典的结论是 <strong>性能差分引理（Performance Difference Lemma）</strong>：</p>
+
+<blockquote>
+  <p>对任意两策略 $\mu$ 和 $\pi_\theta$，有</p>
+
+\[\mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
+= \frac{1}{1-\gamma}\;
+\mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)]。\]
+</blockquote>
+
+<p>直觉非常简单：</p>
+
+<ul>
+  <li>$A_\mu(s,a)$ 就是在说“如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报会多或少多少”；</li>
+  <li>把所有时刻、所有状态、所有动作的“增益”累积起来，就得到新策略比行为策略总共赚了多少。</li>
+</ul>
+
+<p>TRPO 的问题在于，我们没法准确算</p>
+
+\[\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]，\]
+
+<p>因为 $d_{\pi_\theta}$ 是“新策略”的状态分布，我们没有在它下面采样过。</p>
+
+<p>于是 TRPO 引入了一个替代目标：把状态分布换成行为策略的：</p>
+
+\[L_\mu(\pi_\theta)
+:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)]。\]
+
+<p>$L_\mu$ 的直觉解释是：在行为策略的状态分布下，让新策略试着去选动作，看优势有多大。</p>
+
+<p>从性能差分引理出发，两者之差是：</p>
+
+\[\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)
+= \frac{1}{1-\gamma}\;
+  \sum_s \big(d_{\pi_\theta}(s) - d_\mu(s)\big)
+  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)]。\]
+
+<p>如果我们定义</p>
+
+\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|，\]
+
+<p>那么有一个直接的上界：</p>
+
+<blockquote>
+  <p><strong>Lemma 1</strong></p>
+
+\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
+\le \frac{\epsilon_\mu}{1-\gamma}\;
+    \|d_{\pi_\theta} - d_\mu\|_1。\]
+</blockquote>
+
+<p>这里出现了第一个关键量：</p>
+
+<blockquote>
+  <p><strong>状态分布偏移</strong> $|d_{\pi_\theta} - d_\mu|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。</p>
+</blockquote>
+
+<p>我们通常不会直接对 $|d_{\pi_\theta} - d_\mu|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如 trust region、KL、clip 等。</p>
+
+<p>记总变差距离（total variation）：</p>
+
+\[D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1。\]
+
+<p>假设存在常数 $\beta$，使得</p>
+
+<blockquote>
+  <p>对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：</p>
+
+\[D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta。\]
+</blockquote>
+
+<p>直观含义：在任意状态里，“新策略”和“生成数据的策略”选动作的分布都不会离太远。</p>
+
+<p>一个经典结果（可以用 coupling 证明）是：</p>
+
+<blockquote>
+  <p><strong>Lemma 2</strong>
+在上述条件下有</p>
+
+\[\|d_{\pi_\theta} - d_\mu\|_1
+\le \frac{2\gamma}{1-\gamma}\,\beta。\]
+</blockquote>
+
+<p>把它和 Lemma 1 结合：</p>
+
+\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
+\le \frac{\epsilon_\mu}{1-\gamma}\; \frac{2\gamma}{1-\gamma}\,\beta
+= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。\]
+
+<p>于是我们得到一个形式上相当简洁的<strong>两策略 TRPO 下界（基准为行为策略）</strong>：</p>
+
+<blockquote>
+  <p><strong>Theorem 1（两策略 TRPO）</strong></p>
+
+\[\mathcal{J}(\pi_\theta)
+\;\ge\;
+L_\mu(\pi_\theta)
+\;-\;
+\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。\]
+</blockquote>
+
+<p>这说明：</p>
+
+<ul>
+  <li><strong>真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong>
+\(\beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big)。\)</li>
+</ul>
+
+<p>如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。</p>
+
+<h3 id="三策略-trpo">三策略 TRPO</h3>
+
+<p>现实问题在于：<strong>大模型强化学习训练里我们可能无法直接控制 $\beta$ 本身。</strong></p>
+
+<p>在大部分 PPO / GRPO / GSPO / 现有 RLHF 框架里，实际发生的是：</p>
+
+<ul>
+  <li>rollout 数据是由某个<strong>行为策略</strong> $\mu$ 产生的（推理引擎里的“那一版参数” + 若干系统细节）；</li>
+  <li>更新时，我们希望利用<strong>参考策略</strong> $\pi_{\theta_{\text{old}}}$ 来限制<strong>目标策略</strong> $\pi_\theta$ 的更新幅度。</li>
+</ul>
+
+<p>也就是说，实际可以“动手”的是两个量：</p>
+
+<ol>
+  <li><strong>参考 vs 目标</strong>：我们可以通过 KL / clip 等手段控制
+\(D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。\)</li>
+  <li><strong>行为 vs 参考</strong>：我们希望<strong>间接</strong>控制
+\(D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\)</li>
+</ol>
+
+<p>于是自然就定义两个“proxy 差异”：</p>
+
+<ul>
+  <li><strong>约束 1：参考 vs 目标</strong>
+\(\alpha_0
+:= \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
+                              \pi_\theta(\cdot\mid s)\big)；\)</li>
+  <li><strong>约束 2：行为 vs 参考</strong>
+\(\alpha_1
+:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
+                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\)</li>
+</ul>
+
+<p>直觉上：</p>
+
+<ul>
+  <li>$\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是 trust region 控制的那部分；</li>
+  <li>$\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致或异步的影子。</li>
+</ul>
+
+<p>现在，可以把这两个量塞回 TRPO 的下界里。</p>
+
+<p>对任意状态 $s$，有</p>
+
+\[\begin{aligned}
+D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
+&amp;\le
+D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
+\\
+&amp;\quad +
+D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。
+\end{aligned}\]
+
+<p>对 $s$ 取上确界：</p>
+
+\[\beta
+:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
+\;\le\;
+\alpha_1 + \alpha_0。\]
+
+<p>把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里，记</p>
+
+\[C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，\]
+
+<p>即得到：</p>
+
+\[\mathcal{J}(\pi_\theta)
+\;\ge\;
+L_\mu(\pi_\theta)
+\;-\;
+C\,\beta
+\;\ge\;
+L_\mu(\pi_\theta)
+\;-\;
+C\,(\alpha_0 + \alpha_1)。\]
+
+<p>于是，我们得到一个非常直接的<strong>三策略 TRPO 下界</strong>：</p>
+
+<blockquote>
+  <p><strong>Theorem 2（三策略 TRPO）</strong>
+记</p>
+
+\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，\]
+
+  <p>以及</p>
+
+\[\alpha_0
+:= \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
+                              \pi_\theta(\cdot\mid s)\big)，
+\quad
+\alpha_1
+:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
+                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\]
+
+  <p>则对任意目标策略 $\pi_\theta$ 有</p>
+
+\[\boxed{
+\mathcal{J}(\pi_\theta)
+\;\ge\;
+L_\mu(\pi_\theta)
+\;-\; C\,(\alpha_0 + \alpha_1)
+}\]
+
+  <p>其中</p>
+
+\[L_\mu(\pi_\theta)
+:=
+\mathcal{J}(\mu) + \frac{1}{1-\gamma}
+  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)]。\]
+</blockquote>
+
+<p>这个结论的含义其实很直接：</p>
+
+<ul>
+  <li><strong>替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，可以拆成两部分：</strong>
+    <ul>
+      <li>参考 vs 目标的偏移 $\alpha_0$；</li>
+      <li>行为 vs 参考的偏移 $\alpha_1$。</li>
+    </ul>
+  </li>
+</ul>
+
+<p>只要这两个量都小，<strong>优化 $L_\mu$ 就有希望有效提升 $\mathcal{J}$</strong>。</p>
+
+<h3 id="这两个差异各自怎么约束">这两个差异各自怎么约束？</h3>
+
+<p>现在，我们可以从 Theorem 2 回头看各种实际方法：</p>
+
+<ul>
+  <li>绝大多数 “PPO / GRPO / GSPO” 类工作，其实是在控制 <strong>约束 1：$\alpha_0$</strong>；</li>
+  <li>绝大多数 “TIS / IcePop / MIS” 类工作，在本文的统一视角下，可以理解为主要是在控制 <strong>约束 2：$\alpha_1$</strong>。</li>
+</ul>
+
+<p>本文下面只讨论 <strong>约束 2</strong>。</p>
+
+<p>约束 2 的目标是：<strong>保证用来训练的数据，尽可能来自“接近参考策略”的行为策略。</strong></p>
+
+<p>这里通常既有<strong>系统层</strong>的机制，也有<strong>算法层（importance sampling）</strong>的机制。</p>
+
+<ol>
+  <li><strong>系统层：让行为策略别飘太远</strong>
+    <ul>
+      <li>异步框架：给每个样本打上策略版本号，只能用与 $\pi_{\theta_{\text{old}}}$ 相差不大的参数版本采样的数据；</li>
+      <li>训推对齐：强调训练框架和推理框架用相同精度、相同算子、相近的内核 / kernel 行为。</li>
+    </ul>
+
+    <p>这些机制的目标是：从“算法外部”让 $\mu$ 和 $\pi_{\theta_{\text{old}}}$ 靠近，从而压缩 $\alpha_1$。</p>
+  </li>
+  <li>
+    <p><strong>算法层：样本修正</strong></p>
+
+    <p>在算法层，我们不再试图“纠正整个行为策略”，而是用重要性采样比率在<strong>样本层面</strong>做筛选和重加权，让“真正参与训练的样本子集”上的行为策略尽量接近参考策略，或者减小差异较大的样本在训练上的权重。</p>
+
+    <p>具体来说，就是下面这些方法，它们本质上都可以看作是“实现约束 2 的不同方式”。</p>
+  </li>
+</ol>
+
+<h2 id="重要性采样与掩码四种约束-2-实现">重要性采样与掩码：四种约束 2 实现</h2>
+
+<p>下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为</p>
+
+\[g_\theta(t)
+= \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),\]
+
+<p>其中</p>
+
+\[r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
+\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t)。\]
+
+<p>也就是说：</p>
+
+<ul>
+  <li>$r_t(\theta)$ 是 <strong>目标 vs 参考</strong> 的比率（对应约束 1）；</li>
+  <li>$A_t$ 基于行为策略采样的数据，是我们能估到的优势函数。</li>
+</ul>
+
+<p>为了把 token 级的 $(s_t,a_t)$ 与序列级的 $(x,y)$ 记号打通，在以 RLHF（reinforcement learning from human feedback，人类反馈强化学习）为代表的 LLM-RL 设定中，我们约定：</p>
+
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{</td>
+          <td>y</td>
+          <td>})$；</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>token 级状态 $s_t := (x, y_{\lt t})$，动作 $a_t := y_t$；</li>
+  <li>因此行为策略和参考策略在序列上的分布可写成
+\(\mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
+\pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t)。\)</li>
+</ul>
+
+<p>此外，为了描述“参考 vs 行为”的偏移，统一定义 token 级重要性比率</p>
+
+\[\rho_t^{(\text{ref}\leftarrow\text{beh})} :=
+\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)}，\]
+
+<p>以及其对应的序列级版本</p>
+
+\[\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)}
+= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}。\]
+
+<p>接下来，TIS / IcePop / MIS 的区别，就体现在“如何利用这些 $\rho$ 来实现约束 2”。</p>
+
+<h3 id="1-tistoken-level-截断-is">1. TIS：token-level 截断 IS</h3>
+
+<p>TIS 直接对上述 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 做截断，记</p>
+
+\[\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}。\]
+
+<p>更新目标写成</p>
+
+\[L_{\text{TIS}}(\theta)
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big]。\]
+
+<ul>
+  <li>蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。</li>
+  <li>从三策略 TRPO 的角度看，这相当于在 <strong>token 分布</strong> 上“软削弱”行为策略和参考策略严重不一致的样本，从而在梯度中有效减小那部分样本对 $\alpha_1$ 的贡献。</li>
+</ul>
+
+<h3 id="2-icepopmoe-场景下的-token-level-双侧-mask">2. IcePop：MoE 场景下的 token-level 双侧 Mask</h3>
+
+<p>IcePop 同样以 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 为度量，但采用 <strong>双侧掩码</strong>：</p>
+
+\[\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}。\]
+
+<p>更新目标写成</p>
+
+\[L_{\text{IcePop}}(\theta)
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big]。\]
+
+<ul>
+  <li>蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。</li>
+  <li>这相当于硬性裁掉“行为策略和参考策略极度不一致”的 token，只在 $\rho_t$ 适中的区域上优化，从样本集合层面实施更强的“约束 2”。</li>
+</ul>
+
+<h3 id="3-sequence-level-mis按整条序列-mask-的重要性采样">3. sequence-level MIS：按整条序列 Mask 的重要性采样</h3>
+
+<p>MIS 的核心操作是：<strong>只保留 IS 比率不超过阈值 $C$ 的序列，其余序列的损失直接置零</strong>。写成</p>
+
+\[\color{blue}{
+\rho(y\mid x)
+\leftarrow
+\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}
+}\]
+
+<p>在统一的损失形式下，可以写成</p>
+
+\[L_{\text{MIS}}(\theta)
+=-\,\mathbb{E}_{(x,y)\sim\mu}
+\Big[
+\color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}}
+\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
+\Big],\]
+
+<p>简而言之：</p>
+
+<ul>
+  <li>对于 <strong>IS 比率较小的序列</strong>：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；</li>
+  <li>对于 <strong>IS 比率超过阈值 $C$ 的序列</strong>：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。</li>
+</ul>
+
+<p>从三策略 TRPO 的角度看，MIS 不再在 token 上做截断，而是直接在<strong>序列级</strong>筛掉“行为策略和参考策略严重不一致”的轨迹，只在 $\rho(y\mid x)\le C$ 的子分布上优化，从而在 trajectory 粒度上实现对“约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。</p>
+
+<h3 id="4-worst-token-reject-sampling按最差-token-拒绝整条序列">4. Worst Token Reject Sampling：按最差 token 拒绝整条序列</h3>
+
+<p>verl 中的 veto 机制 与 INTELLECT-3 分别在各自的训练框架中采用了一种可统称为 <strong>Worst Token Reject Sampling（WTRS）</strong> 的拒绝采样策略：</p>
+
+<ul>
+  <li>
+    <p><strong>verl Token Veto</strong>：在其 rollout correction 模块中，若轨迹中存在任意 token 使得 $\min_t \rho_t &lt; \tau_{\text{veto}}$，则通过 response<em>mask 将整条序列剔除。阈值 $\tau</em>{\text{veto}}$ 可由用户配置。</p>
+  </li>
+  <li>
+    <p><strong>INTELLECT-3 Token Masking</strong>：在其异步分布式 RL 框架中，若任意 token 的比率低于 $10^{-5}$，则对整条轨迹进行 masking。</p>
+  </li>
+</ul>
+
+<p>二者的核心操作一致：<strong>若轨迹中存在任意 token 的 IS 比率低于阈值 $\tau$，则将整条序列从训练中剔除</strong>。写成</p>
+
+\[\color{blue}{
+m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})} \ge \tau\Big\}
+}\]
+
+<p>在统一的损失形式下，可以写成</p>
+
+\[L_{\text{WTRS}}(\theta)
+=-\,\mathbb{E}_{(x,y)\sim\mu}
+\Big[
+\color{blue}{m(y\mid x)}
+\;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
+\Big],\]
+
+<p>简而言之：</p>
+
+<ul>
+  <li>对于 <strong>所有 token 的 IS 比率均不低于 $\tau$ 的序列</strong>：正常参与训练；</li>
+  <li>对于 <strong>存在任意 token 的 IS 比率低于 $\tau$ 的序列</strong>：整条序列的 policy loss 被 mask 掉。</li>
+</ul>
+
+<p>从三策略 TRPO 的角度看，WTRS 采用了”token 粒度检测、sequence 粒度否决”的混合策略：在 <strong>token-level</strong> 检测极端不一致的信号，一旦发现则在 <strong>sequence-level</strong> 执行拒绝。这种”一票否决”的设计体现了一种保守思路——当轨迹中存在”行为策略生成但参考策略几乎不可能生成”的 token 时，<strong>整条轨迹的可信度都将受到质疑</strong>，从而在 trajectory 粒度上实现对”约束 2”（$\mu$ vs $\pi_{\theta_{\text{old}}}$ 偏移）的控制。</p>
+
+<h2 id="moe-路由回放它在三策略-trpo-中到底做了什么">MoE 路由回放：它在三策略 TRPO 中到底做了什么？</h2>
+
+<p>在 MoE（Mixture-of-Experts）模型上，训推不一致往往首先表现为<strong>路由不一致（routing inconsistency）</strong>：即便参数相同，推理端与训练端也可能因为算子、并行或数值细节的微小差异而路由到不同专家。一个很自然的工程应对是<strong>路由回放（routing replay）</strong>：在 rollout（推理）时记录实际命中的专家路径，训练时强制复用这些路由决策。</p>
+
+<p>这类方法经常被直觉性地理解为“在实现约束 2、压小 $\alpha_1$”。但从三策略 TRPO 的视角看，更准确的说法是：</p>
+
+<blockquote>
+  <p><strong>路由回放并不是在原 surrogate objective 上收紧约束，而是在把 surrogate objective 改写成另一个“带路由条件/替换”的目标。</strong>
+它让路由不一致在 loss 里“不可见”，但并没有让真实策略距离里的 $\alpha_0$ 或 $\alpha_1$ 变小。</p>
+</blockquote>
+
+<p>下面用一个<strong>尽量简单</strong>但足够说明问题的建模来把这件事写清楚。</p>
+
+<h3 id="moe-下的-surrogate-objective把路由和token-生成拆开">MoE 下的 surrogate objective：把“路由”和“token 生成”拆开</h3>
+
+<p>把 MoE 抽象成两阶段随机决策：“先选专家 $z$，再在该专家条件下生成 token $a$”。
+因此目标策略可以分解为</p>
+
+\[\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),\]
+
+<p>其中：</p>
+
+<ul>
+  <li>$\omega_\theta(z\mid s)$ 是路由器（router）的分布；</li>
+  <li>$\pi_\theta(a\mid s,z)$ 是在专家 $z$ 条件下的 token 分布。</li>
+</ul>
+
+<p>在三策略 TRPO 中，我们真正想优化的 surrogate objective 为</p>
+
+\[L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_z \omega_\theta(z\mid s)\,F_\theta(s,z)
+\bigg],\]
+
+<p>其中我把专家层的优势聚合写成</p>
+
+\[F_\theta(s,z)
+:=
+\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z).\]
+
+<p>关键点：<strong>在原始的 $L_\mu(\pi_\theta)$ 里，路由分布是当前要更新的 $\omega_\theta$</strong>。也就是说，MoE 的 RL 训练不仅在更新 token 生成分布，也在更新路由器本身。</p>
+
+<h3 id="1回放行为策略的路由behavior-router-replay--r3-类">1）回放行为策略的路由（behavior-router replay / R3 类）</h3>
+
+<p>R3 的做法是：rollout 时记录推理端实际命中的专家集合 $M_\mu(s)$，训练时强制当前策略<strong>只在该集合内路由</strong>。可以把它写成对路由分布的“条件化投影”：</p>
+
+\[\omega_\theta^{\text{R3}}(z\mid s)
+:=
+\frac{\omega_\theta(z\mid s)\,\mathbf{1}\{z\in M_\mu(s)\}}
+     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .\]
+
+<p>从而训练时实际优化的 surrogate objective 变为</p>
+
+\[L_\mu^{\text{R3}}(\pi_\theta) =
+\mathcal{J}(\mu) +
+\frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_{z\in M_\mu(s)} \omega_\theta^{\text{R3}}(z\mid s)\,F_\theta(s,z)
+\bigg].\]
+
+<p>和原始 $L_\mu(\pi_\theta)$ 对比可以看到，R3 并没有让 $\omega_\theta$ 逼近 $\omega_{\text{old}}$ 或 $\omega_\mu$；它做的是：</p>
+
+<ul>
+  <li><strong>把对 $z\sim\omega_\theta$ 的期望，改成了对 $z\sim\omega_\theta(\cdot\mid z\in M_\mu(s))$ 的条件期望</strong>；</li>
+  <li>等价地说，把路由的可行 support 缩到了 $M_\mu(s)$。</li>
+</ul>
+
+<p>因此 R3 训练的是一个“被行为路由集合条件化后的 surrogate objective”，而不是原来的 $L_\mu(\pi_\theta)$。
+好处是显著降方差、提升稳定性；代价是<strong>在每个状态上都收缩了路由器探索 / 更新的自由度</strong>。</p>
+
+<h3 id="2回放参考策略的路由reference-router-replay">2）回放参考策略的路由（reference-router replay）</h3>
+
+<p>另一类 routing replay 复用的是参考策略（old policy）的路由器 $\omega_{\text{old}}$。这等价于训练一个混合策略</p>
+
+\[\hat\pi_\theta(a,z\mid s)
+:=
+\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),\]
+
+<p>对应 surrogate objective 为</p>
+
+\[L_\mu^{\text{ref-replay}}(\pi_\theta) =
+\mathcal{J}(\mu) +
+\frac{1}{1-\gamma}
+\mathbb{E}_{s\sim d_\mu}
+\bigg[
+\sum_z \omega_{\text{old}}(z\mid s)\,F_\theta(s,z)
+\bigg].\]
+
+<p>这意味着：</p>
+
+<ul>
+  <li>在 surrogate objective 中，路由器被<strong>固定为旧路由器</strong>，路由相关的“参考 vs 目标”差异在 loss 里被直接抹掉；</li>
+  <li>训练对“新路由器 $\omega_\theta$ 是否偏离 $\omega_{\text{old}}$”不再敏感，于是路由不一致导致的不稳定被绕开。</li>
+</ul>
+
+<p>但注意这同样是<strong>换目标</strong>：</p>
+
+<ul>
+  <li>真实策略空间里的 $\alpha_0$ 并没有因此变小，只是被“用旧路由器重定义目标”而在 loss 中不可见；</li>
+  <li>路由器的学习被强行冻结或极度削弱。</li>
+</ul>
+
+<h3 id="路由回放只是在改写-surrogate-objective">路由回放只是在改写 surrogate objective</h3>
+
+<p>把两类 replay 放在一起看，它们的共同点是：</p>
+
+<ol>
+  <li><strong>优化的都不是原始的 $L_\mu(\pi_\theta)$</strong>，而是某个“路由被条件化 / 替换后的 surrogate objective”。</li>
+  <li><strong>它们没有直接收缩三策略 TRPO 下界里的 $\alpha_0,\alpha_1$</strong>。replay 让路由不匹配不再显式出现在 loss 中，但不匹配在真实策略距离里仍然存在。</li>
+  <li><strong>实践上是在“用偏差换方差”</strong>：回放往往显著降低方差、提升稳定性，但也可能限制了 MoE 在 RL 目标下学到更优的路由模式。</li>
+</ol>
+
+<p>所以，从三策略 TRPO 的视角，更准确的理解是：</p>
+
+<blockquote>
+  <p><strong>routing replay 是一种 surrogate objective 的改写，而不是对 $\alpha_0$ 或 $\alpha_1$ 的直接实现。</strong></p>
+</blockquote>
+
+<h2 id="小结">小结</h2>
+
+<p>如果把这篇文章压缩成一句话，就是：</p>
+
+<blockquote>
+  <p><strong>许多“大模型 RL 训推不一致”和“异步训练”问题，在本文的视角下，其实都可以理解为：在 TRPO 框架下，当行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 不一致时，二者之间的偏移（$\alpha_1$）被严重低估了。</strong></p>
+</blockquote>
+
+<p>从两策略到三策略，我们做的事情其实很简单：</p>
+
+<ul>
+  <li>把 TRPO 的下界从“旧策略 vs 新策略”的叙述，改写成“<strong>行为策略 – 参考策略 – 目标策略</strong>”三者的关系；</li>
+  <li>显式地拆出了两个 TV 距离：
+    <ul>
+      <li><strong>约束 1：参考 vs 目标</strong> $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；</li>
+      <li><strong>约束 2：行为 vs 参考</strong> $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；</li>
+    </ul>
+  </li>
+  <li>得到了一个非常直接的结论：
+替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。</li>
+</ul>
+
+<p>在这个视角下（当然这只是众多可能视角之一）：</p>
+
+<ul>
+  <li>Decoupled PPO / AReaL 可以被看作是在<strong>形式上承认“三策略存在”</strong>，并尝试在目标函数上将“行为分布”和“参考策略”解耦；</li>
+  <li>TIS、IcePop、MIS、WTRS 则是通过 IS 或者掩码机制在样本层面实施”约束 2”：
+    <ul>
+      <li>TIS：用 token-level 截断权重削弱比率过大样本的影响；</li>
+      <li>IcePop：在 MoE 场景下用 token-level 双侧掩码硬性丢弃”极端不一致”的 token；</li>
+      <li>MIS：在 sequence-level 直接屏蔽整条”比率过大”的轨迹；</li>
+      <li>WTRS：在 token-level 检测比率过小的信号，一旦发现则在 sequence-level 拒绝整条轨迹；</li>
+    </ul>
+  </li>
+  <li><strong>routing replay（路由回放）在三策略 TRPO 的视角下更像是“改写 surrogate objective”而非“直接实现约束”</strong>：无论回放行为路由（R3 类）还是回放参考路由，它们都把原本的 $L_{\mu}(\pi_{\theta})$ 改成了一个路由被条件化/替换后的 surrogate objective，用<strong>一定的目标偏差与路由学习自由度的收缩</strong>换取<strong>降低方差与提升稳定性</strong>。因此它并不会真正收缩 $\alpha_0$ 或 $\alpha_1$，而是让路由不一致在 loss 中“不可见”；</li>
+  <li>《RL 老训崩？训推差异是基石》、以及前文提到的 <em>Defeating Nondeterminism in LLM Inference</em> 等工程经验，则可以理解为在<strong>系统侧和数值实现侧</strong>，尽可能把 $\alpha_1$ 压低，让算法层的假设不至于完全失效。</li>
+</ul>
+
+<p>从这个统一视角出发，也许有助于回答几个实际问题（这里只是抛几个开放性问题）：</p>
+
+<ul>
+  <li>在什么条件下，我们还能把“大模型 RL 训练”理解成某种意义上的“近似 TRPO / PPO”？</li>
+  <li>对一个具体的 RL 系统，我们究竟应该把主要精力花在：
+    <ul>
+      <li>收紧 $\alpha_0$（更强的 KL / 更稳的 sequence-level 目标），还是</li>
+      <li>压低 $\alpha_1$（更一致的训推框架、更激进的 MIS / TIS / IcePop）？</li>
+    </ul>
+  </li>
+  <li>在 MoE、异步采样、复杂 agent workflow 这些现实设定下，我们还能安全地假装“$\mu \approx \pi_{\theta_{\text{old}}}$”多久？</li>
+</ul>
+
+<p>本文只是在 TRPO 这个老框架上做了一个非常“<strong>最小化</strong>”的延展，把“三策略”显式写出来，并用它来整理现有的一些工作。难免有理解偏差或遗漏之处，如果你也关注实际大模型 RL 训练的情况，欢迎把你自己的设定抽象成“$\mu,\pi_{\theta_{\text{old}}},\pi_\theta$ 三者的关系”，再回头看看 Theorem 2 里的那条不等式，或许会有不一样的直观感受。</p>
+
+<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025ThreePolicyTRPO</span><span class="p">,</span>
+  <span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
+  <span class="na">title</span>        <span class="p">=</span> <span class="s">{From Two Policies to Three: Extending TRPO under Behavior-Reference Policy Mismatch in LLM RL}</span><span class="p">,</span>
+  <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+  <span class="na">month</span>        <span class="p">=</span> <span class="nv">nov</span><span class="p">,</span>
+  <span class="na">day</span>          <span class="p">=</span> <span class="s">{15}</span><span class="p">,</span>
+  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html}</span><span class="p">,</span>
+  <span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-11-23}</span>
+<span class="p">}</span>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。]]></summary></entry></feed>

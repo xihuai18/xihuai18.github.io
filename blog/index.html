@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 
   <!-- Head -->
   <head>    <!-- Metadata, OpenGraph and Schema.org -->
@@ -14,6 +13,42 @@
     <meta name="description" content="Xihuai's personal page.
 " />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
+
+    <!-- OpenGraph -->
+    <meta property="og:site_name" content="Xihuai Wang's Page" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Xihuai Wang's Page | Xihuai's Blog" />
+    <meta property="og:url" content="https://xihuai18.github.io/blog/" />
+    <meta property="og:description" content="Xihuai's personal page.
+" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Xihuai's Blog" />
+    <meta name="twitter:description" content="Xihuai's personal page.
+" />
+    
+    
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+      {
+        "author":
+        {
+          "@type": "Person",
+          "name": "Xihuai Leo Wang"
+        },
+        "url": "https://xihuai18.github.io/blog/",
+        "@type": "WebSite",
+        "description": "Xihuai's personal page.
+",
+        "headline": "Xihuai's Blog",
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "name": "Xihuai Leo Wang",
+        "@context": "https://schema.org"
+      }
+    </script>
 
 
     <!-- Bootstrap & MDB -->
@@ -155,6 +190,51 @@
 
         <h3>
         
+          <a class="post-title" href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</a>
+        
+      </h3>
+      <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
+      <p class="post-meta">
+        21 min read &nbsp; &middot; &nbsp;
+        December 01, 2025
+        
+        
+          
+          &nbsp; &middot; &nbsp;
+          <span class="post-uv" data-uv-all="328" data-uv-d30="328">328 views</span>
+        
+      </p>
+      <p class="post-tags">
+        <a href="/blog/2025">
+          📅 2025 </a>
+
+          
+
+          
+          &nbsp; &middot; &nbsp;
+            
+            <a href="/blog/category/reinforcement-learning">
+              🏷️ reinforcement-learning</a>
+              
+              
+          
+    </p>
+
+
+    </li>
+
+    
+
+    
+    
+    
+    
+
+    <li>
+
+
+        <h3>
+        
           <a class="post-title" href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</a>
         
       </h3>
@@ -200,18 +280,18 @@
 
         <h3>
         
-          <a class="post-title" href="/reinforcement-learning/2025/12/01/kl-estimators-cn.html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</a>
+          <a class="post-title" href="/reinforcement-learning/2025/11/15/three-policy-zh.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>
         
       </h3>
-      <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
+      <p>现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。</p>
       <p class="post-meta">
-        21 min read &nbsp; &middot; &nbsp;
-        December 01, 2025
+        11 min read &nbsp; &middot; &nbsp;
+        November 15, 2025
         
         
           
           &nbsp; &middot; &nbsp;
-          <span class="post-uv" data-uv-all="328" data-uv-d30="328">328 views</span>
+          <span class="post-uv" data-uv-all="30" data-uv-d30="30">30 views</span>
         
       </p>
       <p class="post-tags">
@@ -257,51 +337,6 @@
           
           &nbsp; &middot; &nbsp;
           <span class="post-uv" data-uv-all="63" data-uv-d30="63">63 views</span>
-        
-      </p>
-      <p class="post-tags">
-        <a href="/blog/2025">
-          📅 2025 </a>
-
-          
-
-          
-          &nbsp; &middot; &nbsp;
-            
-            <a href="/blog/category/reinforcement-learning">
-              🏷️ reinforcement-learning</a>
-              
-              
-          
-    </p>
-
-
-    </li>
-
-    
-
-    
-    
-    
-    
-
-    <li>
-
-
-        <h3>
-        
-          <a class="post-title" href="/reinforcement-learning/2025/11/15/three-policy-cn.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>
-        
-      </h3>
-      <p>现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。</p>
-      <p class="post-meta">
-        11 min read &nbsp; &middot; &nbsp;
-        November 15, 2025
-        
-        
-          
-          &nbsp; &middot; &nbsp;
-          <span class="post-uv" data-uv-all="30" data-uv-d30="30">30 views</span>
         
       </p>
       <p class="post-tags">

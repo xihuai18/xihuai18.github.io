@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 
   <!-- Head -->
   <head>    <!-- Metadata, OpenGraph and Schema.org -->
@@ -13,6 +12,39 @@
     <meta name="author" content="Xihuai Leo Wang" />
     <meta name="description" content="Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations." />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
+
+    <!-- OpenGraph -->
+    <meta property="og:site_name" content="Xihuai Wang's Page" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Xihuai Wang's Page | From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" />
+    <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" />
+    <meta property="og:description" content="Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations." />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" />
+    <meta name="twitter:description" content="Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations." />
+    
+    
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+      {
+        "author":
+        {
+          "@type": "Person",
+          "name": "Xihuai Leo Wang"
+        },
+        "url": "https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html",
+        "@type": "WebSite",
+        "description": "Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.",
+        "headline": "From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL",
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "name": "Xihuai Leo Wang",
+        "@context": "https://schema.org"
+      }
+    </script>
 
 
     <!-- Bootstrap & MDB -->
@@ -157,7 +189,7 @@
   <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
 </ul>
 
-<p><a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <p><img src="/assets/img/three-policy/three-policy-mini-class-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 

@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 
   <!-- Head -->
   <head>    <!-- Metadata, OpenGraph and Schema.org -->
@@ -13,6 +12,39 @@
     <meta name="author" content="Xihuai Leo Wang" />
     <meta name="description" content="How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate." />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
+
+    <!-- OpenGraph -->
+    <meta property="og:site_name" content="Xihuai Wang's Page" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Xihuai Wang's Page | Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation" />
+    <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html" />
+    <meta property="og:description" content="How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate." />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation" />
+    <meta name="twitter:description" content="How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate." />
+    
+    
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+      {
+        "author":
+        {
+          "@type": "Person",
+          "name": "Xihuai Leo Wang"
+        },
+        "url": "https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html",
+        "@type": "WebSite",
+        "description": "How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate.",
+        "headline": "Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation",
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "name": "Xihuai Leo Wang",
+        "@context": "https://schema.org"
+      }
+    </script>
 
 
     <!-- Bootstrap & MDB -->
@@ -193,7 +225,7 @@
   <p>How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
 </blockquote>
 
-<p><a href="/reinforcement-learning/2025/12/01/kl-estimators-cn.html">中文版</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+<p><a href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <h2 id="introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</h2>
 
@@ -498,7 +530,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>Real RL often samples from a behavior policy $\mu$ (old or mixed policy, replay buffer). To optimize <strong>reverse KL</strong> you need <strong>importance weights</strong>.</p>
 
-<p>See also my earlier post: <a href="/reinforcement-learning/2025/11/15/three-policy-cn.html">Three-policy TRPO extension for LLM RL</a>.</p>
+<p>See also my earlier post: <a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">Three-policy TRPO extension for LLM RL</a>.</p>
 
 <h4 id="setup">Setup</h4>
 
