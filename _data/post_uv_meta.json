@@ -1,0 +1,13 @@
+{
+  "generated_at": "2025-12-12T15:13:52Z",
+  "metric": "totalUsers",
+  "dimension": "pagePath",
+  "all": {
+    "start_date": "2025-11-15",
+    "end_date": "today"
+  },
+  "d30": {
+    "start_date": "30daysAgo",
+    "end_date": "today"
+  }
+}
