@@ -1,0 +1,19 @@
+{%- comment -%}
+  用法: {% include post_uv.html url=post.url %}
+  输出: 设置 uv_all 和 uv_d30 变量
+{%- endcomment -%}
+{%- assign uv_all = 0 -%}
+{%- assign uv_d30 = 0 -%}
+{%- assign lookup_url = include.url -%}
+{%- for item in site.data.post_uv.all -%}
+  {%- if item[0] == lookup_url -%}
+    {%- assign uv_all = item[1] -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- for item in site.data.post_uv.d30 -%}
+  {%- if item[0] == lookup_url -%}
+    {%- assign uv_d30 = item[1] -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}

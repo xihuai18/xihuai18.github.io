@@ -16,7 +16,7 @@ $(document).ready(function() {
             if (value === undefined || value === null || value === '') {
                 value = 0;
             }
-            $(this).text('👤 ' + value + ' UV');
+            $(this).text(value + ' views');
         });
 
         $('.uv-toggle').removeClass('font-weight-bold');

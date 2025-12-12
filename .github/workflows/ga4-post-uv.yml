@@ -41,13 +41,25 @@ jobs:
           python scripts/ga4_export_uv.py
 
       - name: Commit and push if changed
+        id: commit
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add _data/post_uv.json _data/post_uv_meta.json
-            git commit -m "Update post UV data"
+            git commit -m "Update post views data"
             git push
+            echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "No changes"
+            echo "changed=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Trigger deploy workflow
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches \
+            -d '{"ref":"master"}'
