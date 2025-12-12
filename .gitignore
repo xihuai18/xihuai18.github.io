@@ -10,3 +10,4 @@ Gemfile.lock
 vendor
 .vscode
 _posts/tips.md
+/sitemap.xml

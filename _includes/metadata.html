@@ -52,7 +52,15 @@
     {% if page.og_image or site.og_image -%}
     <meta property="og:image" content="{%- if page.og_image -%}{{ page.og_image }}{%- else -%}{{ site.og_image }}{%- endif -%}" />
     {%- endif %}
-    <meta property="og:locale" content="{{ site.lang }}" />
+        {%- assign _page_lang = page.lang | default: site.lang -%}
+        {%- if _page_lang == 'zh' -%}
+            {%- assign _og_locale = 'zh_CN' -%}
+        {%- elsif _page_lang == 'en' -%}
+            {%- assign _og_locale = 'en_US' -%}
+        {%- else -%}
+            {%- assign _og_locale = _page_lang -%}
+        {%- endif -%}
+        <meta property="og:locale" content="{{ _og_locale }}" />
 
     <!-- Twitter card -->
     <meta name="twitter:card" content="summary" />

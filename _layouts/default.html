@@ -1,5 +1,13 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang }}">
+{%- assign _page_lang = page.lang | default: site.lang -%}
+{%- if _page_lang == 'zh' -%}
+  {%- assign _html_lang = 'zh-CN' -%}
+{%- elsif _page_lang == 'en' -%}
+  {%- assign _html_lang = 'en' -%}
+{%- else -%}
+  {%- assign _html_lang = _page_lang -%}
+{%- endif -%}
+<html lang="{{ _html_lang }}">
 
   <!-- Head -->
   <head>

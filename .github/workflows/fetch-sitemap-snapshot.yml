@@ -1,0 +1,48 @@
+name: fetch-sitemap-snapshot
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-sitemap-snapshot
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch sitemap
+        env:
+          SITEMAP_URL: https://xihuai18.github.io/sitemap.xml
+          SNAPSHOT_PATH: .github/sitemaps/sitemap.xml
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$SNAPSHOT_PATH")"
+          curl -fsSL "$SITEMAP_URL" -o "$SNAPSHOT_PATH.new"
+          if [ -f "$SNAPSHOT_PATH" ] && cmp -s "$SNAPSHOT_PATH" "$SNAPSHOT_PATH.new"; then
+            echo "No changes."
+            rm -f "$SNAPSHOT_PATH.new"
+            exit 0
+          fi
+          mv "$SNAPSHOT_PATH.new" "$SNAPSHOT_PATH"
+
+      - name: Commit snapshot (if changed)
+        run: |
+          set -euo pipefail
+          git add .github/sitemaps/sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update sitemap snapshot"
+          git push
