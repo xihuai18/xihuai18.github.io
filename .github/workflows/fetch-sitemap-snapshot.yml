@@ -22,22 +22,30 @@ jobs:
       - name: Fetch sitemap
         env:
           SITEMAP_URL: https://xihuai18.github.io/sitemap.xml
-          SNAPSHOT_PATH: .github/sitemaps/sitemap.xml
+          PUBLIC_SNAPSHOT_PATH: sitemap-snapshot.xml
         run: |
           set -euo pipefail
-          mkdir -p "$(dirname "$SNAPSHOT_PATH")"
-          curl -fsSL "$SITEMAP_URL" -o "$SNAPSHOT_PATH.new"
-          if [ -f "$SNAPSHOT_PATH" ] && cmp -s "$SNAPSHOT_PATH" "$SNAPSHOT_PATH.new"; then
+          tmp="$(mktemp)"
+          curl -fsSL "$SITEMAP_URL" -o "$tmp"
+
+          changed=0
+          if [ ! -f "$PUBLIC_SNAPSHOT_PATH" ] || ! cmp -s "$PUBLIC_SNAPSHOT_PATH" "$tmp"; then
+            changed=1
+          fi
+
+          if [ "$changed" -eq 0 ]; then
             echo "No changes."
-            rm -f "$SNAPSHOT_PATH.new"
+            rm -f "$tmp"
             exit 0
           fi
-          mv "$SNAPSHOT_PATH.new" "$SNAPSHOT_PATH"
+
+          cp "$tmp" "$PUBLIC_SNAPSHOT_PATH"
+          rm -f "$tmp"
 
       - name: Commit snapshot (if changed)
         run: |
           set -euo pipefail
-          git add .github/sitemaps/sitemap.xml
+          git add sitemap-snapshot.xml
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
