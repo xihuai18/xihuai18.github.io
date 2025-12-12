@@ -23,6 +23,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
 
       - name: Fetch sitemap
         id: fetch_sitemap
@@ -66,4 +69,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: update sitemap snapshot"
-          git push
+
+          branch="${GITHUB_REF_NAME}"
+          for i in 1 2 3; do
+            git fetch origin "$branch"
+            git rebase "origin/$branch" || true
+            if git push origin "HEAD:$branch"; then
+              break
+            fi
+            if [ "$i" -eq 3 ]; then
+              echo "Push failed after retries" >&2
+              exit 1
+            fi
+            sleep 2
+          done

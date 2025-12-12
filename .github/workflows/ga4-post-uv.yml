@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -52,7 +55,20 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add _data/post_uv.json _data/post_uv_meta.json
             git commit -m "Update post views data"
-            git push
+
+            branch="${GITHUB_REF_NAME}"
+            for i in 1 2 3; do
+              git fetch origin "$branch"
+              git rebase "origin/$branch" || true
+              if git push origin "HEAD:$branch"; then
+                break
+              fi
+              if [ "$i" -eq 3 ]; then
+                echo "Push failed after retries" >&2
+                exit 1
+              fi
+              sleep 2
+            done
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "No changes"

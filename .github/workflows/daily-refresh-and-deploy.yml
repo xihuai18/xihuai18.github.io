@@ -20,6 +20,7 @@ jobs:
     secrets: inherit
 
   sitemap_snapshot:
+    needs: [ga4_post_uv]
     uses: ./.github/workflows/fetch-sitemap-snapshot.yml
     secrets: inherit
 
