@@ -1,8 +1,11 @@
 name: fetch-sitemap-snapshot
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
+  workflow_call:
+    outputs:
+      changed:
+        description: Whether sitemap snapshot changed
+        value: ${{ jobs.fetch.outputs.changed }}
   workflow_dispatch:
 
 permissions:
@@ -15,11 +18,14 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.fetch_sitemap.outputs.changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Fetch sitemap
+        id: fetch_sitemap
         env:
           SITEMAP_URL: https://xihuai18.github.io/sitemap.xml
           PUBLIC_SNAPSHOT_PATH: sitemap-snapshot.xml
@@ -33,6 +39,12 @@ jobs:
             changed=1
           fi
 
+          if [ "$changed" -eq 1 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
           if [ "$changed" -eq 0 ]; then
             echo "No changes."
             rm -f "$tmp"
@@ -43,6 +55,7 @@ jobs:
           rm -f "$tmp"
 
       - name: Commit snapshot (if changed)
+        if: steps.fetch_sitemap.outputs.changed == 'true'
         run: |
           set -euo pipefail
           git add sitemap-snapshot.xml

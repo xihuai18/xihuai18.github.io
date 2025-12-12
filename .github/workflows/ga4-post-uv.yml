@@ -1,16 +1,20 @@
 name: Update GA4 Post UV
 
 on:
+  workflow_call:
+    outputs:
+      changed:
+        description: Whether post UV data changed
+        value: ${{ jobs.update-post-uv.outputs.changed }}
   workflow_dispatch:
-  schedule:
-    # 每天 UTC 00:00 (北京时间 08:00)
-    - cron: "0 0 * * *"
 
 permissions:
   contents: write
 
 jobs:
   update-post-uv:
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     runs-on: ubuntu-latest
 
     steps:
@@ -54,12 +58,3 @@ jobs:
             echo "No changes"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Trigger deploy workflow
-        if: steps.commit.outputs.changed == 'true'
-        run: |
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy.yml/dispatches \
-            -d '{"ref":"master"}'
