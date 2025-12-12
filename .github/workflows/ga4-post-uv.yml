@@ -1,0 +1,53 @@
+name: Update GA4 Post UV
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 每天 UTC 00:00 (北京时间 08:00)
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-post-uv:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Authenticate to Google
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GA4_SERVICE_ACCOUNT_KEY }}
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-analytics-data
+
+      - name: Export post UV data
+        env:
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          # Optional: set GA4_START_DATE in repo secrets/variables if you want a fixed date.
+          GA4_START_DATE: ${{ secrets.GA4_START_DATE }}
+        run: |
+          python scripts/ga4_export_uv.py
+
+      - name: Commit and push if changed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add _data/post_uv.json _data/post_uv_meta.json
+            git commit -m "Update post UV data"
+            git push
+          else
+            echo "No changes"
+          fi

@@ -8,6 +8,9 @@ nav_order: 1
 
 <div class="post">
 
+{% assign uv_enabled = site.data.post_uv_meta.generated_at %}
+{% assign uv_has_modes = site.data.post_uv.all %}
+
 {% assign blog_name_size = site.blog_name | size %}
 {% assign blog_description_size = site.blog_description | size %}
 
@@ -46,6 +49,15 @@ nav_order: 1
   </div>
   {% endif %}
 
+{% if uv_enabled and uv_has_modes %}
+  <p class="post-meta mb-2">
+    UV:
+    <a href="#" class="uv-toggle" data-uv-mode="all">累计</a>
+    /
+    <a href="#" class="uv-toggle" data-uv-mode="d30">近30天</a>
+  </p>
+{% endif %}
+
 {% assign featured_posts = site.posts | where: "featured", "true" %}
 {% if featured_posts.size > 0 %}
 <br>
@@ -77,6 +89,23 @@ nav_order: 1
                       {{ read_time }} min read &nbsp; &middot; &nbsp;
                       <a href="{{ year | prepend: '/blog/' | relative_url }}">
                         📅 {{ year }} </a>
+                      {% if uv_enabled and uv_has_modes %}
+                        {% assign uv_all = site.data.post_uv.all[post.url] %}
+                        {% assign uv_d30 = site.data.post_uv.d30[post.url] %}
+                        {% if (uv_all == nil or uv_d30 == nil) and post.url contains '.html' %}
+                          {% assign url_no_html = post.url | remove: '.html' %}
+                          {% if uv_all == nil %}
+                            {% assign uv_all = site.data.post_uv.all[url_no_html] %}
+                          {% endif %}
+                          {% if uv_d30 == nil %}
+                            {% assign uv_d30 = site.data.post_uv.d30[url_no_html] %}
+                          {% endif %}
+                        {% endif %}
+                        {% if uv_all == nil %}{% assign uv_all = 0 %}{% endif %}
+                        {% if uv_d30 == nil %}{% assign uv_d30 = 0 %}{% endif %}
+                        &nbsp; &middot; &nbsp;
+                        <span class="post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">👤 {{ uv_all }} UV</span>
+                      {% endif %}
                     </p>
                   </div>
                 </div>
@@ -135,6 +164,23 @@ nav_order: 1
         {{ post.date | date: '%B %d, %Y' }}
         {% if post.external_source %}
         &nbsp; &middot; &nbsp; {{ post.external_source }}
+        {% endif %}
+        {% if uv_enabled and uv_has_modes %}
+          {% assign uv_all = site.data.post_uv.all[post.url] %}
+          {% assign uv_d30 = site.data.post_uv.d30[post.url] %}
+          {% if (uv_all == nil or uv_d30 == nil) and post.url contains '.html' %}
+            {% assign url_no_html = post.url | remove: '.html' %}
+            {% if uv_all == nil %}
+              {% assign uv_all = site.data.post_uv.all[url_no_html] %}
+            {% endif %}
+            {% if uv_d30 == nil %}
+              {% assign uv_d30 = site.data.post_uv.d30[url_no_html] %}
+            {% endif %}
+          {% endif %}
+          {% if uv_all == nil %}{% assign uv_all = 0 %}{% endif %}
+          {% if uv_d30 == nil %}{% assign uv_d30 = 0 %}{% endif %}
+          &nbsp; &middot; &nbsp;
+          <span class="post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">👤 {{ uv_all }} UV</span>
         {% endif %}
       </p>
       <p class="post-tags">

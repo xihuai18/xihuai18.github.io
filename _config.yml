@@ -10,7 +10,7 @@ email: wang_98xh@qq.com
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
   Xihuai's personal page.
 footer_text: >
-keywords: Reinforcement Learning, Multi-agent System  # add your own keywords or leave empty
+keywords: Reinforcement Learning, Multi-agent System, Language Model  # add your own keywords or leave empty
 
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: 🤖  # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
