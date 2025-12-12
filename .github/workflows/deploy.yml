@@ -29,6 +29,12 @@ jobs:
       run: |
         npm install -g mermaid.cli
         bundle exec jekyll build
+    - name: Include sitemap snapshot
+      run: |
+        set -euo pipefail
+        if [ -f sitemap-snapshot.xml ]; then
+          cp -f sitemap-snapshot.xml _site/sitemap-snapshot.xml
+        fi
     - name: Deploy 🚀
       if: github.event_name != 'pull_request'
       uses: JamesIves/github-pages-deploy-action@v4.6.4
