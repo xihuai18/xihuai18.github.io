@@ -1,67 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
-
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-  <loc>https://xihuai18.github.io/</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>1.00</priority>
+<loc>https://xihuai18.github.io/news/announcement_1/</loc>
+<lastmod>2023-03-25T20:27:23+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/blog/</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/news/announcement_2/</loc>
+<lastmod>2023-08-08T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/publications/</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/news/announcement_3/</loc>
+<lastmod>2024-09-26T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/cv/</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/news/announcement_4/</loc>
+<lastmod>2025-05-16T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/news/</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/news/announcement_5/</loc>
+<lastmod>2025-11-23T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/news/announcement_6/</loc>
+<lastmod>2025-12-02T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-cn.html</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html</loc>
+<lastmod>2025-11-15T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html</loc>
+<lastmod>2025-11-15T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-cn.html</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.80</priority>
+<loc>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html</loc>
+<lastmod>2025-12-01T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/blog/2025/</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.64</priority>
+<loc>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html</loc>
+<lastmod>2025-12-01T00:00:00+00:00</lastmod>
 </url>
 <url>
-  <loc>https://xihuai18.github.io/blog/category/reinforcement-learning/</loc>
-  <lastmod>2025-12-12T16:11:57+00:00</lastmod>
-  <priority>0.64</priority>
+<loc>https://xihuai18.github.io/</loc>
 </url>
-
-
+<url>
+<loc>https://xihuai18.github.io/blog/</loc>
+</url>
+<url>
+<loc>https://xihuai18.github.io/cv/</loc>
+</url>
+<url>
+<loc>https://xihuai18.github.io/news/</loc>
+</url>
+<url>
+<loc>https://xihuai18.github.io/publications/</loc>
+</url>
+<url>
+<loc>https://xihuai18.github.io/blog/category/reinforcement-learning/</loc>
+</url>
+<url>
+<loc>https://xihuai18.github.io/blog/2025/</loc>
+</url>
+<url>
+<loc>https://xihuai18.github.io/googlea3a90baf4191fbfd.html</loc>
+<lastmod>2025-12-12T17:11:09+00:00</lastmod>
+</url>
 </urlset>
