@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Off-Policy Training in Large Language Model Reinforcement Learning: From Theory to Practice"
+title: "Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees"
 date: 2025-12-17
 description: "A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies."
 categories: reinforcement-learning
