@@ -176,6 +176,9 @@ news_limit: # leave blank to include all the news in the `_news` folder
 # Jekyll settings
 # -----------------------------------------------------------------------------
 
+# Build settings
+future: true  # render posts with future dates
+
 # Markdown and syntax highlight
 markdown: kramdown
 highlighter: rouge
