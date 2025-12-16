@@ -1,4 +1,4 @@
-name: Daily refresh (GA4 + sitemap) and deploy
+name: Daily refresh (GA4) and deploy
 
 on:
   workflow_dispatch:
@@ -19,14 +19,9 @@ jobs:
     uses: ./.github/workflows/ga4-post-uv.yml
     secrets: inherit
 
-  sitemap_snapshot:
-    needs: [ga4_post_uv]
-    uses: ./.github/workflows/fetch-sitemap-snapshot.yml
-    secrets: inherit
-
   deploy:
-    needs: [ga4_post_uv, sitemap_snapshot]
-    if: needs.ga4_post_uv.outputs.changed == 'true' || needs.sitemap_snapshot.outputs.changed == 'true'
+    needs: [ga4_post_uv]
+    if: needs.ga4_post_uv.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger deploy workflow
