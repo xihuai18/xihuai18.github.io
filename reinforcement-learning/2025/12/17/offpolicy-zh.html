@@ -1,0 +1,961 @@
+<!DOCTYPE html><html lang="zh-CN">
+
+  <!-- Head -->
+  <head>    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>大模型强化学习中的异策略训练：从理论到实践 | Xihuai Wang's Page</title>
+    <meta name="author" content="Xihuai Leo Wang" />
+    <meta name="description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" />
+    <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
+
+    <!-- OpenGraph -->
+    <meta property="og:site_name" content="Xihuai Wang's Page" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Xihuai Wang's Page | 大模型强化学习中的异策略训练：从理论到实践" />
+    <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html" />
+    <meta property="og:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="大模型强化学习中的异策略训练：从理论到实践" />
+    <meta name="twitter:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" />
+    
+    
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+      {
+        "author":
+        {
+          "@type": "Person",
+          "name": "Xihuai Leo Wang"
+        },
+        "url": "https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html",
+        "@type": "WebSite",
+        "description": "系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。",
+        "headline": "大模型强化学习中的异策略训练：从理论到实践",
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "name": "Xihuai Leo Wang",
+        "@context": "https://schema.org"
+      }
+    </script>
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous" />
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" />
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/monokai.css" media="none" id="highlight_theme_dark" />
+
+    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/dark_mode.js"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header --><header>
+
+  <!-- Nav Bar -->
+  <nav id="navbar"
+    class="navbar navbar-light navbar-expand-sm fixed-top">
+    <div class="container">
+      <a class="navbar-brand title font-weight-lighter" href="/">Xihuai Wang's Page</a>
+      <!-- Navbar Toggle -->
+      <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar top-bar"></span>
+        <span class="icon-bar middle-bar"></span>
+        <span class="icon-bar bottom-bar"></span>
+      </button>
+
+      <div class="collapse navbar-collapse text-right" id="navbarNav">
+        <ul class="navbar-nav ml-auto flex-nowrap">
+
+          <!-- About -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/">about</a>
+          </li>
+          
+
+          <!-- CV -->
+          <!-- 
+          <li class="nav-item ">
+            <a class="nav-link" href="/assets/pdf/" target="_blank"
+              rel="noopener noreferrer">cv</a>
+          </li> -->
+          <!-- Other pages -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/blog/">Xihuai's Blog</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/publications/">publications</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/cv/">cv</a>
+          </li>
+
+          <!-- Toogle theme mode -->
+          <li class="toggle-container">
+            <button id="light-toggle" title="Change theme">
+              <i class="fas fa-moon"></i>
+              <i class="fas fa-sun"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Scrolling Progress Bar -->
+  <progress id="progress" value="0">
+    <div class="progress-container">
+      <span class="progress-bar"></span>
+    </div>
+  </progress>
+</header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      <!-- _layouts/post.html -->
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">大模型强化学习中的异策略训练：从理论到实践</h1>
+    <p class="post-meta">December 17, 2025</p>
+    <p class="post-tags">
+  <a href="/blog/2025"> 📅 2025 </a>
+      &nbsp; &middot; &nbsp;
+        <a href="/blog/category/reinforcement-learning">
+          🏷️ reinforcement-learning</a> &nbsp;
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    <ul id="markdown-toc">
+  <li><a href="#引言为什么我们需要关心异策略" id="markdown-toc-引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</a></li>
+  <li><a href="#第一部分理论基础" id="markdown-toc-第一部分理论基础">第一部分：理论基础</a>    <ul>
+      <li><a href="#11-基本设定" id="markdown-toc-11-基本设定">1.1 基本设定</a></li>
+      <li><a href="#12-核心工具策略性能差异引理" id="markdown-toc-12-核心工具策略性能差异引理">1.2 核心工具：策略性能差异引理</a></li>
+    </ul>
+  </li>
+  <li><a href="#第二部分单策略采样的性能改进下界" id="markdown-toc-第二部分单策略采样的性能改进下界">第二部分：单策略采样的性能改进下界</a>    <ul>
+      <li><a href="#21-分布不匹配问题" id="markdown-toc-21-分布不匹配问题">2.1 分布不匹配问题</a></li>
+      <li><a href="#22-状态分布差异的控制" id="markdown-toc-22-状态分布差异的控制">2.2 状态分布差异的控制</a></li>
+      <li><a href="#23-策略性能改进下界" id="markdown-toc-23-策略性能改进下界">2.3 策略性能改进下界</a></li>
+    </ul>
+  </li>
+  <li><a href="#第三部分多策略静态混合采样" id="markdown-toc-第三部分多策略静态混合采样">第三部分：多策略静态混合采样</a>    <ul>
+      <li><a href="#31-实际场景" id="markdown-toc-31-实际场景">3.1 实际场景</a></li>
+      <li><a href="#32-核心思想扩展状态空间" id="markdown-toc-32-核心思想扩展状态空间">3.2 核心思想：扩展状态空间</a></li>
+      <li><a href="#33-轨迹级混合的结构简化" id="markdown-toc-33-轨迹级混合的结构简化">3.3 轨迹级混合的结构简化</a></li>
+      <li><a href="#34-轨迹级混合的性能改进下界" id="markdown-toc-34-轨迹级混合的性能改进下界">3.4 轨迹级混合的性能改进下界</a></li>
+    </ul>
+  </li>
+  <li><a href="#第四部分动态混合采样与单调提升条件" id="markdown-toc-第四部分动态混合采样与单调提升条件">第四部分：动态混合采样与单调提升条件</a>    <ul>
+      <li><a href="#41-问题的核心挑战" id="markdown-toc-41-问题的核心挑战">4.1 问题的核心挑战</a></li>
+      <li><a href="#42-统一建模框架" id="markdown-toc-42-统一建模框架">4.2 统一建模框架</a></li>
+      <li><a href="#43-核心分解" id="markdown-toc-43-核心分解">4.3 核心分解</a></li>
+      <li><a href="#44-单调提升下界" id="markdown-toc-44-单调提升下界">4.4 单调提升下界</a></li>
+      <li><a href="#45-直接约束的不可行性" id="markdown-toc-45-直接约束的不可行性">4.5 直接约束的不可行性</a></li>
+      <li><a href="#46-三角不等式分解" id="markdown-toc-46-三角不等式分解">4.6 三角不等式分解</a></li>
+    </ul>
+  </li>
+  <li><a href="#第五部分裁剪机制的理论基础" id="markdown-toc-第五部分裁剪机制的理论基础">第五部分：裁剪机制的理论基础</a>    <ul>
+      <li><a href="#51-从tv距离到可计算量" id="markdown-toc-51-从tv距离到可计算量">5.1 从TV距离到可计算量</a></li>
+      <li><a href="#52-u_k-的样本表示" id="markdown-toc-52-u_k-的样本表示">5.2 $U_k$ 的样本表示</a></li>
+      <li><a href="#53-两种约束-u_k-的方法" id="markdown-toc-53-两种约束-u_k-的方法">5.3 两种约束 $U_k$ 的方法</a></li>
+      <li><a href="#55-三种方法的对比" id="markdown-toc-55-三种方法的对比">5.5 三种方法的对比</a></li>
+      <li><a href="#56-采样陈旧性的控制" id="markdown-toc-56-采样陈旧性的控制">5.6 采样陈旧性的控制</a></li>
+      <li><a href="#57-裁剪的操作含义" id="markdown-toc-57-裁剪的操作含义">5.7 裁剪的操作含义</a></li>
+      <li><a href="#58-本节小结" id="markdown-toc-58-本节小结">5.8 本节小结</a></li>
+    </ul>
+  </li>
+  <li><a href="#第六部分轨迹级与步段级混合的比较" id="markdown-toc-第六部分轨迹级与步段级混合的比较">第六部分：轨迹级与步/段级混合的比较</a>    <ul>
+      <li><a href="#61-两类机制的核心差异" id="markdown-toc-61-两类机制的核心差异">6.1 两类机制的核心差异</a></li>
+      <li><a href="#62-采样陈旧性-s_k-的差异" id="markdown-toc-62-采样陈旧性-s_k-的差异">6.2 采样陈旧性 $S_k$ 的差异</a></li>
+      <li><a href="#63-代理目标估计的差异" id="markdown-toc-63-代理目标估计的差异">6.3 代理目标估计的差异</a></li>
+      <li><a href="#64-方差放大风险" id="markdown-toc-64-方差放大风险">6.4 方差放大风险</a></li>
+      <li><a href="#65-适用场景" id="markdown-toc-65-适用场景">6.5 适用场景</a></li>
+    </ul>
+  </li>
+  <li><a href="#第七部分训推不一致的处理" id="markdown-toc-第七部分训推不一致的处理">第七部分：训推不一致的处理</a>    <ul>
+      <li><a href="#71-问题背景" id="markdown-toc-71-问题背景">7.1 问题背景</a></li>
+      <li><a href="#72-有效陈旧性" id="markdown-toc-72-有效陈旧性">7.2 有效陈旧性</a></li>
+      <li><a href="#73-可操作控制" id="markdown-toc-73-可操作控制">7.3 可操作控制</a></li>
+    </ul>
+  </li>
+  <li><a href="#总结实践指南" id="markdown-toc-总结实践指南">总结：实践指南</a>    <ul>
+      <li><a href="#核心理论框架" id="markdown-toc-核心理论框架">核心理论框架</a></li>
+      <li><a href="#职责分离原则" id="markdown-toc-职责分离原则">职责分离原则</a></li>
+      <li><a href="#裁剪方法选择" id="markdown-toc-裁剪方法选择">裁剪方法选择</a></li>
+      <li><a href="#训推不一致处理" id="markdown-toc-训推不一致处理">训推不一致处理</a></li>
+    </ul>
+  </li>
+  <li><a href="#附录关键符号速查表" id="markdown-toc-附录关键符号速查表">附录：关键符号速查表</a></li>
+  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+</ul>
+
+<p><a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version</a></p>
+
+<h2 id="引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</h2>
+
+<p>想象这样一个场景：你正在用强化学习训练一个大语言模型，让它学会更好地回答问题。理想情况下，每次模型生成一批回答后，你会立即用这些数据更新模型，然后用更新后的模型生成新数据，如此循环往复。这种”用谁的数据就更新谁”的方式叫做<strong>同策略</strong>（on-policy）训练。</p>
+
+<p>但现实没这么简单。在大规模分布式训练中，数百个GPU并行生成数据，而模型更新需要时间。当新模型发布时，很多”旧版本”模型生成的数据还没用完——扔掉太浪费，用起来又担心”数据过时”会影响训练效果。</p>
+
+<p>这就是<strong>异策略</strong>（off-policy）训练面临的核心问题：<strong>用旧策略采集的数据来更新新策略，能保证性能持续提升吗？</strong></p>
+
+<p>本文将系统回答这个问题。我们从基础理论出发，逐步推导出可操作的条件，告诉你：在什么情况下，混合使用多个版本策略的数据仍然能保证训练单调改进。</p>
+
+<h2 id="第一部分理论基础">第一部分：理论基础</h2>
+
+<h3 id="11-基本设定">1.1 基本设定</h3>
+
+<p>我们考虑标准的马尔可夫决策过程（MDP），包含状态空间 $\mathcal{S}$、动作空间 $\mathcal{A}$、转移概率 $p(s’|s,a)$、奖励函数 $r(s,a)$、初始分布 $\rho_0$ 和折扣因子 $\gamma \in (0,1)$。</p>
+
+<p>策略 $\pi$ 的<strong>期望累计折扣回报</strong>为：</p>
+
+\[J(\pi) := \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \mid \pi\right]\]
+
+<p><strong>折扣状态访问分布</strong>定义为策略长期运行中访问各状态的加权频率：</p>
+
+\[d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)\]
+
+<p><strong>优势函数</strong>衡量动作 $a$ 相对于策略平均水平的优劣：</p>
+
+\[A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)\]
+
+<p><strong>全变差距离</strong>（TV距离）衡量两个策略在状态 $s$ 上动作分布的差异：</p>
+
+\[D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|\]
+
+<h3 id="12-核心工具策略性能差异引理">1.2 核心工具：策略性能差异引理</h3>
+
+<p>整个理论的基石是这个简洁的结论：</p>
+
+<blockquote>
+  <p><strong>引理1.1（策略性能差异引理）</strong></p>
+
+  <p>对任意策略 $\pi_k$（旧）和 $\pi$（新），性能差异可表示为：</p>
+
+\[J(\pi) - J(\pi_k) = \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_\pi}\left[ \mathbb{E}_{a \sim \pi(\cdot \mid s)}[A^{\pi_k}(s,a)] \right]\]
+</blockquote>
+
+<p><strong>直观理解</strong>：新策略比旧策略好多少，等于在新策略访问的状态分布下，用新策略选动作能获得的”平均优势”。</p>
+
+<h2 id="第二部分单策略采样的性能改进下界">第二部分：单策略采样的性能改进下界</h2>
+
+<h3 id="21-分布不匹配问题">2.1 分布不匹配问题</h3>
+
+<p>策略性能差异引理有个实际问题：右侧期望在 $d_\pi$（新策略的状态分布）下计算，而我们只能从 $d_{\pi_k}$（旧策略）采样。</p>
+
+<p>解决思路是：把期望拆成”旧分布下的期望 + 偏差项”，然后控制偏差。关键问题是：<strong>状态分布的差异与策略的差异有什么定量关系？</strong></p>
+
+<h3 id="22-状态分布差异的控制">2.2 状态分布差异的控制</h3>
+
+<blockquote>
+  <p><strong>引理1.2（状态分布差异与策略TV距离的关系）</strong></p>
+
+\[\|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]\]
+</blockquote>
+
+<p><strong>物理意义</strong>：策略在动作空间上的小差异，会通过环境动力学”放大”成状态访问分布的差异。系数 $\frac{\gamma}{1-\gamma}$ 反映了<strong>时间累积效应</strong>——长时域任务（$\gamma$ 接近1）中，放大效应更强。</p>
+
+<p><strong>证明思路</strong>：推导折扣访问分布的不动点方程，利用随机矩阵的 $\ell_1$ 非扩张性，可以证明状态分布差异被策略差异通过转移动力学放大，放大系数正是 $\frac{\gamma}{1-\gamma}$。</p>
+
+<h3 id="23-策略性能改进下界">2.3 策略性能改进下界</h3>
+
+<blockquote>
+  <p><strong>定理1.1（策略性能改进下界）</strong></p>
+
+  <p>定义期望优势上界常数 $C_{\pi,\pi_k} := \max_{s} \lvert \mathbb{E}_{a \sim \pi}[A^{\pi_k}(s,a)] \rvert$，则：</p>
+
+\[J(\pi) - J(\pi_k) \geq L_{\pi_k}(\pi) - \frac{2\gamma C_{\pi,\pi_k}}{(1-\gamma)^2} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]\]
+
+  <p>其中<strong>代理目标</strong>为：</p>
+
+\[L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k} \left[ \frac{\pi(a \mid s)}{\pi_k(a \mid s)} A^{\pi_k}(s,a) \right]\]
+</blockquote>
+
+<p>这个下界由两部分组成：</p>
+
+<ol>
+  <li>
+    <p><strong>代理目标</strong> $L_{\pi_k}(\pi)$：可用旧策略数据通过重要性采样直接估计，是TRPO/PPO的优化目标。</p>
+  </li>
+  <li>
+    <p><strong>策略偏移惩罚</strong>：随新旧策略的TV距离增大而增大，这解释了为何PPO需要限制更新幅度。</p>
+  </li>
+</ol>
+
+<p><strong>核心结论</strong>：最大化代理目标的同时控制策略偏移，即可保证性能改进。</p>
+
+<h2 id="第三部分多策略静态混合采样">第三部分：多策略静态混合采样</h2>
+
+<h3 id="31-实际场景">3.1 实际场景</h3>
+
+<p>在实际训练中，一个batch的数据可能来自多个策略版本 ${\pi^{(1)}, \ldots, \pi^{(M)}}$，各版本占比为 $\alpha_1, \ldots, \alpha_M$。如何将定理1.1扩展到这种情形？</p>
+
+<h3 id="32-核心思想扩展状态空间">3.2 核心思想：扩展状态空间</h3>
+
+<p>解决方案是一个优雅的建模技巧：<strong>把策略版本索引当作状态的一部分</strong>。</p>
+
+<p>定义扩展状态空间 $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$，其中 $\mathcal{I} = {1, \ldots, M}$ 是策略索引集合。在扩展状态 $(s, i)$ 下，<strong>混合行为策略</strong>定义为 $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$。</p>
+
+<p>索引的演化由<strong>索引转移核</strong> $q(i’ \mid i)$ 刻画。扩展MDP继承原始MDP的奖励和环境转移，索引按 $q(i’|i)$ 独立演化。</p>
+
+<p>这个技巧之所以有效，是因为新策略 $\pi$ 在扩展MDP上的回报等于原始MDP中的回报，从而可以直接应用定理1.1。</p>
+
+<h3 id="33-轨迹级混合的结构简化">3.3 轨迹级混合的结构简化</h3>
+
+<p>最常见的情形是<strong>每条轨迹只用一个旧策略</strong>：轨迹开始时采样索引 $I_0 \sim \alpha$，整条轨迹使用 $\pi^{(I_0)}$。此时索引转移核为恒等转移：$q(i’ \mid i) = \mathbf{1}_{i’=i}$。</p>
+
+<p>从工程实现角度看，在很多 <strong>actor-learner 的异步训练</strong>里（如果采样与训练侧把数据按”整条轨迹/完整 episode 归属某个策略版本”来组织），这可以近似对应这里的<strong>轨迹级混合</strong>：actor 在一个采样单元内固定使用某个策略快照生成数据，learner 再混合使用来自不同版本的整轨迹数据做更新。这里用”近似”是因为不同系统对”轨迹/采样单元”的切分边界并不完全一致。</p>
+
+<blockquote>
+  <p><strong>引理2.1（轨迹级混合的结构简化）</strong></p>
+
+  <p>(a) 扩展状态访问分布分解为：$d_{\beta}(s, i) = \alpha_i \cdot d_{\pi^{(i)}}(s)$</p>
+
+  <p>(b) 优势函数还原为：$A^{\beta}((s, i), a) = A^{\pi^{(i)}}(s, a)$</p>
+</blockquote>
+
+<p><strong>(b)的直觉</strong>：由于索引永不改变，从扩展状态 $(s,i)$ 出发的<strong>所有未来轨迹</strong>都由同一个策略 $\pi^{(i)}$ 生成。因此，未来的累计回报完全由 $\pi^{(i)}$ 决定，价值函数和优势函数自然还原为 $\pi^{(i)}$ 的对应量。</p>
+
+<p>由此，混合策略的回报为各旧策略回报的加权平均：$J_{\mathrm{mix}} = \sum_{i=1}^{M} \alpha_i J(\pi^{(i)})$。</p>
+
+<h3 id="34-轨迹级混合的性能改进下界">3.4 轨迹级混合的性能改进下界</h3>
+
+<blockquote>
+  <p><strong>推论2.1（轨迹级混合的性能改进下界）</strong></p>
+
+\[J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\pi^{(i)}}(\pi) - \frac{2\gamma \max_i C_{\pi, \pi^{(i)}}}{(1-\gamma)^2} \sum_{i=1}^{M} \alpha_i \mathbb{E}_{s \sim d_{\pi^{(i)}}} \big[ D_{\mathrm{TV}}(\pi, \pi^{(i)}; s) \big]\]
+</blockquote>
+
+<p>该结论表明：将多个旧策略版本的轨迹混合训练时，若对每条轨迹用对应旧策略的重要性比率构造损失，同时控制新策略与各旧策略的偏移，则新策略性能有明确的改进下界。</p>
+
+<h2 id="第四部分动态混合采样与单调提升条件">第四部分：动态混合采样与单调提升条件</h2>
+
+<h3 id="41-问题的核心挑战">4.1 问题的核心挑战</h3>
+
+<p>第三部分讨论的是<strong>静态混合</strong>——混合权重 $\alpha_i$ 固定不变。本节考虑更一般的<strong>动态混合</strong>——新策略发布后，采样逐步由新策略接管。</p>
+
+<p>前面的结论刻画了”新策略相对于混合行为策略”的改进。但在实际训练中，我们真正关心的是：<strong>每轮更新后的最新策略 $\pi_{k+1}$ 相对于上一轮最新策略 $\pi_k$ 是否单调提升？</strong></p>
+
+\[J(\pi_{k+1}) \geq J(\pi_k)\]
+
+<h3 id="42-统一建模框架">4.2 统一建模框架</h3>
+
+<p>动态混合采样的两种典型形式都可以用索引转移核 $q(i’|i)$ 统一刻画：</p>
+
+<p><strong>轨迹级混合</strong>（可类比为常规异步训练的一个抽象；索引恒等转移）：$q(i’|i) = \mathbf{1}{i’=i}$</p>
+
+<p><strong>步/段级混合</strong>（partial rollout / 段式采样的一个抽象；允许切换）：$q(i’|i) = (1-\sigma(i))\mathbf{1}{i’=i} + \sigma(i)\kappa(i’|i)$</p>
+
+<p>其中 $\sigma(i)$ 为切换概率，$\kappa(\cdot|i)$ 为目标索引分布。</p>
+
+<h3 id="43-核心分解">4.3 核心分解</h3>
+
+<p>通过引入混合回报 $J_{\mathrm{mix}}^{(k)}$ 作为中间桥梁，性能差异分解为：</p>
+
+\[J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{相对混合策略的改进}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{混合偏差项}}\]
+
+<p>第一项可用定理1.1处理。第二项是<strong>混合偏差项</strong>，可以证明它满足：</p>
+
+\[J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]\]
+
+<h3 id="44-单调提升下界">4.4 单调提升下界</h3>
+
+<p>合并上述结果，得到核心定理：</p>
+
+<blockquote>
+  <p><strong>定理3.1（动态混合采样下的单调提升下界）</strong></p>
+
+\[\begin{aligned}
+J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
+&amp;- \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \big] \\
+&amp;- \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
+\end{aligned}\]
+</blockquote>
+
+<p>该下界揭示了<strong>双重控制</strong>的必要性：</p>
+<ul>
+  <li><strong>更新偏移惩罚</strong>：新策略 $\pi_{k+1}$ 相对采样来源策略 $\pi^{(i)}$ 的偏移</li>
+  <li><strong>采样陈旧性惩罚</strong>：采样来源策略 $\pi^{(i)}$ 相对当前策略 $\pi_k$ 的陈旧性</li>
+</ul>
+
+<h3 id="45-直接约束的不可行性">4.5 直接约束的不可行性</h3>
+
+<p>定理3.1中的更新偏移惩罚项看似可以通过约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s)$ 来控制，但这实际上<strong>不可行</strong>：</p>
+
+<blockquote>
+  <p><strong>观察3.1（更新偏移约束的不可行性）</strong></p>
+
+  <p>设混合采样包含两个旧策略 $\pi^{(1)}$ 和 $\pi^{(2)}$，若存在某状态 $s$ 使 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) &gt; 2\delta$，则不存在策略 $\pi_{k+1}$ 同时满足 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ 与 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$。</p>
+</blockquote>
+
+<p><strong>证明</strong>：由三角不等式，若同时满足两约束，则 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) \leq 2\delta$，矛盾。</p>
+
+<p><strong>问题根源</strong>：更新偏移惩罚项将 $\pi_{k+1}$ 与历史策略族 ${\pi^{(i)}}$ 直接耦合，而后者的内部结构是历史训练的产物，不受当前更新控制。</p>
+
+<h3 id="46-三角不等式分解">4.6 三角不等式分解</h3>
+
+<p>解决方案是利用TV距离的三角不等式：</p>
+
+\[D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \leq D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s) + D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\]
+
+<p>这将耦合约束拆分为两个独立部分：</p>
+
+<ul>
+  <li><strong>更新增量偏移</strong> $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)$：新策略相对当前策略的偏离，<strong>可由优化侧控制</strong></li>
+  <li><strong>采样陈旧性</strong> $D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)$：当前策略相对各旧策略的偏离，<strong>需由采样侧控制</strong></li>
+</ul>
+
+<p>定义：</p>
+
+\[U_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)\big], \quad S_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\big]\]
+
+<blockquote>
+  <p><strong>推论3.2（分解后的单调提升下界）</strong></p>
+
+\[J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k\]
+</blockquote>
+
+<p><strong>为何分解能解决问题？</strong> 关键在于：分解后的 $U_k$ 只涉及新策略 $\pi_{k+1}$ 和当前策略 $\pi_k$，<strong>与旧策略族 ${\pi^{(i)}}$ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 $U_k$ 都是可行的——这正是观察3.1揭示的不可行性问题的解决之道。</p>
+
+<p>这揭示了重要的工程原则——<strong>职责分离</strong>：</p>
+
+<div>
+<table>
+<thead>
+<tr><th>控制项</th><th>负责方</th><th>控制手段</th></tr>
+</thead>
+<tbody>
+<tr><td>$U_k$（更新增量偏移）</td><td>优化算法</td><td>策略裁剪</td></tr>
+<tr><td>$S_k$（采样陈旧性）</td><td>采样系统</td><td>数据过滤、版本窗口</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="第五部分裁剪机制的理论基础">第五部分：裁剪机制的理论基础</h2>
+
+<h3 id="51-从tv距离到可计算量">5.1 从TV距离到可计算量</h3>
+
+<p>推论3.2告诉我们，要保证单调提升，需要控制更新增量偏移 $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$。但TV距离是分布层面的量，如何用样本来控制它？</p>
+
+<p>关键桥梁是下面这个恒等式：</p>
+
+<blockquote>
+  <p><strong>引理3.3（TV距离的比值差表示）</strong></p>
+
+  <p>设策略 $\pi_1$ 的支撑覆盖 $\pi$ 和 $\pi_2$ 的支撑，则对任意状态分布 $\mu$：</p>
+
+\[\mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot|s)} \left| \frac{\pi(a|s)}{\pi_1(a|s)} - \frac{\pi_2(a|s)}{\pi_1(a|s)} \right|\]
+</blockquote>
+
+<p><strong>直观理解</strong>：左边是两个分布的TV距离（需要遍历所有动作），右边是在 $\pi_1$ 下采样时两个重要性比值的差的绝对值。这使得我们可以用样本来估计和控制TV距离。</p>
+
+<h3 id="52-u_k-的样本表示">5.2 $U_k$ 的样本表示</h3>
+
+<p>利用引理3.3，取 $\pi = \pi_{k+1}$，$\pi_2 = \pi_k$，$\pi_1 = \pi^{(i)}$（采样来源策略），可得：</p>
+
+\[U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot|s)} \left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right|\]
+
+<p>记 $\rho_{k+1} := \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)}$ 和 $\rho_k := \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)}$，则：</p>
+
+\[U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{训练数据}} \big| \rho_{k+1} - \rho_k \big|\]
+
+<p>这意味着：<strong>如果我们能让每个样本上 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，就能保证 $U_k \leq \epsilon/2$</strong>。</p>
+
+<h3 id="53-两种约束-u_k-的方法">5.3 两种约束 $U_k$ 的方法</h3>
+
+<p><strong>方法一：直接约束比值差</strong></p>
+
+<p>对每个样本 $(s, i, a)$，要求：</p>
+
+\[\left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right| \leq \epsilon\]
+
+<p>即裁剪区间为 $\left[\frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} - \epsilon, \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} + \epsilon\right]$，<strong>裁剪中心是 $\rho_k$ 而非 1</strong>。</p>
+
+<p><strong>方法二：约束增量比值</strong></p>
+
+<p>注意到 $\rho_{k+1} - \rho_k = \rho_k \cdot \left(\frac{\pi_{k+1}}{\pi_k} - 1\right)$，因此：</p>
+
+\[|\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right|\]
+
+<p>如果约束 $\left\lvert\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right\rvert \leq \epsilon$，由于 $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$，可证 $U_k \leq \epsilon/2$。</p>
+
+<p>这种方法直接对 $\pi_{k+1}/\pi_k$ 以 1 为中心裁剪，**完全不涉及旧策略 $\pi^{(i)}$比，我们给出三种裁剪机制的完整目标函数。设当前样本来自旧策略 $\pi^{(i)}$，记：</p>
+<ul>
+  <li>$\rho_{k+1} = \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)}$（新策略相对采样策略的比值）</li>
+  <li>$\rho_k = \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)}$（当前策略相对采样策略的比值）</li>
+  <li>$r = \frac{\pi_{k+1}(a|s)}{\pi_k(a|s)}$（新策略相对当前策略的增量比值）</li>
+</ul>
+
+<p><strong>标准PPO</strong>：以 1 为中心裁剪 $\rho_{k+1}$</p>
+
+\[L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]\]
+
+<p><strong>方法一</strong>：以 $\rho_k$ 为中心裁剪 $\rho_{k+1}$</p>
+
+\[L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]\]
+
+<p><strong>方法二</strong>：以 1 为中心裁剪增量比值 $r$</p>
+
+\[L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]\]
+
+<p>其中 $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ 是经过重要性加权的优势估计。</p>
+
+<h3 id="55-三种方法的对比">5.5 三种方法的对比</h3>
+
+<p><strong>表5.1　三种裁剪机制的对比</strong></p>
+
+<div>
+<table>
+<thead>
+<tr><th>方法</th><th>裁剪变量</th><th>裁剪中心</th><th>裁剪区间</th><th>约束的TV距离</th></tr>
+</thead>
+<tbody>
+<tr><td>标准PPO</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$</td></tr>
+<tr><td>方法一</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$\rho_k = \pi_k/\pi^{(i)}$</td><td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
+<tr><td>方法二</td><td>$r = \pi_{k+1}/\pi_k$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>标准PPO在多策略混合下的根本问题</strong></p>
+
+<p>标准PPO约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$，要求新策略同时接近所有采样来源策略。由观察3.1，当各旧策略 $\pi^{(1)}, \pi^{(2)}, \ldots$ 之间差异显著时，<strong>不存在能同时满足所有约束的 $\pi_{k+1}$</strong>。这导致信赖域交集收缩甚至为空，更新被最陈旧的策略所限制。</p>
+
+<p><strong>方法一与方法二的共同优势</strong></p>
+
+<p>两者都约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$——新策略相对<strong>当前策略</strong>（而非采样策略）的偏离。由于 $\pi_k$ 是唯一确定的，这个约束对所有来源的样本一致，完全规避了不可行性问题。</p>
+
+<p><strong>方法一 vs 方法二</strong></p>
+
+<div>
+<table>
+<thead>
+<tr><th>比较维度</th><th>方法一（自适应裁剪）</th><th>方法二（增量裁剪）</th></tr>
+</thead>
+<tbody>
+<tr><td>陈旧样本（$\rho_k \gg 1$）</td><td>自动收紧约束，更保守</td><td>可能产生大梯度方差</td></tr>
+<tr><td>LLM大词表低概率token</td><td>允许较大绝对变化（加法型）</td><td>绝对变化受限（乘法型）</td></tr>
+<tr><td>实现复杂度</td><td>需存储 $\pi^{(i)}(a|s)$ 和 $\pi_k(a|s)$</td><td>仅需 $\pi_k(a|s)$</td></tr>
+<tr><td>优势函数</td><td>使用 $A^{\beta^{(k)}}$</td><td>使用加权优势 $\rho_k \cdot A^{\beta^{(k)}}$</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>详细解释</strong>：</p>
+
+<p><strong>(一) 陈旧样本处理</strong></p>
+
+<p>当样本来自很旧的策略时，$\rho_k = \pi_k/\pi^{(i)}$ 可能很大。</p>
+
+<ul>
+  <li>方法二的被积函数为 $\rho_k \cdot \lvert r - 1\rvert$，即便 $\lvert r-1\rvert \leq \epsilon$，被积函数仍可达 $\epsilon \cdot \rho_k$，产生尖峰。</li>
+  <li>方法一直接约束 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，被积函数上界恒为 $\epsilon$，不受 $\rho_k$ 放大。</li>
+</ul>
+
+<p><strong>(二) LLM大词表问题</strong></p>
+
+<p>大语言模型词表规模巨大，大量token概率极小。</p>
+
+<ul>
+  <li>方法二约束 $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$，这是<strong>乘法型约束</strong>：若 $\pi_k(a|s) = 10^{-6}$，允许的绝对变化仅为 $\epsilon \times 10^{-6}$。</li>
+  <li>方法一约束 $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$，这是<strong>加法型约束</strong>：若该token在旧策略下概率较高（如 $\pi^{(i)}(a|s) = 0.1$），即便当前概率很低，也允许较快提升。</li>
+</ul>
+
+<h3 id="56-采样陈旧性的控制">5.6 采样陈旧性的控制</h3>
+
+<p>推论3.2表明，$S_k$ 同样影响单调提升下界，但它<strong>无法通过优化侧裁剪控制</strong>，需由采样系统实现：</p>
+
+<p><strong>(一) 丢弃陈旧数据</strong></p>
+
+<p>设定阈值 $\epsilon_{\mathrm{stale}}$，对每个样本计算 $\lvert\rho_k - 1\rvert = \lvert\pi_k(a|s)/\pi^{(i)}(a|s) - 1\rvert$，丢弃超过阈值者。</p>
+
+<p><strong>(二) 控制策略版本窗口</strong></p>
+
+<p>限制混合采样的旧策略版本数量，如仅用最近 $W$ 个版本的数据。</p>
+
+<h3 id="57-裁剪的操作含义">5.7 裁剪的操作含义</h3>
+
+<p>最后，需要澄清裁剪与理论下界的关系。</p>
+
+<p>推论3.2中，$U_k$ 的系数 $C_{\pi_{k+1},\beta^{(k)}}$ 依赖于新策略 $\pi_{k+1}$，因此惩罚项<strong>不能简单替换为常数</strong>。正确的操作含义是：</p>
+
+<blockquote>
+  <p><strong>在 $U_k \leq \epsilon/2$ 的约束下，最大化代理目标 $L_{\beta^{(k)}}(\pi_{k+1})$</strong></p>
+</blockquote>
+
+<p>裁剪目标函数正是这一约束优化的实现——通过裁剪<strong>硬性限制</strong>更新幅度，确保 $U_k$ 可控；在此前提下，梯度上升提升代理目标，从而为策略单调改进提供保障。</p>
+
+<h3 id="58-本节小结">5.8 本节小结</h3>
+
+<p>本节建立了裁剪机制的理论基础：</p>
+
+<ol>
+  <li><strong>引理3.3</strong>将TV距离转化为样本层面的比值差，是连接理论与实现的桥梁</li>
+  <li><strong>两种约束方法</strong>：方法一（自适应裁剪中心）和方法二（固定增量裁剪），均保证 $U_k \leq \epsilon/2$</li>
+  <li><strong>与标准PPO对比</strong>：标准PPO约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$，在多策略混合下不可行；方法一/二约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$，规避了该问题</li>
+  <li><strong>方法选择</strong>：陈旧性高或LLM大词表场景推荐方法一；实现简洁优先推荐方法二</li>
+  <li><strong>$S_k$ 的控制</strong>由采样侧负责，通过数据过滤和版本窗口实现</li>
+  <li><strong>裁剪是约束优化</strong>：在 $U_k$ 约束下最大化代理目标</li>
+</ol>
+
+<h2 id="第六部分轨迹级与步段级混合的比较">第六部分：轨迹级与步/段级混合的比较</h2>
+
+<h3 id="61-两类机制的核心差异">6.1 两类机制的核心差异</h3>
+
+<p>两类混合机制的本质区别在于索引转移核的结构：</p>
+
+<ul>
+  <li><strong>轨迹级混合</strong>：$q(i’|i) = \mathbf{1}{i’=i}$，索引永不改变</li>
+  <li><strong>步/段级混合</strong>：$\sigma(i) &gt; 0$，允许轨迹内切换</li>
+</ul>
+
+<p>与常见工程术语的对应关系是：</p>
+
+<ul>
+  <li>这里的<strong>轨迹级混合</strong>可以大致理解为”<strong>常规异步训练</strong>“的一个理想化抽象：数据按整条轨迹/episode 归属到某个策略版本；</li>
+  <li>这里的<strong>步/段级混合</strong>可以大致理解为”<strong>partial rollout</strong>“的一个抽象：由于 actor 与 learner 异步、且 segment 边界处可能刷新到新策略版本，用索引转移核允许”轨迹内部版本切换”可以更好地近似刻画这种现象。</li>
+</ul>
+
+<p>关键分水岭是<strong>引理2.1的结构简化是否成立</strong>：轨迹级混合满足优势函数还原；步/段级混合一般不满足，因为未来回报受索引转移核影响。</p>
+
+<h3 id="62-采样陈旧性-s_k-的差异">6.2 采样陈旧性 $S_k$ 的差异</h3>
+
+<p><strong>轨迹级混合</strong>的陈旧性来源于：混合权重 $\alpha_i^{(k)}$ 在新策略发布后仍对旧策略保留质量。</p>
+
+<p><strong>步/段级混合</strong>具有<strong>指数压缩效应</strong>：考虑从旧到新以概率 $\sigma$ 切换的简化模型，折扣访问分布下旧索引的边缘质量为 $\frac{1-\gamma}{1-\gamma(1-\sigma)}$。只要 $\sigma \gg 1-\gamma$，旧策略权重即可被显著压缩。</p>
+
+<h3 id="63-代理目标估计的差异">6.3 代理目标估计的差异</h3>
+
+<p><strong>轨迹级混合</strong>：优势函数还原为 $A^{\pi^{(i)}}(s,a)$，估计路径清晰。</p>
+
+<p><strong>步/段级混合的优势替代偏差</strong>：若沿用单策略优势估计，将产生系统性偏差。原因是 $A^{\beta^{(k)}}((s,i),a)$ 需要对未来索引切换取期望，而 $A^{\pi^{(i)}}(s,a)$ 隐含”未来始终沿用 $\pi^{(i)}$”的假设。</p>
+
+<p><strong>Bandit设定下的统一</strong>：在单步episode的LLM训练中，无后续状态转移，两类机制的估计问题统一，无上述偏差。</p>
+
+<h3 id="64-方差放大风险">6.4 方差放大风险</h3>
+
+<p>步/段级混合还有一个隐患：即便单步重要性比值被裁剪，长轨迹下多步噪声叠加仍会放大梯度估计方差。当每次更新的策略变化幅度较大时，轨迹内部的”行为突变”可能引发更重尾的比值分布。这也是下表中”策略变化幅度大”场景推荐轨迹级混合的原因。</p>
+
+<h3 id="65-适用场景">6.5 适用场景</h3>
+
+<p><strong>表6.1　两类混合机制的适用场景</strong></p>
+
+<div>
+<table>
+<thead>
+<tr><th>场景特征</th><th>推荐机制</th><th>理由</th></tr>
+</thead>
+<tbody>
+<tr><td>长轨迹、高频更新、强异步</td><td>步/段级</td><td>可显著压缩 $S_k$</td></tr>
+<tr><td>短轨迹（非Bandit）</td><td>轨迹级</td><td>$S_k$ 自然较低</td></tr>
+<tr><td>每次更新策略变化幅度大</td><td>轨迹级</td><td>避免方差放大</td></tr>
+<tr><td>单步episode（Bandit）</td><td>均可</td><td>按实现便利选择</td></tr>
+<tr><td>需要折中方案</td><td>段级</td><td>在自然边界切换</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>核心权衡</strong>：步/段级混合在采样侧更强（快速去陈旧），轨迹级混合在估计侧更稳（代理目标易估计）。</p>
+
+<h2 id="第七部分训推不一致的处理">第七部分：训推不一致的处理</h2>
+
+<h3 id="71-问题背景">7.1 问题背景</h3>
+
+<p>在大规模分布式训练中，推理端和训练端的策略可能不一致：</p>
+
+<ul>
+  <li><strong>数值实现差异</strong>：softmax归一化、量化、核融合</li>
+  <li><strong>解码规则差异</strong>：温度缩放、top-p/top-k采样</li>
+</ul>
+
+<p>设训练侧建模的行为策略为 $\pi^{(i)}$，而推理端实际采样的策略为 $\hat{\pi}^{(i)}$。</p>
+
+<h3 id="72-有效陈旧性">7.2 有效陈旧性</h3>
+
+<p>定义<strong>有效陈旧性</strong>：</p>
+
+\[\hat{S}_k := \mathbb{E}_{(s,i) \sim d_{\hat{\beta}^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_k, \hat{\pi}^{(i)}; s) \big]\]
+
+<p>该定义同时覆盖版本陈旧性与训推实现差异。</p>
+
+<h3 id="73-可操作控制">7.3 可操作控制</h3>
+
+<p>由引理3.3，$\hat{S}_k$ 可表示为样本级可计算形式。给定阈值 $\epsilon_{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a|s)/\hat{\pi}^{(i)}(a|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则 $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$。</p>
+
+<p><strong>关键实现要点</strong>：</p>
+
+<ol>
+  <li><strong>行为分母对齐</strong>：损失中的行为概率应使用推理端记录的 $\hat{\pi}^{(i)}(a|s)$</li>
+  <li><strong>概率平滑</strong>：若推理端有截断（如top-k），需确保比值合法</li>
+</ol>
+
+<h2 id="总结实践指南">总结：实践指南</h2>
+
+<h3 id="核心理论框架">核心理论框架</h3>
+
+<p>单调提升下界的结构为：</p>
+
+\[J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{代理目标}} - \underbrace{C_1 \cdot U_k}_{\text{更新偏移惩罚}} - \underbrace{C_2 \cdot S_k}_{\text{采样陈旧性惩罚}}\]
+
+<h3 id="职责分离原则">职责分离原则</h3>
+
+<div>
+<table>
+<thead>
+<tr><th>控制项</th><th>负责方</th><th>控制手段</th><th>具体操作</th></tr>
+</thead>
+<tbody>
+<tr><td>$U_k$</td><td>优化算法</td><td>策略裁剪</td><td>对 $\pi_{k+1}/\pi_k$ 裁剪</td></tr>
+<tr><td>$S_k$</td><td>采样系统</td><td>数据过滤</td><td>丢弃陈旧样本</td></tr>
+<tr><td>$S_k$</td><td>采样系统</td><td>版本窗口</td><td>仅用最近 $W$ 个版本</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="裁剪方法选择">裁剪方法选择</h3>
+
+<div>
+<table>
+<thead>
+<tr><th>场景</th><th>推荐方法</th><th>理由</th></tr>
+</thead>
+<tbody>
+<tr><td>陈旧性较高</td><td>方法一（自适应）</td><td>自动对陈旧样本收紧约束</td></tr>
+<tr><td>实现简洁优先</td><td>方法二（增量）</td><td>无需存储旧策略信息</td></tr>
+<tr><td>LLM大词表</td><td>方法一</td><td>避免低概率token更新过慢</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="训推不一致处理">训推不一致处理</h3>
+
+<ul>
+  <li>使用推理端记录的 $\hat{\pi}^{(i)}$ 作为行为分母</li>
+  <li>通过样本过滤压缩有效陈旧性</li>
+</ul>
+
+<h2 id="附录关键符号速查表">附录：关键符号速查表</h2>
+
+<div>
+<table>
+<thead>
+<tr><th>符号</th><th>含义</th></tr>
+</thead>
+<tbody>
+<tr><td>$\pi_k$, $\pi^{(i)}$</td><td>第 $k$ 轮最新策略，第 $i$ 个旧策略</td></tr>
+<tr><td>$d_\pi(s)$, $A^\pi(s,a)$</td><td>折扣状态访问分布，优势函数</td></tr>
+<tr><td>$D_{\mathrm{TV}}(\pi, \pi'; s)$</td><td>两策略在状态 $s$ 上的TV距离</td></tr>
+<tr><td>$\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$</td><td>第 $k$ 轮混合行为策略</td></tr>
+<tr><td>$q(i' \mid i)$, $\alpha_i^{(k)}$</td><td>索引转移核，索引初始分布</td></tr>
+<tr><td>$U_k$, $S_k$</td><td>更新增量偏移，采样陈旧性</td></tr>
+<tr><td>$\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$</td><td>裁剪半径，陈旧性阈值，版本窗口</td></tr>
+<tr><td>$C_{\pi,\pi_k}$</td><td>期望优势上界常数</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="参考文献">参考文献</h2>
+
+<ol>
+  <li>
+    <p>John Schulman, Sergey Levine, Philipp Moritz, Michael I. Jordan, Pieter Abbeel. “Trust Region Policy Optimization” (TRPO). arXiv:1502.05477. <a href="https://arxiv.org/abs/1502.05477">https://arxiv.org/abs/1502.05477</a></p>
+  </li>
+  <li>
+    <p>Joshua Achiam, David Held, Aviv Tamar, Pieter Abbeel. “Constrained Policy Optimization” (CPO). arXiv:1705.10528. <a href="https://arxiv.org/abs/1705.10528">https://arxiv.org/abs/1705.10528</a></p>
+  </li>
+  <li>
+    <p>John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov. “Proximal Policy Optimization Algorithms” (PPO). arXiv:1707.06347. <a href="https://arxiv.org/abs/1707.06347">https://arxiv.org/abs/1707.06347</a></p>
+  </li>
+  <li>
+    <p>James Queeney, Ioannis Ch. Paschalidis, Christos G. Cassandras. “Generalized Proximal Policy Optimization with Sample Reuse” (GePPO). arXiv:2111.00072. <a href="https://arxiv.org/abs/2111.00072">https://arxiv.org/abs/2111.00072</a></p>
+  </li>
+  <li>
+    <p>Yuzhen Zhou, Jiajun Li, Yusheng Su, et al. “APRIL: Active Partial Rollouts in Reinforcement Learning to Tame Long-tail Generation” (APRIL; partial rollout). arXiv:2509.18521. <a href="https://arxiv.org/abs/2509.18521">https://arxiv.org/abs/2509.18521</a></p>
+  </li>
+  <li>
+    <p>Jacob Hilton, Karl Cobbe, John Schulman. “Batch size-invariance for policy optimization” (Decoupled PPO). arXiv:2110.00641. <a href="https://arxiv.org/abs/2110.00641">https://arxiv.org/abs/2110.00641</a></p>
+  </li>
+</ol>
+
+<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025OffPolicyLLMRL</span><span class="p">,</span>
+	<span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
+	<span class="na">title</span>        <span class="p">=</span> <span class="s">{Off-Policy Training in LLM Reinforcement Learning: From Theory to Practice}</span><span class="p">,</span>
+	<span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+	<span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
+	<span class="na">day</span>          <span class="p">=</span> <span class="s">{17}</span><span class="p">,</span>
+	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html}</span><span class="p">,</span>
+	<span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-12-17}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+  </article></div>
+
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        &copy; Copyright 2025 Xihuai Leo Wang. Last updated: December 16, 2025.
+      </div>
+    </footer>
+
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    <!-- Load Common JS -->
+  <script defer src="/assets/js/common.js"></script>
+  <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams',
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2923RQZBXG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-2923RQZBXG');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar,
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+  </body>
+</html>
