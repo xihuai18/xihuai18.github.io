@@ -26,3 +26,6 @@ Xihuai's research interests include **Decision-making** and **Multi-agent System
 - **Multi-agent Decision-making in Cooperative Scenarios**, especially
   - Efficiency of Cooperative Multi-agent Reinforcement Learning;
   - Zero-shot Generalization Ability in Cooperative Multi-agent Systems.
+
+**I am on the job market, actively seeking opportunities in large language model research and development.**  
+**目前正在积极寻找大语言模型研发相关职位。**
