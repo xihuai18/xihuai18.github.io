@@ -6,6 +6,5 @@ inline: true
 related_posts: false
 ---
 
-Give a talk about cooperative multi-agent reinforcement learning ([Coordinate Agents vis Policy Optimization](assets\pdf\CoordinatingAgents-RLChina.pdf)) at RLChina.
-
-<iframe src="//player.bilibili.com/player.html?aid=404558756&bvid=BV15V41137pA&cid=1230482639&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+Give a talk about cooperative multi-agent reinforcement learning ([Coordinate Agents vis Policy Optimization](assets\pdf\CoordinatingAgents-RLChina.pdf)) at RLChina 
+- Video at [![BiliBili](https://img.icons8.com/color/20/bilibili.png)](https://www.bilibili.com/video/BV15V41137pA/?share_source=copy_web&vd_source=eecbb5055f668ec99c7c940f35a591c6).
