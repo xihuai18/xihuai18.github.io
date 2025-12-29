@@ -773,6 +773,30 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 
 /*******************************************************************************
+ * News
+ ******************************************************************************/
+.news .news-table.news-scrollable {
+  max-height: clamp(220px, 32vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+.news .news-table.news-scrollable table {
+  margin-bottom: 0;
+}
+.news th[scope=row] {
+  white-space: nowrap;
+}
+.news .news-table.news-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+.news .news-table.news-scrollable::-webkit-scrollbar-thumb {
+  background-color: var(--global-divider-color);
+  border-radius: 8px;
+}
+
+/*******************************************************************************
  * Style overrides for distill blog posts.
  ******************************************************************************/
 d-byline {
