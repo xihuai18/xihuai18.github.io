@@ -1,70 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-29T16:35:07+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
-</subtitle><entry xml:lang="en"><title type="html">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html" rel="alternate" type="text/html" title="Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#introduction-why-should-we-care-about-off-policy" id="markdown-toc-introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</a></li>
-  <li><a href="#part-i-theoretical-foundations" id="markdown-toc-part-i-theoretical-foundations">Part I: Theoretical Foundations</a>    <ul>
-      <li><a href="#11-basic-setup" id="markdown-toc-11-basic-setup">1.1 Basic Setup</a></li>
-      <li><a href="#12-core-tool-policy-performance-difference-lemma" id="markdown-toc-12-core-tool-policy-performance-difference-lemma">1.2 Core Tool: Policy Performance Difference Lemma</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-ii-performance-improvement-bounds-for-single-policy-sampling" id="markdown-toc-part-ii-performance-improvement-bounds-for-single-policy-sampling">Part II: Performance Improvement Bounds for Single-Policy Sampling</a>    <ul>
-      <li><a href="#21-the-distribution-mismatch-problem" id="markdown-toc-21-the-distribution-mismatch-problem">2.1 The Distribution Mismatch Problem</a></li>
-      <li><a href="#22-controlling-state-distribution-differences" id="markdown-toc-22-controlling-state-distribution-differences">2.2 Controlling State Distribution Differences</a></li>
-      <li><a href="#23-policy-performance-improvement-lower-bound" id="markdown-toc-23-policy-performance-improvement-lower-bound">2.3 Policy Performance Improvement Lower Bound</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-iii-multi-policy-static-mixture-sampling" id="markdown-toc-part-iii-multi-policy-static-mixture-sampling">Part III: Multi-Policy Static Mixture Sampling</a>    <ul>
-      <li><a href="#31-practical-scenarios" id="markdown-toc-31-practical-scenarios">3.1 Practical Scenarios</a></li>
-      <li><a href="#32-core-idea-augmented-state-space" id="markdown-toc-32-core-idea-augmented-state-space">3.2 Core Idea: Augmented State Space</a></li>
-      <li><a href="#33-structural-simplification-for-trajectory-level-mixture" id="markdown-toc-33-structural-simplification-for-trajectory-level-mixture">3.3 Structural Simplification for Trajectory-Level Mixture</a></li>
-      <li><a href="#34-performance-improvement-lower-bound-for-trajectory-level-mixture" id="markdown-toc-34-performance-improvement-lower-bound-for-trajectory-level-mixture">3.4 Performance Improvement Lower Bound for Trajectory-Level Mixture</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-iv-dynamic-mixture-sampling-and-monotonic-improvement-conditions" id="markdown-toc-part-iv-dynamic-mixture-sampling-and-monotonic-improvement-conditions">Part IV: Dynamic Mixture Sampling and Monotonic Improvement Conditions</a>    <ul>
-      <li><a href="#41-the-core-challenge" id="markdown-toc-41-the-core-challenge">4.1 The Core Challenge</a></li>
-      <li><a href="#42-unified-modeling-framework" id="markdown-toc-42-unified-modeling-framework">4.2 Unified Modeling Framework</a></li>
-      <li><a href="#43-core-decomposition" id="markdown-toc-43-core-decomposition">4.3 Core Decomposition</a></li>
-      <li><a href="#44-monotonic-improvement-lower-bound" id="markdown-toc-44-monotonic-improvement-lower-bound">4.4 Monotonic Improvement Lower Bound</a></li>
-      <li><a href="#45-infeasibility-of-direct-constraints" id="markdown-toc-45-infeasibility-of-direct-constraints">4.5 Infeasibility of Direct Constraints</a></li>
-      <li><a href="#46-triangle-inequality-decomposition" id="markdown-toc-46-triangle-inequality-decomposition">4.6 Triangle Inequality Decomposition</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-v-theoretical-foundations-of-clipping-mechanisms" id="markdown-toc-part-v-theoretical-foundations-of-clipping-mechanisms">Part V: Theoretical Foundations of Clipping Mechanisms</a>    <ul>
-      <li><a href="#51-from-tv-distance-to-computable-quantities" id="markdown-toc-51-from-tv-distance-to-computable-quantities">5.1 From TV Distance to Computable Quantities</a></li>
-      <li><a href="#52-sample-representation-of-u_k" id="markdown-toc-52-sample-representation-of-u_k">5.2 Sample Representation of $U_k$</a></li>
-      <li><a href="#53-two-methods-for-constraining-u_k" id="markdown-toc-53-two-methods-for-constraining-u_k">5.3 Two Methods for Constraining $U_k$</a></li>
-      <li><a href="#54-complete-objective-functions-for-three-clipping-mechanisms" id="markdown-toc-54-complete-objective-functions-for-three-clipping-mechanisms">5.4 Complete Objective Functions for Three Clipping Mechanisms</a></li>
-      <li><a href="#55-comparison-of-three-methods" id="markdown-toc-55-comparison-of-three-methods">5.5 Comparison of Three Methods</a></li>
-      <li><a href="#56-controlling-sampling-staleness" id="markdown-toc-56-controlling-sampling-staleness">5.6 Controlling Sampling Staleness</a></li>
-      <li><a href="#57-operational-meaning-of-clipping" id="markdown-toc-57-operational-meaning-of-clipping">5.7 Operational Meaning of Clipping</a></li>
-      <li><a href="#58-section-summary" id="markdown-toc-58-section-summary">5.8 Section Summary</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-vi-comparison-of-trajectory-level-and-stepsegment-level-mixture" id="markdown-toc-part-vi-comparison-of-trajectory-level-and-stepsegment-level-mixture">Part VI: Comparison of Trajectory-Level and Step/Segment-Level Mixture</a>    <ul>
-      <li><a href="#61-core-differences-between-the-two-mechanisms" id="markdown-toc-61-core-differences-between-the-two-mechanisms">6.1 Core Differences Between the Two Mechanisms</a></li>
-      <li><a href="#62-differences-in-sampling-staleness-s_k" id="markdown-toc-62-differences-in-sampling-staleness-s_k">6.2 Differences in Sampling Staleness $S_k$</a></li>
-      <li><a href="#63-differences-in-surrogate-objective-estimation" id="markdown-toc-63-differences-in-surrogate-objective-estimation">6.3 Differences in Surrogate Objective Estimation</a></li>
-      <li><a href="#64-variance-amplification-risk" id="markdown-toc-64-variance-amplification-risk">6.4 Variance Amplification Risk</a></li>
-      <li><a href="#65-applicable-scenarios" id="markdown-toc-65-applicable-scenarios">6.5 Applicable Scenarios</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-vii-handling-training-inference-inconsistency" id="markdown-toc-part-vii-handling-training-inference-inconsistency">Part VII: Handling Training-Inference Inconsistency</a>    <ul>
-      <li><a href="#71-background" id="markdown-toc-71-background">7.1 Background</a></li>
-      <li><a href="#72-effective-staleness" id="markdown-toc-72-effective-staleness">7.2 Effective Staleness</a></li>
-      <li><a href="#73-actionable-control" id="markdown-toc-73-actionable-control">7.3 Actionable Control</a></li>
-    </ul>
-  </li>
-  <li><a href="#summary-practical-guidelines" id="markdown-toc-summary-practical-guidelines">Summary: Practical Guidelines</a>    <ul>
-      <li><a href="#core-theoretical-framework" id="markdown-toc-core-theoretical-framework">Core Theoretical Framework</a></li>
-      <li><a href="#separation-of-concerns-principle" id="markdown-toc-separation-of-concerns-principle">Separation of Concerns Principle</a></li>
-      <li><a href="#clipping-method-selection" id="markdown-toc-clipping-method-selection">Clipping Method Selection</a></li>
-      <li><a href="#handling-training-inference-inconsistency" id="markdown-toc-handling-training-inference-inconsistency">Handling Training-Inference Inconsistency</a></li>
-    </ul>
-  </li>
-  <li><a href="#appendix-quick-reference-for-key-symbols" id="markdown-toc-appendix-quick-reference-for-key-symbols">Appendix: Quick Reference for Key Symbols</a></li>
-  <li><a href="#references" id="markdown-toc-references">References</a></li>
-</ul>
-
-<p><a href="/reinforcement-learning/2025/12/17/offpolicy-zh.html">中文版</a></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-12-29T16:59:08+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+</subtitle><entry xml:lang="en"><title type="html">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html" rel="alternate" type="text/html" title="Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"><![CDATA[<p><a href="/reinforcement-learning/2025/12/17/offpolicy-zh.html">中文版</a></p>
 
 <h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
 
@@ -794,71 +729,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html}</span><span class="p">,</span>
 	<span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-12-17}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies.]]></summary></entry><entry xml:lang="zh"><title type="html">驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html" rel="alternate" type="text/html" title="驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#引言为什么我们需要关心异策略" id="markdown-toc-引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</a></li>
-  <li><a href="#第一部分理论基础" id="markdown-toc-第一部分理论基础">第一部分：理论基础</a>    <ul>
-      <li><a href="#11-基本设定" id="markdown-toc-11-基本设定">1.1 基本设定</a></li>
-      <li><a href="#12-核心工具策略性能差异引理" id="markdown-toc-12-核心工具策略性能差异引理">1.2 核心工具：策略性能差异引理</a></li>
-    </ul>
-  </li>
-  <li><a href="#第二部分单策略采样的性能改进下界" id="markdown-toc-第二部分单策略采样的性能改进下界">第二部分：单策略采样的性能改进下界</a>    <ul>
-      <li><a href="#21-分布不匹配问题" id="markdown-toc-21-分布不匹配问题">2.1 分布不匹配问题</a></li>
-      <li><a href="#22-状态分布差异的控制" id="markdown-toc-22-状态分布差异的控制">2.2 状态分布差异的控制</a></li>
-      <li><a href="#23-策略性能改进下界" id="markdown-toc-23-策略性能改进下界">2.3 策略性能改进下界</a></li>
-    </ul>
-  </li>
-  <li><a href="#第三部分多策略静态混合采样" id="markdown-toc-第三部分多策略静态混合采样">第三部分：多策略静态混合采样</a>    <ul>
-      <li><a href="#31-实际场景" id="markdown-toc-31-实际场景">3.1 实际场景</a></li>
-      <li><a href="#32-核心思想扩展状态空间" id="markdown-toc-32-核心思想扩展状态空间">3.2 核心思想：扩展状态空间</a></li>
-      <li><a href="#33-轨迹级混合的结构简化" id="markdown-toc-33-轨迹级混合的结构简化">3.3 轨迹级混合的结构简化</a></li>
-      <li><a href="#34-轨迹级混合的性能改进下界" id="markdown-toc-34-轨迹级混合的性能改进下界">3.4 轨迹级混合的性能改进下界</a></li>
-    </ul>
-  </li>
-  <li><a href="#第四部分动态混合采样与单调提升条件" id="markdown-toc-第四部分动态混合采样与单调提升条件">第四部分：动态混合采样与单调提升条件</a>    <ul>
-      <li><a href="#41-问题的核心挑战" id="markdown-toc-41-问题的核心挑战">4.1 问题的核心挑战</a></li>
-      <li><a href="#42-统一建模框架" id="markdown-toc-42-统一建模框架">4.2 统一建模框架</a></li>
-      <li><a href="#43-核心分解" id="markdown-toc-43-核心分解">4.3 核心分解</a></li>
-      <li><a href="#44-单调提升下界" id="markdown-toc-44-单调提升下界">4.4 单调提升下界</a></li>
-      <li><a href="#45-直接约束的不可行性" id="markdown-toc-45-直接约束的不可行性">4.5 直接约束的不可行性</a></li>
-      <li><a href="#46-三角不等式分解" id="markdown-toc-46-三角不等式分解">4.6 三角不等式分解</a></li>
-    </ul>
-  </li>
-  <li><a href="#第五部分裁剪机制的理论基础" id="markdown-toc-第五部分裁剪机制的理论基础">第五部分：裁剪机制的理论基础</a>    <ul>
-      <li><a href="#51-从tv距离到可计算量" id="markdown-toc-51-从tv距离到可计算量">5.1 从TV距离到可计算量</a></li>
-      <li><a href="#52-u_k-的样本表示" id="markdown-toc-52-u_k-的样本表示">5.2 $U_k$ 的样本表示</a></li>
-      <li><a href="#53-两种约束-u_k-的方法" id="markdown-toc-53-两种约束-u_k-的方法">5.3 两种约束 $U_k$ 的方法</a></li>
-      <li><a href="#55-三种方法的对比" id="markdown-toc-55-三种方法的对比">5.5 三种方法的对比</a></li>
-      <li><a href="#56-采样陈旧性的控制" id="markdown-toc-56-采样陈旧性的控制">5.6 采样陈旧性的控制</a></li>
-      <li><a href="#57-裁剪的操作含义" id="markdown-toc-57-裁剪的操作含义">5.7 裁剪的操作含义</a></li>
-      <li><a href="#58-本节小结" id="markdown-toc-58-本节小结">5.8 本节小结</a></li>
-    </ul>
-  </li>
-  <li><a href="#第六部分轨迹级与步段级混合的比较" id="markdown-toc-第六部分轨迹级与步段级混合的比较">第六部分：轨迹级与步/段级混合的比较</a>    <ul>
-      <li><a href="#61-两类机制的核心差异" id="markdown-toc-61-两类机制的核心差异">6.1 两类机制的核心差异</a></li>
-      <li><a href="#62-采样陈旧性-s_k-的差异" id="markdown-toc-62-采样陈旧性-s_k-的差异">6.2 采样陈旧性 $S_k$ 的差异</a></li>
-      <li><a href="#63-代理目标估计的差异" id="markdown-toc-63-代理目标估计的差异">6.3 代理目标估计的差异</a></li>
-      <li><a href="#64-方差放大风险" id="markdown-toc-64-方差放大风险">6.4 方差放大风险</a></li>
-      <li><a href="#65-适用场景" id="markdown-toc-65-适用场景">6.5 适用场景</a></li>
-    </ul>
-  </li>
-  <li><a href="#第七部分训推不一致的处理" id="markdown-toc-第七部分训推不一致的处理">第七部分：训推不一致的处理</a>    <ul>
-      <li><a href="#71-问题背景" id="markdown-toc-71-问题背景">7.1 问题背景</a></li>
-      <li><a href="#72-有效陈旧性" id="markdown-toc-72-有效陈旧性">7.2 有效陈旧性</a></li>
-      <li><a href="#73-可操作控制" id="markdown-toc-73-可操作控制">7.3 可操作控制</a></li>
-    </ul>
-  </li>
-  <li><a href="#总结实践指南" id="markdown-toc-总结实践指南">总结：实践指南</a>    <ul>
-      <li><a href="#核心理论框架" id="markdown-toc-核心理论框架">核心理论框架</a></li>
-      <li><a href="#职责分离原则" id="markdown-toc-职责分离原则">职责分离原则</a></li>
-      <li><a href="#裁剪方法选择" id="markdown-toc-裁剪方法选择">裁剪方法选择</a></li>
-      <li><a href="#训推不一致处理" id="markdown-toc-训推不一致处理">训推不一致处理</a></li>
-    </ul>
-  </li>
-  <li><a href="#附录关键符号速查表" id="markdown-toc-附录关键符号速查表">附录：关键符号速查表</a></li>
-  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
-</ul>
-
-<p><a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version</a></p>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies.]]></summary></entry><entry xml:lang="zh"><title type="html">驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html" rel="alternate" type="text/html" title="驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html"><![CDATA[<p><a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version</a></p>
 
 <h2 id="引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</h2>
 
@@ -1584,64 +1455,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html}</span><span class="p">,</span>
 	<span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-12-17}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。]]></summary></entry><entry xml:lang="en"><title type="html">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html" rel="alternate" type="text/html" title="Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#introduction-what-kl-does-in-rl" id="markdown-toc-introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</a>    <ul>
-      <li><a href="#forward-vs-reverse-kl" id="markdown-toc-forward-vs-reverse-kl">Forward vs. reverse KL</a></li>
-    </ul>
-  </li>
-  <li><a href="#three-estimators-definitions-and-design" id="markdown-toc-three-estimators-definitions-and-design">Three estimators: definitions and design</a>    <ul>
-      <li><a href="#k_1-the-naive-estimator" id="markdown-toc-k_1-the-naive-estimator">$k_1$: the naive estimator</a></li>
-      <li><a href="#k_2-an-f-divergence-lower-variance" id="markdown-toc-k_2-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</a></li>
-      <li><a href="#k_3-control-variate-optimal-shape" id="markdown-toc-k_3-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</a></li>
-      <li><a href="#quick-comparison" id="markdown-toc-quick-comparison">Quick comparison</a></li>
-    </ul>
-  </li>
-  <li><a href="#core-analysis" id="markdown-toc-core-analysis">Core analysis</a>    <ul>
-      <li><a href="#bias-and-variance-for-kl-values" id="markdown-toc-bias-and-variance-for-kl-values">Bias and variance for KL values</a></li>
-      <li><a href="#gradient-estimation-the-crucial-distinction" id="markdown-toc-gradient-estimation-the-crucial-distinction">Gradient estimation: the crucial distinction</a>        <ul>
-          <li><a href="#true-gradients-for-reference" id="markdown-toc-true-gradients-for-reference">True gradients for reference</a></li>
-          <li><a href="#two-differentiation-orders" id="markdown-toc-two-differentiation-orders">Two differentiation orders</a></li>
-          <li><a href="#gradients-of-the-three-estimators-on-policy" id="markdown-toc-gradients-of-the-three-estimators-on-policy">Gradients of the three estimators (on-policy)</a></li>
-          <li><a href="#expectation-then-grad-vs-grad-then-expectation" id="markdown-toc-expectation-then-grad-vs-grad-then-expectation">Expectation-then-grad vs. grad-then-expectation</a></li>
-        </ul>
-      </li>
-      <li><a href="#off-policy-gradients-with-importance-sampling" id="markdown-toc-off-policy-gradients-with-importance-sampling">Off-policy gradients with importance sampling</a>        <ul>
-          <li><a href="#setup" id="markdown-toc-setup">Setup</a></li>
-          <li><a href="#crucial-observation-the-two-orders-coincide" id="markdown-toc-crucial-observation-the-two-orders-coincide">Crucial observation: the two orders coincide</a></li>
-          <li><a href="#value-unbiasedness-remains" id="markdown-toc-value-unbiasedness-remains">Value unbiasedness remains</a></li>
-          <li><a href="#gradients-with-weights" id="markdown-toc-gradients-with-weights">Gradients with weights</a></li>
-          <li><a href="#variance-of-the-three-unbiased-off-policy-gradient-estimators" id="markdown-toc-variance-of-the-three-unbiased-off-policy-gradient-estimators">Variance of the three unbiased off-policy gradient estimators</a></li>
-        </ul>
-      </li>
-      <li><a href="#gradient-cheat-sheet" id="markdown-toc-gradient-cheat-sheet">Gradient cheat sheet</a></li>
-    </ul>
-  </li>
-  <li><a href="#two-ways-to-use-kl-as-reward-vs-as-loss" id="markdown-toc-two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</a>    <ul>
-      <li><a href="#definitions" id="markdown-toc-definitions">Definitions</a></li>
-      <li><a href="#key-difference-1-optimization-target" id="markdown-toc-key-difference-1-optimization-target">Key Difference 1: Optimization Target</a></li>
-      <li><a href="#key-difference-2-actor-gradient" id="markdown-toc-key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</a></li>
-      <li><a href="#key-difference-3-critic-learning-target" id="markdown-toc-key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</a></li>
-      <li><a href="#key-difference-4-credit-assignment" id="markdown-toc-key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</a></li>
-      <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
-    </ul>
-  </li>
-  <li><a href="#rl-practice-guide" id="markdown-toc-rl-practice-guide">RL practice guide</a>    <ul>
-      <li><a href="#kl-as-reward-penalty-no-gradient-needed" id="markdown-toc-kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</a></li>
-      <li><a href="#kl-as-loss-needs-gradients" id="markdown-toc-kl-as-loss-needs-gradients">KL as loss (needs gradients)</a>        <ul>
-          <li><a href="#on-policy-optimize-reverse-kl-most-common" id="markdown-toc-on-policy-optimize-reverse-kl-most-common">On-policy: optimize reverse KL (most common)</a></li>
-          <li><a href="#on-policy-optimize-forward-kl-coverage" id="markdown-toc-on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</a></li>
-          <li><a href="#off-policy-optimize-reverse-kl" id="markdown-toc-off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li><a href="#grab-and-use-crib-sheet" id="markdown-toc-grab-and-use-crib-sheet">“Grab-and-use” crib sheet</a></li>
-  <li><a href="#common-implementation-traps" id="markdown-toc-common-implementation-traps">Common implementation traps</a></li>
-  <li><a href="#summary-1" id="markdown-toc-summary-1">Summary</a></li>
-  <li><a href="#references" id="markdown-toc-references">References</a></li>
-</ul>
-
-<p><img src="/assets/img/kl-estimators/kl-estimator-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。]]></summary></entry><entry xml:lang="en"><title type="html">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html" rel="alternate" type="text/html" title="Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html"><![CDATA[<p><img src="/assets/img/kl-estimators/kl-estimator-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
@@ -2453,66 +2267,7 @@ g_3 &amp;= w s_\theta k_1.
 	<span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
 	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate.]]></summary></entry><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
-      <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
-    </ul>
-  </li>
-  <li><a href="#三种估计器的定义与设计原理" id="markdown-toc-三种估计器的定义与设计原理">三种估计器的定义与设计原理</a>    <ul>
-      <li><a href="#k_1最朴素的估计器" id="markdown-toc-k_1最朴素的估计器">$k_1$：最朴素的估计器</a></li>
-      <li><a href="#k_2基于-f-散度的低方差估计器" id="markdown-toc-k_2基于-f-散度的低方差估计器">$k_2$：基于 f-散度的低方差估计器</a></li>
-      <li><a href="#k_3控制变量法构造的最优估计器" id="markdown-toc-k_3控制变量法构造的最优估计器">$k_3$：控制变量法构造的「最优」估计器</a></li>
-      <li><a href="#三者对比总结" id="markdown-toc-三者对比总结">三者对比总结</a></li>
-    </ul>
-  </li>
-  <li><a href="#核心分析" id="markdown-toc-核心分析">核心分析</a>    <ul>
-      <li><a href="#估计-kl-数值时的偏差与方差" id="markdown-toc-估计-kl-数值时的偏差与方差">估计 KL 数值时的偏差与方差</a></li>
-      <li><a href="#估计-kl-梯度时的关键区分" id="markdown-toc-估计-kl-梯度时的关键区分">估计 KL 梯度时的关键区分</a>        <ul>
-          <li><a href="#正向与反向-kl-真梯度的推导" id="markdown-toc-正向与反向-kl-真梯度的推导">正向与反向 KL 真梯度的推导</a></li>
-          <li><a href="#两种求导顺序" id="markdown-toc-两种求导顺序">两种求导顺序</a></li>
-          <li><a href="#三种估计器的梯度推导" id="markdown-toc-三种估计器的梯度推导">三种估计器的梯度推导</a></li>
-          <li><a href="#先期望后梯度vs先梯度后期望" id="markdown-toc-先期望后梯度vs先梯度后期望">「先期望后梯度」vs「先梯度后期望」</a></li>
-        </ul>
-      </li>
-      <li><a href="#扩展从行为策略-mu-采样时的-kl-梯度估计" id="markdown-toc-扩展从行为策略-mu-采样时的-kl-梯度估计">扩展：从行为策略 $\mu$ 采样时的 KL 梯度估计</a>        <ul>
-          <li><a href="#设置与记号" id="markdown-toc-设置与记号">设置与记号</a></li>
-          <li><a href="#关键观察两种求导顺序的等价性" id="markdown-toc-关键观察两种求导顺序的等价性">关键观察：两种求导顺序的等价性</a></li>
-          <li><a href="#数值层面无偏性仍然保持" id="markdown-toc-数值层面无偏性仍然保持">数值层面：无偏性仍然保持</a></li>
-          <li><a href="#梯度推导" id="markdown-toc-梯度推导">梯度推导</a></li>
-          <li><a href="#哪些给出无偏的反向-kl-梯度" id="markdown-toc-哪些给出无偏的反向-kl-梯度">哪些给出无偏的反向 KL 梯度？</a></li>
-          <li><a href="#三个无偏梯度估计器的方差对比" id="markdown-toc-三个无偏梯度估计器的方差对比">三个无偏梯度估计器的方差对比</a></li>
-          <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
-        </ul>
-      </li>
-      <li><a href="#梯度估计总览" id="markdown-toc-梯度估计总览">梯度估计总览</a></li>
-    </ul>
-  </li>
-  <li><a href="#kl-的两种使用方式作为-reward-vs-作为-loss" id="markdown-toc-kl-的两种使用方式作为-reward-vs-作为-loss">KL 的两种使用方式：作为 Reward vs 作为 Loss</a>    <ul>
-      <li><a href="#两种用法的定义" id="markdown-toc-两种用法的定义">两种用法的定义</a></li>
-      <li><a href="#核心差异一更新目标" id="markdown-toc-核心差异一更新目标">核心差异一：更新目标</a></li>
-      <li><a href="#核心差异二actor-梯度" id="markdown-toc-核心差异二actor-梯度">核心差异二：Actor 梯度</a></li>
-      <li><a href="#核心差异三critic-学习目标" id="markdown-toc-核心差异三critic-学习目标">核心差异三：Critic 学习目标</a></li>
-      <li><a href="#核心差异四credit-assignment" id="markdown-toc-核心差异四credit-assignment">核心差异四：Credit Assignment</a></li>
-      <li><a href="#小结-1" id="markdown-toc-小结-1">小结</a></li>
-    </ul>
-  </li>
-  <li><a href="#rl-实践指南" id="markdown-toc-rl-实践指南">RL 实践指南</a>    <ul>
-      <li><a href="#kl-作为-reward-惩罚不需要梯度" id="markdown-toc-kl-作为-reward-惩罚不需要梯度">KL 作为 Reward 惩罚（不需要梯度）</a></li>
-      <li><a href="#kl-作为-loss需要梯度回传" id="markdown-toc-kl-作为-loss需要梯度回传">KL 作为 Loss（需要梯度回传）</a>        <ul>
-          <li><a href="#on-policy优化反向-kl最常见场景" id="markdown-toc-on-policy优化反向-kl最常见场景">On-policy：优化反向 KL（最常见场景）</a></li>
-          <li><a href="#on-policy优化正向-kl覆盖型场景" id="markdown-toc-on-policy优化正向-kl覆盖型场景">On-policy：优化正向 KL（覆盖型场景）</a></li>
-          <li><a href="#off-policy优化反向-kl" id="markdown-toc-off-policy优化反向-kl">Off-policy：优化反向 KL</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li><a href="#一份拿来就用的对照表" id="markdown-toc-一份拿来就用的对照表">一份「拿来就用」的对照表</a></li>
-  <li><a href="#常见实现陷阱" id="markdown-toc-常见实现陷阱">常见实现陷阱</a></li>
-  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
-  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
-</ul>
-
-<p><img src="/assets/img/kl-estimators/kl-estimator-zh.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate.]]></summary></entry><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html"><![CDATA[<p><img src="/assets/img/kl-estimators/kl-estimator-zh.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
@@ -3576,34 +3331,7 @@ g_3(x)
   <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
   <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。]]></summary></entry><entry xml:lang="en"><title type="html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" rel="alternate" type="text/html" title="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#traininginference-mismatch-and-asynchronous-frameworks" id="markdown-toc-traininginference-mismatch-and-asynchronous-frameworks">Training–Inference Mismatch and Asynchronous Frameworks</a></li>
-  <li><a href="#related-work" id="markdown-toc-related-work">Related Work</a></li>
-  <li><a href="#a-minimally-unified-view-from-a-three-policy-trpo-perspective" id="markdown-toc-a-minimally-unified-view-from-a-three-policy-trpo-perspective">A Minimally Unified View from a Three-Policy TRPO Perspective</a>    <ul>
-      <li><a href="#three-policies" id="markdown-toc-three-policies">Three Policies</a></li>
-      <li><a href="#two-policy-trpo" id="markdown-toc-two-policy-trpo">Two-Policy TRPO</a></li>
-      <li><a href="#three-policy-trpo" id="markdown-toc-three-policy-trpo">Three-Policy TRPO</a></li>
-      <li><a href="#how-to-control-these-two-deviations-in-practice" id="markdown-toc-how-to-control-these-two-deviations-in-practice">How to Control These Two Deviations in Practice?</a></li>
-    </ul>
-  </li>
-  <li><a href="#importance-sampling-and-masking-four-implementations-of-constraint-2" id="markdown-toc-importance-sampling-and-masking-four-implementations-of-constraint-2">Importance Sampling and Masking: Four Implementations of Constraint 2</a>    <ul>
-      <li><a href="#1-tis-token-level-truncated-importance-sampling" id="markdown-toc-1-tis-token-level-truncated-importance-sampling">1. TIS: Token-Level Truncated Importance Sampling</a></li>
-      <li><a href="#2-icepop-token-level-two-sided-masking-in-moe" id="markdown-toc-2-icepop-token-level-two-sided-masking-in-moe">2. IcePop: Token-Level Two-Sided Masking in MoE</a></li>
-      <li><a href="#3-sequence-level-mis-masked-importance-sampling-over-entire-sequences" id="markdown-toc-3-sequence-level-mis-masked-importance-sampling-over-entire-sequences">3. Sequence-Level MIS: Masked Importance Sampling Over Entire Sequences</a></li>
-      <li><a href="#4-worst-token-reject-sampling-rejecting-entire-sequences-based-on-the-worst-token" id="markdown-toc-4-worst-token-reject-sampling-rejecting-entire-sequences-based-on-the-worst-token">4. Worst Token Reject Sampling: Rejecting Entire Sequences Based on the Worst Token</a></li>
-    </ul>
-  </li>
-  <li><a href="#moe-routing-replay-what-does-it-actually-do-in-three-policy-trpo" id="markdown-toc-moe-routing-replay-what-does-it-actually-do-in-three-policy-trpo">MoE Routing Replay: What Does It Actually Do in Three-Policy TRPO?</a>    <ul>
-      <li><a href="#surrogate-objective-in-moe-separating-routing-and-token-generation" id="markdown-toc-surrogate-objective-in-moe-separating-routing-and-token-generation">Surrogate Objective in MoE: Separating Routing and Token Generation</a></li>
-      <li><a href="#1-replaying-behavior-policy-routing-behavior-router-replay--r3-style" id="markdown-toc-1-replaying-behavior-policy-routing-behavior-router-replay--r3-style">(1) Replaying Behavior-Policy Routing (Behavior-Router Replay / R3-Style)</a></li>
-      <li><a href="#2-replaying-reference-policy-routing-reference-router-replay" id="markdown-toc-2-replaying-reference-policy-routing-reference-router-replay">(2) Replaying Reference-Policy Routing (Reference-Router Replay)</a></li>
-      <li><a href="#routing-replay-as-a-change-of-surrogate-objective" id="markdown-toc-routing-replay-as-a-change-of-surrogate-objective">Routing Replay as a Change of Surrogate Objective</a></li>
-    </ul>
-  </li>
-  <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a></li>
-</ul>
-
-<p><a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。]]></summary></entry><entry xml:lang="en"><title type="html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html" rel="alternate" type="text/html" title="From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html"><![CDATA[<p><a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <p><img src="/assets/img/three-policy/three-policy-mini-class-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
@@ -4357,34 +4085,7 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html}</span><span class="p">,</span>
   <span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-11-23}</span>
 <span class="p">}</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.]]></summary></entry><entry xml:lang="zh"><title type="html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html" rel="alternate" type="text/html" title="从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html"><![CDATA[<ul id="markdown-toc">
-  <li><a href="#训推不一致和异步框架" id="markdown-toc-训推不一致和异步框架">训推不一致和异步框架</a></li>
-  <li><a href="#相关工作" id="markdown-toc-相关工作">相关工作</a></li>
-  <li><a href="#三策略-trpo-视角下的最小统一理解" id="markdown-toc-三策略-trpo-视角下的最小统一理解">三策略 TRPO 视角下的最小统一理解</a>    <ul>
-      <li><a href="#三个策略" id="markdown-toc-三个策略">三个策略</a></li>
-      <li><a href="#两策略-trpo" id="markdown-toc-两策略-trpo">两策略 TRPO</a></li>
-      <li><a href="#三策略-trpo" id="markdown-toc-三策略-trpo">三策略 TRPO</a></li>
-      <li><a href="#这两个差异各自怎么约束" id="markdown-toc-这两个差异各自怎么约束">这两个差异各自怎么约束？</a></li>
-    </ul>
-  </li>
-  <li><a href="#重要性采样与掩码四种约束-2-实现" id="markdown-toc-重要性采样与掩码四种约束-2-实现">重要性采样与掩码：四种约束 2 实现</a>    <ul>
-      <li><a href="#1-tistoken-level-截断-is" id="markdown-toc-1-tistoken-level-截断-is">1. TIS：token-level 截断 IS</a></li>
-      <li><a href="#2-icepopmoe-场景下的-token-level-双侧-mask" id="markdown-toc-2-icepopmoe-场景下的-token-level-双侧-mask">2. IcePop：MoE 场景下的 token-level 双侧 Mask</a></li>
-      <li><a href="#3-sequence-level-mis按整条序列-mask-的重要性采样" id="markdown-toc-3-sequence-level-mis按整条序列-mask-的重要性采样">3. sequence-level MIS：按整条序列 Mask 的重要性采样</a></li>
-      <li><a href="#4-worst-token-reject-sampling按最差-token-拒绝整条序列" id="markdown-toc-4-worst-token-reject-sampling按最差-token-拒绝整条序列">4. Worst Token Reject Sampling：按最差 token 拒绝整条序列</a></li>
-    </ul>
-  </li>
-  <li><a href="#moe-路由回放它在三策略-trpo-中到底做了什么" id="markdown-toc-moe-路由回放它在三策略-trpo-中到底做了什么">MoE 路由回放：它在三策略 TRPO 中到底做了什么？</a>    <ul>
-      <li><a href="#moe-下的-surrogate-objective把路由和token-生成拆开" id="markdown-toc-moe-下的-surrogate-objective把路由和token-生成拆开">MoE 下的 surrogate objective：把“路由”和“token 生成”拆开</a></li>
-      <li><a href="#1回放行为策略的路由behavior-router-replay--r3-类" id="markdown-toc-1回放行为策略的路由behavior-router-replay--r3-类">1）回放行为策略的路由（behavior-router replay / R3 类）</a></li>
-      <li><a href="#2回放参考策略的路由reference-router-replay" id="markdown-toc-2回放参考策略的路由reference-router-replay">2）回放参考策略的路由（reference-router replay）</a></li>
-      <li><a href="#路由回放只是在改写-surrogate-objective" id="markdown-toc-路由回放只是在改写-surrogate-objective">路由回放只是在改写 surrogate objective</a></li>
-    </ul>
-  </li>
-  <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
-</ul>
-
-<p><a href="/reinforcement-learning/2025/11/15/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.]]></summary></entry><entry xml:lang="zh"><title type="html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html" rel="alternate" type="text/html" title="从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" /><published>2025-11-15T00:00:00+00:00</published><updated>2025-11-15T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html"><![CDATA[<p><a href="/reinforcement-learning/2025/11/15/three-policy-en.html">English Version</a> | <a href="https://zhuanlan.zhihu.com/p/1973206684907365344">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <p><img src="/assets/img/three-policy/three-policy-mini-class-zh.jpg" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 

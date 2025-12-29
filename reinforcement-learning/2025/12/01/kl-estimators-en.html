@@ -147,80 +147,25 @@
     <div class="container mt-5">
       <!-- _layouts/post.html -->
 
-<div class="post">
+<div class="post toc-layout">
+  <div class="row">
+    <div class="col-lg toc-content">
 
-  <header class="post-header">
-    <h1 class="post-title">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</h1>
-    <p class="post-meta">December 1, 2025</p>
-    <p class="post-tags">
-  <a href="/blog/2025"> 📅 2025 </a>
-      &nbsp; &middot; &nbsp;
-        <a href="/blog/category/reinforcement-learning">
-          🏷️ reinforcement-learning</a> &nbsp;
-          
+      <header class="post-header">
+        <h1 class="post-title">Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation</h1>
+        <p class="post-meta">December 1, 2025</p>
+        <p class="post-tags">
+      <a href="/blog/2025"> 📅 2025 </a>
+          &nbsp; &middot; &nbsp;
+            <a href="/blog/category/reinforcement-learning">
+              🏷️ reinforcement-learning</a> &nbsp;
+              
 
-    </p>
-  </header>
+        </p>
+      </header>
 
-  <article class="post-content">
-    <ul id="markdown-toc">
-  <li><a href="#introduction-what-kl-does-in-rl" id="markdown-toc-introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</a>    <ul>
-      <li><a href="#forward-vs-reverse-kl" id="markdown-toc-forward-vs-reverse-kl">Forward vs. reverse KL</a></li>
-    </ul>
-  </li>
-  <li><a href="#three-estimators-definitions-and-design" id="markdown-toc-three-estimators-definitions-and-design">Three estimators: definitions and design</a>    <ul>
-      <li><a href="#k_1-the-naive-estimator" id="markdown-toc-k_1-the-naive-estimator">$k_1$: the naive estimator</a></li>
-      <li><a href="#k_2-an-f-divergence-lower-variance" id="markdown-toc-k_2-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</a></li>
-      <li><a href="#k_3-control-variate-optimal-shape" id="markdown-toc-k_3-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</a></li>
-      <li><a href="#quick-comparison" id="markdown-toc-quick-comparison">Quick comparison</a></li>
-    </ul>
-  </li>
-  <li><a href="#core-analysis" id="markdown-toc-core-analysis">Core analysis</a>    <ul>
-      <li><a href="#bias-and-variance-for-kl-values" id="markdown-toc-bias-and-variance-for-kl-values">Bias and variance for KL values</a></li>
-      <li><a href="#gradient-estimation-the-crucial-distinction" id="markdown-toc-gradient-estimation-the-crucial-distinction">Gradient estimation: the crucial distinction</a>        <ul>
-          <li><a href="#true-gradients-for-reference" id="markdown-toc-true-gradients-for-reference">True gradients for reference</a></li>
-          <li><a href="#two-differentiation-orders" id="markdown-toc-two-differentiation-orders">Two differentiation orders</a></li>
-          <li><a href="#gradients-of-the-three-estimators-on-policy" id="markdown-toc-gradients-of-the-three-estimators-on-policy">Gradients of the three estimators (on-policy)</a></li>
-          <li><a href="#expectation-then-grad-vs-grad-then-expectation" id="markdown-toc-expectation-then-grad-vs-grad-then-expectation">Expectation-then-grad vs. grad-then-expectation</a></li>
-        </ul>
-      </li>
-      <li><a href="#off-policy-gradients-with-importance-sampling" id="markdown-toc-off-policy-gradients-with-importance-sampling">Off-policy gradients with importance sampling</a>        <ul>
-          <li><a href="#setup" id="markdown-toc-setup">Setup</a></li>
-          <li><a href="#crucial-observation-the-two-orders-coincide" id="markdown-toc-crucial-observation-the-two-orders-coincide">Crucial observation: the two orders coincide</a></li>
-          <li><a href="#value-unbiasedness-remains" id="markdown-toc-value-unbiasedness-remains">Value unbiasedness remains</a></li>
-          <li><a href="#gradients-with-weights" id="markdown-toc-gradients-with-weights">Gradients with weights</a></li>
-          <li><a href="#variance-of-the-three-unbiased-off-policy-gradient-estimators" id="markdown-toc-variance-of-the-three-unbiased-off-policy-gradient-estimators">Variance of the three unbiased off-policy gradient estimators</a></li>
-        </ul>
-      </li>
-      <li><a href="#gradient-cheat-sheet" id="markdown-toc-gradient-cheat-sheet">Gradient cheat sheet</a></li>
-    </ul>
-  </li>
-  <li><a href="#two-ways-to-use-kl-as-reward-vs-as-loss" id="markdown-toc-two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</a>    <ul>
-      <li><a href="#definitions" id="markdown-toc-definitions">Definitions</a></li>
-      <li><a href="#key-difference-1-optimization-target" id="markdown-toc-key-difference-1-optimization-target">Key Difference 1: Optimization Target</a></li>
-      <li><a href="#key-difference-2-actor-gradient" id="markdown-toc-key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</a></li>
-      <li><a href="#key-difference-3-critic-learning-target" id="markdown-toc-key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</a></li>
-      <li><a href="#key-difference-4-credit-assignment" id="markdown-toc-key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</a></li>
-      <li><a href="#summary" id="markdown-toc-summary">Summary</a></li>
-    </ul>
-  </li>
-  <li><a href="#rl-practice-guide" id="markdown-toc-rl-practice-guide">RL practice guide</a>    <ul>
-      <li><a href="#kl-as-reward-penalty-no-gradient-needed" id="markdown-toc-kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</a></li>
-      <li><a href="#kl-as-loss-needs-gradients" id="markdown-toc-kl-as-loss-needs-gradients">KL as loss (needs gradients)</a>        <ul>
-          <li><a href="#on-policy-optimize-reverse-kl-most-common" id="markdown-toc-on-policy-optimize-reverse-kl-most-common">On-policy: optimize reverse KL (most common)</a></li>
-          <li><a href="#on-policy-optimize-forward-kl-coverage" id="markdown-toc-on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</a></li>
-          <li><a href="#off-policy-optimize-reverse-kl" id="markdown-toc-off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li><a href="#grab-and-use-crib-sheet" id="markdown-toc-grab-and-use-crib-sheet">“Grab-and-use” crib sheet</a></li>
-  <li><a href="#common-implementation-traps" id="markdown-toc-common-implementation-traps">Common implementation traps</a></li>
-  <li><a href="#summary-1" id="markdown-toc-summary-1">Summary</a></li>
-  <li><a href="#references" id="markdown-toc-references">References</a></li>
-</ul>
-
-<p><img src="/assets/img/kl-estimators/kl-estimator-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+      <article class="post-content">
+        <p><img src="/assets/img/kl-estimators/kl-estimator-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
@@ -1034,7 +979,25 @@ g_3 &amp;= w s_\theta k_1.
 <span class="p">}</span>
 </code></pre></div></div>
 
-  </article></div>
+      </article></div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+      <aside class="toc-sidebar">
+  <div class="toc-sidebar__title">Contents</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content=".toc-content"
+    data-toc-headings="h2,h3"
+    data-toc-min-items="2"
+    aria-label="Contents"
+  ></nav>
+</aside>
+
+
+    </div>
+  </div>
+</div>
 
     </div>
 
@@ -1061,6 +1024,7 @@ g_3 &amp;= w s_\theta k_1.
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

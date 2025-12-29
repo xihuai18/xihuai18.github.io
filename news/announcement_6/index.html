@@ -151,25 +151,45 @@
     <div class="container mt-5">
       <!-- _layouts/post.html -->
 
-<div class="post">
+<div class="post toc-layout">
+  <div class="row">
+    <div class="col-lg toc-content">
 
-  <header class="post-header">
-    <h1 class="post-title">KL Estimators Blog</h1>
-    <p class="post-meta">December 2, 2025</p>
-    <p class="post-tags">
-  <a href="/blog/2025"> 📅 2025 </a>
+      <header class="post-header">
+        <h1 class="post-title">KL Estimators Blog</h1>
+        <p class="post-meta">December 2, 2025</p>
+        <p class="post-tags">
+      <a href="/blog/2025"> 📅 2025 </a>
 
-    </p>
-  </header>
+        </p>
+      </header>
 
-  <article class="post-content">
-    <p>A blog post sharing my perspective on KL estimators in reinforcement learning.</p>
+      <article class="post-content">
+        <p>A blog post sharing my perspective on KL estimators in reinforcement learning.</p>
 
 <ul>
   <li><a href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">English Version</a> | <a href="reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://img.icons8.com/m_outlined/20/zhihu.jpg" alt="Zhihu" /></a></li>
 </ul>
 
-  </article></div>
+      </article></div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+      <aside class="toc-sidebar">
+  <div class="toc-sidebar__title">Contents</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content=".toc-content"
+    data-toc-headings="h2,h3"
+    data-toc-min-items="2"
+    aria-label="Contents"
+  ></nav>
+</aside>
+
+
+    </div>
+  </div>
+</div>
 
     </div>
 
@@ -196,6 +216,7 @@
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

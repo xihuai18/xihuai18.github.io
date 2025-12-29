@@ -150,21 +150,22 @@
     <!-- Content -->
     <div class="container mt-5">
       <!-- _layouts/cv.html -->
-        <div class="post">
+        <div class="post toc-layout">
+          <div class="row">
+            <div class="col-lg toc-content">
+              <header class="post-header">
+                <h1 class="post-title">cv </h1>
+                <p class="post-description"></p >
+              </header>
 
-          <header class="post-header">
-            <h1 class="post-title">cv </h1>
-            <p class="post-description"></p >
-          </header>
-
-          <article>
-            <div class="cv">
-              
-                <div class="card mt-3 p-3">
-                  <h3 class="card-title font-weight-medium">General Information</h3>
-                  <div>
+              <article>
+                <div class="cv">
                   
-                    <table class="table table-sm table-borderless table-responsive">
+                    <div class="card mt-3 p-3">
+                      <h3 class="card-title font-weight-medium">General Information</h3>
+                      <div>
+                      
+                        <table class="table table-sm table-borderless table-responsive">
     
       <tr>
         <td class="p-1 pr-2 font-weight-bold"><b>Full Name</b></td>
@@ -183,15 +184,15 @@
     
 </table>
 
+                      
+                      </div>
+                    </div>
                   
-                  </div>
-                </div>
-              
-                <div class="card mt-3 p-3">
-                  <h3 class="card-title font-weight-medium">Education</h3>
-                  <div>
-                  
-                   <ul class="card-text font-weight-light list-group list-group-flush">
+                    <div class="card mt-3 p-3">
+                      <h3 class="card-title font-weight-medium">Education</h3>
+                      <div>
+                      
+                       <ul class="card-text font-weight-light list-group list-group-flush">
     
       <li class="list-group-item">
         <div class="row">
@@ -239,15 +240,15 @@
     
     </ul>
 
+                      
+                      </div>
+                    </div>
                   
-                  </div>
-                </div>
-              
-                <div class="card mt-3 p-3">
-                  <h3 class="card-title font-weight-medium">Experience</h3>
-                  <div>
-                  
-                   <ul class="card-text font-weight-light list-group list-group-flush">
+                    <div class="card mt-3 p-3">
+                      <h3 class="card-title font-weight-medium">Experience</h3>
+                      <div>
+                      
+                       <ul class="card-text font-weight-light list-group list-group-flush">
     
       <li class="list-group-item">
         <div class="row">
@@ -317,15 +318,15 @@
     
     </ul>
 
+                      
+                      </div>
+                    </div>
                   
-                  </div>
-                </div>
-              
-                <div class="card mt-3 p-3">
-                  <h3 class="card-title font-weight-medium">Honors and Awards</h3>
-                  <div>
-                  
-                   <ul class="card-text font-weight-light list-group list-group-flush">
+                    <div class="card mt-3 p-3">
+                      <h3 class="card-title font-weight-medium">Honors and Awards</h3>
+                      <div>
+                      
+                       <ul class="card-text font-weight-light list-group list-group-flush">
     
       <li class="list-group-item">
         <div class="row">
@@ -413,29 +414,29 @@
     
     </ul>
 
+                      
+                      </div>
+                    </div>
                   
-                  </div>
-                </div>
-              
-                <div class="card mt-3 p-3">
-                  <h3 class="card-title font-weight-medium">Other Interests</h3>
-                  <div>
-                  
-                    <ul class="card-text font-weight-light list-group list-group-flush">
+                    <div class="card mt-3 p-3">
+                      <h3 class="card-title font-weight-medium">Other Interests</h3>
+                      <div>
+                      
+                        <ul class="card-text font-weight-light list-group list-group-flush">
     
       <li class="list-group-item"><u>Hobbies:</u> BodyBuilding, etc.</li>
     
 </ul>
 
+                      
+                      </div>
+                    </div>
                   
-                  </div>
-                </div>
-              
-                <div class="card mt-3 p-3">
-                  <h3 class="card-title font-weight-medium">PDF Version</h3>
-                  <div>
-                  
-                    <ul class="card-text font-weight-light list-group list-group-flush">
+                    <div class="card mt-3 p-3">
+                      <h3 class="card-title font-weight-medium">PDF Version</h3>
+                      <div>
+                      
+                        <ul class="card-text font-weight-light list-group list-group-flush">
     
       <li class="list-group-item">
       <h5 class="font-italic"></h5>
@@ -450,13 +451,30 @@
     
 </ul>
 
+                      
+                      </div>
+                    </div>
                   
                   </div>
-                </div>
-              
-              </div>
-          </article>
+              </article>
+            </div>
 
+            <div class="col-lg-3 d-none d-lg-block">
+              <aside class="toc-sidebar">
+  <div class="toc-sidebar__title">Contents</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content=".toc-content"
+    data-toc-headings="h3"
+    data-toc-min-items="2"
+    aria-label="Contents"
+  ></nav>
+</aside>
+
+
+            </div>
+          </div>
         </div>
 
     </div>
@@ -484,6 +502,7 @@
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

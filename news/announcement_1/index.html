@@ -151,21 +151,41 @@
     <div class="container mt-5">
       <!-- _layouts/post.html -->
 
-<div class="post">
+<div class="post toc-layout">
+  <div class="row">
+    <div class="col-lg toc-content">
 
-  <header class="post-header">
-    <h1 class="post-title">A paper accepted by ICLR 2023</h1>
-    <p class="post-meta">March 25, 2023</p>
-    <p class="post-tags">
-  <a href="/blog/2023"> 📅 2023 </a>
+      <header class="post-header">
+        <h1 class="post-title">A paper accepted by ICLR 2023</h1>
+        <p class="post-meta">March 25, 2023</p>
+        <p class="post-tags">
+      <a href="/blog/2023"> 📅 2023 </a>
 
-    </p>
-  </header>
+        </p>
+      </header>
 
-  <article class="post-content">
-    <p>Our work about policy optimization in cooperative multi-agent scenarios <a href="https://openreview.net/forum?id=Q-neeWNVv1">Order Matters: Agent-by-agent Policy Optimization</a> is accepted by ICLR 2023!</p>
+      <article class="post-content">
+        <p>Our work about policy optimization in cooperative multi-agent scenarios <a href="https://openreview.net/forum?id=Q-neeWNVv1">Order Matters: Agent-by-agent Policy Optimization</a> is accepted by ICLR 2023!</p>
 
-  </article></div>
+      </article></div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+      <aside class="toc-sidebar">
+  <div class="toc-sidebar__title">Contents</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content=".toc-content"
+    data-toc-headings="h2,h3"
+    data-toc-min-items="2"
+    aria-label="Contents"
+  ></nav>
+</aside>
+
+
+    </div>
+  </div>
+</div>
 
     </div>
 
@@ -192,6 +212,7 @@
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

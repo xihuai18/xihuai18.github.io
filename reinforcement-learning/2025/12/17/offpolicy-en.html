@@ -147,88 +147,25 @@
     <div class="container mt-5">
       <!-- _layouts/post.html -->
 
-<div class="post">
+<div class="post toc-layout">
+  <div class="row">
+    <div class="col-lg toc-content">
 
-  <header class="post-header">
-    <h1 class="post-title">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</h1>
-    <p class="post-meta">December 17, 2025</p>
-    <p class="post-tags">
-  <a href="/blog/2025"> 📅 2025 </a>
-      &nbsp; &middot; &nbsp;
-        <a href="/blog/category/reinforcement-learning">
-          🏷️ reinforcement-learning</a> &nbsp;
-          
+      <header class="post-header">
+        <h1 class="post-title">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</h1>
+        <p class="post-meta">December 17, 2025</p>
+        <p class="post-tags">
+      <a href="/blog/2025"> 📅 2025 </a>
+          &nbsp; &middot; &nbsp;
+            <a href="/blog/category/reinforcement-learning">
+              🏷️ reinforcement-learning</a> &nbsp;
+              
 
-    </p>
-  </header>
+        </p>
+      </header>
 
-  <article class="post-content">
-    <ul id="markdown-toc">
-  <li><a href="#introduction-why-should-we-care-about-off-policy" id="markdown-toc-introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</a></li>
-  <li><a href="#part-i-theoretical-foundations" id="markdown-toc-part-i-theoretical-foundations">Part I: Theoretical Foundations</a>    <ul>
-      <li><a href="#11-basic-setup" id="markdown-toc-11-basic-setup">1.1 Basic Setup</a></li>
-      <li><a href="#12-core-tool-policy-performance-difference-lemma" id="markdown-toc-12-core-tool-policy-performance-difference-lemma">1.2 Core Tool: Policy Performance Difference Lemma</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-ii-performance-improvement-bounds-for-single-policy-sampling" id="markdown-toc-part-ii-performance-improvement-bounds-for-single-policy-sampling">Part II: Performance Improvement Bounds for Single-Policy Sampling</a>    <ul>
-      <li><a href="#21-the-distribution-mismatch-problem" id="markdown-toc-21-the-distribution-mismatch-problem">2.1 The Distribution Mismatch Problem</a></li>
-      <li><a href="#22-controlling-state-distribution-differences" id="markdown-toc-22-controlling-state-distribution-differences">2.2 Controlling State Distribution Differences</a></li>
-      <li><a href="#23-policy-performance-improvement-lower-bound" id="markdown-toc-23-policy-performance-improvement-lower-bound">2.3 Policy Performance Improvement Lower Bound</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-iii-multi-policy-static-mixture-sampling" id="markdown-toc-part-iii-multi-policy-static-mixture-sampling">Part III: Multi-Policy Static Mixture Sampling</a>    <ul>
-      <li><a href="#31-practical-scenarios" id="markdown-toc-31-practical-scenarios">3.1 Practical Scenarios</a></li>
-      <li><a href="#32-core-idea-augmented-state-space" id="markdown-toc-32-core-idea-augmented-state-space">3.2 Core Idea: Augmented State Space</a></li>
-      <li><a href="#33-structural-simplification-for-trajectory-level-mixture" id="markdown-toc-33-structural-simplification-for-trajectory-level-mixture">3.3 Structural Simplification for Trajectory-Level Mixture</a></li>
-      <li><a href="#34-performance-improvement-lower-bound-for-trajectory-level-mixture" id="markdown-toc-34-performance-improvement-lower-bound-for-trajectory-level-mixture">3.4 Performance Improvement Lower Bound for Trajectory-Level Mixture</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-iv-dynamic-mixture-sampling-and-monotonic-improvement-conditions" id="markdown-toc-part-iv-dynamic-mixture-sampling-and-monotonic-improvement-conditions">Part IV: Dynamic Mixture Sampling and Monotonic Improvement Conditions</a>    <ul>
-      <li><a href="#41-the-core-challenge" id="markdown-toc-41-the-core-challenge">4.1 The Core Challenge</a></li>
-      <li><a href="#42-unified-modeling-framework" id="markdown-toc-42-unified-modeling-framework">4.2 Unified Modeling Framework</a></li>
-      <li><a href="#43-core-decomposition" id="markdown-toc-43-core-decomposition">4.3 Core Decomposition</a></li>
-      <li><a href="#44-monotonic-improvement-lower-bound" id="markdown-toc-44-monotonic-improvement-lower-bound">4.4 Monotonic Improvement Lower Bound</a></li>
-      <li><a href="#45-infeasibility-of-direct-constraints" id="markdown-toc-45-infeasibility-of-direct-constraints">4.5 Infeasibility of Direct Constraints</a></li>
-      <li><a href="#46-triangle-inequality-decomposition" id="markdown-toc-46-triangle-inequality-decomposition">4.6 Triangle Inequality Decomposition</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-v-theoretical-foundations-of-clipping-mechanisms" id="markdown-toc-part-v-theoretical-foundations-of-clipping-mechanisms">Part V: Theoretical Foundations of Clipping Mechanisms</a>    <ul>
-      <li><a href="#51-from-tv-distance-to-computable-quantities" id="markdown-toc-51-from-tv-distance-to-computable-quantities">5.1 From TV Distance to Computable Quantities</a></li>
-      <li><a href="#52-sample-representation-of-u_k" id="markdown-toc-52-sample-representation-of-u_k">5.2 Sample Representation of $U_k$</a></li>
-      <li><a href="#53-two-methods-for-constraining-u_k" id="markdown-toc-53-two-methods-for-constraining-u_k">5.3 Two Methods for Constraining $U_k$</a></li>
-      <li><a href="#54-complete-objective-functions-for-three-clipping-mechanisms" id="markdown-toc-54-complete-objective-functions-for-three-clipping-mechanisms">5.4 Complete Objective Functions for Three Clipping Mechanisms</a></li>
-      <li><a href="#55-comparison-of-three-methods" id="markdown-toc-55-comparison-of-three-methods">5.5 Comparison of Three Methods</a></li>
-      <li><a href="#56-controlling-sampling-staleness" id="markdown-toc-56-controlling-sampling-staleness">5.6 Controlling Sampling Staleness</a></li>
-      <li><a href="#57-operational-meaning-of-clipping" id="markdown-toc-57-operational-meaning-of-clipping">5.7 Operational Meaning of Clipping</a></li>
-      <li><a href="#58-section-summary" id="markdown-toc-58-section-summary">5.8 Section Summary</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-vi-comparison-of-trajectory-level-and-stepsegment-level-mixture" id="markdown-toc-part-vi-comparison-of-trajectory-level-and-stepsegment-level-mixture">Part VI: Comparison of Trajectory-Level and Step/Segment-Level Mixture</a>    <ul>
-      <li><a href="#61-core-differences-between-the-two-mechanisms" id="markdown-toc-61-core-differences-between-the-two-mechanisms">6.1 Core Differences Between the Two Mechanisms</a></li>
-      <li><a href="#62-differences-in-sampling-staleness-s_k" id="markdown-toc-62-differences-in-sampling-staleness-s_k">6.2 Differences in Sampling Staleness $S_k$</a></li>
-      <li><a href="#63-differences-in-surrogate-objective-estimation" id="markdown-toc-63-differences-in-surrogate-objective-estimation">6.3 Differences in Surrogate Objective Estimation</a></li>
-      <li><a href="#64-variance-amplification-risk" id="markdown-toc-64-variance-amplification-risk">6.4 Variance Amplification Risk</a></li>
-      <li><a href="#65-applicable-scenarios" id="markdown-toc-65-applicable-scenarios">6.5 Applicable Scenarios</a></li>
-    </ul>
-  </li>
-  <li><a href="#part-vii-handling-training-inference-inconsistency" id="markdown-toc-part-vii-handling-training-inference-inconsistency">Part VII: Handling Training-Inference Inconsistency</a>    <ul>
-      <li><a href="#71-background" id="markdown-toc-71-background">7.1 Background</a></li>
-      <li><a href="#72-effective-staleness" id="markdown-toc-72-effective-staleness">7.2 Effective Staleness</a></li>
-      <li><a href="#73-actionable-control" id="markdown-toc-73-actionable-control">7.3 Actionable Control</a></li>
-    </ul>
-  </li>
-  <li><a href="#summary-practical-guidelines" id="markdown-toc-summary-practical-guidelines">Summary: Practical Guidelines</a>    <ul>
-      <li><a href="#core-theoretical-framework" id="markdown-toc-core-theoretical-framework">Core Theoretical Framework</a></li>
-      <li><a href="#separation-of-concerns-principle" id="markdown-toc-separation-of-concerns-principle">Separation of Concerns Principle</a></li>
-      <li><a href="#clipping-method-selection" id="markdown-toc-clipping-method-selection">Clipping Method Selection</a></li>
-      <li><a href="#handling-training-inference-inconsistency" id="markdown-toc-handling-training-inference-inconsistency">Handling Training-Inference Inconsistency</a></li>
-    </ul>
-  </li>
-  <li><a href="#appendix-quick-reference-for-key-symbols" id="markdown-toc-appendix-quick-reference-for-key-symbols">Appendix: Quick Reference for Key Symbols</a></li>
-  <li><a href="#references" id="markdown-toc-references">References</a></li>
-</ul>
-
-<p><a href="/reinforcement-learning/2025/12/17/offpolicy-zh.html">中文版</a></p>
+      <article class="post-content">
+        <p><a href="/reinforcement-learning/2025/12/17/offpolicy-zh.html">中文版</a></p>
 
 <h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
 
@@ -960,7 +897,25 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <span class="p">}</span>
 </code></pre></div></div>
 
-  </article></div>
+      </article></div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+      <aside class="toc-sidebar">
+  <div class="toc-sidebar__title">Contents</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content=".toc-content"
+    data-toc-headings="h2,h3"
+    data-toc-min-items="2"
+    aria-label="Contents"
+  ></nav>
+</aside>
+
+
+    </div>
+  </div>
+</div>
 
     </div>
 
@@ -987,6 +942,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

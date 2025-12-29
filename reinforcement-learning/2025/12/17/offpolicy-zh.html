@@ -147,87 +147,25 @@
     <div class="container mt-5">
       <!-- _layouts/post.html -->
 
-<div class="post">
+<div class="post toc-layout">
+  <div class="row">
+    <div class="col-lg toc-content">
 
-  <header class="post-header">
-    <h1 class="post-title">驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证</h1>
-    <p class="post-meta">December 17, 2025</p>
-    <p class="post-tags">
-  <a href="/blog/2025"> 📅 2025 </a>
-      &nbsp; &middot; &nbsp;
-        <a href="/blog/category/reinforcement-learning">
-          🏷️ reinforcement-learning</a> &nbsp;
-          
+      <header class="post-header">
+        <h1 class="post-title">驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证</h1>
+        <p class="post-meta">December 17, 2025</p>
+        <p class="post-tags">
+      <a href="/blog/2025"> 📅 2025 </a>
+          &nbsp; &middot; &nbsp;
+            <a href="/blog/category/reinforcement-learning">
+              🏷️ reinforcement-learning</a> &nbsp;
+              
 
-    </p>
-  </header>
+        </p>
+      </header>
 
-  <article class="post-content">
-    <ul id="markdown-toc">
-  <li><a href="#引言为什么我们需要关心异策略" id="markdown-toc-引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</a></li>
-  <li><a href="#第一部分理论基础" id="markdown-toc-第一部分理论基础">第一部分：理论基础</a>    <ul>
-      <li><a href="#11-基本设定" id="markdown-toc-11-基本设定">1.1 基本设定</a></li>
-      <li><a href="#12-核心工具策略性能差异引理" id="markdown-toc-12-核心工具策略性能差异引理">1.2 核心工具：策略性能差异引理</a></li>
-    </ul>
-  </li>
-  <li><a href="#第二部分单策略采样的性能改进下界" id="markdown-toc-第二部分单策略采样的性能改进下界">第二部分：单策略采样的性能改进下界</a>    <ul>
-      <li><a href="#21-分布不匹配问题" id="markdown-toc-21-分布不匹配问题">2.1 分布不匹配问题</a></li>
-      <li><a href="#22-状态分布差异的控制" id="markdown-toc-22-状态分布差异的控制">2.2 状态分布差异的控制</a></li>
-      <li><a href="#23-策略性能改进下界" id="markdown-toc-23-策略性能改进下界">2.3 策略性能改进下界</a></li>
-    </ul>
-  </li>
-  <li><a href="#第三部分多策略静态混合采样" id="markdown-toc-第三部分多策略静态混合采样">第三部分：多策略静态混合采样</a>    <ul>
-      <li><a href="#31-实际场景" id="markdown-toc-31-实际场景">3.1 实际场景</a></li>
-      <li><a href="#32-核心思想扩展状态空间" id="markdown-toc-32-核心思想扩展状态空间">3.2 核心思想：扩展状态空间</a></li>
-      <li><a href="#33-轨迹级混合的结构简化" id="markdown-toc-33-轨迹级混合的结构简化">3.3 轨迹级混合的结构简化</a></li>
-      <li><a href="#34-轨迹级混合的性能改进下界" id="markdown-toc-34-轨迹级混合的性能改进下界">3.4 轨迹级混合的性能改进下界</a></li>
-    </ul>
-  </li>
-  <li><a href="#第四部分动态混合采样与单调提升条件" id="markdown-toc-第四部分动态混合采样与单调提升条件">第四部分：动态混合采样与单调提升条件</a>    <ul>
-      <li><a href="#41-问题的核心挑战" id="markdown-toc-41-问题的核心挑战">4.1 问题的核心挑战</a></li>
-      <li><a href="#42-统一建模框架" id="markdown-toc-42-统一建模框架">4.2 统一建模框架</a></li>
-      <li><a href="#43-核心分解" id="markdown-toc-43-核心分解">4.3 核心分解</a></li>
-      <li><a href="#44-单调提升下界" id="markdown-toc-44-单调提升下界">4.4 单调提升下界</a></li>
-      <li><a href="#45-直接约束的不可行性" id="markdown-toc-45-直接约束的不可行性">4.5 直接约束的不可行性</a></li>
-      <li><a href="#46-三角不等式分解" id="markdown-toc-46-三角不等式分解">4.6 三角不等式分解</a></li>
-    </ul>
-  </li>
-  <li><a href="#第五部分裁剪机制的理论基础" id="markdown-toc-第五部分裁剪机制的理论基础">第五部分：裁剪机制的理论基础</a>    <ul>
-      <li><a href="#51-从tv距离到可计算量" id="markdown-toc-51-从tv距离到可计算量">5.1 从TV距离到可计算量</a></li>
-      <li><a href="#52-u_k-的样本表示" id="markdown-toc-52-u_k-的样本表示">5.2 $U_k$ 的样本表示</a></li>
-      <li><a href="#53-两种约束-u_k-的方法" id="markdown-toc-53-两种约束-u_k-的方法">5.3 两种约束 $U_k$ 的方法</a></li>
-      <li><a href="#55-三种方法的对比" id="markdown-toc-55-三种方法的对比">5.5 三种方法的对比</a></li>
-      <li><a href="#56-采样陈旧性的控制" id="markdown-toc-56-采样陈旧性的控制">5.6 采样陈旧性的控制</a></li>
-      <li><a href="#57-裁剪的操作含义" id="markdown-toc-57-裁剪的操作含义">5.7 裁剪的操作含义</a></li>
-      <li><a href="#58-本节小结" id="markdown-toc-58-本节小结">5.8 本节小结</a></li>
-    </ul>
-  </li>
-  <li><a href="#第六部分轨迹级与步段级混合的比较" id="markdown-toc-第六部分轨迹级与步段级混合的比较">第六部分：轨迹级与步/段级混合的比较</a>    <ul>
-      <li><a href="#61-两类机制的核心差异" id="markdown-toc-61-两类机制的核心差异">6.1 两类机制的核心差异</a></li>
-      <li><a href="#62-采样陈旧性-s_k-的差异" id="markdown-toc-62-采样陈旧性-s_k-的差异">6.2 采样陈旧性 $S_k$ 的差异</a></li>
-      <li><a href="#63-代理目标估计的差异" id="markdown-toc-63-代理目标估计的差异">6.3 代理目标估计的差异</a></li>
-      <li><a href="#64-方差放大风险" id="markdown-toc-64-方差放大风险">6.4 方差放大风险</a></li>
-      <li><a href="#65-适用场景" id="markdown-toc-65-适用场景">6.5 适用场景</a></li>
-    </ul>
-  </li>
-  <li><a href="#第七部分训推不一致的处理" id="markdown-toc-第七部分训推不一致的处理">第七部分：训推不一致的处理</a>    <ul>
-      <li><a href="#71-问题背景" id="markdown-toc-71-问题背景">7.1 问题背景</a></li>
-      <li><a href="#72-有效陈旧性" id="markdown-toc-72-有效陈旧性">7.2 有效陈旧性</a></li>
-      <li><a href="#73-可操作控制" id="markdown-toc-73-可操作控制">7.3 可操作控制</a></li>
-    </ul>
-  </li>
-  <li><a href="#总结实践指南" id="markdown-toc-总结实践指南">总结：实践指南</a>    <ul>
-      <li><a href="#核心理论框架" id="markdown-toc-核心理论框架">核心理论框架</a></li>
-      <li><a href="#职责分离原则" id="markdown-toc-职责分离原则">职责分离原则</a></li>
-      <li><a href="#裁剪方法选择" id="markdown-toc-裁剪方法选择">裁剪方法选择</a></li>
-      <li><a href="#训推不一致处理" id="markdown-toc-训推不一致处理">训推不一致处理</a></li>
-    </ul>
-  </li>
-  <li><a href="#附录关键符号速查表" id="markdown-toc-附录关键符号速查表">附录：关键符号速查表</a></li>
-  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
-</ul>
-
-<p><a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version</a></p>
+      <article class="post-content">
+        <p><a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version</a></p>
 
 <h2 id="引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</h2>
 
@@ -955,7 +893,25 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <span class="p">}</span>
 </code></pre></div></div>
 
-  </article></div>
+      </article></div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+      <aside class="toc-sidebar">
+  <div class="toc-sidebar__title">目录</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content=".toc-content"
+    data-toc-headings="h2,h3"
+    data-toc-min-items="2"
+    aria-label="目录"
+  ></nav>
+</aside>
+
+
+    </div>
+  </div>
+</div>
 
     </div>
 
@@ -982,6 +938,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

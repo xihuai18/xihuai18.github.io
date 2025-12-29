@@ -147,82 +147,25 @@
     <div class="container mt-5">
       <!-- _layouts/post.html -->
 
-<div class="post">
+<div class="post toc-layout">
+  <div class="row">
+    <div class="col-lg toc-content">
 
-  <header class="post-header">
-    <h1 class="post-title">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</h1>
-    <p class="post-meta">December 1, 2025</p>
-    <p class="post-tags">
-  <a href="/blog/2025"> 📅 2025 </a>
-      &nbsp; &middot; &nbsp;
-        <a href="/blog/category/reinforcement-learning">
-          🏷️ reinforcement-learning</a> &nbsp;
-          
+      <header class="post-header">
+        <h1 class="post-title">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</h1>
+        <p class="post-meta">December 1, 2025</p>
+        <p class="post-tags">
+      <a href="/blog/2025"> 📅 2025 </a>
+          &nbsp; &middot; &nbsp;
+            <a href="/blog/category/reinforcement-learning">
+              🏷️ reinforcement-learning</a> &nbsp;
+              
 
-    </p>
-  </header>
+        </p>
+      </header>
 
-  <article class="post-content">
-    <ul id="markdown-toc">
-  <li><a href="#引言kl-散度在强化学习中的角色" id="markdown-toc-引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</a>    <ul>
-      <li><a href="#正向-kl-与反向-kl-的区别" id="markdown-toc-正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</a></li>
-    </ul>
-  </li>
-  <li><a href="#三种估计器的定义与设计原理" id="markdown-toc-三种估计器的定义与设计原理">三种估计器的定义与设计原理</a>    <ul>
-      <li><a href="#k_1最朴素的估计器" id="markdown-toc-k_1最朴素的估计器">$k_1$：最朴素的估计器</a></li>
-      <li><a href="#k_2基于-f-散度的低方差估计器" id="markdown-toc-k_2基于-f-散度的低方差估计器">$k_2$：基于 f-散度的低方差估计器</a></li>
-      <li><a href="#k_3控制变量法构造的最优估计器" id="markdown-toc-k_3控制变量法构造的最优估计器">$k_3$：控制变量法构造的「最优」估计器</a></li>
-      <li><a href="#三者对比总结" id="markdown-toc-三者对比总结">三者对比总结</a></li>
-    </ul>
-  </li>
-  <li><a href="#核心分析" id="markdown-toc-核心分析">核心分析</a>    <ul>
-      <li><a href="#估计-kl-数值时的偏差与方差" id="markdown-toc-估计-kl-数值时的偏差与方差">估计 KL 数值时的偏差与方差</a></li>
-      <li><a href="#估计-kl-梯度时的关键区分" id="markdown-toc-估计-kl-梯度时的关键区分">估计 KL 梯度时的关键区分</a>        <ul>
-          <li><a href="#正向与反向-kl-真梯度的推导" id="markdown-toc-正向与反向-kl-真梯度的推导">正向与反向 KL 真梯度的推导</a></li>
-          <li><a href="#两种求导顺序" id="markdown-toc-两种求导顺序">两种求导顺序</a></li>
-          <li><a href="#三种估计器的梯度推导" id="markdown-toc-三种估计器的梯度推导">三种估计器的梯度推导</a></li>
-          <li><a href="#先期望后梯度vs先梯度后期望" id="markdown-toc-先期望后梯度vs先梯度后期望">「先期望后梯度」vs「先梯度后期望」</a></li>
-        </ul>
-      </li>
-      <li><a href="#扩展从行为策略-mu-采样时的-kl-梯度估计" id="markdown-toc-扩展从行为策略-mu-采样时的-kl-梯度估计">扩展：从行为策略 $\mu$ 采样时的 KL 梯度估计</a>        <ul>
-          <li><a href="#设置与记号" id="markdown-toc-设置与记号">设置与记号</a></li>
-          <li><a href="#关键观察两种求导顺序的等价性" id="markdown-toc-关键观察两种求导顺序的等价性">关键观察：两种求导顺序的等价性</a></li>
-          <li><a href="#数值层面无偏性仍然保持" id="markdown-toc-数值层面无偏性仍然保持">数值层面：无偏性仍然保持</a></li>
-          <li><a href="#梯度推导" id="markdown-toc-梯度推导">梯度推导</a></li>
-          <li><a href="#哪些给出无偏的反向-kl-梯度" id="markdown-toc-哪些给出无偏的反向-kl-梯度">哪些给出无偏的反向 KL 梯度？</a></li>
-          <li><a href="#三个无偏梯度估计器的方差对比" id="markdown-toc-三个无偏梯度估计器的方差对比">三个无偏梯度估计器的方差对比</a></li>
-          <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
-        </ul>
-      </li>
-      <li><a href="#梯度估计总览" id="markdown-toc-梯度估计总览">梯度估计总览</a></li>
-    </ul>
-  </li>
-  <li><a href="#kl-的两种使用方式作为-reward-vs-作为-loss" id="markdown-toc-kl-的两种使用方式作为-reward-vs-作为-loss">KL 的两种使用方式：作为 Reward vs 作为 Loss</a>    <ul>
-      <li><a href="#两种用法的定义" id="markdown-toc-两种用法的定义">两种用法的定义</a></li>
-      <li><a href="#核心差异一更新目标" id="markdown-toc-核心差异一更新目标">核心差异一：更新目标</a></li>
-      <li><a href="#核心差异二actor-梯度" id="markdown-toc-核心差异二actor-梯度">核心差异二：Actor 梯度</a></li>
-      <li><a href="#核心差异三critic-学习目标" id="markdown-toc-核心差异三critic-学习目标">核心差异三：Critic 学习目标</a></li>
-      <li><a href="#核心差异四credit-assignment" id="markdown-toc-核心差异四credit-assignment">核心差异四：Credit Assignment</a></li>
-      <li><a href="#小结-1" id="markdown-toc-小结-1">小结</a></li>
-    </ul>
-  </li>
-  <li><a href="#rl-实践指南" id="markdown-toc-rl-实践指南">RL 实践指南</a>    <ul>
-      <li><a href="#kl-作为-reward-惩罚不需要梯度" id="markdown-toc-kl-作为-reward-惩罚不需要梯度">KL 作为 Reward 惩罚（不需要梯度）</a></li>
-      <li><a href="#kl-作为-loss需要梯度回传" id="markdown-toc-kl-作为-loss需要梯度回传">KL 作为 Loss（需要梯度回传）</a>        <ul>
-          <li><a href="#on-policy优化反向-kl最常见场景" id="markdown-toc-on-policy优化反向-kl最常见场景">On-policy：优化反向 KL（最常见场景）</a></li>
-          <li><a href="#on-policy优化正向-kl覆盖型场景" id="markdown-toc-on-policy优化正向-kl覆盖型场景">On-policy：优化正向 KL（覆盖型场景）</a></li>
-          <li><a href="#off-policy优化反向-kl" id="markdown-toc-off-policy优化反向-kl">Off-policy：优化反向 KL</a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li><a href="#一份拿来就用的对照表" id="markdown-toc-一份拿来就用的对照表">一份「拿来就用」的对照表</a></li>
-  <li><a href="#常见实现陷阱" id="markdown-toc-常见实现陷阱">常见实现陷阱</a></li>
-  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
-  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
-</ul>
-
-<p><img src="/assets/img/kl-estimators/kl-estimator-zh.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+      <article class="post-content">
+        <p><img src="/assets/img/kl-estimators/kl-estimator-zh.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
@@ -1288,7 +1231,25 @@ g_3(x)
 <span class="p">}</span>
 </code></pre></div></div>
 
-  </article></div>
+      </article></div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+      <aside class="toc-sidebar">
+  <div class="toc-sidebar__title">目录</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content=".toc-content"
+    data-toc-headings="h2,h3"
+    data-toc-min-items="2"
+    aria-label="目录"
+  ></nav>
+</aside>
+
+
+    </div>
+  </div>
+</div>
 
     </div>
 
@@ -1315,6 +1276,7 @@ g_3(x)
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

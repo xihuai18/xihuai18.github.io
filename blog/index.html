@@ -196,7 +196,7 @@
       </h3>
       <p>系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。</p>
       <p class="post-meta">
-        10 min read &nbsp; &middot; &nbsp;
+        9 min read &nbsp; &middot; &nbsp;
         December 17, 2025
         
         
@@ -241,7 +241,7 @@
       </h3>
       <p>A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies.</p>
       <p class="post-meta">
-        26 min read &nbsp; &middot; &nbsp;
+        24 min read &nbsp; &middot; &nbsp;
         December 17, 2025
         
         
@@ -286,7 +286,7 @@
       </h3>
       <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。</p>
       <p class="post-meta">
-        20 min read &nbsp; &middot; &nbsp;
+        19 min read &nbsp; &middot; &nbsp;
         December 01, 2025
         
         
@@ -331,7 +331,7 @@
       </h3>
       <p>How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate.</p>
       <p class="post-meta">
-        24 min read &nbsp; &middot; &nbsp;
+        22 min read &nbsp; &middot; &nbsp;
         December 01, 2025
         
         
@@ -376,7 +376,7 @@
       </h3>
       <p>现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。</p>
       <p class="post-meta">
-        11 min read &nbsp; &middot; &nbsp;
+        10 min read &nbsp; &middot; &nbsp;
         November 15, 2025
         
         
@@ -421,7 +421,7 @@
       </h3>
       <p>Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.</p>
       <p class="post-meta">
-        30 min read &nbsp; &middot; &nbsp;
+        29 min read &nbsp; &middot; &nbsp;
         November 15, 2025
         
         
@@ -482,6 +482,7 @@
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
+  <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
