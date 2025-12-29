@@ -140,31 +140,34 @@ Images2Symbols (CogSci: <a href="https://images2symbols.github.io/" target="_bla
 
 ## Table Of Contents
 
-- [User community](#user-community)
-- [Lighthouse PageSpeed Insights](#lighthouse-pagespeed-insights)
-- [Getting started](#getting-started)
-  - [Installation](#installation)
-    - [Local setup using Docker (Recommended on Windows)](#local-setup-using-docker-recommended-on-windows)
-    - [Local Setup (Standard)](#local-setup-standard)
-    - [Deployment](#deployment)
-    - [Upgrading from a previous version](#upgrading-from-a-previous-version)
-  - [FAQ](#faq)
-- [Features](#features)
-  - [Publications](#publications)
-  - [Collections](#collections)
-  - [Layouts](#layouts)
-    - [The iconic style of Distill](#the-iconic-style-of-distill)
-    - [Full support for math & code](#full-support-for-math--code)
-    - [Photos](#photos)
-  - [Other features](#other-features)
-    - [GitHub repositories and user stats](#github-repositories-and-user-stats)
-    - [Theming](#theming)
-    - [Social media previews](#social-media-previews)
-    - [Atom (RSS-like) Feed](#atom-rss-like-feed)
-    - [Related posts](#related-posts)
-- [Contributing](#contributing)
-  - [Core Contributors](#core-contributors)
-- [License](#license)
+- [al-folio](#al-folio)
+  - [User community](#user-community)
+  - [Lighthouse PageSpeed Insights](#lighthouse-pagespeed-insights)
+  - [Table Of Contents](#table-of-contents)
+  - [Getting started](#getting-started)
+    - [Installation](#installation)
+      - [Local setup using Docker (Recommended on Windows)](#local-setup-using-docker-recommended-on-windows)
+      - [Local Setup (Standard)](#local-setup-standard)
+      - [Deployment](#deployment)
+      - [Upgrading from a previous version](#upgrading-from-a-previous-version)
+    - [FAQ](#faq)
+  - [Features](#features)
+    - [Publications](#publications)
+    - [Collections](#collections)
+    - [Layouts](#layouts)
+      - [The iconic style of Distill](#the-iconic-style-of-distill)
+      - [Full support for math \& code](#full-support-for-math--code)
+      - [Citations, footnotes, sidenotes, Mermaid](#citations-footnotes-sidenotes-mermaid)
+      - [Photos](#photos)
+    - [Other features](#other-features)
+      - [GitHub repositories and user stats](#github-repositories-and-user-stats)
+      - [Theming](#theming)
+      - [Social media previews](#social-media-previews)
+      - [Atom (RSS-like) Feed](#atom-rss-like-feed)
+      - [Related posts](#related-posts)
+  - [Contributing](#contributing)
+    - [Maintainers](#maintainers)
+  - [License](#license)
 
 ## Getting started
 
@@ -513,6 +516,39 @@ For more details on how to create distill-styled posts using `<d-*>` tags, pleas
 <a href="https://alshedivat.github.io/al-folio/blog/2015/math/" target="_blank"><img src="https://raw.githubusercontent.com/alshedivat/al-folio/master/assets/img/math-screenshot.png" width=400></a>
 <a href="https://alshedivat.github.io/al-folio/blog/2015/code/" target="_blank"><img src="https://raw.githubusercontent.com/alshedivat/al-folio/master/assets/img/code-screenshot.png" width=400></a>
 </p>
+
+#### Citations, footnotes, sidenotes, Mermaid
+
+- **BibTeX source**: `_bibliography/papers.bib` (configured in `_config.yml` under `scholar.bibliography`).
+- **Cite in text**: `{% cite your_bibtex_key %}` where `your_bibtex_key` is the BibTeX entry key (e.g., `@article{your_bibtex_key, ...}`).
+- **Show references list (cited-only)**: add `references: true` in a post front matter (layout `post`).
+- **Distill-style manual citations (per-post .bib, no `papers.bib`)**: add `distill_citations: true` and `distill_bibliography: your_post.bib`, put the file under `assets/bibliography/`, then cite with `<d-cite key="your_bibtex_key"></d-cite>`.
+- **Distill-style hover footnotes**: add `distill_footnotes: true`, then use `<d-footnote>...</d-footnote>` in the post body (hoverable preview on desktop).
+- **Footnotes**: standard Markdown footnotes `[^1]` / `[^1]: ...`.
+- **Sidenotes (desktop)**: add `sidenotes: true` in a post front matter (uses footnotes as the source).
+- **Mermaid**: fenced code blocks with `mermaid` language:
+  ````
+  ```mermaid
+  graph TD
+    A-->B
+  ```
+  ````
+- **Pseudocode**: fenced code blocks with `pseudocode` (or `pseudo`) language:
+  ````
+  ```pseudocode
+  \begin{algorithm}
+  \caption{Euclid's algorithm}
+  \begin{algorithmic}
+    \FUNCTION{gcd}{$a, b$}
+      \WHILE{$b \ne 0$}
+        \STATE $(a, b) \gets (b, a \bmod b)$
+      \ENDWHILE
+      \STATE \textbf{return} $a$
+    \ENDFUNCTION
+  \end{algorithmic}
+  \end{algorithm}
+  ```
+  ````
 
 #### Photos
 

@@ -22,6 +22,10 @@ let setTheme = (theme) =>  {
   }
   localStorage.setItem("theme", theme);
 
+  try {
+    document.dispatchEvent(new CustomEvent('theme:change', { detail: { theme } }));
+  } catch (e) {}
+
   // Updates the background of medium-zoom overlay.
   if (typeof medium_zoom !== 'undefined') {
     medium_zoom.update({

@@ -57,9 +57,8 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
 
     <!-- Code Syntax Highlighting -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" />
-
-    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" /><!-- Pseudocode -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" integrity="sha256-VwMV//xgBPDyRFVSOshhRhzJRDyBmIACniLPpeXNUdc=" crossorigin="anonymous"><!-- Styles -->
     
     <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
@@ -148,21 +147,22 @@
       <!-- _layouts/post.html -->
 
 <div class="post toc-layout">
-  <div class="row">
-    <div class="col-lg toc-content">
-
-      <header class="post-header">
-        <h1 class="post-title">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</h1>
-        <p class="post-meta">December 1, 2025</p>
-        <p class="post-tags">
+  <header class="post-header">
+    <h1 class="post-title">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</h1>
+    <p class="post-meta">December 1, 2025</p>
+    <p class="post-tags">
       <a href="/blog/2025"> 📅 2025 </a>
-          &nbsp; &middot; &nbsp;
-            <a href="/blog/category/reinforcement-learning">
-              🏷️ reinforcement-learning</a> &nbsp;
-              
+        &nbsp; &middot; &nbsp;
+        <a href="/blog/category/reinforcement-learning">
+            🏷️ reinforcement-learning</a> &nbsp;
+        
+    </p>
+  </header>
 
-        </p>
-      </header>
+  <div class="row">
+    
+      <div class="col-lg toc-content">
+    
 
       <article class="post-content">
         <p><img src="/assets/img/kl-estimators/kl-estimator-zh.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
@@ -1231,7 +1231,13 @@ g_3(x)
 <span class="p">}</span>
 </code></pre></div></div>
 
-      </article></div>
+      </article>
+
+      
+
+      
+        
+      </div>
 
     <div class="col-lg-3 d-none d-lg-block">
       <aside class="toc-sidebar">
@@ -1275,6 +1281,9 @@ g_3(x)
   <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
     <!-- Load Common JS -->
   <script defer src="/assets/js/common.js"></script>
+  <script defer src="/assets/js/blog_enhancements.js" type="text/javascript"></script>
+  <script defer src="/assets/js/sidenotes.js" type="text/javascript"></script>
+  <script defer src="/assets/js/footnote_preview.js" type="text/javascript"></script>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
   <script defer src="/assets/js/toc.js" type="text/javascript"></script>
 
@@ -1288,13 +1297,25 @@ g_3(x)
       tex: {
         tags: 'ams',
         inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        // Avoid unexpected rendering inside code blocks.
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
       }
     };
   </script>
   <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
   <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 
+    <!-- Pseudocode -->
+  <script defer src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js" integrity="sha256-aVkDxqyzrB+ExUsOY9PdyelkDhn/DfrjWu08aVpqNlo=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/pseudocode-init.js" type="text/javascript"></script>
+    <!-- Mermaid -->
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js"></script>
+  <script defer src="/assets/js/mermaid-init.js" type="text/javascript"></script>
     <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2923RQZBXG"></script>
   <script>

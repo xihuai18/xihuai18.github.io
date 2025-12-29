@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*******************************************************************************
  * Variables used throughout the theme.
  * To adjust anything, simply edit the variables below and rebuild the theme.
@@ -872,6 +873,166 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 .toc a.is-active {
   color: var(--global-theme-color);
   font-weight: 600;
+}
+
+/*******************************************************************************
+ * Enhancements for regular blog posts (non-distill).
+ ******************************************************************************/
+.post-content .table-responsive {
+  margin: 1rem 0;
+}
+.post-content table {
+  width: 100%;
+  margin: 0;
+}
+.post-content :not(pre) > code {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.95em;
+  word-break: break-word;
+}
+.post-content .footnotes {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--global-divider-color);
+  font-size: 0.95rem;
+}
+.post-content .footnotes ol {
+  padding-left: 1.25rem;
+}
+.post-content a.footnote,
+.post-content a.reversefootnote,
+.post-content a.footnote-backlink {
+  text-decoration: none;
+}
+
+.footnote-preview {
+  position: fixed;
+  z-index: 1000;
+  max-width: min(520px, 92vw);
+  max-height: min(320px, 60vh);
+  overflow: auto;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--global-divider-color);
+  background: var(--global-bg-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  color: var(--global-text-color);
+}
+.footnote-preview p:last-child {
+  margin-bottom: 0;
+}
+
+.mermaid {
+  margin: 1rem 0;
+  text-align: center;
+}
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.details-block {
+  margin: 1rem 0;
+  border: 1px solid var(--global-divider-color);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--global-card-bg-color);
+}
+.details-block summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.35rem 0;
+  list-style: none;
+  outline: none;
+}
+.details-block summary::-webkit-details-marker {
+  display: none;
+}
+.details-block summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.5rem;
+  transform: translateY(-1px);
+}
+.details-block[open] summary::before {
+  content: "▾";
+}
+.details-block .details-content {
+  padding: 0.25rem 0 0.75rem;
+}
+
+.post-references {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--global-divider-color);
+}
+.post-references h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.post-references ol.bibliography {
+  padding-left: 1.25rem;
+}
+.post-references li.reference {
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 992px) {
+  .post.post--sidenotes .footnotes {
+    display: none;
+  }
+  .post.post--sidenotes .sidenotes-col {
+    position: relative;
+  }
+  .post.post--sidenotes .sidenotes-rail {
+    position: relative;
+    min-height: 1px;
+  }
+  .post.post--sidenotes .sidenote {
+    position: absolute;
+    left: 0;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: var(--global-text-color-light);
+    padding-right: 0.75rem;
+    border-right: 2px solid var(--global-divider-color);
+    text-align: right;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .post.post--sidenotes .sidenote.is-active {
+    color: var(--global-text-color);
+    border-right-color: var(--global-theme-color);
+  }
+}
+
+/*******************************************************************************
+ * Pseudocode.js (algorithmic blocks)
+ ******************************************************************************/
+.pseudocode {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--global-code-bg-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.pseudocode .ps-root {
+  color: var(--global-text-color);
+}
+
+.pseudocode .ps-root .ps-algorithm {
+  border-top-color: var(--global-text-color);
+  border-bottom-color: var(--global-text-color);
+}
+
+.pseudocode .ps-root .ps-algorithm.with-caption > .ps-line:first-child {
+  border-bottom-color: var(--global-text-color);
+}
+
+.pseudocode .ps-root .ps-algorithmic.with-scopelines div.ps-block {
+  border-left-color: var(--global-text-color);
 }
 
 /*******************************************************************************
