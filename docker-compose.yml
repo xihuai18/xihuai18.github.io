@@ -8,6 +8,7 @@ services:
       && bundle install
       && bundle exec jekyll serve \
         --watch \
+        --force_polling \
         --port=10086 \
         --host=0.0.0.0 \
         --livereload \
