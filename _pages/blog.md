@@ -2,7 +2,7 @@
 layout: default
 permalink: /blog/
 title: Xihuai's Blog
-nav: true
+nav: false
 nav_order: 1
 ---
 
@@ -204,7 +204,7 @@ nav_order: 1
   </ul>
 
 {% if page.pagination.enabled %}
-{% include pagination.liquid %}
+{% include pagination.html %}
 {% endif %}
 
 </div>
