@@ -16,7 +16,6 @@ lang: en
 
 [中文版](/reinforcement-learning/2025/12/01/kl-estimators-zh.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
-
 ## Introduction: What KL Does in RL
 
 In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), **KL penalty** keeps the new policy from drifting too far from a reference policy, preventing instability or collapse. However, implementing KL penalty involves multiple layers of choices: **which estimator** ($k_1$, $k_2$, $k_3$), **who to sample from** (on-policy vs off-policy), and **how to use it** (as reward shaping or as a loss for backpropagation). This post systematically dissects these choices and their interrelationships.
@@ -50,7 +49,6 @@ $$
 - **Forward KL** is mass-covering: policy tries to cover the support of $p$.
 
 RLHF typically uses **reverse KL** because we want the actor not to move too far from the reference, not necessarily to cover every mode.
-
 
 ## Three estimators: definitions and design
 
@@ -116,48 +114,15 @@ $$
 
 Convexity keeps $\phi$ above its tangent, so this gap is **nonnegative**. As $r \to 1$, the gap shrinks quadratically $(r-1)^2$, explaining the low variance when policies are close.
 
-
 ### Quick comparison
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">Definition</th>
-			<th style="text-align: center;">Design idea</th>
-			<th style="text-align: center;">Bias (value)</th>
-			<th style="text-align: center;">Variance</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">$\log r$</td>
-			<td style="text-align: center;">Naive log-ratio</td>
-			<td style="text-align: center;">Unbiased</td>
-			<td style="text-align: center;">High (can be negative)</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">$\tfrac{1}{2}(\log r)^2$</td>
-			<td style="text-align: center;">f-divergence, KL-matching 2nd order</td>
-			<td style="text-align: center;">Biased (very small)</td>
-			<td style="text-align: center;">Low (always positive)</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">$r - 1 - \log r$</td>
-			<td style="text-align: center;">Control variate + Bregman</td>
-			<td style="text-align: center;">Unbiased</td>
-			<td style="text-align: center;">Low (always positive)</td>
-		</tr>
-	</tbody>
-</table>
-</div>
+| Estimator | Definition | Design idea | Bias (value) | Variance |
+| :---: | :---: | :---: | :---: | :---: |
+| $k_1$ | $\log r$ | Naive log-ratio | Unbiased | High (can be negative) |
+| $k_2$ | $\tfrac{1}{2}(\log r)^2$ | f-divergence, KL-matching 2nd order | Biased (very small) | Low (always positive) |
+| $k_3$ | $r - 1 - \log r$ | Control variate + Bregman | Unbiased | Low (always positive) |
 
 For estimating the KL **value**, $k_3$ is "unbiased + low variance"; but as we'll analyze, **the gradient story is completely different** — different estimators' gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.
-
 
 ## Core analysis
 
@@ -179,65 +144,19 @@ $$
 
 John Schulman's toy experiments ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005):
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">bias/true</th>
-			<th style="text-align: center;">stdev/true</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">20</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">0.002</td>
-			<td style="text-align: center;">1.42</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">1.42</td>
-		</tr>
-	</tbody>
-</table>
-</div>
+| Estimator | bias/true | stdev/true |
+| :---: | :---: | :---: |
+| $k_1$ | 0 | 20 |
+| $k_2$ | 0.002 | 1.42 |
+| $k_3$ | 0 | 1.42 |
 
 When KL is large ($p = \mathcal{N}(1,1)$, true KL = 0.5):
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">bias/true</th>
-			<th style="text-align: center;">stdev/true</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">2</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">0.25</td>
-			<td style="text-align: center;">1.73</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">0</td>
-			<td style="text-align: center;">1.7</td>
-		</tr>
-	</tbody>
-</table>
-</div>
+| Estimator | bias/true | stdev/true |
+| :---: | :---: | :---: |
+| $k_1$ | 0 | 2 |
+| $k_2$ | 0.25 | 1.73 |
+| $k_3$ | 0 | 1.7 |
 
 **Intuition:**
 - $k_1 = -\log r$ is first-order around $r=1$, can be negative, so variance explodes when close.
@@ -245,7 +164,6 @@ When KL is large ($p = \mathcal{N}(1,1)$, true KL = 0.5):
 - When coverage is poor (heavy tails in $r$), $k_3$ can explode; then $k_1$ can be more stable.
 
 > **Note:** To estimate **forward KL value** $D\_{\mathrm{KL}}(p \| q) = \mathbb{E}\_p[\log r]$ but only sample from $q$, use importance sampling $\mathbb{E}\_q[r \log r]$.
-
 
 ### Gradient estimation: the crucial distinction
 
@@ -304,34 +222,11 @@ $$
 
 Taking expectation under $q_\theta$:
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Estimator</th>
-			<th style="text-align: center;">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-			<th style="text-align: center;">Equals</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">$\mathbb{E}_{q}[s_\theta] = 0$</td>
-			<td style="text-align: center;"><strong>Zero (useless as loss)</strong></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">$-\mathbb{E}_{q}[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Gradient of reverse KL</strong></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">$\mathbb{E}_{q}[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-			<td style="text-align: center;"><strong>Gradient of forward KL</strong></td>
-		</tr>
-	</tbody>
-</table>
-</div>
+| Estimator | $\mathbb{E}_{q}[\nabla_\theta k_i]$ | Equals |
+| :---: | :---: | :---: |
+| $k_1$ | $\mathbb{E}_{q}[s_\theta] = 0$ | Zero (useless as loss) |
+| $k_2$ | $-\mathbb{E}_{q}[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Gradient of reverse KL |
+| $k_3$ | $\mathbb{E}_{q}[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$ | Gradient of forward KL |
 
 **Key takeaways:**
 - **$k_2$ gradient** matches reverse KL gradient (the usual "stay near ref" objective).
@@ -347,7 +242,6 @@ $$
 $$
 
 Both give reverse KL. But autograd on per-sample $k_3$ averages (grad-then-expectation) yields **forward KL gradient**. Same estimator, different order, different result.
-
 
 ### Off-policy gradients with importance sampling
 
@@ -407,39 +301,12 @@ $$
 
 Which give expected gradients:
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Weighted estimator</th>
-			<th style="text-align: center;">Value target</th>
-			<th style="text-align: center;">Expected gradient</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_1$</td>
-			<td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_2$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-			<td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$, <strong>not</strong> reverse KL ✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\text{sg}\left(\tfrac{q_\theta}{\mu}\right) k_2$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\tfrac{q_\theta}{\mu} k_3$</td>
-			<td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
-		</tr>
-	</tbody>
-</table>
-</div>
+| Weighted estimator | Value target | Expected gradient |
+| :---: | :---: | :---: |
+| $\tfrac{q_\theta}{\mu} k_1$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
+| $\tfrac{q_\theta}{\mu} k_2$ | $\mathbb{E}_q[k_2]$ (f-divergence) | $\nabla_\theta \mathbb{E}_q[k_2]$, not reverse KL ✗ |
+| $\text{sg}\left(\tfrac{q_\theta}{\mu}\right) k_2$ | $\mathbb{E}_q[k_2]$ (f-divergence) | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
+| $\tfrac{q_\theta}{\mu} k_3$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
 
 **Interesting reversal vs. on-policy:**
 - On-policy: $k_2$ as loss gives reverse KL gradient; $k_1$ gradient is zero.
@@ -486,110 +353,27 @@ Intuition:
 
 Table summary:
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center; white-space: nowrap;">Estimator</th>
-			<th style="text-align: center; white-space: nowrap;">Gradient rv</th>
-			<th style="text-align: center; white-space: nowrap;">Scale ($r\approx1$)</th>
-			<th style="text-align: center;">Variance</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$w k_1$</td>
-			<td style="text-align: center;">$w s_\theta (k_1+1)$</td>
-			<td style="text-align: center;">$O(1)$</td>
-			<td style="text-align: center;">High</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mathrm{sg}(w) k_2$</td>
-			<td style="text-align: center;">$w s_\theta k_1$</td>
-			<td style="text-align: center;">$O(\varepsilon)$</td>
-			<td style="text-align: center;">Low</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$w k_3$</td>
-			<td style="text-align: center;">$w s_\theta k_1$</td>
-			<td style="text-align: center;">$O(\varepsilon)$</td>
-			<td style="text-align: center;">Low</td>
-		</tr>
-	</tbody>
-</table>
-</div>
+| Estimator | Gradient rv | Scale ($r\approx1$) | Variance |
+| :---: | :---: | :---: | :---: |
+| $w k_1$ | $w s_\theta (k_1+1)$ | $O(1)$ | High |
+| $\mathrm{sg}(w) k_2$ | $w s_\theta k_1$ | $O(\varepsilon)$ | Low |
+| $w k_3$ | $w s_\theta k_1$ | $O(\varepsilon)$ | Low |
 
 Conclusion: off-policy IS with reverse-KL gradients has three unbiased options: $w k_1$, $\bar w k_2$, $w k_3$. The latter two are identical in gradient and variance and are preferred; $w k_1$ is unbiased but noisier.
 
 **When far off-policy:** If $w$ explodes (little overlap), any $\tfrac{q}{\mu}$ method suffers. Then the variance advantage of $k_3$ over $k_1$ is not guaranteed; clipping/regularization becomes necessary.
 
-
 ### Gradient cheat sheet
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center; white-space: nowrap;">Sampling</th>
-			<th style="text-align: center;">Loss</th>
-			<th style="text-align: center;">$\mathbb{E}[\nabla_\theta \text{Loss}]$</th>
-			<th style="text-align: center;">Optimizes</th>
-			<th style="text-align: center; white-space: nowrap;">Right for reverse KL?</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">$q$ (on)</td>
-			<td style="text-align: center;">$k_1$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[s_\theta] = 0$</td>
-			<td style="text-align: center;">None (zero grad)</td>
-			<td style="text-align: center;">✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$q$ (on)</td>
-			<td style="text-align: center;">$k_2$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$q$ (on)</td>
-			<td style="text-align: center;">$k_3$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-			<td style="text-align: center;">Forward KL</td>
-			<td style="text-align: center;">✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_1$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓ (higher var)</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_2$</td>
-			<td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
-			<td style="text-align: center;">f-divergence (not KL)</td>
-			<td style="text-align: center;">✗</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\text{sg}\left(\tfrac{q}{\mu}\right) k_2$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">$\mu$ (off)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_3$</td>
-			<td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;"><strong>Reverse KL</strong></td>
-			<td style="text-align: center;">✓ (recommended, low var)</td>
-		</tr>
-	</tbody>
-</table>
-</div>
+| Sampling | Loss | $\mathbb{E}[\nabla_\theta \text{Loss}]$ | Optimizes | Right for reverse KL? |
+| :---: | :---: | :---: | :---: | :---: |
+| $q$ (on) | $k_1$ | $\mathbb{E}_q[s_\theta] = 0$ | None (zero grad) | ✗ |
+| $q$ (on) | $k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ |
+| $q$ (on) | $k_3$ | $\nabla_\theta D_{\mathrm{KL}}(p \| q)$ | Forward KL | ✗ |
+| $\mu$ (off) | $\tfrac{q}{\mu} k_1$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ (higher var) |
+| $\mu$ (off) | $\tfrac{q}{\mu} k_2$ | $\nabla_\theta \mathbb{E}_q[k_2]$ | f-divergence (not KL) | ✗ |
+| $\mu$ (off) | $\text{sg}\left(\tfrac{q}{\mu}\right) k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ |
+| $\mu$ (off) | $\tfrac{q}{\mu} k_3$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ (recommended, low var) |
 
 **Key conclusions:**
 1) **On-policy reverse KL:** use $k_2$ (only correct choice).
@@ -673,42 +457,14 @@ Consider a scenario: first few steps are routing behavior, final step has high r
 
 ### Summary
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">Dimension</th>
-      <th style="text-align: center;">KL as Reward (stop-grad)</th>
-      <th style="text-align: center;">KL as Loss (backprop)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">Optimization target</td>
-      <td style="text-align: center;">Regularized new MDP</td>
-      <td style="text-align: center;">Original task + supervised regularization</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Actor gradient</td>
-      <td style="text-align: center;">Single PG, based on shaped advantage</td>
-      <td style="text-align: center;">RL gradient + explicit KL gradient</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Critic</td>
-      <td style="text-align: center;">Learns $V^{\text{reg}}$: reward + KL mixed</td>
-      <td style="text-align: center;">Learns $V^{\text{env}}$: only environment reward</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Credit Assignment</td>
-      <td style="text-align: center;">Multi-step backprop, planning-capable</td>
-      <td style="text-align: center;">Local per-state, no planning</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| Dimension | KL as Reward (stop-grad) | KL as Loss (backprop) |
+| :---: | :---: | :---: |
+| Optimization target | Regularized new MDP | Original task + supervised regularization |
+| Actor gradient | Single PG, based on shaped advantage | RL gradient + explicit KL gradient |
+| Critic | Learns $V^{\text{reg}}$: reward + KL mixed | Learns $V^{\text{env}}$: only environment reward |
+| Credit Assignment | Multi-step backprop, planning-capable | Local per-state, no planning |
 
 **One-liner:** KL as reward makes the agent "plan to avoid high-KL paths" — constraints are more global and thorough; KL as loss makes the agent "visit but locally correct" — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be "preventive" or "corrective".
-
 
 ## RL practice guide
 
@@ -769,44 +525,15 @@ $$
 
 **Avoid:** $\dfrac{q\_\theta}{\mu} k_2$ with weight in gradient — biased for reverse KL.
 
-
 ## "Grab-and-use" crib sheet
 
 The table below provides recommended estimator choices along three dimensions: "target KL direction" × "sampling source" × "usage mode". "For **value**" corresponds to KL as reward penalty (no gradient needed); "For **gradient**" corresponds to KL as loss (gradient backpropagation needed).
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-	<thead>
-		<tr style="background-color: var(--global-bg-color);">
-			<th style="text-align: center;">Target</th>
-			<th style="text-align: center;">Sampling</th>
-			<th style="text-align: center;">For <strong>value</strong> (KL as Reward)</th>
-			<th style="text-align: center;">For <strong>gradient</strong> (KL as Loss)</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;">$q$ (on-policy)</td>
-			<td style="text-align: center;">$k_1$ or $k_3$ (unbiased)</td>
-			<td style="text-align: center;">$k_2$</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
-			<td style="text-align: center;">$\mu$ (off-policy)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_1$ or $\tfrac{q}{\mu} k_3$ (unbiased)</td>
-			<td style="text-align: center;">$\tfrac{q}{\mu} k_3$ (recommended) or $\text{sg}(\tfrac{q}{\mu}) k_2$</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Forward KL $D_{\mathrm{KL}}(p \| q)$</td>
-			<td style="text-align: center;">$q$</td>
-			<td style="text-align: center;">$\mathbb{E}_q[r\log r]$</td>
-			<td style="text-align: center;">$k_3$</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-
+| Target | Sampling | For value (KL as Reward) | For gradient (KL as Loss) |
+| :---: | :---: | :---: | :---: |
+| Reverse KL $D_{\mathrm{KL}}(q \| p)$ | $q$ (on-policy) | $k_1$ or $k_3$ (unbiased) | $k_2$ |
+| Reverse KL $D_{\mathrm{KL}}(q \| p)$ | $\mu$ (off-policy) | $\tfrac{q}{\mu} k_1$ or $\tfrac{q}{\mu} k_3$ (unbiased) | $\tfrac{q}{\mu} k_3$ (recommended) or $\text{sg}(\tfrac{q}{\mu}) k_2$ |
+| Forward KL $D_{\mathrm{KL}}(p \| q)$ | $q$ | $\mathbb{E}_q[r\log r]$ | $k_3$ |
 
 ## Common implementation traps
 
@@ -845,7 +572,6 @@ $w = q_\theta / \mu$ often comes from `log_prob_q - log_prob_mu` then `exp`. Det
 
 > **Summary:** match estimator with the right detach strategy.
 
-
 ## Summary
 
 **One-liners:**
@@ -862,7 +588,6 @@ Additionally, don't forget to determine **the KL usage mode** before choosing an
 - **KL as loss:** Constraints act on the policy directly as an independent gradient term; agent will "visit but locally correct"
 
 This choice is more fundamental than the estimator itself, depending on whether you want constraints to be "preventive" or "corrective".
-
 
 ## References
 

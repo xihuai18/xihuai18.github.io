@@ -16,8 +16,6 @@ lang: zh
 
 [English Version](/reinforcement-learning/2025/12/01/kl-estimators-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
-
-
 ## 引言：KL 散度在强化学习中的角色
 
 在策略优化（PPO、GRPO 等）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，用以防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：**用哪个估计器**（$k_1$, $k_2$, $k_3$）、**从谁采样**（on-policy vs off-policy）、以及**如何使用**（作为 reward shaping 还是作为 loss 回传）。本文将系统地拆解这些选择及其相互关系。
@@ -51,7 +49,6 @@ $$
 - **正向 KL** 倾向于「质量覆盖」（mass-covering）——策略会尽量覆盖参考分布的支撑集
 
 在 RLHF 的主流实现中，**反向 KL** 更为常见，因为我们希望 actor 不要偏离 reference policy 太远，而非要求完全覆盖所有模式。
-
 
 ## 三种估计器的定义与设计原理
 
@@ -118,48 +115,15 @@ $$
 
 由于凸函数始终位于其切线上方，这个差值**天然非负**。更重要的是，在 $r \to 1$ 时，函数与切线「贴合」得越来越紧，差值以 $(r-1)^2$ 的二阶速度趋近于零——这正是 $k_3$ 在策略接近时方差小的根本原因。
 
-
 ### 三者对比总结
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">估计器</th>
-      <th style="text-align: center;">定义</th>
-      <th style="text-align: center;">设计原理</th>
-      <th style="text-align: center;">对数值的偏差</th>
-      <th style="text-align: center;">方差特性</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\log r$</td>
-      <td style="text-align: center;">最朴素定义</td>
-      <td style="text-align: center;">无偏</td>
-      <td style="text-align: center;">高（可正可负）</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$\frac{1}{2}(\log r)^2$</td>
-      <td style="text-align: center;">f-散度，二阶行为与 KL 一致</td>
-      <td style="text-align: center;">有偏（但极小）</td>
-      <td style="text-align: center;">低（恒正）</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$r - 1 - \log r$</td>
-      <td style="text-align: center;">控制变量 + Bregman 散度</td>
-      <td style="text-align: center;">无偏</td>
-      <td style="text-align: center;">低（恒正）</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| 估计器 | 定义 | 设计原理 | 对数值的偏差 | 方差特性 |
+| :---: | :---: | :---: | :---: | :---: |
+| $k_1$ | $\log r$ | 最朴素定义 | 无偏 | 高（可正可负） |
+| $k_2$ | $\frac{1}{2}(\log r)^2$ | f-散度，二阶行为与 KL 一致 | 有偏（但极小） | 低（恒正） |
+| $k_3$ | $r - 1 - \log r$ | 控制变量 + Bregman 散度 | 无偏 | 低（恒正） |
 
 从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，**梯度层面的故事完全不同**——不同估计器的梯度可能对应不同的优化目标。此外，KL 是加入 reward 做 shaping，还是作为 loss 直接回传梯度，也会根本性地影响训练行为。
-
 
 ## 核心分析
 
@@ -185,65 +149,19 @@ $$
 
 John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）表明：
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">估计器</th>
-      <th style="text-align: center;">bias/true</th>
-      <th style="text-align: center;">stdev/true</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">20</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">0.002</td>
-      <td style="text-align: center;">1.42</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">1.42</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| 估计器 | bias/true | stdev/true |
+| :---: | :---: | :---: |
+| $k_1$ | 0 | 20 |
+| $k_2$ | 0.002 | 1.42 |
+| $k_3$ | 0 | 1.42 |
 
 当 KL 较大时（$p = \mathcal{N}(1,1)$，真实 KL = 0.5）：
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">估计器</th>
-      <th style="text-align: center;">bias/true</th>
-      <th style="text-align: center;">stdev/true</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">2</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">0.25</td>
-      <td style="text-align: center;">1.73</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">1.7</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| 估计器 | bias/true | stdev/true |
+| :---: | :---: | :---: |
+| $k_1$ | 0 | 2 |
+| $k_2$ | 0.25 | 1.73 |
+| $k_3$ | 0 | 1.7 |
 
 **核心直觉**：
 - $k_1 = -\log r$ 以一阶项起步，当 $r$ 接近 1 时波动较大，且可能取负值
@@ -251,7 +169,6 @@ John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，�
 - 但当覆盖严重不足（$r$ 可能爆炸）时，$k_3$ 的方差会被权重爆炸拖累；此时 $k_1$ 反而更稳定
 
 > **注**：若要估计**正向 KL 的数值** $D_{\mathrm{KL}}(p \| q) = \mathbb{E}_p[\log r]$，而只能从 $q$ 采样，可用重要性采样 $\mathbb{E}_q[r \log r]$。
-
 
 ### 估计 KL 梯度时的关键区分
 
@@ -378,37 +295,13 @@ $$
 \nabla_\theta k_3 = \nabla_\theta r - 0 - \nabla_\theta \log r = -r \cdot s_\theta - (-s_\theta) = (1 - r) \cdot s_\theta
 $$
 
-
 对它们在 $q_\theta$ 下取期望：
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">Estimator</th>
-      <th style="text-align: center;">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-      <th style="text-align: center;">Equals</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\mathbb{E}_{q}[s_\theta] = 0$</td>
-      <td style="text-align: center;"><strong>Zero (useless as loss)</strong></td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>Gradient of reverse KL</strong></td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-      <td style="text-align: center;"><strong>Gradient of forward KL</strong></td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| Estimator | $\mathbb{E}_{q}[\nabla_\theta k_i]$ | Equals |
+| :---: | :---: | :---: |
+| $k_1$ | $\mathbb{E}_{q}[s_\theta] = 0$ | Zero (useless as loss) |
+| $k_2$ | $-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Gradient of reverse KL |
+| $k_3$ | $\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$ | Gradient of forward KL |
 
 **关键洞察**：
 - **$k_2$ 的梯度**等价于反向 KL 的真梯度——这是优化「约束策略不偏离 ref」的正确选择
@@ -430,7 +323,6 @@ $$
 两者都给出反向 KL 的梯度。但在代码中直接对 $k_3$ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 $\mathbb{E}\_q[\nabla\_\theta k\_3]$，即**正向 KL 的梯度**。
 
 这个区分非常重要：**同一个估计器，两种求导顺序可能给出完全不同的结果**。
-
 
 ### 扩展：从行为策略 $\mu$ 采样时的 KL 梯度估计
 
@@ -571,39 +463,12 @@ $$
 
 **总结表格**：
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">加权估计器</th>
-      <th style="text-align: center;">期望对应的目标</th>
-      <th style="text-align: center;">梯度期望对应的真梯度</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_1$</td>
-      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_2$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[k_2]$（f-散度）</td>
-      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$，<strong>不是</strong>反向 KL ✗</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[k_2]$（f-散度）</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
-      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| 加权估计器 | 期望对应的目标 | 梯度期望对应的真梯度 |
+| :---: | :---: | :---: |
+| $\frac{q_\theta}{\mu} k_1$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓ |
+| $\frac{q_\theta}{\mu} k_2$ | $\mathbb{E}_q[k_2]$（f-散度） | $\nabla_\theta \mathbb{E}_q[k_2]$，不是反向 KL ✗ |
+| $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ | $\mathbb{E}_q[k_2]$（f-散度） | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓ |
+| $\frac{q_\theta}{\mu} k_3$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓ |
 
 **与 on-policy 情形的对比——一个有趣的反转**：
 
@@ -715,38 +580,11 @@ $$
 
 小结表格：
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center; white-space: nowrap;">估计器</th>
-      <th style="text-align: center; white-space: nowrap;">梯度随机变量</th>
-      <th style="text-align: center; white-space: nowrap;">系数量级（$r\approx1$）</th>
-      <th style="text-align: center;">方差</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">$w k_1$</td>
-      <td style="text-align: center;">$w s_\theta (k_1+1)$</td>
-      <td style="text-align: center;">$O(1)$</td>
-      <td style="text-align: center;">高</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\mathrm{sg}(w) k_2$</td>
-      <td style="text-align: center;">$w s_\theta k_1$</td>
-      <td style="text-align: center;">$O(\varepsilon)$</td>
-      <td style="text-align: center;">低</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$w k_3$</td>
-      <td style="text-align: center;">$w s_\theta k_1$</td>
-      <td style="text-align: center;">$O(\varepsilon)$</td>
-      <td style="text-align: center;">低</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| 估计器 | 梯度随机变量 | 系数量级（$r\approx1$） | 方差 |
+| :---: | :---: | :---: | :---: |
+| $w k_1$ | $w s_\theta (k_1+1)$ | $O(1)$ | 高 |
+| $\mathrm{sg}(w) k_2$ | $w s_\theta k_1$ | $O(\varepsilon)$ | 低 |
+| $w k_3$ | $w s_\theta k_1$ | $O(\varepsilon)$ | 低 |
 
 结论：在 off-policy + 重要性采样的设置下，给出反向 KL 真梯度的无偏估计器有三个：$w k_1,\; \bar w k_2,\; w k_3$。其中 $\bar w k_2$ 与 $w k_3$ 在梯度层面完全等价——同均值、同方差、同高阶矩；相比之下，$w k_1$ 的梯度多了一个零均值的常数噪声项 $w s_\theta$，在典型的 KL 惩罚 regime 下其方差大约高一个量级。
 
@@ -781,70 +619,15 @@ $$
 
 下表汇总了 on-policy 与 off-policy 两种场景下，各估计器的梯度期望及其对应的优化目标：
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center; white-space: nowrap;">采样来源</th>
-      <th style="text-align: center;">Loss</th>
-      <th style="text-align: center;">$\nabla_\theta$ Loss 的期望</th>
-      <th style="text-align: center;">对应的优化目标</th>
-      <th style="text-align: center; white-space: nowrap;">能否用于优化反向 KL？</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[s_\theta] = 0$</td>
-      <td style="text-align: center;">无（梯度恒为零）</td>
-      <td style="text-align: center;">✗</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-      <td style="text-align: center;">正向 KL</td>
-      <td style="text-align: center;">✗</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_1$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓（但方差较高）</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
-      <td style="text-align: center;">f-散度（非 KL）</td>
-      <td style="text-align: center;">✗</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓（推荐，低方差）</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| 采样来源 | Loss | $\nabla_\theta$ Loss 的期望 | 对应的优化目标 | 能否用于优化反向 KL？ |
+| :---: | :---: | :---: | :---: | :---: |
+| $q$ (on) | $k_1$ | $\mathbb{E}_q[s_\theta] = 0$ | 无（梯度恒为零） | ✗ |
+| $q$ (on) | $k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | 反向 KL | ✓ |
+| $q$ (on) | $k_3$ | $\nabla_\theta D_{\mathrm{KL}}(p \| q)$ | 正向 KL | ✗ |
+| $\mu$ (off) | $\frac{q}{\mu} k_1$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | 反向 KL | ✓（但方差较高） |
+| $\mu$ (off) | $\frac{q}{\mu} k_2$ | $\nabla_\theta \mathbb{E}_q[k_2]$ | f-散度（非 KL） | ✗ |
+| $\mu$ (off) | $\text{sg}\left(\frac{q}{\mu}\right) k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | 反向 KL | ✓ |
+| $\mu$ (off) | $\frac{q}{\mu} k_3$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | 反向 KL | ✓（推荐，低方差） |
 
 **关键结论**：
 
@@ -932,43 +715,14 @@ $$
 
 ### 小结
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">维度</th>
-      <th style="text-align: center;">KL 作为 Reward（stop-grad）</th>
-      <th style="text-align: center;">KL 作为 Loss（backprop）</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">更新目标</td>
-      <td style="text-align: center;">正则化后的新 MDP</td>
-      <td style="text-align: center;">原任务 + 监督正则</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Actor 梯度</td>
-      <td style="text-align: center;">单一 PG，基于 shaped advantage</td>
-      <td style="text-align: center;">RL 梯度 + 显式 KL 梯度</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Critic</td>
-      <td style="text-align: center;">学 $V^{\text{reg}}$：reward + KL 混合</td>
-      <td style="text-align: center;">学 $V^{\text{env}}$：只看环境 reward</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">Credit Assignment</td>
-      <td style="text-align: center;">多步回传，有规划性</td>
-      <td style="text-align: center;">局部 per-state，无规划性</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+| 维度 | KL 作为 Reward（stop-grad） | KL 作为 Loss（backprop） |
+| :---: | :---: | :---: |
+| 更新目标 | 正则化后的新 MDP | 原任务 + 监督正则 |
+| Actor 梯度 | 单一 PG，基于 shaped advantage | RL 梯度 + 显式 KL 梯度 |
+| Critic | 学 $V^{\text{reg}}$：reward + KL 混合 | 学 $V^{\text{env}}$：只看环境 reward |
+| Credit Assignment | 多步回传，有规划性 | 局部 per-state，无规划性 |
 
 **一句话总结**：KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底；KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活。选择取决于你是否需要跨时间步的 KL 预算分配能力，以及希望约束是「预防性」还是「修正性」的。
-
-
 
 ## RL 实践指南
 
@@ -1018,7 +772,6 @@ $$
 
 目标：数据来自行为策略 $\mu$，仍希望优化反向 KL。
 
-
 **推荐做法**：使用 **$\dfrac{q_\theta}{\mu} k_3$** 或 **$\mathrm{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$** 作为 loss（两者梯度完全等价）。
 
 $$
@@ -1038,44 +791,15 @@ $$
 
 **避免**：使用 $\dfrac{q_\theta}{\mu} k_2$（权重参与梯度计算）——梯度有偏，不是反向 KL 的正确方向
 
-
 ## 一份「拿来就用」的对照表
 
 下表按「目标 KL 方向」×「采样来源」×「使用方式」三个维度给出推荐的估计器选择。其中「用于**数值**」对应 KL 作为 reward 惩罚（不需要梯度），「用于**梯度**」对应 KL 作为 loss（需要反传梯度）。
 
-<div class="table-responsive" markdown="0">
-<table class="table table-bordered" style="font-size: 0.95em;">
-  <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">目标</th>
-      <th style="text-align: center;">采样来源</th>
-      <th style="text-align: center;">用于<strong>数值</strong>（KL 作为 Reward）</th>
-      <th style="text-align: center;">用于<strong>梯度</strong>（KL 作为 Loss）</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;">$q$（on-policy）</td>
-      <td style="text-align: center;">$k_1$ 或 $k_3$（无偏）</td>
-      <td style="text-align: center;">$k_2$</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;">$\mu$（off-policy）</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏）</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$（推荐）或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
-    </tr>
-    <tr>
-      <td style="text-align: center;">正向 KL $D_{\mathrm{KL}}(p \| q)$</td>
-      <td style="text-align: center;">$q$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[r\log r]$</td>
-      <td style="text-align: center;">$k_3$</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
+| 目标 | 采样来源 | 用于数值（KL 作为 Reward） | 用于梯度（KL 作为 Loss） |
+| :---: | :---: | :---: | :---: |
+| 反向 KL $D_{\mathrm{KL}}(q \| p)$ | $q$（on-policy） | $k_1$ 或 $k_3$（无偏） | $k_2$ |
+| 反向 KL $D_{\mathrm{KL}}(q \| p)$ | $\mu$（off-policy） | $\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏） | $\frac{q}{\mu} k_3$（推荐）或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$ |
+| 正向 KL $D_{\mathrm{KL}}(p \| q)$ | $q$ | $\mathbb{E}_q[r\log r]$ | $k_3$ |
 
 ## 常见实现陷阱
 
@@ -1114,7 +838,6 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 
 > **总结**：选择不同的估计器时，要注意匹配正确的 detach 策略。
 
-
 ## 总结
 
 **一句话记忆**：
@@ -1131,7 +854,6 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 - **KL 作为 loss**：约束作为独立梯度项直接作用于策略，agent 会「访问但局部修正」
 
 这一选择比估计器本身更根本，取决于你希望约束是「预防性」还是「修正性」的。
-
 
 ## 参考文献
 

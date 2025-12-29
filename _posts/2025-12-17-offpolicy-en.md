@@ -22,7 +22,6 @@ This is the core problem faced by **off-policy** training: **Can we guarantee co
 
 This article systematically addresses this question. Starting from foundational theory, we progressively derive actionable conditions that specify when mixing data from multiple policy versions can still guarantee monotonic training improvement.
 
-
 ## Part I: Theoretical Foundations
 
 ### 1.1 Basic Setup
@@ -66,7 +65,6 @@ The cornerstone of the entire theory is this elegant result:
 > $$
 
 **Intuitive understanding**: How much better the new policy is than the old equals the "average advantage" obtained by selecting actions according to the new policy under the state distribution visited by the new policy.
-
 
 ## Part II: Performance Improvement Bounds for Single-Policy Sampling
 
@@ -112,7 +110,6 @@ This lower bound consists of two parts:
 
 **Core conclusion**: Maximizing the surrogate objective while controlling policy shift guarantees performance improvement.
 
-
 ## Part III: Multi-Policy Static Mixture Sampling
 
 ### 3.1 Practical Scenarios
@@ -154,7 +151,6 @@ Consequently, the mixture policy's return is the weighted average of individual 
 > $$
 
 This result shows that when mixing trajectories from multiple old policy versions for training, if we construct the loss using importance ratios corresponding to each trajectory's source policy while controlling the new policy's deviation from each old policy, the new policy's performance has a clear improvement lower bound.
-
 
 ## Part IV: Dynamic Mixture Sampling and Monotonic Improvement Conditions
 
@@ -251,18 +247,10 @@ $$
 
 This reveals an important engineering principle—**separation of concerns**:
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>Control Term</th><th>Responsible Party</th><th>Control Mechanism</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$ (update increment shift)</td><td>Optimization algorithm</td><td>Policy clipping</td></tr>
-<tr><td>$S_k$ (sampling staleness)</td><td>Sampling system</td><td>Data filtering, version window</td></tr>
-</tbody>
-</table>
-</div>
-
+| Control Term | Responsible Party | Control Mechanism |
+| --- | --- | --- |
+| $U_k$ (update increment shift) | Optimization algorithm | Policy clipping |
+| $S_k$ (sampling staleness) | Sampling system | Data filtering, version window |
 
 ## Part V: Theoretical Foundations of Clipping Mechanisms
 
@@ -353,18 +341,11 @@ where $\hat{A} = \rho\_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advan
 
 **Table 5.1　Comparison of Three Clipping Mechanisms**
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>Method</th><th>Clipped Variable</th><th>Clipping Center</th><th>Clipping Interval</th><th>Constrained TV Distance</th></tr>
-</thead>
-<tbody>
-<tr><td>Standard PPO</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$</td></tr>
-<tr><td>Method 1</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$\rho_k = \pi_k/\pi^{(i)}$</td><td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-<tr><td>Method 2</td><td>$r = \pi_{k+1}/\pi_k$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-</tbody>
-</table>
-</div>
+| Method | Clipped Variable | Clipping Center | Clipping Interval | Constrained TV Distance |
+| --- | --- | --- | --- | --- |
+| Standard PPO | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $1$ | $[1-\epsilon, 1+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$ |
+| Method 1 | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $\rho_k = \pi_k/\pi^{(i)}$ | $[\rho_k-\epsilon, \rho_k+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$ |
+| Method 2 | $r = \pi_{k+1}/\pi_k$ | $1$ | $[1-\epsilon, 1+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$ |
 
 **The Fundamental Problem with Standard PPO Under Multi-Policy Mixture**
 
@@ -376,19 +357,12 @@ Both methods constrain $D\_{\mathrm{TV}}(\pi\_{k+1}, \pi\_k)$—the deviation of
 
 **Method 1 vs Method 2**
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>Comparison Dimension</th><th>Method 1 (Adaptive Clipping)</th><th>Method 2 (Incremental Clipping)</th></tr>
-</thead>
-<tbody>
-<tr><td>Stale samples ($\rho_k \gg 1$)</td><td>Automatically tightens constraints, more conservative</td><td>May produce large gradient variance</td></tr>
-<tr><td>LLM large vocabulary low-probability tokens</td><td>Allows larger absolute changes (additive)</td><td>Absolute changes are limited (multiplicative)</td></tr>
-<tr><td>Implementation complexity</td><td>Requires storing $\pi^{(i)}(a|s)$ and $\pi_k(a|s)$</td><td>Only requires $\pi_k(a|s)$</td></tr>
-<tr><td>Advantage function</td><td>Uses $A^{\beta^{(k)}}$</td><td>Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$</td></tr>
-</tbody>
-</table>
-</div>
+| Comparison Dimension | Method 1 (Adaptive Clipping) | Method 2 (Incremental Clipping) |
+| --- | --- | --- |
+| Stale samples ($\rho_k \gg 1$) | Automatically tightens constraints, more conservative | May produce large gradient variance |
+| LLM large vocabulary low-probability tokens | Allows larger absolute changes (additive) | Absolute changes are limited (multiplicative) |
+| Implementation complexity | Requires storing $\pi^{(i)}(a\|s)$ and $\pi_k(a\|s)$ | Only requires $\pi_k(a\|s)$ |
+| Advantage function | Uses $A^{\beta^{(k)}}$ | Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$ |
 
 **Detailed Explanations**:
 
@@ -439,7 +413,6 @@ This section established the theoretical foundations of clipping mechanisms:
 5. **$S\_k$ control** is the sampling side's responsibility, implemented through data filtering and version windows
 6. **Clipping is constrained optimization**: Maximize the surrogate objective subject to $U\_k$ constraints
 
-
 ## Part VI: Comparison of Trajectory-Level and Step/Segment-Level Mixture
 
 ### 6.1 Core Differences Between the Two Mechanisms
@@ -478,23 +451,15 @@ Step/segment-level mixture has another hidden concern: even if single-step impor
 
 **Table 6.1　Applicable Scenarios for Two Mixture Mechanisms**
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>Scenario Characteristics</th><th>Recommended Mechanism</th><th>Rationale</th></tr>
-</thead>
-<tbody>
-<tr><td>Long trajectories, high-frequency updates, strong asynchrony</td><td>Step/segment-level</td><td>Can significantly compress $S_k$</td></tr>
-<tr><td>Short trajectories (non-bandit)</td><td>Trajectory-level</td><td>$S_k$ is naturally low</td></tr>
-<tr><td>Large policy change per update</td><td>Trajectory-level</td><td>Avoids variance amplification</td></tr>
-<tr><td>Single-step episode (bandit)</td><td>Either</td><td>Choose based on implementation convenience</td></tr>
-<tr><td>Need for compromise</td><td>Segment-level</td><td>Switch at natural boundaries</td></tr>
-</tbody>
-</table>
-</div>
+| Scenario Characteristics | Recommended Mechanism | Rationale |
+| --- | --- | --- |
+| Long trajectories, high-frequency updates, strong asynchrony | Step/segment-level | Can significantly compress $S_k$ |
+| Short trajectories (non-bandit) | Trajectory-level | $S_k$ is naturally low |
+| Large policy change per update | Trajectory-level | Avoids variance amplification |
+| Single-step episode (bandit) | Either | Choose based on implementation convenience |
+| Need for compromise | Segment-level | Switch at natural boundaries |
 
 **Core trade-off**: Step/segment-level mixture is stronger on the sampling side (fast staleness removal), while trajectory-level mixture is more stable on the estimation side (easier surrogate objective estimation).
-
 
 ## Part VII: Handling Training-Inference Inconsistency
 
@@ -526,7 +491,6 @@ By Lemma 3.3, $\hat{S}\_k$ can be expressed in sample-level computable form. Giv
 1. **Behavior denominator alignment**: The behavior probability in the loss should use the inference-side recorded $\hat{\pi}^{(i)}(a\|s)$
 2. **Probability smoothing**: If the inference side has truncation (e.g., top-k), ensure ratios are valid
 
-
 ## Summary: Practical Guidelines
 
 ### Core Theoretical Framework
@@ -539,61 +503,37 @@ $$
 
 ### Separation of Concerns Principle
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>Control Term</th><th>Responsible Party</th><th>Control Mechanism</th><th>Specific Operation</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$</td><td>Optimization algorithm</td><td>Policy clipping</td><td>Clip $\pi_{k+1}/\pi_k$</td></tr>
-<tr><td>$S_k$</td><td>Sampling system</td><td>Data filtering</td><td>Discard stale samples</td></tr>
-<tr><td>$S_k$</td><td>Sampling system</td><td>Version window</td><td>Use only most recent $W$ versions</td></tr>
-</tbody>
-</table>
-</div>
+| Control Term | Responsible Party | Control Mechanism | Specific Operation |
+| --- | --- | --- | --- |
+| $U_k$ | Optimization algorithm | Policy clipping | Clip $\pi_{k+1}/\pi_k$ |
+| $S_k$ | Sampling system | Data filtering | Discard stale samples |
+| $S_k$ | Sampling system | Version window | Use only most recent $W$ versions |
 
 ### Clipping Method Selection
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>Scenario</th><th>Recommended Method</th><th>Rationale</th></tr>
-</thead>
-<tbody>
-<tr><td>High staleness</td><td>Method 1 (adaptive)</td><td>Automatically tightens constraints for stale samples</td></tr>
-<tr><td>Implementation simplicity prioritized</td><td>Method 2 (incremental)</td><td>No need to store old policy information</td></tr>
-<tr><td>LLM large vocabulary</td><td>Method 1</td><td>Avoids slow updates for low-probability tokens</td></tr>
-</tbody>
-</table>
-</div>
-
+| Scenario | Recommended Method | Rationale |
+| --- | --- | --- |
+| High staleness | Method 1 (adaptive) | Automatically tightens constraints for stale samples |
+| Implementation simplicity prioritized | Method 2 (incremental) | No need to store old policy information |
+| LLM large vocabulary | Method 1 | Avoids slow updates for low-probability tokens |
 
 ### Handling Training-Inference Inconsistency
 
 - Use inference-side recorded $\hat{\pi}^{(i)}$ as the behavior denominator
 - Compress effective staleness through sample filtering
 
-
 ## Appendix: Quick Reference for Key Symbols
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>Symbol</th><th>Meaning</th></tr>
-</thead>
-<tbody>
-<tr><td>$\pi_k$, $\pi^{(i)}$</td><td>Latest policy at round $k$, $i$-th old policy</td></tr>
-<tr><td>$d_\pi(s)$, $A^\pi(s,a)$</td><td>Discounted state visitation distribution, advantage function</td></tr>
-<tr><td>$D_{\mathrm{TV}}(\pi, \pi'; s)$</td><td>TV distance between two policies at state $s$</td></tr>
-<tr><td>$\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$</td><td>Mixture behavior policy at round $k$</td></tr>
-<tr><td>$q(i' \mid i)$, $\alpha_i^{(k)}$</td><td>Index transition kernel, initial index distribution</td></tr>
-<tr><td>$U_k$, $S_k$</td><td>Update increment shift, sampling staleness</td></tr>
-<tr><td>$\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$</td><td>Clipping radius, staleness threshold, version window</td></tr>
-<tr><td>$C_{\pi,\pi_k}$</td><td>Expected advantage upper bound constant</td></tr>
-</tbody>
-</table>
-</div>
-
+| Symbol | Meaning |
+| --- | --- |
+| $\pi_k$, $\pi^{(i)}$ | Latest policy at round $k$, $i$-th old policy |
+| $d_\pi(s)$, $A^\pi(s,a)$ | Discounted state visitation distribution, advantage function |
+| $D_{\mathrm{TV}}(\pi, \pi'; s)$ | TV distance between two policies at state $s$ |
+| $\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$ | Mixture behavior policy at round $k$ |
+| $q(i' \mid i)$, $\alpha_i^{(k)}$ | Index transition kernel, initial index distribution |
+| $U_k$, $S_k$ | Update increment shift, sampling staleness |
+| $\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$ | Clipping radius, staleness threshold, version window |
+| $C_{\pi,\pi_k}$ | Expected advantage upper bound constant |
 
 ## References
 
@@ -608,7 +548,6 @@ $$
 5. Yuzhen Zhou, Jiajun Li, Yusheng Su, et al. "APRIL: Active Partial Rollouts in Reinforcement Learning to Tame Long-tail Generation" (APRIL; partial rollout). arXiv:2509.18521. <https://arxiv.org/abs/2509.18521>
 
 6. Jacob Hilton, Karl Cobbe, John Schulman. "Batch size-invariance for policy optimization" (Decoupled PPO). arXiv:2110.00641. <https://arxiv.org/abs/2110.00641>
-
 
 ```bibtex
 @misc{WangZhang2025OffPolicyLLMRL,

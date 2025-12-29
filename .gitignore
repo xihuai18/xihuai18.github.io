@@ -9,5 +9,5 @@ _site
 Gemfile.lock
 vendor
 .vscode
-_posts/tips.md
+_posts/AGENTS.md
 /sitemap.xml

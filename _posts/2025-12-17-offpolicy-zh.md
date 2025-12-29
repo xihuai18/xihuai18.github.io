@@ -22,7 +22,6 @@ lang: zh
 
 本文将系统回答这个问题。我们从基础理论出发，逐步推导出可操作的条件，告诉你：在什么情况下，混合使用多个版本策略的数据仍然能保证训练单调改进。
 
-
 ## 第一部分：理论基础
 
 ### 1.1 基本设定
@@ -66,7 +65,6 @@ $$
 > $$
 
 **直观理解**：新策略比旧策略好多少，等于在新策略访问的状态分布下，用新策略选动作能获得的"平均优势"。
-
 
 ## 第二部分：单策略采样的性能改进下界
 
@@ -112,7 +110,6 @@ $$
 
 **核心结论**：最大化代理目标的同时控制策略偏移，即可保证性能改进。
 
-
 ## 第三部分：多策略静态混合采样
 
 ### 3.1 实际场景
@@ -154,7 +151,6 @@ $$
 > $$
 
 该结论表明：将多个旧策略版本的轨迹混合训练时，若对每条轨迹用对应旧策略的重要性比率构造损失，同时控制新策略与各旧策略的偏移，则新策略性能有明确的改进下界。
-
 
 ## 第四部分：动态混合采样与单调提升条件
 
@@ -251,18 +247,10 @@ $$
 
 这揭示了重要的工程原则——**职责分离**：
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>控制项</th><th>负责方</th><th>控制手段</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$（更新增量偏移）</td><td>优化算法</td><td>策略裁剪</td></tr>
-<tr><td>$S_k$（采样陈旧性）</td><td>采样系统</td><td>数据过滤、版本窗口</td></tr>
-</tbody>
-</table>
-</div>
-
+| 控制项 | 负责方 | 控制手段 |
+| --- | --- | --- |
+| $U_k$（更新增量偏移） | 优化算法 | 策略裁剪 |
+| $S_k$（采样陈旧性） | 采样系统 | 数据过滤、版本窗口 |
 
 ## 第五部分：裁剪机制的理论基础
 
@@ -349,18 +337,11 @@ $$
 
 **表5.1　三种裁剪机制的对比**
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>方法</th><th>裁剪变量</th><th>裁剪中心</th><th>裁剪区间</th><th>约束的TV距离</th></tr>
-</thead>
-<tbody>
-<tr><td>标准PPO</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$</td></tr>
-<tr><td>方法一</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$\rho_k = \pi_k/\pi^{(i)}$</td><td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-<tr><td>方法二</td><td>$r = \pi_{k+1}/\pi_k$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-</tbody>
-</table>
-</div>
+| 方法 | 裁剪变量 | 裁剪中心 | 裁剪区间 | 约束的TV距离 |
+| --- | --- | --- | --- | --- |
+| 标准PPO | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $1$ | $[1-\epsilon, 1+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$ |
+| 方法一 | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $\rho_k = \pi_k/\pi^{(i)}$ | $[\rho_k-\epsilon, \rho_k+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$ |
+| 方法二 | $r = \pi_{k+1}/\pi_k$ | $1$ | $[1-\epsilon, 1+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$ |
 
 **标准PPO在多策略混合下的根本问题**
 
@@ -372,19 +353,12 @@ $$
 
 **方法一 vs 方法二**
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>比较维度</th><th>方法一（自适应裁剪）</th><th>方法二（增量裁剪）</th></tr>
-</thead>
-<tbody>
-<tr><td>陈旧样本（$\rho_k \gg 1$）</td><td>自动收紧约束，更保守</td><td>可能产生大梯度方差</td></tr>
-<tr><td>LLM大词表低概率token</td><td>允许较大绝对变化（加法型）</td><td>绝对变化受限（乘法型）</td></tr>
-<tr><td>实现复杂度</td><td>需存储 $\pi^{(i)}(a|s)$ 和 $\pi_k(a|s)$</td><td>仅需 $\pi_k(a|s)$</td></tr>
-<tr><td>优势函数</td><td>使用 $A^{\beta^{(k)}}$</td><td>使用加权优势 $\rho_k \cdot A^{\beta^{(k)}}$</td></tr>
-</tbody>
-</table>
-</div>
+| 比较维度 | 方法一（自适应裁剪） | 方法二（增量裁剪） |
+| --- | --- | --- |
+| 陈旧样本（$\rho_k \gg 1$） | 自动收紧约束，更保守 | 可能产生大梯度方差 |
+| LLM大词表低概率token | 允许较大绝对变化（加法型） | 绝对变化受限（乘法型） |
+| 实现复杂度 | 需存储 $\pi^{(i)}(a\|s)$ 和 $\pi_k(a\|s)$ | 仅需 $\pi_k(a\|s)$ |
+| 优势函数 | 使用 $A^{\beta^{(k)}}$ | 使用加权优势 $\rho_k \cdot A^{\beta^{(k)}}$ |
 
 **详细解释**：
 
@@ -435,7 +409,6 @@ $$
 5. **$S\_k$ 的控制**由采样侧负责，通过数据过滤和版本窗口实现
 6. **裁剪是约束优化**：在 $U\_k$ 约束下最大化代理目标
 
-
 ## 第六部分：轨迹级与步/段级混合的比较
 
 ### 6.1 两类机制的核心差异
@@ -474,23 +447,15 @@ $$
 
 **表6.1　两类混合机制的适用场景**
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>场景特征</th><th>推荐机制</th><th>理由</th></tr>
-</thead>
-<tbody>
-<tr><td>长轨迹、高频更新、强异步</td><td>步/段级</td><td>可显著压缩 $S_k$</td></tr>
-<tr><td>短轨迹（非Bandit）</td><td>轨迹级</td><td>$S_k$ 自然较低</td></tr>
-<tr><td>每次更新策略变化幅度大</td><td>轨迹级</td><td>避免方差放大</td></tr>
-<tr><td>单步episode（Bandit）</td><td>均可</td><td>按实现便利选择</td></tr>
-<tr><td>需要折中方案</td><td>段级</td><td>在自然边界切换</td></tr>
-</tbody>
-</table>
-</div>
+| 场景特征 | 推荐机制 | 理由 |
+| --- | --- | --- |
+| 长轨迹、高频更新、强异步 | 步/段级 | 可显著压缩 $S_k$ |
+| 短轨迹（非Bandit） | 轨迹级 | $S_k$ 自然较低 |
+| 每次更新策略变化幅度大 | 轨迹级 | 避免方差放大 |
+| 单步episode（Bandit） | 均可 | 按实现便利选择 |
+| 需要折中方案 | 段级 | 在自然边界切换 |
 
 **核心权衡**：步/段级混合在采样侧更强（快速去陈旧），轨迹级混合在估计侧更稳（代理目标易估计）。
-
 
 ## 第七部分：训推不一致的处理
 
@@ -522,7 +487,6 @@ $$
 1. **行为分母对齐**：损失中的行为概率应使用推理端记录的 $\hat{\pi}^{(i)}(a\|s)$
 2. **概率平滑**：若推理端有截断（如top-k），需确保比值合法
 
-
 ## 总结：实践指南
 
 ### 核心理论框架
@@ -535,33 +499,19 @@ $$
 
 ### 职责分离原则
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>控制项</th><th>负责方</th><th>控制手段</th><th>具体操作</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$</td><td>优化算法</td><td>策略裁剪</td><td>对 $\pi_{k+1}/\pi_k$ 裁剪</td></tr>
-<tr><td>$S_k$</td><td>采样系统</td><td>数据过滤</td><td>丢弃陈旧样本</td></tr>
-<tr><td>$S_k$</td><td>采样系统</td><td>版本窗口</td><td>仅用最近 $W$ 个版本</td></tr>
-</tbody>
-</table>
-</div>
+| 控制项 | 负责方 | 控制手段 | 具体操作 |
+| --- | --- | --- | --- |
+| $U_k$ | 优化算法 | 策略裁剪 | 对 $\pi_{k+1}/\pi_k$ 裁剪 |
+| $S_k$ | 采样系统 | 数据过滤 | 丢弃陈旧样本 |
+| $S_k$ | 采样系统 | 版本窗口 | 仅用最近 $W$ 个版本 |
 
 ### 裁剪方法选择
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>场景</th><th>推荐方法</th><th>理由</th></tr>
-</thead>
-<tbody>
-<tr><td>陈旧性较高</td><td>方法一（自适应）</td><td>自动对陈旧样本收紧约束</td></tr>
-<tr><td>实现简洁优先</td><td>方法二（增量）</td><td>无需存储旧策略信息</td></tr>
-<tr><td>LLM大词表</td><td>方法一</td><td>避免低概率token更新过慢</td></tr>
-</tbody>
-</table>
-</div>
+| 场景 | 推荐方法 | 理由 |
+| --- | --- | --- |
+| 陈旧性较高 | 方法一（自适应） | 自动对陈旧样本收紧约束 |
+| 实现简洁优先 | 方法二（增量） | 无需存储旧策略信息 |
+| LLM大词表 | 方法一 | 避免低概率token更新过慢 |
 
 ### 训推不一致处理
 
@@ -570,24 +520,16 @@ $$
 
 ## 附录：关键符号速查表
 
-<div markdown="0">
-<table>
-<thead>
-<tr><th>符号</th><th>含义</th></tr>
-</thead>
-<tbody>
-<tr><td>$\pi_k$, $\pi^{(i)}$</td><td>第 $k$ 轮最新策略，第 $i$ 个旧策略</td></tr>
-<tr><td>$d_\pi(s)$, $A^\pi(s,a)$</td><td>折扣状态访问分布，优势函数</td></tr>
-<tr><td>$D_{\mathrm{TV}}(\pi, \pi'; s)$</td><td>两策略在状态 $s$ 上的TV距离</td></tr>
-<tr><td>$\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$</td><td>第 $k$ 轮混合行为策略</td></tr>
-<tr><td>$q(i' \mid i)$, $\alpha_i^{(k)}$</td><td>索引转移核，索引初始分布</td></tr>
-<tr><td>$U_k$, $S_k$</td><td>更新增量偏移，采样陈旧性</td></tr>
-<tr><td>$\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$</td><td>裁剪半径，陈旧性阈值，版本窗口</td></tr>
-<tr><td>$C_{\pi,\pi_k}$</td><td>期望优势上界常数</td></tr>
-</tbody>
-</table>
-</div>
-
+| 符号 | 含义 |
+| --- | --- |
+| $\pi_k$, $\pi^{(i)}$ | 第 $k$ 轮最新策略，第 $i$ 个旧策略 |
+| $d_\pi(s)$, $A^\pi(s,a)$ | 折扣状态访问分布，优势函数 |
+| $D_{\mathrm{TV}}(\pi, \pi'; s)$ | 两策略在状态 $s$ 上的TV距离 |
+| $\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$ | 第 $k$ 轮混合行为策略 |
+| $q(i' \mid i)$, $\alpha_i^{(k)}$ | 索引转移核，索引初始分布 |
+| $U_k$, $S_k$ | 更新增量偏移，采样陈旧性 |
+| $\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$ | 裁剪半径，陈旧性阈值，版本窗口 |
+| $C_{\pi,\pi_k}$ | 期望优势上界常数 |
 
 ## 参考文献
 
@@ -602,7 +544,6 @@ $$
 5. Yuzhen Zhou, Jiajun Li, Yusheng Su, et al. "APRIL: Active Partial Rollouts in Reinforcement Learning to Tame Long-tail Generation" (APRIL; partial rollout). arXiv:2509.18521. <https://arxiv.org/abs/2509.18521>
 
 6. Jacob Hilton, Karl Cobbe, John Schulman. "Batch size-invariance for policy optimization" (Decoupled PPO). arXiv:2110.00641. <https://arxiv.org/abs/2110.00641>
-
 
 ```bibtex
 @misc{WangZhang2025OffPolicyLLMRL,
