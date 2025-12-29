@@ -314,42 +314,40 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h3 id="三者对比总结">三者对比总结</h3>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">估计器</th>
-      <th style="text-align: center;">定义</th>
-      <th style="text-align: center;">设计原理</th>
-      <th style="text-align: center;">对数值的偏差</th>
-      <th style="text-align: center;">方差特性</th>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: center">定义</th>
+      <th style="text-align: center">设计原理</th>
+      <th style="text-align: center">对数值的偏差</th>
+      <th style="text-align: center">方差特性</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\log r$</td>
-      <td style="text-align: center;">最朴素定义</td>
-      <td style="text-align: center;">无偏</td>
-      <td style="text-align: center;">高（可正可负）</td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">$\log r$</td>
+      <td style="text-align: center">最朴素定义</td>
+      <td style="text-align: center">无偏</td>
+      <td style="text-align: center">高（可正可负）</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$\frac{1}{2}(\log r)^2$</td>
-      <td style="text-align: center;">f-散度，二阶行为与 KL 一致</td>
-      <td style="text-align: center;">有偏（但极小）</td>
-      <td style="text-align: center;">低（恒正）</td>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">$\frac{1}{2}(\log r)^2$</td>
+      <td style="text-align: center">f-散度，二阶行为与 KL 一致</td>
+      <td style="text-align: center">有偏（但极小）</td>
+      <td style="text-align: center">低（恒正）</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$r - 1 - \log r$</td>
-      <td style="text-align: center;">控制变量 + Bregman 散度</td>
-      <td style="text-align: center;">无偏</td>
-      <td style="text-align: center;">低（恒正）</td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">$r - 1 - \log r$</td>
+      <td style="text-align: center">控制变量 + Bregman 散度</td>
+      <td style="text-align: center">无偏</td>
+      <td style="text-align: center">低（恒正）</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p>从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；但正如后文将分析的，<strong>梯度层面的故事完全不同</strong>——不同估计器的梯度可能对应不同的优化目标。此外，KL 是加入 reward 做 shaping，还是作为 loss 直接回传梯度，也会根本性地影响训练行为。</p>
 
@@ -375,65 +373,61 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）表明：</p>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">估计器</th>
-      <th style="text-align: center;">bias/true</th>
-      <th style="text-align: center;">stdev/true</th>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: center">bias/true</th>
+      <th style="text-align: center">stdev/true</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">20</td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">20</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">0.002</td>
-      <td style="text-align: center;">1.42</td>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">0.002</td>
+      <td style="text-align: center">1.42</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">1.42</td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">1.42</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p>当 KL 较大时（$p = \mathcal{N}(1,1)$，真实 KL = 0.5）：</p>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">估计器</th>
-      <th style="text-align: center;">bias/true</th>
-      <th style="text-align: center;">stdev/true</th>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: center">bias/true</th>
+      <th style="text-align: center">stdev/true</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">2</td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">2</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">0.25</td>
-      <td style="text-align: center;">1.73</td>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">0.25</td>
+      <td style="text-align: center">1.73</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">0</td>
-      <td style="text-align: center;">1.7</td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">1.7</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p><strong>核心直觉</strong>：</p>
 <ul>
@@ -543,34 +537,32 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p>对它们在 $q_\theta$ 下取期望：</p>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">Estimator</th>
-      <th style="text-align: center;">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-      <th style="text-align: center;">Equals</th>
+    <tr>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">$\mathbb{E}<em>{q}[\nabla</em>\theta k_i]$</th>
+      <th style="text-align: center">Equals</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\mathbb{E}_{q}[s_\theta] = 0$</td>
-      <td style="text-align: center;"><strong>Zero (useless as loss)</strong></td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">$\mathbb{E}<em>{q}[s</em>\theta] = 0$</td>
+      <td style="text-align: center">Zero (useless as loss)</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$-\mathbb{E}_{q}[(\log r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>Gradient of reverse KL</strong></td>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">$-\mathbb{E}<em>{q}[(\log r) \cdot s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: center">Gradient of reverse KL</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$\mathbb{E}_{q}[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-      <td style="text-align: center;"><strong>Gradient of forward KL</strong></td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">$\mathbb{E}<em>{q}[(1-r) \cdot s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$</td>
+      <td style="text-align: center">Gradient of forward KL</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p><strong>关键洞察</strong>：</p>
 <ul>
@@ -704,39 +696,37 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <p><strong>总结表格</strong>：</p>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">加权估计器</th>
-      <th style="text-align: center;">期望对应的目标</th>
-      <th style="text-align: center;">梯度期望对应的真梯度</th>
+    <tr>
+      <th style="text-align: center">加权估计器</th>
+      <th style="text-align: center">期望对应的目标</th>
+      <th style="text-align: center">梯度期望对应的真梯度</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_1$</td>
-      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
+      <td style="text-align: center">$\frac{q_\theta}{\mu} k_1$</td>
+      <td style="text-align: center">$D_{\mathrm{KL}}(q_\theta | p)$</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$（反向 KL） ✓</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_2$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[k_2]$（f-散度）</td>
-      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$，<strong>不是</strong>反向 KL ✗</td>
+      <td style="text-align: center">$\frac{q_\theta}{\mu} k_2$</td>
+      <td style="text-align: center">$\mathbb{E}_q[k_2]$（f-散度）</td>
+      <td style="text-align: center">$\nabla_\theta \mathbb{E}_q[k_2]$，不是反向 KL ✗</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[k_2]$（f-散度）</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
+      <td style="text-align: center">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
+      <td style="text-align: center">$\mathbb{E}_q[k_2]$（f-散度）</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$（反向 KL） ✓</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\frac{q_\theta}{\mu} k_3$</td>
-      <td style="text-align: center;">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL） ✓</td>
+      <td style="text-align: center">$\frac{q_\theta}{\mu} k_3$</td>
+      <td style="text-align: center">$D_{\mathrm{KL}}(q_\theta | p)$</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q_\theta | p)$（反向 KL） ✓</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p><strong>与 on-policy 情形的对比——一个有趣的反转</strong>：</p>
 
@@ -838,38 +828,36 @@ g_3(x)
 
 <p>小结表格：</p>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center; white-space: nowrap;">估计器</th>
-      <th style="text-align: center; white-space: nowrap;">梯度随机变量</th>
-      <th style="text-align: center; white-space: nowrap;">系数量级（$r\approx1$）</th>
-      <th style="text-align: center;">方差</th>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: center">梯度随机变量</th>
+      <th style="text-align: center">系数量级（$r\approx1$）</th>
+      <th style="text-align: center">方差</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$w k_1$</td>
-      <td style="text-align: center;">$w s_\theta (k_1+1)$</td>
-      <td style="text-align: center;">$O(1)$</td>
-      <td style="text-align: center;">高</td>
+      <td style="text-align: center">$w k_1$</td>
+      <td style="text-align: center">$w s_\theta (k_1+1)$</td>
+      <td style="text-align: center">$O(1)$</td>
+      <td style="text-align: center">高</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\mathrm{sg}(w) k_2$</td>
-      <td style="text-align: center;">$w s_\theta k_1$</td>
-      <td style="text-align: center;">$O(\varepsilon)$</td>
-      <td style="text-align: center;">低</td>
+      <td style="text-align: center">$\mathrm{sg}(w) k_2$</td>
+      <td style="text-align: center">$w s_\theta k_1$</td>
+      <td style="text-align: center">$O(\varepsilon)$</td>
+      <td style="text-align: center">低</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$w k_3$</td>
-      <td style="text-align: center;">$w s_\theta k_1$</td>
-      <td style="text-align: center;">$O(\varepsilon)$</td>
-      <td style="text-align: center;">低</td>
+      <td style="text-align: center">$w k_3$</td>
+      <td style="text-align: center">$w s_\theta k_1$</td>
+      <td style="text-align: center">$O(\varepsilon)$</td>
+      <td style="text-align: center">低</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p>结论：在 off-policy + 重要性采样的设置下，给出反向 KL 真梯度的无偏估计器有三个：$w k_1,\; \bar w k_2,\; w k_3$。其中 $\bar w k_2$ 与 $w k_3$ 在梯度层面完全等价——同均值、同方差、同高阶矩；相比之下，$w k_1$ 的梯度多了一个零均值的常数噪声项 $w s_\theta$，在典型的 KL 惩罚 regime 下其方差大约高一个量级。</p>
 
@@ -913,70 +901,68 @@ g_3(x)
 
 <p>下表汇总了 on-policy 与 off-policy 两种场景下，各估计器的梯度期望及其对应的优化目标：</p>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center; white-space: nowrap;">采样来源</th>
-      <th style="text-align: center;">Loss</th>
-      <th style="text-align: center;">$\nabla_\theta$ Loss 的期望</th>
-      <th style="text-align: center;">对应的优化目标</th>
-      <th style="text-align: center; white-space: nowrap;">能否用于优化反向 KL？</th>
+    <tr>
+      <th style="text-align: center">采样来源</th>
+      <th style="text-align: center">Loss</th>
+      <th style="text-align: center">$\nabla_\theta$ Loss 的期望</th>
+      <th style="text-align: center">对应的优化目标</th>
+      <th style="text-align: center">能否用于优化反向 KL？</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_1$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[s_\theta] = 0$</td>
-      <td style="text-align: center;">无（梯度恒为零）</td>
-      <td style="text-align: center;">✗</td>
+      <td style="text-align: center">$q$ (on)</td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">$\mathbb{E}<em>q[s</em>\theta] = 0$</td>
+      <td style="text-align: center">无（梯度恒为零）</td>
+      <td style="text-align: center">✗</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓</td>
+      <td style="text-align: center">$q$ (on)</td>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: center">反向 KL</td>
+      <td style="text-align: center">✓</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$q$ (on)</td>
-      <td style="text-align: center;">$k_3$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-      <td style="text-align: center;">正向 KL</td>
-      <td style="text-align: center;">✗</td>
+      <td style="text-align: center">$q$ (on)</td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(p | q)$</td>
+      <td style="text-align: center">正向 KL</td>
+      <td style="text-align: center">✗</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_1$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓（但方差较高）</td>
+      <td style="text-align: center">$\mu$ (off)</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_1$</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: center">反向 KL</td>
+      <td style="text-align: center">✓（但方差较高）</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
-      <td style="text-align: center;">f-散度（非 KL）</td>
-      <td style="text-align: center;">✗</td>
+      <td style="text-align: center">$\mu$ (off)</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_2$</td>
+      <td style="text-align: center">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
+      <td style="text-align: center">f-散度（非 KL）</td>
+      <td style="text-align: center">✗</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓</td>
+      <td style="text-align: center">$\mu$ (off)</td>
+      <td style="text-align: center">$\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: center">反向 KL</td>
+      <td style="text-align: center">✓</td>
     </tr>
     <tr>
-      <td style="text-align: center;">$\mu$ (off)</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$</td>
-      <td style="text-align: center;">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;"><strong>反向 KL</strong></td>
-      <td style="text-align: center;">✓（推荐，低方差）</td>
+      <td style="text-align: center">$\mu$ (off)</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_3$</td>
+      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: center">反向 KL</td>
+      <td style="text-align: center">✓（推荐，低方差）</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p><strong>关键结论</strong>：</p>
 
@@ -1059,39 +1045,37 @@ g_3(x)
 
 <h3 id="小结-1">小结</h3>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">维度</th>
-      <th style="text-align: center;">KL 作为 Reward（stop-grad）</th>
-      <th style="text-align: center;">KL 作为 Loss（backprop）</th>
+    <tr>
+      <th style="text-align: center">维度</th>
+      <th style="text-align: center">KL 作为 Reward（stop-grad）</th>
+      <th style="text-align: center">KL 作为 Loss（backprop）</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">更新目标</td>
-      <td style="text-align: center;">正则化后的新 MDP</td>
-      <td style="text-align: center;">原任务 + 监督正则</td>
+      <td style="text-align: center">更新目标</td>
+      <td style="text-align: center">正则化后的新 MDP</td>
+      <td style="text-align: center">原任务 + 监督正则</td>
     </tr>
     <tr>
-      <td style="text-align: center;">Actor 梯度</td>
-      <td style="text-align: center;">单一 PG，基于 shaped advantage</td>
-      <td style="text-align: center;">RL 梯度 + 显式 KL 梯度</td>
+      <td style="text-align: center">Actor 梯度</td>
+      <td style="text-align: center">单一 PG，基于 shaped advantage</td>
+      <td style="text-align: center">RL 梯度 + 显式 KL 梯度</td>
     </tr>
     <tr>
-      <td style="text-align: center;">Critic</td>
-      <td style="text-align: center;">学 $V^{\text{reg}}$：reward + KL 混合</td>
-      <td style="text-align: center;">学 $V^{\text{env}}$：只看环境 reward</td>
+      <td style="text-align: center">Critic</td>
+      <td style="text-align: center">学 $V^{\text{reg}}$：reward + KL 混合</td>
+      <td style="text-align: center">学 $V^{\text{env}}$：只看环境 reward</td>
     </tr>
     <tr>
-      <td style="text-align: center;">Credit Assignment</td>
-      <td style="text-align: center;">多步回传，有规划性</td>
-      <td style="text-align: center;">局部 per-state，无规划性</td>
+      <td style="text-align: center">Credit Assignment</td>
+      <td style="text-align: center">多步回传，有规划性</td>
+      <td style="text-align: center">局部 per-state，无规划性</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <p><strong>一句话总结</strong>：KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底；KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活。选择取决于你是否需要跨时间步的 KL 预算分配能力，以及希望约束是「预防性」还是「修正性」的。</p>
 
@@ -1164,38 +1148,36 @@ g_3(x)
 
 <p>下表按「目标 KL 方向」×「采样来源」×「使用方式」三个维度给出推荐的估计器选择。其中「用于<strong>数值</strong>」对应 KL 作为 reward 惩罚（不需要梯度），「用于<strong>梯度</strong>」对应 KL 作为 loss（需要反传梯度）。</p>
 
-<div class="table-responsive">
-<table class="table table-bordered" style="font-size: 0.95em;">
+<table>
   <thead>
-    <tr style="background-color: var(--global-bg-color);">
-      <th style="text-align: center;">目标</th>
-      <th style="text-align: center;">采样来源</th>
-      <th style="text-align: center;">用于<strong>数值</strong>（KL 作为 Reward）</th>
-      <th style="text-align: center;">用于<strong>梯度</strong>（KL 作为 Loss）</th>
+    <tr>
+      <th style="text-align: center">目标</th>
+      <th style="text-align: center">采样来源</th>
+      <th style="text-align: center">用于数值（KL 作为 Reward）</th>
+      <th style="text-align: center">用于梯度（KL 作为 Loss）</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;">$q$（on-policy）</td>
-      <td style="text-align: center;">$k_1$ 或 $k_3$（无偏）</td>
-      <td style="text-align: center;">$k_2$</td>
+      <td style="text-align: center">反向 KL $D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: center">$q$（on-policy）</td>
+      <td style="text-align: center">$k_1$ 或 $k_3$（无偏）</td>
+      <td style="text-align: center">$k_2$</td>
     </tr>
     <tr>
-      <td style="text-align: center;">反向 KL $D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center;">$\mu$（off-policy）</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏）</td>
-      <td style="text-align: center;">$\frac{q}{\mu} k_3$（推荐）或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center">反向 KL $D_{\mathrm{KL}}(q | p)$</td>
+      <td style="text-align: center">$\mu$（off-policy）</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏）</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_3$（推荐）或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$</td>
     </tr>
     <tr>
-      <td style="text-align: center;">正向 KL $D_{\mathrm{KL}}(p \| q)$</td>
-      <td style="text-align: center;">$q$</td>
-      <td style="text-align: center;">$\mathbb{E}_q[r\log r]$</td>
-      <td style="text-align: center;">$k_3$</td>
+      <td style="text-align: center">正向 KL $D_{\mathrm{KL}}(p | q)$</td>
+      <td style="text-align: center">$q$</td>
+      <td style="text-align: center">$\mathbb{E}_q[r\log r]$</td>
+      <td style="text-align: center">$k_3$</td>
     </tr>
   </tbody>
 </table>
-</div>
 
 <h2 id="常见实现陷阱">常见实现陷阱</h2>
 

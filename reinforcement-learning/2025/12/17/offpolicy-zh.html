@@ -456,17 +456,27 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>这揭示了重要的工程原则——<strong>职责分离</strong>：</p>
 
-<div>
 <table>
-<thead>
-<tr><th>控制项</th><th>负责方</th><th>控制手段</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$（更新增量偏移）</td><td>优化算法</td><td>策略裁剪</td></tr>
-<tr><td>$S_k$（采样陈旧性）</td><td>采样系统</td><td>数据过滤、版本窗口</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>控制项</th>
+      <th>负责方</th>
+      <th>控制手段</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$U_k$（更新增量偏移）</td>
+      <td>优化算法</td>
+      <td>策略裁剪</td>
+    </tr>
+    <tr>
+      <td>$S_k$（采样陈旧性）</td>
+      <td>采样系统</td>
+      <td>数据过滤、版本窗口</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h2 id="第五部分裁剪机制的理论基础">第五部分：裁剪机制的理论基础</h2>
 
@@ -541,18 +551,40 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>表5.1　三种裁剪机制的对比</strong></p>
 
-<div>
 <table>
-<thead>
-<tr><th>方法</th><th>裁剪变量</th><th>裁剪中心</th><th>裁剪区间</th><th>约束的TV距离</th></tr>
-</thead>
-<tbody>
-<tr><td>标准PPO</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$</td></tr>
-<tr><td>方法一</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$\rho_k = \pi_k/\pi^{(i)}$</td><td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-<tr><td>方法二</td><td>$r = \pi_{k+1}/\pi_k$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>方法</th>
+      <th>裁剪变量</th>
+      <th>裁剪中心</th>
+      <th>裁剪区间</th>
+      <th>约束的TV距离</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>标准PPO</td>
+      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
+      <td>$1$</td>
+      <td>$[1-\epsilon, 1+\epsilon]$</td>
+      <td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$</td>
+    </tr>
+    <tr>
+      <td>方法一</td>
+      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
+      <td>$\rho_k = \pi_k/\pi^{(i)}$</td>
+      <td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td>
+      <td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td>
+    </tr>
+    <tr>
+      <td>方法二</td>
+      <td>$r = \pi_{k+1}/\pi_k$</td>
+      <td>$1$</td>
+      <td>$[1-\epsilon, 1+\epsilon]$</td>
+      <td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <p><strong>标准PPO在多策略混合下的根本问题</strong></p>
 
@@ -564,19 +596,37 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>方法一 vs 方法二</strong></p>
 
-<div>
 <table>
-<thead>
-<tr><th>比较维度</th><th>方法一（自适应裁剪）</th><th>方法二（增量裁剪）</th></tr>
-</thead>
-<tbody>
-<tr><td>陈旧样本（$\rho_k \gg 1$）</td><td>自动收紧约束，更保守</td><td>可能产生大梯度方差</td></tr>
-<tr><td>LLM大词表低概率token</td><td>允许较大绝对变化（加法型）</td><td>绝对变化受限（乘法型）</td></tr>
-<tr><td>实现复杂度</td><td>需存储 $\pi^{(i)}(a|s)$ 和 $\pi_k(a|s)$</td><td>仅需 $\pi_k(a|s)$</td></tr>
-<tr><td>优势函数</td><td>使用 $A^{\beta^{(k)}}$</td><td>使用加权优势 $\rho_k \cdot A^{\beta^{(k)}}$</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>比较维度</th>
+      <th>方法一（自适应裁剪）</th>
+      <th>方法二（增量裁剪）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>陈旧样本（$\rho_k \gg 1$）</td>
+      <td>自动收紧约束，更保守</td>
+      <td>可能产生大梯度方差</td>
+    </tr>
+    <tr>
+      <td>LLM大词表低概率token</td>
+      <td>允许较大绝对变化（加法型）</td>
+      <td>绝对变化受限（乘法型）</td>
+    </tr>
+    <tr>
+      <td>实现复杂度</td>
+      <td>需存储 $\pi^{(i)}(a|s)$ 和 $\pi_k(a|s)$</td>
+      <td>仅需 $\pi_k(a|s)$</td>
+    </tr>
+    <tr>
+      <td>优势函数</td>
+      <td>使用 $A^{\beta^{(k)}}$</td>
+      <td>使用加权优势 $\rho_k \cdot A^{\beta^{(k)}}$</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <p><strong>详细解释</strong>：</p>
 
@@ -677,20 +727,42 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>表6.1　两类混合机制的适用场景</strong></p>
 
-<div>
 <table>
-<thead>
-<tr><th>场景特征</th><th>推荐机制</th><th>理由</th></tr>
-</thead>
-<tbody>
-<tr><td>长轨迹、高频更新、强异步</td><td>步/段级</td><td>可显著压缩 $S_k$</td></tr>
-<tr><td>短轨迹（非Bandit）</td><td>轨迹级</td><td>$S_k$ 自然较低</td></tr>
-<tr><td>每次更新策略变化幅度大</td><td>轨迹级</td><td>避免方差放大</td></tr>
-<tr><td>单步episode（Bandit）</td><td>均可</td><td>按实现便利选择</td></tr>
-<tr><td>需要折中方案</td><td>段级</td><td>在自然边界切换</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>场景特征</th>
+      <th>推荐机制</th>
+      <th>理由</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>长轨迹、高频更新、强异步</td>
+      <td>步/段级</td>
+      <td>可显著压缩 $S_k$</td>
+    </tr>
+    <tr>
+      <td>短轨迹（非Bandit）</td>
+      <td>轨迹级</td>
+      <td>$S_k$ 自然较低</td>
+    </tr>
+    <tr>
+      <td>每次更新策略变化幅度大</td>
+      <td>轨迹级</td>
+      <td>避免方差放大</td>
+    </tr>
+    <tr>
+      <td>单步episode（Bandit）</td>
+      <td>均可</td>
+      <td>按实现便利选择</td>
+    </tr>
+    <tr>
+      <td>需要折中方案</td>
+      <td>段级</td>
+      <td>在自然边界切换</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <p><strong>核心权衡</strong>：步/段级混合在采样侧更强（快速去陈旧），轨迹级混合在估计侧更稳（代理目标易估计）。</p>
 
@@ -736,33 +808,65 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <h3 id="职责分离原则">职责分离原则</h3>
 
-<div>
 <table>
-<thead>
-<tr><th>控制项</th><th>负责方</th><th>控制手段</th><th>具体操作</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$</td><td>优化算法</td><td>策略裁剪</td><td>对 $\pi_{k+1}/\pi_k$ 裁剪</td></tr>
-<tr><td>$S_k$</td><td>采样系统</td><td>数据过滤</td><td>丢弃陈旧样本</td></tr>
-<tr><td>$S_k$</td><td>采样系统</td><td>版本窗口</td><td>仅用最近 $W$ 个版本</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>控制项</th>
+      <th>负责方</th>
+      <th>控制手段</th>
+      <th>具体操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$U_k$</td>
+      <td>优化算法</td>
+      <td>策略裁剪</td>
+      <td>对 $\pi_{k+1}/\pi_k$ 裁剪</td>
+    </tr>
+    <tr>
+      <td>$S_k$</td>
+      <td>采样系统</td>
+      <td>数据过滤</td>
+      <td>丢弃陈旧样本</td>
+    </tr>
+    <tr>
+      <td>$S_k$</td>
+      <td>采样系统</td>
+      <td>版本窗口</td>
+      <td>仅用最近 $W$ 个版本</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h3 id="裁剪方法选择">裁剪方法选择</h3>
 
-<div>
 <table>
-<thead>
-<tr><th>场景</th><th>推荐方法</th><th>理由</th></tr>
-</thead>
-<tbody>
-<tr><td>陈旧性较高</td><td>方法一（自适应）</td><td>自动对陈旧样本收紧约束</td></tr>
-<tr><td>实现简洁优先</td><td>方法二（增量）</td><td>无需存储旧策略信息</td></tr>
-<tr><td>LLM大词表</td><td>方法一</td><td>避免低概率token更新过慢</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>场景</th>
+      <th>推荐方法</th>
+      <th>理由</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>陈旧性较高</td>
+      <td>方法一（自适应）</td>
+      <td>自动对陈旧样本收紧约束</td>
+    </tr>
+    <tr>
+      <td>实现简洁优先</td>
+      <td>方法二（增量）</td>
+      <td>无需存储旧策略信息</td>
+    </tr>
+    <tr>
+      <td>LLM大词表</td>
+      <td>方法一</td>
+      <td>避免低概率token更新过慢</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h3 id="训推不一致处理">训推不一致处理</h3>
 
@@ -773,23 +877,48 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <h2 id="附录关键符号速查表">附录：关键符号速查表</h2>
 
-<div>
 <table>
-<thead>
-<tr><th>符号</th><th>含义</th></tr>
-</thead>
-<tbody>
-<tr><td>$\pi_k$, $\pi^{(i)}$</td><td>第 $k$ 轮最新策略，第 $i$ 个旧策略</td></tr>
-<tr><td>$d_\pi(s)$, $A^\pi(s,a)$</td><td>折扣状态访问分布，优势函数</td></tr>
-<tr><td>$D_{\mathrm{TV}}(\pi, \pi'; s)$</td><td>两策略在状态 $s$ 上的TV距离</td></tr>
-<tr><td>$\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$</td><td>第 $k$ 轮混合行为策略</td></tr>
-<tr><td>$q(i' \mid i)$, $\alpha_i^{(k)}$</td><td>索引转移核，索引初始分布</td></tr>
-<tr><td>$U_k$, $S_k$</td><td>更新增量偏移，采样陈旧性</td></tr>
-<tr><td>$\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$</td><td>裁剪半径，陈旧性阈值，版本窗口</td></tr>
-<tr><td>$C_{\pi,\pi_k}$</td><td>期望优势上界常数</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>符号</th>
+      <th>含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$\pi_k$, $\pi^{(i)}$</td>
+      <td>第 $k$ 轮最新策略，第 $i$ 个旧策略</td>
+    </tr>
+    <tr>
+      <td>$d_\pi(s)$, $A^\pi(s,a)$</td>
+      <td>折扣状态访问分布，优势函数</td>
+    </tr>
+    <tr>
+      <td>$D_{\mathrm{TV}}(\pi, \pi’; s)$</td>
+      <td>两策略在状态 $s$ 上的TV距离</td>
+    </tr>
+    <tr>
+      <td>$\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$</td>
+      <td>第 $k$ 轮混合行为策略</td>
+    </tr>
+    <tr>
+      <td>$q(i’ \mid i)$, $\alpha_i^{(k)}$</td>
+      <td>索引转移核，索引初始分布</td>
+    </tr>
+    <tr>
+      <td>$U_k$, $S_k$</td>
+      <td>更新增量偏移，采样陈旧性</td>
+    </tr>
+    <tr>
+      <td>$\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$</td>
+      <td>裁剪半径，陈旧性阈值，版本窗口</td>
+    </tr>
+    <tr>
+      <td>$C_{\pi,\pi_k}$</td>
+      <td>期望优势上界常数</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h2 id="参考文献">参考文献</h2>
 

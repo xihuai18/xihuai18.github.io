@@ -457,17 +457,27 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>This reveals an important engineering principle—<strong>separation of concerns</strong>:</p>
 
-<div>
 <table>
-<thead>
-<tr><th>Control Term</th><th>Responsible Party</th><th>Control Mechanism</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$ (update increment shift)</td><td>Optimization algorithm</td><td>Policy clipping</td></tr>
-<tr><td>$S_k$ (sampling staleness)</td><td>Sampling system</td><td>Data filtering, version window</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Control Term</th>
+      <th>Responsible Party</th>
+      <th>Control Mechanism</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$U_k$ (update increment shift)</td>
+      <td>Optimization algorithm</td>
+      <td>Policy clipping</td>
+    </tr>
+    <tr>
+      <td>$S_k$ (sampling staleness)</td>
+      <td>Sampling system</td>
+      <td>Data filtering, version window</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h2 id="part-v-theoretical-foundations-of-clipping-mechanisms">Part V: Theoretical Foundations of Clipping Mechanisms</h2>
 
@@ -546,18 +556,40 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>Table 5.1　Comparison of Three Clipping Mechanisms</strong></p>
 
-<div>
 <table>
-<thead>
-<tr><th>Method</th><th>Clipped Variable</th><th>Clipping Center</th><th>Clipping Interval</th><th>Constrained TV Distance</th></tr>
-</thead>
-<tbody>
-<tr><td>Standard PPO</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$</td></tr>
-<tr><td>Method 1</td><td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td><td>$\rho_k = \pi_k/\pi^{(i)}$</td><td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-<tr><td>Method 2</td><td>$r = \pi_{k+1}/\pi_k$</td><td>$1$</td><td>$[1-\epsilon, 1+\epsilon]$</td><td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Clipped Variable</th>
+      <th>Clipping Center</th>
+      <th>Clipping Interval</th>
+      <th>Constrained TV Distance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Standard PPO</td>
+      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
+      <td>$1$</td>
+      <td>$[1-\epsilon, 1+\epsilon]$</td>
+      <td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$</td>
+    </tr>
+    <tr>
+      <td>Method 1</td>
+      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
+      <td>$\rho_k = \pi_k/\pi^{(i)}$</td>
+      <td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td>
+      <td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td>
+    </tr>
+    <tr>
+      <td>Method 2</td>
+      <td>$r = \pi_{k+1}/\pi_k$</td>
+      <td>$1$</td>
+      <td>$[1-\epsilon, 1+\epsilon]$</td>
+      <td>$D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <p><strong>The Fundamental Problem with Standard PPO Under Multi-Policy Mixture</strong></p>
 
@@ -569,19 +601,37 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>Method 1 vs Method 2</strong></p>
 
-<div>
 <table>
-<thead>
-<tr><th>Comparison Dimension</th><th>Method 1 (Adaptive Clipping)</th><th>Method 2 (Incremental Clipping)</th></tr>
-</thead>
-<tbody>
-<tr><td>Stale samples ($\rho_k \gg 1$)</td><td>Automatically tightens constraints, more conservative</td><td>May produce large gradient variance</td></tr>
-<tr><td>LLM large vocabulary low-probability tokens</td><td>Allows larger absolute changes (additive)</td><td>Absolute changes are limited (multiplicative)</td></tr>
-<tr><td>Implementation complexity</td><td>Requires storing $\pi^{(i)}(a|s)$ and $\pi_k(a|s)$</td><td>Only requires $\pi_k(a|s)$</td></tr>
-<tr><td>Advantage function</td><td>Uses $A^{\beta^{(k)}}$</td><td>Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Comparison Dimension</th>
+      <th>Method 1 (Adaptive Clipping)</th>
+      <th>Method 2 (Incremental Clipping)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Stale samples ($\rho_k \gg 1$)</td>
+      <td>Automatically tightens constraints, more conservative</td>
+      <td>May produce large gradient variance</td>
+    </tr>
+    <tr>
+      <td>LLM large vocabulary low-probability tokens</td>
+      <td>Allows larger absolute changes (additive)</td>
+      <td>Absolute changes are limited (multiplicative)</td>
+    </tr>
+    <tr>
+      <td>Implementation complexity</td>
+      <td>Requires storing $\pi^{(i)}(a|s)$ and $\pi_k(a|s)$</td>
+      <td>Only requires $\pi_k(a|s)$</td>
+    </tr>
+    <tr>
+      <td>Advantage function</td>
+      <td>Uses $A^{\beta^{(k)}}$</td>
+      <td>Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <p><strong>Detailed Explanations</strong>:</p>
 
@@ -682,20 +732,42 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>Table 6.1　Applicable Scenarios for Two Mixture Mechanisms</strong></p>
 
-<div>
 <table>
-<thead>
-<tr><th>Scenario Characteristics</th><th>Recommended Mechanism</th><th>Rationale</th></tr>
-</thead>
-<tbody>
-<tr><td>Long trajectories, high-frequency updates, strong asynchrony</td><td>Step/segment-level</td><td>Can significantly compress $S_k$</td></tr>
-<tr><td>Short trajectories (non-bandit)</td><td>Trajectory-level</td><td>$S_k$ is naturally low</td></tr>
-<tr><td>Large policy change per update</td><td>Trajectory-level</td><td>Avoids variance amplification</td></tr>
-<tr><td>Single-step episode (bandit)</td><td>Either</td><td>Choose based on implementation convenience</td></tr>
-<tr><td>Need for compromise</td><td>Segment-level</td><td>Switch at natural boundaries</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Scenario Characteristics</th>
+      <th>Recommended Mechanism</th>
+      <th>Rationale</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Long trajectories, high-frequency updates, strong asynchrony</td>
+      <td>Step/segment-level</td>
+      <td>Can significantly compress $S_k$</td>
+    </tr>
+    <tr>
+      <td>Short trajectories (non-bandit)</td>
+      <td>Trajectory-level</td>
+      <td>$S_k$ is naturally low</td>
+    </tr>
+    <tr>
+      <td>Large policy change per update</td>
+      <td>Trajectory-level</td>
+      <td>Avoids variance amplification</td>
+    </tr>
+    <tr>
+      <td>Single-step episode (bandit)</td>
+      <td>Either</td>
+      <td>Choose based on implementation convenience</td>
+    </tr>
+    <tr>
+      <td>Need for compromise</td>
+      <td>Segment-level</td>
+      <td>Switch at natural boundaries</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <p><strong>Core trade-off</strong>: Step/segment-level mixture is stronger on the sampling side (fast staleness removal), while trajectory-level mixture is more stable on the estimation side (easier surrogate objective estimation).</p>
 
@@ -741,33 +813,65 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <h3 id="separation-of-concerns-principle">Separation of Concerns Principle</h3>
 
-<div>
 <table>
-<thead>
-<tr><th>Control Term</th><th>Responsible Party</th><th>Control Mechanism</th><th>Specific Operation</th></tr>
-</thead>
-<tbody>
-<tr><td>$U_k$</td><td>Optimization algorithm</td><td>Policy clipping</td><td>Clip $\pi_{k+1}/\pi_k$</td></tr>
-<tr><td>$S_k$</td><td>Sampling system</td><td>Data filtering</td><td>Discard stale samples</td></tr>
-<tr><td>$S_k$</td><td>Sampling system</td><td>Version window</td><td>Use only most recent $W$ versions</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Control Term</th>
+      <th>Responsible Party</th>
+      <th>Control Mechanism</th>
+      <th>Specific Operation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$U_k$</td>
+      <td>Optimization algorithm</td>
+      <td>Policy clipping</td>
+      <td>Clip $\pi_{k+1}/\pi_k$</td>
+    </tr>
+    <tr>
+      <td>$S_k$</td>
+      <td>Sampling system</td>
+      <td>Data filtering</td>
+      <td>Discard stale samples</td>
+    </tr>
+    <tr>
+      <td>$S_k$</td>
+      <td>Sampling system</td>
+      <td>Version window</td>
+      <td>Use only most recent $W$ versions</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h3 id="clipping-method-selection">Clipping Method Selection</h3>
 
-<div>
 <table>
-<thead>
-<tr><th>Scenario</th><th>Recommended Method</th><th>Rationale</th></tr>
-</thead>
-<tbody>
-<tr><td>High staleness</td><td>Method 1 (adaptive)</td><td>Automatically tightens constraints for stale samples</td></tr>
-<tr><td>Implementation simplicity prioritized</td><td>Method 2 (incremental)</td><td>No need to store old policy information</td></tr>
-<tr><td>LLM large vocabulary</td><td>Method 1</td><td>Avoids slow updates for low-probability tokens</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Scenario</th>
+      <th>Recommended Method</th>
+      <th>Rationale</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>High staleness</td>
+      <td>Method 1 (adaptive)</td>
+      <td>Automatically tightens constraints for stale samples</td>
+    </tr>
+    <tr>
+      <td>Implementation simplicity prioritized</td>
+      <td>Method 2 (incremental)</td>
+      <td>No need to store old policy information</td>
+    </tr>
+    <tr>
+      <td>LLM large vocabulary</td>
+      <td>Method 1</td>
+      <td>Avoids slow updates for low-probability tokens</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h3 id="handling-training-inference-inconsistency">Handling Training-Inference Inconsistency</h3>
 
@@ -778,23 +882,48 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <h2 id="appendix-quick-reference-for-key-symbols">Appendix: Quick Reference for Key Symbols</h2>
 
-<div>
 <table>
-<thead>
-<tr><th>Symbol</th><th>Meaning</th></tr>
-</thead>
-<tbody>
-<tr><td>$\pi_k$, $\pi^{(i)}$</td><td>Latest policy at round $k$, $i$-th old policy</td></tr>
-<tr><td>$d_\pi(s)$, $A^\pi(s,a)$</td><td>Discounted state visitation distribution, advantage function</td></tr>
-<tr><td>$D_{\mathrm{TV}}(\pi, \pi'; s)$</td><td>TV distance between two policies at state $s$</td></tr>
-<tr><td>$\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$</td><td>Mixture behavior policy at round $k$</td></tr>
-<tr><td>$q(i' \mid i)$, $\alpha_i^{(k)}$</td><td>Index transition kernel, initial index distribution</td></tr>
-<tr><td>$U_k$, $S_k$</td><td>Update increment shift, sampling staleness</td></tr>
-<tr><td>$\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$</td><td>Clipping radius, staleness threshold, version window</td></tr>
-<tr><td>$C_{\pi,\pi_k}$</td><td>Expected advantage upper bound constant</td></tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Symbol</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>$\pi_k$, $\pi^{(i)}$</td>
+      <td>Latest policy at round $k$, $i$-th old policy</td>
+    </tr>
+    <tr>
+      <td>$d_\pi(s)$, $A^\pi(s,a)$</td>
+      <td>Discounted state visitation distribution, advantage function</td>
+    </tr>
+    <tr>
+      <td>$D_{\mathrm{TV}}(\pi, \pi’; s)$</td>
+      <td>TV distance between two policies at state $s$</td>
+    </tr>
+    <tr>
+      <td>$\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$</td>
+      <td>Mixture behavior policy at round $k$</td>
+    </tr>
+    <tr>
+      <td>$q(i’ \mid i)$, $\alpha_i^{(k)}$</td>
+      <td>Index transition kernel, initial index distribution</td>
+    </tr>
+    <tr>
+      <td>$U_k$, $S_k$</td>
+      <td>Update increment shift, sampling staleness</td>
+    </tr>
+    <tr>
+      <td>$\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$</td>
+      <td>Clipping radius, staleness threshold, version window</td>
+    </tr>
+    <tr>
+      <td>$C_{\pi,\pi_k}$</td>
+      <td>Expected advantage upper bound constant</td>
+    </tr>
+  </tbody>
 </table>
-</div>
 
 <h2 id="references">References</h2>
 
