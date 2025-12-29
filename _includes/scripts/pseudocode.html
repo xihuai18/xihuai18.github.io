@@ -1,0 +1,6 @@
+{%- if site.enable_pseudocode -%}
+  <!-- Pseudocode -->
+  <script defer src="https://cdn.jsdelivr.net/npm/pseudocode@{{ site.pseudocode.version }}/build/pseudocode.min.js" integrity="{{ site.pseudocode.integrity.js }}" crossorigin="anonymous"></script>
+  <script defer src="{{ '/assets/js/pseudocode-init.js' | relative_url }}" type="text/javascript"></script>
+{%- endif -%}
+

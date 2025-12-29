@@ -1,0 +1,162 @@
+/*******************************************************************************
+ * Enhancements for regular blog posts (non-distill).
+ ******************************************************************************/
+
+.post-content {
+  // Make wide tables usable on small screens.
+  .table-responsive {
+    margin: 1rem 0;
+  }
+
+  table {
+    width: 100%;
+    margin: 0;
+  }
+
+  // Improve readability of inline code without breaking Rouge blocks.
+  :not(pre) > code {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.95em;
+    word-break: break-word;
+  }
+
+  // Footnotes (default)
+  .footnotes {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--global-divider-color);
+    font-size: 0.95rem;
+  }
+
+  .footnotes ol {
+    padding-left: 1.25rem;
+  }
+
+  a.footnote,
+  a.reversefootnote,
+  a.footnote-backlink {
+    text-decoration: none;
+  }
+}
+
+// Hover preview for Markdown footnotes.
+.footnote-preview {
+  position: fixed;
+  z-index: 1000;
+  max-width: min(520px, 92vw);
+  max-height: min(320px, 60vh);
+  overflow: auto;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--global-divider-color);
+  background: var(--global-bg-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  color: var(--global-text-color);
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Mermaid diagrams (client-side rendering).
+.mermaid {
+  margin: 1rem 0;
+  text-align: center;
+
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+// Collapsible blocks: {% details "Title" %} ... {% enddetails %}
+.details-block {
+  margin: 1rem 0;
+  border: 1px solid var(--global-divider-color);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--global-card-bg-color);
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.35rem 0;
+    list-style: none;
+    outline: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::before {
+    content: '▸';
+    display: inline-block;
+    margin-right: 0.5rem;
+    transform: translateY(-1px);
+  }
+
+  &[open] summary::before {
+    content: '▾';
+  }
+
+  .details-content {
+    padding: 0.25rem 0 0.75rem;
+  }
+}
+
+// References section for blog posts.
+.post-references {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--global-divider-color);
+
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  ol.bibliography {
+    padding-left: 1.25rem;
+  }
+
+  li.reference {
+    margin-bottom: 0.5rem;
+  }
+}
+
+// Sidenotes (opt-in per post: `sidenotes: true`)
+.post.post--sidenotes {
+  @media (min-width: 992px) {
+    .footnotes {
+      display: none;
+    }
+
+    .sidenotes-col {
+      position: relative;
+    }
+
+    .sidenotes-rail {
+      position: relative;
+      min-height: 1px;
+    }
+
+    .sidenote {
+      position: absolute;
+      left: 0;
+      font-size: 0.85rem;
+      line-height: 1.35;
+      color: var(--global-text-color-light);
+      padding-right: 0.75rem;
+      border-right: 2px solid var(--global-divider-color);
+      text-align: right;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .sidenote.is-active {
+      color: var(--global-text-color);
+      border-right-color: var(--global-theme-color);
+    }
+  }
+}

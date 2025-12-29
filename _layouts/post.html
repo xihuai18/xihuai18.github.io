@@ -13,37 +13,68 @@ layout: default
 </style>
 {% endif %}
 
-<div class="post toc-layout">
-  <div class="row">
-    <div class="col-lg toc-content">
-
-      <header class="post-header">
-        <h1 class="post-title">{{ page.title }}</h1>
-        <p class="post-meta">{{ page.date | date: "%B %-d, %Y" }}{%- if page.author -%} • {{ page.author }}{%- endif -%}{%- if page.meta -%} • {{ page.meta }}{%- endif -%}</p>
-        <p class="post-tags">
+<div class="post toc-layout{% if page.sidenotes %} post--sidenotes{% endif %}">
+  <header class="post-header">
+    <h1 class="post-title">{{ page.title }}</h1>
+    <p class="post-meta">{{ page.date | date: "%B %-d, %Y" }}{%- if page.author -%} • {{ page.author }}{%- endif -%}{%- if page.meta -%} • {{ page.meta }}{%- endif -%}</p>
+    <p class="post-tags">
       <a href="{{ year | prepend: '/blog/' | prepend: site.baseurl}}"> 📅 {{ year }} </a>
-          {%- if tags != "" %}
-          &nbsp; &middot; &nbsp;
-            {% for tag in page.tags -%}
-            <a href="{{ tag | slugify | prepend: '/blog/tag/' | prepend: site.baseurl}}">
-              #️⃣ {{ tag }}</a> &nbsp;
-              {% endfor -%}
-          {% endif %}
+      {%- if tags != "" %}
+        &nbsp; &middot; &nbsp;
+        {% for tag in page.tags -%}
+          <a href="{{ tag | slugify | prepend: '/blog/tag/' | prepend: site.baseurl}}">
+            #️⃣ {{ tag }}</a> &nbsp;
+        {% endfor -%}
+      {% endif %}
 
-          {%- if categories != "" %}
-          &nbsp; &middot; &nbsp;
-            {% for category in page.categories -%}
-            <a href="{{ category | slugify | prepend: '/blog/category/' | prepend: site.baseurl}}">
-              🏷️ {{ category }}</a> &nbsp;
-              {% endfor -%}
-          {% endif %}
+      {%- if categories != "" %}
+        &nbsp; &middot; &nbsp;
+        {% for category in page.categories -%}
+          <a href="{{ category | slugify | prepend: '/blog/category/' | prepend: site.baseurl}}">
+            🏷️ {{ category }}</a> &nbsp;
+        {% endfor -%}
+      {% endif %}
+    </p>
+  </header>
 
-        </p>
-      </header>
+  <div class="row">
+    {% if page.sidenotes %}
+      <div class="col-lg-3 d-none d-lg-block sidenotes-col">
+        <div class="sidenotes-rail" aria-label="Sidenotes"></div>
+      </div>
+      <div class="col-lg-6 toc-content">
+    {% else %}
+      <div class="col-lg toc-content">
+    {% endif %}
 
       <article class="post-content">
         {{ content }}
       </article>
+
+      {% if page.distill_citations or page.distill_footnotes %}
+        <script defer src="{{ '/assets/js/distillpub/template.v2.js' | relative_url }}"></script>
+        <script defer src="{{ '/assets/js/distillpub/overrides.js' | relative_url }}"></script>
+      {% endif %}
+
+      {% if page.distill_citations %}
+        <d-appendix>
+          <d-citation-list></d-citation-list>
+        </d-appendix>
+
+        {%- assign _bib_src = page.distill_bibliography | default: page.distill_bib -%}
+        {%- if _bib_src -%}
+          {%- assign _bib_src_str = _bib_src | append: '' -%}
+          {%- if _bib_src_str contains '://' or _bib_src_str[0] == '/' -%}
+            {%- assign _bib_url = _bib_src_str -%}
+          {%- else -%}
+            {%- assign _bib_url = _bib_src_str | prepend: '/assets/bibliography/' -%}
+          {%- endif -%}
+          <d-bibliography src="{{ _bib_url | relative_url }}"></d-bibliography>
+        {%- endif -%}
+
+      {% else %}
+        {% include post_references.html %}
+      {% endif %}
 
       {%- if site.related_blog_posts.enabled -%}
         {%- if page.related_posts == null or page.related_posts -%}

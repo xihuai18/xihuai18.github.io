@@ -1,0 +1,32 @@
+{%- comment -%}
+  Optional references section for blog posts (Jekyll Scholar).
+
+  Enable per post with either:
+    - references: true
+    - bibliography: true (kept for compatibility with distill-style front matter)
+
+  Cite in text with:
+    {% cite some_key %}
+
+  The list is limited to cited entries.
+{%- endcomment -%}
+
+{%- assign show_references = page.references | default: false -%}
+{%- if show_references == false and page.bibliography -%}
+  {%- assign show_references = true -%}
+{%- endif -%}
+
+{%- if show_references -%}
+  {%- assign _lang = page.lang | default: site.lang -%}
+  {%- if _lang == 'zh' or _lang == 'zh-CN' or _lang == 'cn' -%}
+    {%- assign refs_title = '参考文献' -%}
+  {%- else -%}
+    {%- assign refs_title = 'References' -%}
+  {%- endif -%}
+
+  <section class="post-references">
+    <h2>{{ refs_title }}</h2>
+    {% bibliography --cited --template bib_post %}
+  </section>
+{%- endif -%}
+

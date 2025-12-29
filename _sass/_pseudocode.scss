@@ -1,0 +1,30 @@
+/*******************************************************************************
+ * Pseudocode.js (algorithmic blocks)
+ ******************************************************************************/
+
+.pseudocode {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--global-code-bg-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.pseudocode .ps-root {
+  color: var(--global-text-color);
+}
+
+.pseudocode .ps-root .ps-algorithm {
+  border-top-color: var(--global-text-color);
+  border-bottom-color: var(--global-text-color);
+}
+
+.pseudocode .ps-root .ps-algorithm.with-caption > .ps-line:first-child {
+  border-bottom-color: var(--global-text-color);
+}
+
+.pseudocode .ps-root .ps-algorithmic.with-scopelines div.ps-block {
+  border-left-color: var(--global-text-color);
+}
+
