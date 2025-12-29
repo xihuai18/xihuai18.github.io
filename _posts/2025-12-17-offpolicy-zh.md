@@ -7,8 +7,7 @@ categories: reinforcement-learning
 lang: zh
 ---
 
-* TOC
-{:toc}
+
 
 [English Version](/reinforcement-learning/2025/12/17/offpolicy-en.html)
 

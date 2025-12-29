@@ -1,0 +1,92 @@
+/******************************************************************************
+ * Sticky / floating Table of Contents
+ ******************************************************************************/
+
+.toc-layout {
+  .toc-content {
+    min-width: 0; // prevent long code/words from forcing overflow in flex/grid
+    overflow-wrap: anywhere;
+  }
+}
+
+.toc-layout .toc-content {
+  pre,
+  table {
+    max-width: 100%;
+  }
+
+  pre {
+    overflow-x: auto;
+  }
+
+  // Prevent wide display equations (MathJax/KaTeX) from visually "overlapping" the ToC column.
+  mjx-container[display="true"],
+  .MathJax_Display,
+  .katex-display {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+
+.toc-sidebar {
+  border-left: 1px solid var(--global-divider-color);
+  padding-left: 1rem;
+  position: sticky;
+  top: 6rem; // accounts for fixed navbar + container margin
+  max-height: calc(100vh - 7rem);
+  overflow: auto;
+
+  &.is-empty {
+    display: none;
+  }
+}
+
+.toc-sidebar__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--global-text-color-light);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.toc {
+  font-size: 0.9rem;
+  line-height: 1.35;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
+  }
+
+  li {
+    margin: 0.25rem 0;
+  }
+
+  ul ul {
+    margin-top: 0.25rem;
+    margin-left: 0.25rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--global-divider-color);
+  }
+
+  a {
+    color: var(--global-text-color-light);
+    text-decoration: none;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--global-theme-color);
+    }
+
+    &.is-active {
+      color: var(--global-theme-color);
+      font-weight: 600;
+    }
+  }
+}

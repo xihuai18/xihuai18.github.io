@@ -1,0 +1,29 @@
+{%- comment -%}
+  Auto-generated floating/sticky table of contents.
+
+  Usage:
+    {% include toc_sidebar.html headings="h2,h3" content=".toc-content" %}
+{%- endcomment -%}
+
+{%- assign toc_title = include.title -%}
+{%- if toc_title == nil or toc_title == '' -%}
+  {%- assign _lang = page.lang | default: site.lang -%}
+  {%- if _lang == 'zh' or _lang == 'zh-CN' or _lang == 'cn' -%}
+    {%- assign toc_title = '目录' -%}
+  {%- else -%}
+    {%- assign toc_title = 'Contents' -%}
+  {%- endif -%}
+{%- endif -%}
+
+<aside class="toc-sidebar{% if include.class %} {{ include.class }}{% endif %}">
+  <div class="toc-sidebar__title">{{ toc_title }}</div>
+  <nav
+    class="toc js-page-toc"
+    data-toc
+    data-toc-content="{{ include.content | default: '.toc-content' }}"
+    data-toc-headings="{{ include.headings | default: 'h2,h3' }}"
+    data-toc-min-items="{{ include.min_items | default: 2 }}"
+    aria-label="{{ toc_title }}"
+  ></nav>
+</aside>
+

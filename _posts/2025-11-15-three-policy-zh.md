@@ -7,8 +7,7 @@ categories: reinforcement-learning
 lang: zh
 ---
 
-* TOC
-{:toc}
+
 
 
 [English Version](/reinforcement-learning/2025/11/15/three-policy-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)

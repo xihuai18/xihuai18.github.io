@@ -7,8 +7,7 @@ categories: reinforcement-learning
 lang: zh
 ---
 
-* TOC
-{:toc}
+
 
 ![Mini-class](/assets/img/kl-estimators/kl-estimator-zh.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 

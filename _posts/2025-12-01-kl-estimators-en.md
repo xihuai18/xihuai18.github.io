@@ -7,8 +7,7 @@ categories: reinforcement-learning
 lang: en
 ---
 
-* TOC
-{:toc}
+
 
 ![Mini-class](/assets/img/kl-estimators/kl-estimator-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
