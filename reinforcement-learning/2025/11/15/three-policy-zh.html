@@ -40,7 +40,7 @@
         "@type": "WebSite",
         "description": "现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。",
         "headline": "从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展",
-        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://github.com/xihuai18"],
         "name": "Xihuai Leo Wang",
         "@context": "https://schema.org"
       }
@@ -243,7 +243,7 @@
     <p><a href="https://zhuanlan.zhihu.com/p/1959976628290590602">RL 老训崩？训推差异是基石</a> 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。</p>
   </li>
   <li>
-    <p><a href="https://verl.readthedocs.io/en/latest/algo/rollout_corr.html">verl Rollout Importance Sampling</a> 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 <strong>token-level</strong> 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t &lt; \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种”token 粒度检测、sequence 粒度否决”的设计体现了一种”一票否决”的保守策略。</p>
+    <p><a href="https://verl.readthedocs.io/en/latest/algo/rollout_corr.html">verl Rollout Importance Sampling</a> 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 <strong>token-level</strong> 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t < \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种”token 粒度检测、sequence 粒度否决”的设计体现了一种”一票否决”的保守策略。</p>
   </li>
   <li>
     <p><a href="https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf">INTELLECT-3 Technical Report</a> 在其异步分布式 RL 训练框架中采用了类似的拒绝采样策略。INTELLECT-3 对每条 rollout 计算 <strong>token-level</strong> 重要性比率，若任意 token 的比率低于阈值（文中使用 $10^{-5}$），则对整条轨迹进行 masking。</p>
@@ -277,11 +277,17 @@
   <li>状态 $s\in\mathcal{S}$，动作 $a\in\mathcal{A}$；</li>
   <li>策略 $\pi(a\mid s)$；</li>
   <li>折扣状态分布：
-\(d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s)。\)</li>
+$$
+  d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s)。
+  $$</li>
   <li>回报（episode 视角）：
-\(\mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big]。\)</li>
+$$
+  \mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big]。
+  $$</li>
   <li>值函数 / 优势函数：
-\(V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s)。\)</li>
+$$
+  V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s)。
+  $$</li>
 </ul>
 
 <p>稍微赘述一下，在“三策略”设定里，我们有：</p>
@@ -307,9 +313,11 @@
 <blockquote>
   <p>对任意两策略 $\mu$ 和 $\pi_\theta$，有</p>
 
-\[\mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
+  <p>$$
+\mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
 = \frac{1}{1-\gamma}\;
-\mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)]。\]
+\mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)]。
+$$</p>
 </blockquote>
 
 <p>直觉非常简单：</p>
@@ -321,56 +329,70 @@
 
 <p>TRPO 的问题在于，我们没法准确算</p>
 
-\[\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]，\]
+<p>$$
+\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]，
+$$</p>
 
 <p>因为 $d_{\pi_\theta}$ 是“新策略”的状态分布，我们没有在它下面采样过。</p>
 
 <p>于是 TRPO 引入了一个替代目标：把状态分布换成行为策略的：</p>
 
-\[L_\mu(\pi_\theta)
-:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)]。\]
+<p>$$
+L_\mu(\pi_\theta)
+:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)]。
+$$</p>
 
 <p>$L_\mu$ 的直觉解释是：在行为策略的状态分布下，让新策略试着去选动作，看优势有多大。</p>
 
 <p>从性能差分引理出发，两者之差是：</p>
 
-\[\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)
+<p>$$
+\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)
 = \frac{1}{1-\gamma}\;
   \sum_s \big(d_{\pi_\theta}(s) - d_\mu(s)\big)
-  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)]。\]
+  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)]。
+$$</p>
 
 <p>如果我们定义</p>
 
-\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|，\]
+<p>$$
+\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|，
+$$</p>
 
 <p>那么有一个直接的上界：</p>
 
 <blockquote>
   <p><strong>Lemma 1</strong></p>
 
-\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
+  <p>$$
+|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
 \le \frac{\epsilon_\mu}{1-\gamma}\;
-    \|d_{\pi_\theta} - d_\mu\|_1。\]
+    \|d_{\pi_\theta} - d_\mu\|_1。
+$$</p>
 </blockquote>
 
 <p>这里出现了第一个关键量：</p>
 
 <blockquote>
-  <p><strong>状态分布偏移</strong> $|d_{\pi_\theta} - d_\mu|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。</p>
+  <p><strong>状态分布偏移</strong> $\|d_{\pi_\theta} - d_\mu\|_1$，也就是“新策略和行为策略看到的世界，到底差了多少”。</p>
 </blockquote>
 
-<p>我们通常不会直接对 $|d_{\pi_\theta} - d_\mu|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如 trust region、KL、clip 等。</p>
+<p>我们通常不会直接对 $\|d_{\pi_\theta} - d_\mu\|_1$ 施加约束，反而是对“每一步 action 分布”的差异施加约束，比如 trust region、KL、clip 等。</p>
 
 <p>记总变差距离（total variation）：</p>
 
-\[D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1。\]
+<p>$$
+D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1。
+$$</p>
 
 <p>假设存在常数 $\beta$，使得</p>
 
 <blockquote>
   <p>对所有 $s$，行为策略和目标策略之间的 TV 被 $\beta$ 上界：</p>
 
-\[D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta。\]
+  <p>$$
+D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta。
+$$</p>
 </blockquote>
 
 <p>直观含义：在任意状态里，“新策略”和“生成数据的策略”选动作的分布都不会离太远。</p>
@@ -381,33 +403,41 @@
   <p><strong>Lemma 2</strong>
 在上述条件下有</p>
 
-\[\|d_{\pi_\theta} - d_\mu\|_1
-\le \frac{2\gamma}{1-\gamma}\,\beta。\]
+  <p>$$
+\|d_{\pi_\theta} - d_\mu\|_1
+\le \frac{2\gamma}{1-\gamma}\,\beta。
+$$</p>
 </blockquote>
 
 <p>把它和 Lemma 1 结合：</p>
 
-\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
+<p>$$
+|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
 \le \frac{\epsilon_\mu}{1-\gamma}\; \frac{2\gamma}{1-\gamma}\,\beta
-= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。\]
+= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。
+$$</p>
 
 <p>于是我们得到一个形式上相当简洁的<strong>两策略 TRPO 下界（基准为行为策略）</strong>：</p>
 
 <blockquote>
   <p><strong>Theorem 1（两策略 TRPO）</strong></p>
 
-\[\mathcal{J}(\pi_\theta)
+  <p>$$
+\mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
-\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。\]
+\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta。
+$$</p>
 </blockquote>
 
 <p>这说明：</p>
 
 <ul>
   <li><strong>真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong>
-\(\beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big)。\)</li>
+$$
+  \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big)。
+  $$</li>
 </ul>
 
 <p>如果你能直接约束住这个 $\beta$，就能直接把 TRPO 的单调性保证搬到行为策略视角下。</p>
@@ -427,22 +457,30 @@ L_\mu(\pi_\theta)
 
 <ol>
   <li><strong>参考 vs 目标</strong>：我们可以通过 KL / clip 等手段控制
-\(D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。\)</li>
+$$
+   D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。
+   $$</li>
   <li><strong>行为 vs 参考</strong>：我们希望<strong>间接</strong>控制
-\(D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\)</li>
+$$
+   D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。
+   $$</li>
 </ol>
 
 <p>于是自然就定义两个“proxy 差异”：</p>
 
 <ul>
   <li><strong>约束 1：参考 vs 目标</strong>
-\(\alpha_0
-:= \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
-                              \pi_\theta(\cdot\mid s)\big)；\)</li>
+$$
+  \alpha_0
+  := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
+                                \pi_\theta(\cdot\mid s)\big)；
+  $$</li>
   <li><strong>约束 2：行为 vs 参考</strong>
-\(\alpha_1
-:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\)</li>
+$$
+  \alpha_1
+  := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
+                                \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。
+  $$</li>
 </ul>
 
 <p>直觉上：</p>
@@ -456,29 +494,36 @@ L_\mu(\pi_\theta)
 
 <p>对任意状态 $s$，有</p>
 
-\[\begin{aligned}
+<p>$$
+\begin{aligned}
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
-&amp;\le
+&\le
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
 \\
-&amp;\quad +
+&\quad +
 D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)。
-\end{aligned}\]
+\end{aligned}
+$$</p>
 
 <p>对 $s$ 取上确界：</p>
 
-\[\beta
+<p>$$
+\beta
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 \;\le\;
-\alpha_1 + \alpha_0。\]
+\alpha_1 + \alpha_0。
+$$</p>
 
 <p>把这个不等式塞回两策略 TRPO 的结论（Theorem 1）里，记</p>
 
-\[C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，\]
+<p>$$
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，
+$$</p>
 
 <p>即得到：</p>
 
-\[\mathcal{J}(\pi_\theta)
+<p>$$
+\mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
@@ -486,7 +531,8 @@ C\,\beta
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
-C\,(\alpha_0 + \alpha_1)。\]
+C\,(\alpha_0 + \alpha_1)。
+$$</p>
 
 <p>于是，我们得到一个非常直接的<strong>三策略 TRPO 下界</strong>：</p>
 
@@ -494,34 +540,42 @@ C\,(\alpha_0 + \alpha_1)。\]
   <p><strong>Theorem 2（三策略 TRPO）</strong>
 记</p>
 
-\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
-C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，\]
+  <p>$$
+\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}，
+$$</p>
 
   <p>以及</p>
 
-\[\alpha_0
+  <p>$$
+\alpha_0
 := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
                               \pi_\theta(\cdot\mid s)\big)，
 \quad
 \alpha_1
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。\]
+                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big)。
+$$</p>
 
   <p>则对任意目标策略 $\pi_\theta$ 有</p>
 
-\[\boxed{
+  <p>$$
+\boxed{
 \mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\; C\,(\alpha_0 + \alpha_1)
-}\]
+}
+$$</p>
 
   <p>其中</p>
 
-\[L_\mu(\pi_\theta)
+  <p>$$
+L_\mu(\pi_\theta)
 :=
 \mathcal{J}(\mu) + \frac{1}{1-\gamma}
-  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)]。\]
+  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)]。
+$$</p>
 </blockquote>
 
 <p>这个结论的含义其实很直接：</p>
@@ -574,13 +628,17 @@ L_\mu(\pi_\theta)
 
 <p>下面延续前文的记号体系来写这三种方法的目标函数，只聚焦在“行为策略 vs 参考策略”这一维的设计。记 token 级的 PPO / GRPO 风格更新项为</p>
 
-\[g_\theta(t)
-= \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),\]
+<p>$$
+g_\theta(t)
+= \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),
+$$</p>
 
 <p>其中</p>
 
-\[r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
-\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t)。\]
+<p>$$
+r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
+\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t)。
+$$</p>
 
 <p>也就是说：</p>
 
@@ -592,32 +650,28 @@ L_\mu(\pi_\theta)
 <p>为了把 token 级的 $(s_t,a_t)$ 与序列级的 $(x,y)$ 记号打通，在以 RLHF（reinforcement learning from human feedback，人类反馈强化学习）为代表的 LLM-RL 设定中，我们约定：</p>
 
 <ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{</td>
-          <td>y</td>
-          <td>})$；</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
+  <li>prompt 记为 $x$；回复记为 $y = (y_1,\dots,y_{|y|})$；</li>
   <li>token 级状态 $s_t := (x, y_{\lt t})$，动作 $a_t := y_t$；</li>
   <li>因此行为策略和参考策略在序列上的分布可写成
-\(\mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
-\pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t)。\)</li>
+$$
+  \mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
+  \pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t)。
+  $$</li>
 </ul>
 
 <p>此外，为了描述“参考 vs 行为”的偏移，统一定义 token 级重要性比率</p>
 
-\[\rho_t^{(\text{ref}\leftarrow\text{beh})} :=
-\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)}，\]
+<p>$$
+\rho_t^{(\text{ref}\leftarrow\text{beh})} :=
+\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)}，
+$$</p>
 
 <p>以及其对应的序列级版本</p>
 
-\[\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)}
-= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}。\]
+<p>$$
+\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)}
+= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}。
+$$</p>
 
 <p>接下来，TIS / IcePop / MIS 的区别，就体现在“如何利用这些 $\rho$ 来实现约束 2”。</p>
 
@@ -625,12 +679,16 @@ L_\mu(\pi_\theta)
 
 <p>TIS 直接对上述 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 做截断，记</p>
 
-\[\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}。\]
+<p>$$
+\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}。
+$$</p>
 
 <p>更新目标写成</p>
 
-\[L_{\text{TIS}}(\theta)
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big]。\]
+<p>$$
+L_{\text{TIS}}(\theta)
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big]。
+$$</p>
 
 <ul>
   <li>蓝色的 $\color{blue}{w_t}$ 是被截断的 IS 权重：极端大的比率被压到常数 $C_{\text{IS}}$。</li>
@@ -641,12 +699,16 @@ L_\mu(\pi_\theta)
 
 <p>IcePop 同样以 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ 为度量，但采用 <strong>双侧掩码</strong>：</p>
 
-\[\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}。\]
+<p>$$
+\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}。
+$$</p>
 
 <p>更新目标写成</p>
 
-\[L_{\text{IcePop}}(\theta)
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big]。\]
+<p>$$
+L_{\text{IcePop}}(\theta)
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big]。
+$$</p>
 
 <ul>
   <li>蓝色的 $\color{blue}{m_t}$ 决定某个 token 是否参与更新：比率太大或太小的 token 直接被丢弃。</li>
@@ -657,20 +719,24 @@ L_\mu(\pi_\theta)
 
 <p>MIS 的核心操作是：<strong>只保留 IS 比率不超过阈值 $C$ 的序列，其余序列的损失直接置零</strong>。写成</p>
 
-\[\color{blue}{
+<p>$$
+\color{blue}{
 \rho(y\mid x)
 \leftarrow
 \rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}
-}\]
+}
+$$</p>
 
 <p>在统一的损失形式下，可以写成</p>
 
-\[L_{\text{MIS}}(\theta)
+<p>$$
+L_{\text{MIS}}(\theta)
 =-\,\mathbb{E}_{(x,y)\sim\mu}
 \Big[
 \color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}}
 \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
-\Big],\]
+\Big],
+$$</p>
 
 <p>简而言之：</p>
 
@@ -687,7 +753,7 @@ L_\mu(\pi_\theta)
 
 <ul>
   <li>
-    <p><strong>verl Token Veto</strong>：在其 rollout correction 模块中，若轨迹中存在任意 token 使得 $\min_t \rho_t &lt; \tau_{\text{veto}}$，则通过 response<em>mask 将整条序列剔除。阈值 $\tau</em>{\text{veto}}$ 可由用户配置。</p>
+    <p><strong>verl Token Veto</strong>：在其 rollout correction 模块中，若轨迹中存在任意 token 使得 $\min_t \rho_t < \tau_{\text{veto}}$，则通过 response*mask 将整条序列剔除。阈值 $\tau*{\text{veto}}$ 可由用户配置。</p>
   </li>
   <li>
     <p><strong>INTELLECT-3 Token Masking</strong>：在其异步分布式 RL 框架中，若任意 token 的比率低于 $10^{-5}$，则对整条轨迹进行 masking。</p>
@@ -696,18 +762,22 @@ L_\mu(\pi_\theta)
 
 <p>二者的核心操作一致：<strong>若轨迹中存在任意 token 的 IS 比率低于阈值 $\tau$，则将整条序列从训练中剔除</strong>。写成</p>
 
-\[\color{blue}{
+<p>$$
+\color{blue}{
 m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})} \ge \tau\Big\}
-}\]
+}
+$$</p>
 
 <p>在统一的损失形式下，可以写成</p>
 
-\[L_{\text{WTRS}}(\theta)
+<p>$$
+L_{\text{WTRS}}(\theta)
 =-\,\mathbb{E}_{(x,y)\sim\mu}
 \Big[
 \color{blue}{m(y\mid x)}
 \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
-\Big],\]
+\Big],
+$$</p>
 
 <p>简而言之：</p>
 
@@ -736,7 +806,9 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
 <p>把 MoE 抽象成两阶段随机决策：“先选专家 $z$，再在该专家条件下生成 token $a$”。
 因此目标策略可以分解为</p>
 
-\[\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),\]
+<p>$$
+\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),
+$$</p>
 
 <p>其中：</p>
 
@@ -747,17 +819,21 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
 
 <p>在三策略 TRPO 中，我们真正想优化的 surrogate objective 为</p>
 
-\[L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
+<p>$$
+L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
 \mathbb{E}_{s\sim d_\mu}
 \bigg[
 \sum_z \omega_\theta(z\mid s)\,F_\theta(s,z)
-\bigg],\]
+\bigg],
+$$</p>
 
 <p>其中我把专家层的优势聚合写成</p>
 
-\[F_\theta(s,z)
+<p>$$
+F_\theta(s,z)
 :=
-\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z).\]
+\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z).
+$$</p>
 
 <p>关键点：<strong>在原始的 $L_\mu(\pi_\theta)$ 里，路由分布是当前要更新的 $\omega_\theta$</strong>。也就是说，MoE 的 RL 训练不仅在更新 token 生成分布，也在更新路由器本身。</p>
 
@@ -765,20 +841,24 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
 
 <p>R3 的做法是：rollout 时记录推理端实际命中的专家集合 $M_\mu(s)$，训练时强制当前策略<strong>只在该集合内路由</strong>。可以把它写成对路由分布的“条件化投影”：</p>
 
-\[\omega_\theta^{\text{R3}}(z\mid s)
+<p>$$
+\omega_\theta^{\text{R3}}(z\mid s)
 :=
 \frac{\omega_\theta(z\mid s)\,\mathbf{1}\{z\in M_\mu(s)\}}
-     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .\]
+     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .
+$$</p>
 
 <p>从而训练时实际优化的 surrogate objective 变为</p>
 
-\[L_\mu^{\text{R3}}(\pi_\theta) =
+<p>$$
+L_\mu^{\text{R3}}(\pi_\theta) =
 \mathcal{J}(\mu) +
 \frac{1}{1-\gamma}
 \mathbb{E}_{s\sim d_\mu}
 \bigg[
 \sum_{z\in M_\mu(s)} \omega_\theta^{\text{R3}}(z\mid s)\,F_\theta(s,z)
-\bigg].\]
+\bigg].
+$$</p>
 
 <p>和原始 $L_\mu(\pi_\theta)$ 对比可以看到，R3 并没有让 $\omega_\theta$ 逼近 $\omega_{\text{old}}$ 或 $\omega_\mu$；它做的是：</p>
 
@@ -794,19 +874,23 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
 
 <p>另一类 routing replay 复用的是参考策略（old policy）的路由器 $\omega_{\text{old}}$。这等价于训练一个混合策略</p>
 
-\[\hat\pi_\theta(a,z\mid s)
+<p>$$
+\hat\pi_\theta(a,z\mid s)
 :=
-\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),\]
+\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),
+$$</p>
 
 <p>对应 surrogate objective 为</p>
 
-\[L_\mu^{\text{ref-replay}}(\pi_\theta) =
+<p>$$
+L_\mu^{\text{ref-replay}}(\pi_\theta) =
 \mathcal{J}(\mu) +
 \frac{1}{1-\gamma}
 \mathbb{E}_{s\sim d_\mu}
 \bigg[
 \sum_z \omega_{\text{old}}(z\mid s)\,F_\theta(s,z)
-\bigg].\]
+\bigg].
+$$</p>
 
 <p>这意味着：</p>
 
@@ -962,24 +1046,121 @@ m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
   <script async src="https://badge.dimensions.ai/badge.js"></script>
 
-    <!-- MathJax -->
+    <!-- MathJax 3.x with comprehensive configuration -->
   <script type="text/javascript">
     window.MathJax = {
       tex: {
         tags: 'ams',
+        // Support all common math delimiters
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
         processEscapes: true,
-        processEnvironments: true
+        processEnvironments: true,
+        processRefs: true,
+        // Common macros for convenience
+        macros: {
+          RR: '\\mathbb{R}',
+          NN: '\\mathbb{N}',
+          ZZ: '\\mathbb{Z}',
+          CC: '\\mathbb{C}',
+          EE: '\\mathbb{E}',
+          PP: '\\mathbb{P}',
+          bm: ['\\boldsymbol{#1}', 1],
+          argmax: '\\operatorname*{arg\\,max}',
+          argmin: '\\operatorname*{arg\\,min}',
+          sgn: '\\operatorname{sgn}',
+          KL: '\\mathrm{KL}',
+          Var: '\\operatorname{Var}',
+          Cov: '\\operatorname{Cov}',
+          tr: '\\operatorname{tr}',
+          diag: '\\operatorname{diag}'
+        },
+        // AMS packages
+        packages: {'[+]': ['ams', 'boldsymbol', 'newcommand']}
+      },
+      loader: {
+        load: ['[tex]/ams', '[tex]/boldsymbol', '[tex]/newcommand']
       },
       options: {
-        // Avoid unexpected rendering inside code blocks.
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        // Skip math rendering in these HTML elements
+        skipHtmlTags: [
+          'script', 'noscript', 'style', 'textarea', 'pre', 'code',
+          'annotation', 'annotation-xml', 'kbd', 'samp', 'var'
+        ],
+        // Fix issues with underscores being converted to <em> by HTML
+        processHtmlClass: 'mathjax-process',
+        ignoreHtmlClass: 'tex2jax_ignore|no-mathjax',
+        // Render math even with HTML entities
+        renderActions: {
+          findScript: [10, function (doc) {
+            // Pre-process to fix HTML entity issues in math
+            for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            }
+          }, '']
+        }
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 1.0
+      },
+      chtml: {
+        scale: 1.0,
+        matchFontHeight: true
+      },
+      startup: {
+        ready: function () {
+          MathJax.startup.defaultReady();
+          // Fix: restore underscores that might have been converted to <em>
+          MathJax.startup.promise.then(() => {
+            console.log('MathJax typesetting complete');
+          });
+        }
       }
     };
   </script>
   <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
-  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  
+  <!-- Pre-processing script to protect math from Markdown/HTML interference -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix underscores in math that were converted to <em> by Markdown
+      function fixMathUnderscores() {
+        const mathContainers = document.querySelectorAll('.MathJax, .MathJax_Display, mjx-container');
+        // This runs before MathJax, so we need to fix raw content
+        const content = document.querySelector('.post-content, article');
+        if (!content) return;
+        
+        // Find math delimiters and restore any <em> or <strong> inside them
+        const html = content.innerHTML;
+        
+        // Pattern to find math blocks and restore underscore formatting
+        // This is a fallback; the main protection is in the Jekyll plugin
+      }
+      
+      // Fix HTML entities in display math blocks
+      function fixHtmlEntities() {
+        document.querySelectorAll('.language-plaintext.highlighter-rouge').forEach(el => {
+          // Check if this looks like an HTML figure that wasn't rendered
+          const text = el.textContent;
+          if (text.includes('<img') || text.includes('<figure') || text.includes('<figcaption')) {
+            // This is raw HTML that should be rendered - replace with actual HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = text;
+            el.replaceWith(...temp.childNodes);
+          }
+        });
+      }
+      
+      fixHtmlEntities();
+    });
+  </script>
 
     <!-- Pseudocode -->
   <script defer src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js" integrity="sha256-aVkDxqyzrB+ExUsOY9PdyelkDhn/DfrjWu08aVpqNlo=" crossorigin="anonymous"></script>

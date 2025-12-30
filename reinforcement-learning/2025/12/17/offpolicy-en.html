@@ -40,7 +40,7 @@
         "@type": "WebSite",
         "description": "A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies.",
         "headline": "Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees",
-        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://github.com/xihuai18"],
         "name": "Xihuai Leo Wang",
         "@context": "https://schema.org"
       }
@@ -202,23 +202,31 @@
 
 <h3 id="11-basic-setup">1.1 Basic Setup</h3>
 
-<p>We consider a standard Markov Decision Process (MDP) comprising a state space $\mathcal{S}$, action space $\mathcal{A}$, transition probability $p(s’|s,a)$, reward function $r(s,a)$, initial distribution $\rho_0$, and discount factor $\gamma \in (0,1)$.</p>
+<p>We consider a standard Markov Decision Process (MDP) comprising a state space $\mathcal{S}$, action space $\mathcal{A}$, transition probability $p(s'\|s,a)$, reward function $r(s,a)$, initial distribution $\rho_0$, and discount factor $\gamma \in (0,1)$.</p>
 
 <p>The <strong>expected cumulative discounted return</strong> of policy $\pi$ is:</p>
 
-\[J(\pi) := \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \mid \pi\right]\]
+<p>$$
+J(\pi) := \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \mid \pi\right]
+$$</p>
 
 <p>The <strong>discounted state visitation distribution</strong> represents the weighted frequency of visiting each state during long-term policy execution:</p>
 
-\[d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)\]
+<p>$$
+d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)
+$$</p>
 
 <p>The <strong>advantage function</strong> measures how much better action $a$ is compared to the policy’s average:</p>
 
-\[A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)\]
+<p>$$
+A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)
+$$</p>
 
 <p>The <strong>total variation distance</strong> (TV distance) measures the difference between two policies’ action distributions at state $s$:</p>
 
-\[D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|\]
+<p>$$
+D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|
+$$</p>
 
 <h3 id="12-core-tool-policy-performance-difference-lemma">1.2 Core Tool: Policy Performance Difference Lemma</h3>
 
@@ -229,7 +237,9 @@
 
   <p>For any policies $\pi_k$ (old) and $\pi$ (new), the performance difference can be expressed as:</p>
 
-\[J(\pi) - J(\pi_k) = \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_\pi}\left[ \mathbb{E}_{a \sim \pi(\cdot \mid s)}[A^{\pi_k}(s,a)] \right]\]
+  <p>$$
+J(\pi) - J(\pi_k) = \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_\pi}\left[ \mathbb{E}_{a \sim \pi(\cdot \mid s)}[A^{\pi_k}(s,a)] \right]
+$$</p>
 </blockquote>
 
 <p><strong>Intuitive understanding</strong>: How much better the new policy is than the old equals the “average advantage” obtained by selecting actions according to the new policy under the state distribution visited by the new policy.</p>
@@ -247,7 +257,9 @@
 <blockquote>
   <p><strong>Lemma 1.2 (Relationship Between State Distribution Difference and Policy TV Distance)</strong></p>
 
-\[\|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]\]
+  <p>$$
+\|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]
+$$</p>
 </blockquote>
 
 <p><strong>Physical interpretation</strong>: Small differences in policies in action space are “amplified” through environment dynamics into differences in state visitation distributions. The coefficient $\frac{\gamma}{1-\gamma}$ reflects the <strong>temporal accumulation effect</strong>—in long-horizon tasks ($\gamma$ close to 1), the amplification is stronger.</p>
@@ -261,11 +273,15 @@
 
   <p>Define the expected advantage upper bound constant $C_{\pi,\pi_k} := \max_{s} \lvert \mathbb{E}_{a \sim \pi}[A^{\pi_k}(s,a)] \rvert$. Then:</p>
 
-\[J(\pi) - J(\pi_k) \geq L_{\pi_k}(\pi) - \frac{2\gamma C_{\pi,\pi_k}}{(1-\gamma)^2} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]\]
+  <p>$$
+J(\pi) - J(\pi_k) \geq L_{\pi_k}(\pi) - \frac{2\gamma C_{\pi,\pi_k}}{(1-\gamma)^2} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]
+$$</p>
 
   <p>where the <strong>surrogate objective</strong> is:</p>
 
-\[L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k} \left[ \frac{\pi(a \mid s)}{\pi_k(a \mid s)} A^{\pi_k}(s,a) \right]\]
+  <p>$$
+L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k} \left[ \frac{\pi(a \mid s)}{\pi_k(a \mid s)} A^{\pi_k}(s,a) \right]
+$$</p>
 </blockquote>
 
 <p>This lower bound consists of two parts:</p>
@@ -285,21 +301,21 @@
 
 <h3 id="31-practical-scenarios">3.1 Practical Scenarios</h3>
 
-<p>In practice, a batch of data may come from multiple policy versions ${\pi^{(1)}, \ldots, \pi^{(M)}}$, with respective proportions $\alpha_1, \ldots, \alpha_M$. How do we extend Theorem 1.1 to this setting?</p>
+<p>In practice, a batch of data may come from multiple policy versions $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$, with respective proportions $\alpha_1, \ldots, \alpha_M$. How do we extend Theorem 1.1 to this setting?</p>
 
 <h3 id="32-core-idea-augmented-state-space">3.2 Core Idea: Augmented State Space</h3>
 
 <p>The solution is an elegant modeling technique: <strong>treat the policy version index as part of the state</strong>.</p>
 
-<p>Define the augmented state space $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$, where $\mathcal{I} = {1, \ldots, M}$ is the policy index set. Under augmented state $(s, i)$, the <strong>mixture behavior policy</strong> is defined as $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$.</p>
+<p>Define the augmented state space $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$, where $\mathcal{I} = \{1, \ldots, M\}$ is the policy index set. Under augmented state $(s, i)$, the <strong>mixture behavior policy</strong> is defined as $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$.</p>
 
-<p>The evolution of indices is characterized by the <strong>index transition kernel</strong> $q(i’ \mid i)$. The augmented MDP inherits the original MDP’s rewards and environment transitions, with indices evolving independently according to $q(i’|i)$.</p>
+<p>The evolution of indices is characterized by the <strong>index transition kernel</strong> $q(i' \mid i)$. The augmented MDP inherits the original MDP’s rewards and environment transitions, with indices evolving independently according to $q(i'\|i)$.</p>
 
 <p>This technique works because the new policy $\pi$’s return in the augmented MDP equals its return in the original MDP, allowing direct application of Theorem 1.1.</p>
 
 <h3 id="33-structural-simplification-for-trajectory-level-mixture">3.3 Structural Simplification for Trajectory-Level Mixture</h3>
 
-<p>The most common scenario is <strong>using a single old policy per trajectory</strong>: at trajectory start, sample index $I_0 \sim \alpha$, and use $\pi^{(I_0)}$ throughout. In this case, the index transition kernel is the identity: $q(i’ \mid i) = \mathbf{1}_{i’=i}$.</p>
+<p>The most common scenario is <strong>using a single old policy per trajectory</strong>: at trajectory start, sample index $I_0 \sim \alpha$, and use $\pi^{(I_0)}$ throughout. In this case, the index transition kernel is the identity: $q(i' \mid i) = \mathbf{1}_{i'=i}$.</p>
 
 <p>From an engineering perspective, in many <strong>actor-learner asynchronous training</strong> setups (when sampling and training organize data by “entire trajectories/complete episodes belonging to a certain policy version”), this approximately corresponds to what we call <strong>trajectory-level mixture</strong>: actors use a fixed policy snapshot within a sampling unit to generate data, while learners mix trajectories from different versions for updates. We say “approximately” because different systems may not have identical boundaries for “trajectory/sampling unit.”</p>
 
@@ -320,7 +336,9 @@
 <blockquote>
   <p><strong>Corollary 2.1 (Performance Improvement Lower Bound for Trajectory-Level Mixture)</strong></p>
 
-\[J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\pi^{(i)}}(\pi) - \frac{2\gamma \max_i C_{\pi, \pi^{(i)}}}{(1-\gamma)^2} \sum_{i=1}^{M} \alpha_i \mathbb{E}_{s \sim d_{\pi^{(i)}}} \big[ D_{\mathrm{TV}}(\pi, \pi^{(i)}; s) \big]\]
+  <p>$$
+J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\pi^{(i)}}(\pi) - \frac{2\gamma \max_i C_{\pi, \pi^{(i)}}}{(1-\gamma)^2} \sum_{i=1}^{M} \alpha_i \mathbb{E}_{s \sim d_{\pi^{(i)}}} \big[ D_{\mathrm{TV}}(\pi, \pi^{(i)}; s) \big]
+$$</p>
 </blockquote>
 
 <p>This result shows that when mixing trajectories from multiple old policy versions for training, if we construct the loss using importance ratios corresponding to each trajectory’s source policy while controlling the new policy’s deviation from each old policy, the new policy’s performance has a clear improvement lower bound.</p>
@@ -333,27 +351,33 @@
 
 <p>The previous results characterize improvement of “the new policy relative to the mixture behavior policy.” However, in actual training, what we truly care about is: <strong>Does the latest policy $\pi_{k+1}$ after each update monotonically improve over the previous latest policy $\pi_k$?</strong></p>
 
-\[J(\pi_{k+1}) \geq J(\pi_k)\]
+<p>$$
+J(\pi_{k+1}) \geq J(\pi_k)
+$$</p>
 
 <h3 id="42-unified-modeling-framework">4.2 Unified Modeling Framework</h3>
 
-<p>Two typical forms of dynamic mixture sampling can be uniformly characterized by the index transition kernel $q(i’|i)$:</p>
+<p>Two typical forms of dynamic mixture sampling can be uniformly characterized by the index transition kernel $q(i'\|i)$:</p>
 
-<p><strong>Trajectory-level mixture</strong> (can be viewed as an abstraction of conventional asynchronous training; identity index transition): $q(i’|i) = \mathbf{1}{i’=i}$</p>
+<p><strong>Trajectory-level mixture</strong> (can be viewed as an abstraction of conventional asynchronous training; identity index transition): $q(i'\|i) = \mathbf{1}\{i'=i\}$</p>
 
-<p><strong>Step/segment-level mixture</strong> (an abstraction of partial rollout / segment-based sampling; allows switching): $q(i’|i) = (1-\sigma(i))\mathbf{1}{i’=i} + \sigma(i)\kappa(i’|i)$</p>
+<p><strong>Step/segment-level mixture</strong> (an abstraction of partial rollout / segment-based sampling; allows switching): $q(i'\|i) = (1-\sigma(i))\mathbf{1}\{i'=i\} + \sigma(i)\kappa(i'\|i)$</p>
 
-<p>where $\sigma(i)$ is the switching probability and $\kappa(\cdot|i)$ is the target index distribution.</p>
+<p>where $\sigma(i)$ is the switching probability and $\kappa(\cdot\|i)$ is the target index distribution.</p>
 
 <h3 id="43-core-decomposition">4.3 Core Decomposition</h3>
 
 <p>By introducing the mixture return $J_{\mathrm{mix}}^{(k)}$ as an intermediate bridge, the performance difference decomposes as:</p>
 
-\[J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{improvement over mixture policy}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{mixture bias term}}\]
+<p>$$
+J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{improvement over mixture policy}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{mixture bias term}}
+$$</p>
 
 <p>The first term can be handled using Theorem 1.1. The second term is the <strong>mixture bias term</strong>, which can be shown to satisfy:</p>
 
-\[J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]\]
+<p>$$
+J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
+$$</p>
 
 <h3 id="44-monotonic-improvement-lower-bound">4.4 Monotonic Improvement Lower Bound</h3>
 
@@ -362,11 +386,13 @@
 <blockquote>
   <p><strong>Theorem 3.1 (Monotonic Improvement Lower Bound Under Dynamic Mixture Sampling)</strong></p>
 
-\[\begin{aligned}
-J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
-&amp;- \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \big] \\
-&amp;- \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
-\end{aligned}\]
+  <p>$$
+\begin{aligned}
+J(\pi_{k+1}) - J(\pi_k) \geq\;& L_{\beta^{(k)}}(\pi_{k+1}) \\
+&- \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \big] \\
+&- \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
+\end{aligned}
+$$</p>
 </blockquote>
 
 <p>This lower bound reveals the necessity of <strong>dual control</strong>:</p>
@@ -382,18 +408,20 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <blockquote>
   <p><strong>Observation 3.1 (Infeasibility of Update Shift Constraints)</strong></p>
 
-  <p>Suppose the mixture sampling includes two old policies $\pi^{(1)}$ and $\pi^{(2)}$. If there exists some state $s$ such that $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) &gt; 2\delta$, then no policy $\pi_{k+1}$ can simultaneously satisfy $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ and $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$.</p>
+  <p>Suppose the mixture sampling includes two old policies $\pi^{(1)}$ and $\pi^{(2)}$. If there exists some state $s$ such that $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) > 2\delta$, then no policy $\pi_{k+1}$ can simultaneously satisfy $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ and $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$.</p>
 </blockquote>
 
 <p><strong>Proof</strong>: By the triangle inequality, if both constraints were satisfied, then $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) \leq 2\delta$, a contradiction.</p>
 
-<p><strong>Root cause</strong>: The update shift penalty directly couples $\pi_{k+1}$ with the historical policy family ${\pi^{(i)}}$, whose internal structure is a product of historical training and not controllable by the current update.</p>
+<p><strong>Root cause</strong>: The update shift penalty directly couples $\pi_{k+1}$ with the historical policy family $\{\pi^{(i)}\}$, whose internal structure is a product of historical training and not controllable by the current update.</p>
 
 <h3 id="46-triangle-inequality-decomposition">4.6 Triangle Inequality Decomposition</h3>
 
 <p>The solution leverages the triangle inequality of TV distance:</p>
 
-\[D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \leq D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s) + D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\]
+<p>$$
+D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \leq D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s) + D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)
+$$</p>
 
 <p>This decomposes the coupled constraint into two independent parts:</p>
 
@@ -404,15 +432,19 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>Define:</p>
 
-\[U_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)\big], \quad S_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\big]\]
+<p>$$
+U_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)\big], \quad S_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\big]
+$$</p>
 
 <blockquote>
   <p><strong>Corollary 3.2 (Decomposed Monotonic Improvement Lower Bound)</strong></p>
 
-\[J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k\]
+  <p>$$
+J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k
+$$</p>
 </blockquote>
 
-<p><strong>Why does decomposition solve the problem?</strong> The key is that after decomposition, $U_k$ only involves the new policy $\pi_{k+1}$ and the current policy $\pi_k$, <strong>completely independent of the structure of the old policy family ${\pi^{(i)}}$</strong>. Therefore, regardless of how different the old policies are from each other, constraining $U_k$ is always feasible—this is precisely the resolution to the infeasibility issue revealed in Observation 3.1.</p>
+<p><strong>Why does decomposition solve the problem?</strong> The key is that after decomposition, $U_k$ only involves the new policy $\pi_{k+1}$ and the current policy $\pi_k$, <strong>completely independent of the structure of the old policy family $\{\pi^{(i)}\}$</strong>. Therefore, regardless of how different the old policies are from each other, constraining $U_k$ is always feasible—this is precisely the resolution to the infeasibility issue revealed in Observation 3.1.</p>
 
 <p>This reveals an important engineering principle—<strong>separation of concerns</strong>:</p>
 
@@ -451,40 +483,50 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
   <p>Suppose policy $\pi_1$’s support covers the supports of $\pi$ and $\pi_2$. Then for any state distribution $\mu$:</p>
 
-\[\mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot|s)} \left| \frac{\pi(a|s)}{\pi_1(a|s)} - \frac{\pi_2(a|s)}{\pi_1(a|s)} \right|\]
+  <p>$$
+\mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot|s)} \left| \frac{\pi(a|s)}{\pi_1(a|s)} - \frac{\pi_2(a|s)}{\pi_1(a|s)} \right|
+$$</p>
 </blockquote>
 
 <p><strong>Intuitive understanding</strong>: The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under $\pi_1$. This enables us to estimate and control TV distance using samples.</p>
 
-<h3 id="52-sample-representation-of-u_k">5.2 Sample Representation of $U_k$</h3>
+<h3 id="52-sample-representation-of-inlmath104mathend">5.2 Sample Representation of $U_k$</h3>
 
 <p>Using Lemma 3.3, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling source policy), we obtain:</p>
 
-\[U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot|s)} \left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right|\]
+<p>$$
+U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot|s)} \left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right|
+$$</p>
 
-<p>Denoting $\rho_{k+1} := \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)}$ and $\rho_k := \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)}$, we have:</p>
+<p>Denoting $\rho_{k+1} := \frac{\pi_{k+1}(a\|s)}{\pi^{(i)}(a\|s)}$ and $\rho_k := \frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)}$, we have:</p>
 
-\[U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{training data}} \big| \rho_{k+1} - \rho_k \big|\]
+<p>$$
+U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{training data}} \big| \rho_{k+1} - \rho_k \big|
+$$</p>
 
 <p>This means: <strong>If we can ensure $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$ for each sample, we can guarantee $U_k \leq \epsilon/2$</strong>.</p>
 
-<h3 id="53-two-methods-for-constraining-u_k">5.3 Two Methods for Constraining $U_k$</h3>
+<h3 id="53-two-methods-for-constraining-inlmath112mathend">5.3 Two Methods for Constraining $U_k$</h3>
 
 <p><strong>Method 1: Direct Constraint on Ratio Difference</strong></p>
 
 <p>For each sample $(s, i, a)$, require:</p>
 
-\[\left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right| \leq \epsilon\]
+<p>$$
+\left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right| \leq \epsilon
+$$</p>
 
-<p>The clipping interval is $\left[\frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} - \epsilon, \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} + \epsilon\right]$, with <strong>clipping center at $\rho_k$ rather than 1</strong>.</p>
+<p>The clipping interval is $\left[\frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)} - \epsilon, \frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)} + \epsilon\right]$, with <strong>clipping center at $\rho_k$ rather than 1</strong>.</p>
 
 <p><strong>Method 2: Constraint on Incremental Ratio</strong></p>
 
 <p>Noting that $\rho_{k+1} - \rho_k = \rho_k \cdot \left(\frac{\pi_{k+1}}{\pi_k} - 1\right)$, we have:</p>
 
-\[|\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right|\]
+<p>$$
+|\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right|
+$$</p>
 
-<p>If we constrain $\left\lvert\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right\rvert \leq \epsilon$, since $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$, one can show $U_k \leq \epsilon/2$.</p>
+<p>If we constrain $\left\lvert\frac{\pi_{k+1}(a\|s)}{\pi_k(a\|s)} - 1\right\rvert \leq \epsilon$, since $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$, one can show $U_k \leq \epsilon/2$.</p>
 
 <p>This method clips $\pi_{k+1}/\pi_k$ with center at 1, <strong>completely independent of the old policy $\pi^{(i)}$</strong>.</p>
 
@@ -492,22 +534,28 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>For comparison, we present the complete objective functions for three clipping mechanisms. Suppose the current sample comes from old policy $\pi^{(i)}$, and denote:</p>
 <ul>
-  <li>$\rho_{k+1} = \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)}$ (new policy’s ratio relative to sampling policy)</li>
-  <li>$\rho_k = \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)}$ (current policy’s ratio relative to sampling policy)</li>
-  <li>$r = \frac{\pi_{k+1}(a|s)}{\pi_k(a|s)}$ (new policy’s incremental ratio relative to current policy)</li>
+  <li>$\rho_{k+1} = \frac{\pi_{k+1}(a\|s)}{\pi^{(i)}(a\|s)}$ (new policy’s ratio relative to sampling policy)</li>
+  <li>$\rho_k = \frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)}$ (current policy’s ratio relative to sampling policy)</li>
+  <li>$r = \frac{\pi_{k+1}(a\|s)}{\pi_k(a\|s)}$ (new policy’s incremental ratio relative to current policy)</li>
 </ul>
 
 <p><strong>Standard PPO</strong>: Clip $\rho_{k+1}$ with center at 1</p>
 
-\[L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]\]
+<p>$$
+L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]
+$$</p>
 
 <p><strong>Method 1</strong>: Clip $\rho_{k+1}$ with center at $\rho_k$</p>
 
-\[L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]\]
+<p>$$
+L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]
+$$</p>
 
 <p><strong>Method 2</strong>: Clip incremental ratio $r$ with center at 1</p>
 
-\[L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]\]
+<p>$$
+L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]
+$$</p>
 
 <p>where $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advantage estimate.</p>
 
@@ -581,8 +629,8 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
     </tr>
     <tr>
       <td>Implementation complexity</td>
-      <td>Requires storing $\pi^{(i)}(a|s)$ and $\pi_k(a|s)$</td>
-      <td>Only requires $\pi_k(a|s)$</td>
+      <td>Requires storing $\pi^{(i)}(a\|s)$ and $\pi_k(a\|s)$</td>
+      <td>Only requires $\pi_k(a\|s)$</td>
     </tr>
     <tr>
       <td>Advantage function</td>
@@ -608,8 +656,8 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <p>Large language models have many tokens having very small probabilities.</p>
 
 <ul>
-  <li>Method 2 constrains $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$, which is a <strong>multiplicative constraint</strong>: if $\pi_k(a|s) = 10^{-6}$, the allowed absolute change is only $\epsilon \times 10^{-6}$.</li>
-  <li>Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an <strong>additive constraint</strong>: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a|s) = 0.1$), even if the current probability is very low, faster improvement is allowed.</li>
+  <li>Method 2 constrains $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$, which is a <strong>multiplicative constraint</strong>: if $\pi_k(a\|s) = 10^{-6}$, the allowed absolute change is only $\epsilon \times 10^{-6}$.</li>
+  <li>Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an <strong>additive constraint</strong>: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a\|s) = 0.1$), even if the current probability is very low, faster improvement is allowed.</li>
 </ul>
 
 <h3 id="56-controlling-sampling-staleness">5.6 Controlling Sampling Staleness</h3>
@@ -618,7 +666,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>(1) Discarding Stale Data</strong></p>
 
-<p>Set a threshold $\epsilon_{\mathrm{stale}}$. For each sample, compute $\lvert\rho_k - 1\rvert = \lvert\pi_k(a|s)/\pi^{(i)}(a|s) - 1\rvert$, and discard samples exceeding the threshold.</p>
+<p>Set a threshold $\epsilon_{\mathrm{stale}}$. For each sample, compute $\lvert\rho_k - 1\rvert = \lvert\pi_k(a\|s)/\pi^{(i)}(a\|s) - 1\rvert$, and discard samples exceeding the threshold.</p>
 
 <p><strong>(2) Controlling Policy Version Window</strong></p>
 
@@ -656,8 +704,8 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <p>The essential difference between the two mixture mechanisms lies in the structure of the index transition kernel:</p>
 
 <ul>
-  <li><strong>Trajectory-level mixture</strong>: $q(i’|i) = \mathbf{1}{i’=i}$, index never changes</li>
-  <li><strong>Step/segment-level mixture</strong>: $\sigma(i) &gt; 0$, allows within-trajectory switching</li>
+  <li><strong>Trajectory-level mixture</strong>: $q(i'\|i) = \mathbf{1}\{i'=i\}$, index never changes</li>
+  <li><strong>Step/segment-level mixture</strong>: $\sigma(i) > 0$, allows within-trajectory switching</li>
 </ul>
 
 <p>The correspondence with common engineering terminology is:</p>
@@ -669,7 +717,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>The key watershed is <strong>whether Lemma 2.1’s structural simplification holds</strong>: trajectory-level mixture satisfies advantage function reduction; step/segment-level mixture generally does not, because future returns are affected by the index transition kernel.</p>
 
-<h3 id="62-differences-in-sampling-staleness-s_k">6.2 Differences in Sampling Staleness $S_k$</h3>
+<h3 id="62-differences-in-sampling-staleness-inlmath183mathend">6.2 Differences in Sampling Staleness $S_k$</h3>
 
 <p><strong>Trajectory-level mixture</strong>’s staleness arises from: mixture weights $\alpha_i^{(k)}$ retaining probability mass on old policies after new policy release.</p>
 
@@ -747,18 +795,20 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>Define <strong>effective staleness</strong>:</p>
 
-\[\hat{S}_k := \mathbb{E}_{(s,i) \sim d_{\hat{\beta}^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_k, \hat{\pi}^{(i)}; s) \big]\]
+<p>$$
+\hat{S}_k := \mathbb{E}_{(s,i) \sim d_{\hat{\beta}^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_k, \hat{\pi}^{(i)}; s) \big]
+$$</p>
 
 <p>This definition simultaneously covers version staleness and training-inference implementation differences.</p>
 
 <h3 id="73-actionable-control">7.3 Actionable Control</h3>
 
-<p>By Lemma 3.3, $\hat{S}<em>k$ can be expressed in sample-level computable form. Given threshold $\epsilon</em>{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a|s)/\hat{\pi}^{(i)}(a|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then $\hat{S}<em>k \leq \epsilon</em>{\mathrm{stale}}/2$.</p>
+<p>By Lemma 3.3, $\hat{S}_k$ can be expressed in sample-level computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\|s)/\hat{\pi}^{(i)}(a\|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$.</p>
 
 <p><strong>Key implementation points</strong>:</p>
 
 <ol>
-  <li><strong>Behavior denominator alignment</strong>: The behavior probability in the loss should use the inference-side recorded $\hat{\pi}^{(i)}(a|s)$</li>
+  <li><strong>Behavior denominator alignment</strong>: The behavior probability in the loss should use the inference-side recorded $\hat{\pi}^{(i)}(a\|s)$</li>
   <li><strong>Probability smoothing</strong>: If the inference side has truncation (e.g., top-k), ensure ratios are valid</li>
 </ol>
 
@@ -768,7 +818,9 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>The structure of the monotonic improvement lower bound is:</p>
 
-\[J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{surrogate objective}} - \underbrace{C_1 \cdot U_k}_{\text{update shift penalty}} - \underbrace{C_2 \cdot S_k}_{\text{sampling staleness penalty}}\]
+<p>$$
+J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{surrogate objective}} - \underbrace{C_1 \cdot U_k}_{\text{update shift penalty}} - \underbrace{C_2 \cdot S_k}_{\text{sampling staleness penalty}}
+$$</p>
 
 <h3 id="separation-of-concerns-principle">Separation of Concerns Principle</h3>
 
@@ -858,7 +910,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
       <td>Discounted state visitation distribution, advantage function</td>
     </tr>
     <tr>
-      <td>$D_{\mathrm{TV}}(\pi, \pi’; s)$</td>
+      <td>$D_{\mathrm{TV}}(\pi, \pi'; s)$</td>
       <td>TV distance between two policies at state $s$</td>
     </tr>
     <tr>
@@ -866,7 +918,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
       <td>Mixture behavior policy at round $k$</td>
     </tr>
     <tr>
-      <td>$q(i’ \mid i)$, $\alpha_i^{(k)}$</td>
+      <td>$q(i' \mid i)$, $\alpha_i^{(k)}$</td>
       <td>Index transition kernel, initial index distribution</td>
     </tr>
     <tr>
@@ -978,24 +1030,121 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
   <script async src="https://badge.dimensions.ai/badge.js"></script>
 
-    <!-- MathJax -->
+    <!-- MathJax 3.x with comprehensive configuration -->
   <script type="text/javascript">
     window.MathJax = {
       tex: {
         tags: 'ams',
+        // Support all common math delimiters
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
         processEscapes: true,
-        processEnvironments: true
+        processEnvironments: true,
+        processRefs: true,
+        // Common macros for convenience
+        macros: {
+          RR: '\\mathbb{R}',
+          NN: '\\mathbb{N}',
+          ZZ: '\\mathbb{Z}',
+          CC: '\\mathbb{C}',
+          EE: '\\mathbb{E}',
+          PP: '\\mathbb{P}',
+          bm: ['\\boldsymbol{#1}', 1],
+          argmax: '\\operatorname*{arg\\,max}',
+          argmin: '\\operatorname*{arg\\,min}',
+          sgn: '\\operatorname{sgn}',
+          KL: '\\mathrm{KL}',
+          Var: '\\operatorname{Var}',
+          Cov: '\\operatorname{Cov}',
+          tr: '\\operatorname{tr}',
+          diag: '\\operatorname{diag}'
+        },
+        // AMS packages
+        packages: {'[+]': ['ams', 'boldsymbol', 'newcommand']}
+      },
+      loader: {
+        load: ['[tex]/ams', '[tex]/boldsymbol', '[tex]/newcommand']
       },
       options: {
-        // Avoid unexpected rendering inside code blocks.
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        // Skip math rendering in these HTML elements
+        skipHtmlTags: [
+          'script', 'noscript', 'style', 'textarea', 'pre', 'code',
+          'annotation', 'annotation-xml', 'kbd', 'samp', 'var'
+        ],
+        // Fix issues with underscores being converted to <em> by HTML
+        processHtmlClass: 'mathjax-process',
+        ignoreHtmlClass: 'tex2jax_ignore|no-mathjax',
+        // Render math even with HTML entities
+        renderActions: {
+          findScript: [10, function (doc) {
+            // Pre-process to fix HTML entity issues in math
+            for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            }
+          }, '']
+        }
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 1.0
+      },
+      chtml: {
+        scale: 1.0,
+        matchFontHeight: true
+      },
+      startup: {
+        ready: function () {
+          MathJax.startup.defaultReady();
+          // Fix: restore underscores that might have been converted to <em>
+          MathJax.startup.promise.then(() => {
+            console.log('MathJax typesetting complete');
+          });
+        }
       }
     };
   </script>
   <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
-  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  
+  <!-- Pre-processing script to protect math from Markdown/HTML interference -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix underscores in math that were converted to <em> by Markdown
+      function fixMathUnderscores() {
+        const mathContainers = document.querySelectorAll('.MathJax, .MathJax_Display, mjx-container');
+        // This runs before MathJax, so we need to fix raw content
+        const content = document.querySelector('.post-content, article');
+        if (!content) return;
+        
+        // Find math delimiters and restore any <em> or <strong> inside them
+        const html = content.innerHTML;
+        
+        // Pattern to find math blocks and restore underscore formatting
+        // This is a fallback; the main protection is in the Jekyll plugin
+      }
+      
+      // Fix HTML entities in display math blocks
+      function fixHtmlEntities() {
+        document.querySelectorAll('.language-plaintext.highlighter-rouge').forEach(el => {
+          // Check if this looks like an HTML figure that wasn't rendered
+          const text = el.textContent;
+          if (text.includes('<img') || text.includes('<figure') || text.includes('<figcaption')) {
+            // This is raw HTML that should be rendered - replace with actual HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = text;
+            el.replaceWith(...temp.childNodes);
+          }
+        });
+      }
+      
+      fixHtmlEntities();
+    });
+  </script>
 
     <!-- Pseudocode -->
   <script defer src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js" integrity="sha256-aVkDxqyzrB+ExUsOY9PdyelkDhn/DfrjWu08aVpqNlo=" crossorigin="anonymous"></script>

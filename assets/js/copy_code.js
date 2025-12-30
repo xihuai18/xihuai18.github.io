@@ -1,7 +1,19 @@
-// create element for copy button in code blocks
+// create element for copy button and wrap button in code blocks
 var codeBlocks = document.querySelectorAll('pre');
 codeBlocks.forEach(function (codeBlock) {
   if (codeBlock.querySelector('pre:not(.lineno)') || codeBlock.querySelector('code')) {
+    // Set default wrap for code blocks
+    codeBlock.classList.add('wrapped');
+    
+    // Create wrap button
+    var wrapButton = document.createElement('button');
+    wrapButton.className = 'wrap-toggle';
+    wrapButton.type = 'button';
+    wrapButton.ariaLabel = 'Toggle code wrap';
+    wrapButton.innerHTML = '<i class="fas fa-align-left"></i>';
+    codeBlock.append(wrapButton);
+    
+    // Create copy button
     var copyButton = document.createElement('button');
     copyButton.className = 'copy';
     copyButton.type = 'button';
@@ -9,6 +21,16 @@ codeBlocks.forEach(function (codeBlock) {
     copyButton.innerText = 'Copy';
     copyButton.innerHTML = '<i class="fas fa-clipboard"></i>';
     codeBlock.append(copyButton);
+    
+    // Toggle wrap on/off
+    wrapButton.addEventListener('click', function () {
+      codeBlock.classList.toggle('wrapped');
+      if (codeBlock.classList.contains('wrapped')) {
+        wrapButton.innerHTML = '<i class="fas fa-align-left"></i>';
+      } else {
+        wrapButton.innerHTML = '<i class="fas fa-arrows-alt-h"></i>';
+      }
+    });
 
     // get code from code block and copy to clipboard
     copyButton.addEventListener('click', function () {

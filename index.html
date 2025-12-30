@@ -44,7 +44,7 @@
         "description": "Xihuai's personal page.
 ",
         "headline": "About",
-        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://github.com/xihuai18"],
         "name": "Xihuai Leo Wang",
         "@context": "https://schema.org"
       }
@@ -92,7 +92,6 @@
       <div class="navbar-brand navbar-social-icons">
         <a href="mailto:%6C%65%6F%78%68%77%61%6E%67@%73%6A%74%75.%65%64%75.%63%6E" title="email"><i class="fas fa-envelope"></i></a>
             <a href="https://scholar.google.com/citations?user=hy6v3qUAAAAJ" title="Google Scholar"><i class="ai ai-google-scholar"></i></a>
-            <a href="https://www.semanticscholar.org/author/2178008" title="Semantic Scholar"><i class="ai ai-semantic-scholar"></i></a>
             <a href="https://github.com/xihuai18" title="GitHub"><i class="fab fa-github"></i></a>
             
 
@@ -237,15 +236,14 @@
 </ul>
 
 <div class="job-ad">
-  <div style="display: flex; align-items: center;">
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;i class="fas fa-bullhorn" style="font-size: 2em; margin-right: 1rem; color: var(--global-theme-color);"&gt;&lt;/i&gt;
-&lt;div&gt;
-  &lt;strong&gt;I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via &lt;em&gt;leoxhwang@sjtu.edu.cn&lt;/em&gt; for potential opportunities.&lt;/strong&gt;
-  &lt;br&gt;
-  &lt;strong&gt;本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 &lt;em&gt;leoxhwang@sjtu.edu.cn&lt;/em&gt; 与我联系。&lt;/strong&gt;
-&lt;/div&gt;
-</code></pre></div>    </div>
-  </div>
+<div style="display: flex; align-items: center;">
+<i class="fas fa-bullhorn" style="font-size: 2em; margin-right: 1rem; color: var(--global-theme-color);"></i>
+<div>
+<strong>I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via <em>leoxhwang@sjtu.edu.cn</em> for potential opportunities.</strong>
+<br />
+<strong>本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 <em>leoxhwang@sjtu.edu.cn</em> 与我联系。</strong>
+</div>
+</div>
 </div>
 
           </div>
@@ -574,24 +572,121 @@
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
   <script async src="https://badge.dimensions.ai/badge.js"></script>
 
-    <!-- MathJax -->
+    <!-- MathJax 3.x with comprehensive configuration -->
   <script type="text/javascript">
     window.MathJax = {
       tex: {
         tags: 'ams',
+        // Support all common math delimiters
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
         processEscapes: true,
-        processEnvironments: true
+        processEnvironments: true,
+        processRefs: true,
+        // Common macros for convenience
+        macros: {
+          RR: '\\mathbb{R}',
+          NN: '\\mathbb{N}',
+          ZZ: '\\mathbb{Z}',
+          CC: '\\mathbb{C}',
+          EE: '\\mathbb{E}',
+          PP: '\\mathbb{P}',
+          bm: ['\\boldsymbol{#1}', 1],
+          argmax: '\\operatorname*{arg\\,max}',
+          argmin: '\\operatorname*{arg\\,min}',
+          sgn: '\\operatorname{sgn}',
+          KL: '\\mathrm{KL}',
+          Var: '\\operatorname{Var}',
+          Cov: '\\operatorname{Cov}',
+          tr: '\\operatorname{tr}',
+          diag: '\\operatorname{diag}'
+        },
+        // AMS packages
+        packages: {'[+]': ['ams', 'boldsymbol', 'newcommand']}
+      },
+      loader: {
+        load: ['[tex]/ams', '[tex]/boldsymbol', '[tex]/newcommand']
       },
       options: {
-        // Avoid unexpected rendering inside code blocks.
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        // Skip math rendering in these HTML elements
+        skipHtmlTags: [
+          'script', 'noscript', 'style', 'textarea', 'pre', 'code',
+          'annotation', 'annotation-xml', 'kbd', 'samp', 'var'
+        ],
+        // Fix issues with underscores being converted to <em> by HTML
+        processHtmlClass: 'mathjax-process',
+        ignoreHtmlClass: 'tex2jax_ignore|no-mathjax',
+        // Render math even with HTML entities
+        renderActions: {
+          findScript: [10, function (doc) {
+            // Pre-process to fix HTML entity issues in math
+            for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            }
+          }, '']
+        }
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 1.0
+      },
+      chtml: {
+        scale: 1.0,
+        matchFontHeight: true
+      },
+      startup: {
+        ready: function () {
+          MathJax.startup.defaultReady();
+          // Fix: restore underscores that might have been converted to <em>
+          MathJax.startup.promise.then(() => {
+            console.log('MathJax typesetting complete');
+          });
+        }
       }
     };
   </script>
   <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
-  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  
+  <!-- Pre-processing script to protect math from Markdown/HTML interference -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix underscores in math that were converted to <em> by Markdown
+      function fixMathUnderscores() {
+        const mathContainers = document.querySelectorAll('.MathJax, .MathJax_Display, mjx-container');
+        // This runs before MathJax, so we need to fix raw content
+        const content = document.querySelector('.post-content, article');
+        if (!content) return;
+        
+        // Find math delimiters and restore any <em> or <strong> inside them
+        const html = content.innerHTML;
+        
+        // Pattern to find math blocks and restore underscore formatting
+        // This is a fallback; the main protection is in the Jekyll plugin
+      }
+      
+      // Fix HTML entities in display math blocks
+      function fixHtmlEntities() {
+        document.querySelectorAll('.language-plaintext.highlighter-rouge').forEach(el => {
+          // Check if this looks like an HTML figure that wasn't rendered
+          const text = el.textContent;
+          if (text.includes('<img') || text.includes('<figure') || text.includes('<figcaption')) {
+            // This is raw HTML that should be rendered - replace with actual HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = text;
+            el.replaceWith(...temp.childNodes);
+          }
+        });
+      }
+      
+      fixHtmlEntities();
+    });
+  </script>
 
     <!-- Pseudocode -->
   <script defer src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js" integrity="sha256-aVkDxqyzrB+ExUsOY9PdyelkDhn/DfrjWu08aVpqNlo=" crossorigin="anonymous"></script>

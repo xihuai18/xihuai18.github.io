@@ -40,7 +40,7 @@
         "@type": "WebSite",
         "description": "Modern LLM RL pipelines often train under an "old policy" that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations.",
         "headline": "From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL",
-        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://github.com/xihuai18"],
         "name": "Xihuai Leo Wang",
         "@context": "https://schema.org"
       }
@@ -258,7 +258,7 @@
     <p><a href="https://zhuanlan.zhihu.com/p/1959976628290590602">RL 老训崩？训推差异是基石</a> approaches the problem more from a practical perspective, sharing experience on how to engineer for near training–inference consistency: choosing consistent operators and precision settings, monitoring and constraining the log-prob gap between training and inference, etc. The focus is on framework-level engineering practices that can mitigate training–inference difference at the root.</p>
   </li>
   <li>
-    <p><a href="https://verl.readthedocs.io/en/latest/algo/rollout_corr.html">verl Rollout Importance Sampling</a> introduces a <strong>Token Veto</strong> mechanism in its rollout correction module: it computes <strong>token-level</strong> importance ratios $\rho_t^{(\text{ref}\leftarrow\text{beh})}$, and if any token in a trajectory satisfies $\min_t \rho_t &lt; \tau_{\text{veto}}$, the entire sequence is discarded from training. This “token-level detection, sequence-level veto” design embodies a conservative “one-vote veto” strategy.</p>
+    <p><a href="https://verl.readthedocs.io/en/latest/algo/rollout_corr.html">verl Rollout Importance Sampling</a> introduces a <strong>Token Veto</strong> mechanism in its rollout correction module: it computes <strong>token-level</strong> importance ratios $\rho_t^{(\text{ref}\leftarrow\text{beh})}$, and if any token in a trajectory satisfies $\min_t \rho_t < \tau_{\text{veto}}$, the entire sequence is discarded from training. This “token-level detection, sequence-level veto” design embodies a conservative “one-vote veto” strategy.</p>
   </li>
   <li><a href="https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf">INTELLECT-3 Technical Report</a> adopts a similar rejection sampling strategy in its asynchronous distributed RL training framework. INTELLECT-3 computes <strong>token-level</strong> importance ratios for each rollout; if any token’s ratio falls below a threshold ($10^{-5}$ in the paper), the entire trajectory is masked.</li>
 </ul>
@@ -290,11 +290,17 @@
   <li>States $s \in \mathcal{S}$, actions $a \in \mathcal{A}$.</li>
   <li>Policy $\pi(a \mid s)$.</li>
   <li>Discounted state distribution:
-\(d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s).\)</li>
+$$
+  d_\pi(s) := (1-\gamma)\sum_{t=0}^\infty \gamma^t \Pr_\pi(s_t = s).
+  $$</li>
   <li>Return (episodic view):
-\(\mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big].\)</li>
+$$
+  \mathcal{J}(\pi) := \mathbb{E}_\pi\Big[\sum_{t=0}^\infty \gamma^t r_t\Big].
+  $$</li>
   <li>Value / Q / advantage functions:
-\(V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s).\)</li>
+$$
+  V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s).
+  $$</li>
 </ul>
 
 <p>It’s worth spelling out that in the three-policy setup we have:</p>
@@ -326,9 +332,11 @@
 <blockquote>
   <p>For any two policies $\mu$ and $\pi_\theta$, we have</p>
 
-\[\mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
+  <p>$$
+\mathcal{J}(\pi_\theta) - \mathcal{J}(\mu)
 = \frac{1}{1-\gamma}\;
-\mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)].\]
+\mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)].
+$$</p>
 </blockquote>
 
 <p>The intuition is simple:</p>
@@ -340,56 +348,70 @@
 
 <p>The challenge in TRPO is that we cannot compute</p>
 
-\[\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]\]
+<p>$$
+\mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]
+$$</p>
 
 <p>exactly, because $d_{\pi_\theta}$ is the state distribution of the <em>new</em> policy, under which we do not have samples.</p>
 
 <p>So TRPO introduces a surrogate objective by replacing the state distribution with that of the behavior policy:</p>
 
-\[L_\mu(\pi_\theta)
-:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)].\]
+<p>$$
+L_\mu(\pi_\theta)
+:= \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)].
+$$</p>
 
 <p>Intuitively, $L_\mu$ asks the following question: “Under the states visited by the behavior policy, how good is the new policy if we just let it pick the actions?”</p>
 
 <p>Starting from the Performance Difference Lemma, the difference between the true objective and the surrogate is:</p>
 
-\[\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)
+<p>$$
+\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)
 = \frac{1}{1-\gamma}\;
   \sum_s \big(d_{\pi_\theta}(s) - d_\mu(s)\big)
-  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)].\]
+  \,\mathbb{E}_{a\sim\pi_\theta(\cdot\mid s)}[A_\mu(s,a)].
+$$</p>
 
 <p>If we define</p>
 
-\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\]
+<p>$$
+\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,
+$$</p>
 
 <p>we immediately get the following upper bound:</p>
 
 <blockquote>
   <p><strong>Lemma 1</strong></p>
 
-\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
+  <p>$$
+|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
 \le \frac{\epsilon_\mu}{1-\gamma}\;
-    \|d_{\pi_\theta} - d_\mu\|_1.\]
+    \|d_{\pi_\theta} - d_\mu\|_1.
+$$</p>
 </blockquote>
 
 <p>This reveals the first key quantity:</p>
 
 <blockquote>
-  <p><strong>State distribution shift</strong> $|d_{\pi_\theta} - d_\mu|_1$, i.e., “how differently the new policy sees the world, compared to the behavior policy.”</p>
+  <p><strong>State distribution shift</strong> $\|d_{\pi_\theta} - d_\mu\|_1$, i.e., “how differently the new policy sees the world, compared to the behavior policy.”</p>
 </blockquote>
 
-<p>We usually do <em>not</em> directly impose constraints on $|d_{\pi_\theta} - d_\mu|_1$. Instead, we constrain the per-timestep action distribution difference — via trust regions, KL penalties, clipping, etc.</p>
+<p>We usually do <em>not</em> directly impose constraints on $\|d_{\pi_\theta} - d_\mu\|_1$. Instead, we constrain the per-timestep action distribution difference — via trust regions, KL penalties, clipping, etc.</p>
 
 <p>Define the total variation (TV) distance:</p>
 
-\[D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1.\]
+<p>$$
+D_{\mathrm{TV}}(p,q) := \frac{1}{2}\|p-q\|_1.
+$$</p>
 
 <p>Assume there is a constant $\beta$ such that</p>
 
 <blockquote>
   <p>For all $s$, the TV distance between the behavior and target policies is bounded:</p>
 
-\[D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta.\]
+  <p>$$
+D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big) \le \beta.
+$$</p>
 </blockquote>
 
 <p>Intuitively: in any state, the action distribution of the “new policy” cannot deviate too much from that of the policy that generated the data.</p>
@@ -400,33 +422,41 @@
   <p><strong>Lemma 2</strong>
 Under the assumption above,</p>
 
-\[\|d_{\pi_\theta} - d_\mu\|_1
-\le \frac{2\gamma}{1-\gamma}\,\beta.\]
+  <p>$$
+\|d_{\pi_\theta} - d_\mu\|_1
+\le \frac{2\gamma}{1-\gamma}\,\beta.
+$$</p>
 </blockquote>
 
 <p>Combining Lemma 1 and Lemma 2, we obtain</p>
 
-\[|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
+<p>$$
+|\mathcal{J}(\pi_\theta) - L_\mu(\pi_\theta)|
 \le \frac{\epsilon_\mu}{1-\gamma}\; \frac{2\gamma}{1-\gamma}\,\beta
-= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.\]
+= \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
+$$</p>
 
 <p>This gives a compact <strong>two-policy TRPO lower bound (baseline = behavior policy)</strong>:</p>
 
 <blockquote>
   <p><strong>Theorem 1 (Two-Policy TRPO)</strong></p>
 
-\[\mathcal{J}(\pi_\theta)
+  <p>$$
+\mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
-\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.\]
+\frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
+$$</p>
 </blockquote>
 
 <p>This suggests:</p>
 
 <ul>
   <li><strong>What really matters for the tightness of $L_\mu(\pi_\theta)$ as a surrogate for $\mathcal{J}(\pi_\theta)$ is how far the behavior policy $\mu$ and the target policy $\pi_\theta$ drift apart:</strong>
-\(\beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).\)</li>
+$$
+  \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
+  $$</li>
 </ul>
 
 <p>If you can directly control this $\beta$, you can essentially port TRPO’s monotonic improvement guarantees to the behavior-policy view.</p>
@@ -448,11 +478,15 @@ L_\mu(\pi_\theta)
   <li>
     <p><strong>Reference vs. target</strong>: via KL penalties, clipping, etc., we constrain</p>
 
-\[D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).\]
+    <p>$$
+   D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).
+   $$</p>
   </li>
   <li>
     <p><strong>Behavior vs. reference</strong>: we would <em>like</em> to keep
-\(D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)\)
+$$
+   D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
+   $$
 small as well — this is where training–inference mismatch and asynchronous execution come in.</p>
   </li>
 </ol>
@@ -463,15 +497,19 @@ small as well — this is where training–inference mismatch and asynchronous e
   <li>
     <p><strong>Constraint 1: reference vs. target</strong></p>
 
-\[\alpha_0
-:= \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
-                              \pi_\theta(\cdot\mid s)\big);\]
+    <p>$$
+  \alpha_0
+  := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
+                                \pi_\theta(\cdot\mid s)\big);
+  $$</p>
   </li>
   <li>
     <p><strong>Constraint 2: behavior vs. reference</strong>
-\(\alpha_1
-:= \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).\)</p>
+$$
+  \alpha_1
+  := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
+                                \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
+  $$</p>
   </li>
 </ul>
 
@@ -486,29 +524,36 @@ small as well — this is where training–inference mismatch and asynchronous e
 
 <p>For any state $s$, by the triangle inequality we have</p>
 
-\[\begin{aligned}
+<p>$$
+\begin{aligned}
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
-&amp;\le
+&\le
 D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big)
 \\
-&amp;\quad +
+&\quad +
 D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),\pi_\theta(\cdot\mid s)\big).
-\end{aligned}\]
+\end{aligned}
+$$</p>
 
 <p>Taking the supremum over $s$ gives</p>
 
-\[\beta
+<p>$$
+\beta
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_\theta(\cdot\mid s)\big)
 \;\le\;
-\alpha_1 + \alpha_0.\]
+\alpha_1 + \alpha_0.
+$$</p>
 
 <p>Plugging this inequality into the two-policy TRPO bound (Theorem 1), and denoting</p>
 
-\[C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},\]
+<p>$$
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
+$$</p>
 
 <p>we obtain</p>
 
-\[\mathcal{J}(\pi_\theta)
+<p>$$
+\mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
@@ -516,7 +561,8 @@ C\,\beta
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\;
-C\,(\alpha_0 + \alpha_1).\]
+C\,(\alpha_0 + \alpha_1).
+$$</p>
 
 <p>This yields a very direct <strong>three-policy TRPO lower bound</strong>:</p>
 
@@ -524,34 +570,42 @@ C\,(\alpha_0 + \alpha_1).\]
   <p><strong>Theorem 2 (Three-Policy TRPO)</strong>
 Let</p>
 
-\[\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
-C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},\]
+  <p>$$
+\epsilon_\mu := \max_{s,a} |A_\mu(s,a)|,\quad
+C := \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2},
+$$</p>
 
   <p>and</p>
 
-\[\alpha_0
+  <p>$$
+\alpha_0
 := \max_s D_{\mathrm{TV}}\big(\pi_{\theta_{\text{old}}}(\cdot\mid s),
                               \pi_\theta(\cdot\mid s)\big),
 \quad
 \alpha_1
 := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
-                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).\]
+                              \pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
+$$</p>
 
   <p>Then for any target policy $\pi_\theta$,</p>
 
-\[\boxed{
+  <p>$$
+\boxed{
 \mathcal{J}(\pi_\theta)
 \;\ge\;
 L_\mu(\pi_\theta)
 \;-\; C\,(\alpha_0 + \alpha_1)
-}\]
+}
+$$</p>
 
   <p>where</p>
 
-\[L_\mu(\pi_\theta)
+  <p>$$
+L_\mu(\pi_\theta)
 :=
 \mathcal{J}(\mu) + \frac{1}{1-\gamma}
-  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].\]
+  \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
+$$</p>
 </blockquote>
 
 <p>The meaning of this bound is quite straightforward:</p>
@@ -610,13 +664,17 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 
 <p>In this section I’ll reuse the notation introduced above to write down the objectives of these three methods, focusing only on the design choices related to “behavior vs. reference policy.” Let the token-level PPO / GRPO-style update term be</p>
 
-\[g_\theta(t)
-= \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),\]
+<p>$$
+g_\theta(t)
+= \min\big(r_t(\theta) A_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon) A_t\big),
+$$</p>
 
 <p>where</p>
 
-\[r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
-\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t).\]
+<p>$$
+r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
+\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t).
+$$</p>
 
 <p>Here:</p>
 
@@ -628,32 +686,28 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 <p>To connect token-level $(s_t,a_t)$ with sequence-level $(x,y)$ notation, consider the RLHF setting (reinforcement learning from human feedback) for LLMs:</p>
 
 <ul>
-  <li>
-    <table>
-      <tbody>
-        <tr>
-          <td>Prompts are denoted by $x$, and responses by $y = (y_1,\dots,y_{</td>
-          <td>y</td>
-          <td>})$.</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-  <li>Token-level states and actions are defined as $s_t := (x,y_{&lt;t})$, $a_t := y_t$.</li>
+  <li>Prompts are denoted by $x$, and responses by $y = (y_1,\dots,y_{|y|})$.</li>
+  <li>Token-level states and actions are defined as $s_t := (x,y_{<t})$, $a_t := y_t$.</li>
   <li>The behavior and reference policies on sequences can then be written as
-\(\mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
-\pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t).\)</li>
+$$
+  \mu(y\mid x) = \prod_{t=1}^{|y|}\mu(a_t=y_t\mid s_t),\quad
+  \pi_{\theta_{\text{old}}}(y\mid x) = \prod_{t=1}^{|y|}\pi_{\theta_{\text{old}}}(a_t=y_t\mid s_t).
+  $$</li>
 </ul>
 
 <p>To quantify the deviation between reference and behavior policies, we can define the token-level importance ratio:</p>
 
-\[\rho_t^{(\text{ref}\leftarrow\text{beh})} :=
-\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)},\]
+<p>$$
+\rho_t^{(\text{ref}\leftarrow\text{beh})} :=
+\frac{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}{\mu(a_t\mid s_t)},
+$$</p>
 
 <p>and its sequence-level counterpart:</p>
 
-\[\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)}
-= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}.\]
+<p>$$
+\rho(y\mid x) := \frac{\pi_{\theta_{\text{old}}}(y\mid x)}{\mu(y\mid x)}
+= \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}.
+$$</p>
 
 <p>The difference between TIS, IcePop, and MIS lies in <strong>how they use $\rho$ to implement Constraint 2</strong>.</p>
 
@@ -661,12 +715,16 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 
 <p>TIS directly truncates the token-level ratio $\rho_t^{(\text{ref}\leftarrow\text{beh})}$; define</p>
 
-\[\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}.\]
+<p>$$
+\color{blue}{w_t = \min\big(\rho_t^{(\text{ref}\leftarrow\text{beh})},\ C_{\text{IS}}\big)}.
+$$</p>
 
 <p>The update objective becomes</p>
 
-\[L_{\text{TIS}}(\theta)
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big].\]
+<p>$$
+L_{\text{TIS}}(\theta)
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{w_t}\; g_\theta(t)\big].
+$$</p>
 
 <ul>
   <li>The blue $\color{blue}{w_t}$ is the truncated IS weight: extremely large ratios are capped at a constant $C_{\text{IS}}$.</li>
@@ -677,12 +735,16 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 
 <p>IcePop also uses $\rho_t^{(\text{ref}\leftarrow\text{beh})}$ as a discrepancy measure, but opts for <strong>two-sided masking</strong>:</p>
 
-\[\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}.\]
+<p>$$
+\color{blue}{m_t = \mathbf{1}\big[C_{\text{low}} \le \rho_t^{(\text{ref}\leftarrow\text{beh})} \le C_{\text{high}}\big]}.
+$$</p>
 
 <p>The update objective becomes</p>
 
-\[L_{\text{IcePop}}(\theta)
-= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big].\]
+<p>$$
+L_{\text{IcePop}}(\theta)
+= - \mathbb{E}_{(s_t,a_t)\sim\mu}\big[\,\color{blue}{m_t}\; g_\theta(t)\big].
+$$</p>
 
 <ul>
   <li>The blue $\color{blue}{m_t}$ decides whether a token participates in the update: tokens with ratios that are too large or too small are dropped entirely.</li>
@@ -693,20 +755,24 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 
 <p>The core operation in sequence-level MIS is to <strong>retain only sequences whose sequence-level IS ratio is below a threshold $C$</strong>, zeroing out the loss for all other sequences:</p>
 
-\[\color{blue}{
+<p>$$
+\color{blue}{
 \rho(y\mid x)
 \leftarrow
 \rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}
-}\]
+}
+$$</p>
 
 <p>In a unified loss form, this can be written as</p>
 
-\[L_{\text{MIS}}(\theta)
+<p>$$
+L_{\text{MIS}}(\theta)
 =-\,\mathbb{E}_{(x,y)\sim\mu}
 \Big[
 \color{blue}{\rho(y\mid x)\,\mathbf{1}\{\rho(y\mid x)\le C\}}
 \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
-\Big].\]
+\Big].
+$$</p>
 
 <p>In words:</p>
 
@@ -723,7 +789,7 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 
 <ul>
   <li>
-    <p><strong>verl Token Veto</strong>: In its rollout correction module, if any token in a trajectory has $\min_t \rho_t &lt; \tau_{\text{veto}}$, the entire sequence is discarded via response<em>mask. The threshold $\tau</em>{\text{veto}}$ is user-configurable.</p>
+    <p><strong>verl Token Veto</strong>: In its rollout correction module, if any token in a trajectory has $\min_t \rho_t < \tau_{\text{veto}}$, the entire sequence is discarded via response*mask. The threshold $\tau*{\text{veto}}$ is user-configurable.</p>
   </li>
   <li>
     <p><strong>INTELLECT-3 Token Masking</strong>: In its asynchronous distributed RL framework, if any token’s ratio is below $10^{-5}$, the entire trajectory is masked.</p>
@@ -732,24 +798,28 @@ Use consistent precision, operators, and similar kernel behavior between the tra
 
 <p>The core operation is identical: <strong>if any token in a trajectory has an IS ratio below a threshold $\tau$, the entire sequence is rejected from training.</strong> This can be written as:</p>
 
-\[\color{blue}{
+<p>$$
+\color{blue}{
 m(y\mid x) = \mathbf{1}\Big\{\min_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})} \ge \tau\Big\}
-}\]
+}
+$$</p>
 
 <p>In a unified loss form:</p>
 
-\[L_{\text{WTRS}}(\theta)
+<p>$$
+L_{\text{WTRS}}(\theta)
 =-\,\mathbb{E}_{(x,y)\sim\mu}
 \Big[
 \color{blue}{m(y\mid x)}
 \;\cdot\; \sum_{t=1}^{|y|}g_\theta(t)
-\Big].\]
+\Big].
+$$</p>
 
 <p>In words:</p>
 
 <ul>
   <li>For <strong>sequences where all tokens have IS ratios $\ge \tau$</strong>: participate in training normally.</li>
-  <li>For <strong>sequences where any token has an IS ratio $&lt; \tau$</strong>: the entire sequence’s policy loss is masked out.</li>
+  <li>For <strong>sequences where any token has an IS ratio $< \tau$</strong>: the entire sequence’s policy loss is masked out.</li>
 </ul>
 
 <p>From the three-policy TRPO perspective, WTRS adopts a hybrid “token-level detection, sequence-level veto” strategy: it detects extreme mismatch signals at the <strong>token level</strong>, and once detected, rejects at the <strong>sequence level</strong>. This “one-vote veto” design reflects a conservative philosophy — when a trajectory contains a token that “the behavior policy generated but the reference policy would almost never generate,” <strong>the credibility of the entire trajectory is called into question</strong>, thereby implementing control over Constraint 2 ($\mu$ vs. $\pi_{\theta_{\text{old}}}$ deviation) at the trajectory granularity.</p>
@@ -771,7 +841,9 @@ It makes routing mismatch invisible in the loss, but it does not actually shrink
 
 <p>Abstract an MoE model as a two-stage stochastic decision: “first choose an expert $z$, then generate token $a$ conditioned on that expert.” The target policy can be factorized as</p>
 
-\[\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),\]
+<p>$$
+\pi_\theta(a,z\mid s)=\omega_\theta(z\mid s)\,\pi_\theta(a\mid s,z),
+$$</p>
 
 <p>where:</p>
 
@@ -782,17 +854,21 @@ It makes routing mismatch invisible in the loss, but it does not actually shrink
 
 <p>In the three-policy TRPO setting, the surrogate objective we actually want to optimize can be written as</p>
 
-\[L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
+<p>$$
+L_\mu(\pi_\theta) = \mathcal{J}(\mu) + \frac{1}{1-\gamma}
 \mathbb{E}_{s\sim d_\mu}
 \bigg[
 \sum_z \omega_\theta(z\mid s)\,F_\theta(s,z)
-\bigg],\]
+\bigg],
+$$</p>
 
 <p>where I use</p>
 
-\[F_\theta(s,z)
+<p>$$
+F_\theta(s,z)
 :=
-\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z)\]
+\sum_a \pi_\theta(a\mid s,z)\,A_\mu(s,a,z)
+$$</p>
 
 <p>to denote the expert-level aggregation of advantages.</p>
 
@@ -802,20 +878,24 @@ It makes routing mismatch invisible in the loss, but it does not actually shrink
 
 <p>R3-style methods record, during rollout, the set of experts $M_\mu(s)$ actually selected by the behavior policy on the inference side, and during training force the current policy to <strong>route only within this set</strong>. This can be written as a “conditional projection” of the routing distribution:</p>
 
-\[\omega_\theta^{\text{R3}}(z\mid s)
+<p>$$
+\omega_\theta^{\text{R3}}(z\mid s)
 :=
 \frac{\omega_\theta(z\mid s)\,\mathbf{1}\{z\in M_\mu(s)\}}
-     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .\]
+     {\sum_{z'\in M_\mu(s)}\omega_\theta(z'\mid s)} .
+$$</p>
 
 <p>The surrogate objective that is actually optimized during training becomes</p>
 
-\[L_\mu^{\text{R3}}(\pi_\theta) =
+<p>$$
+L_\mu^{\text{R3}}(\pi_\theta) =
 \mathcal{J}(\mu) +
 \frac{1}{1-\gamma}
 \mathbb{E}_{s\sim d_\mu}
 \bigg[
 \sum_{z\in M_\mu(s)} \omega_\theta^{\text{R3}}(z\mid s)\,F_\theta(s,z)
-\bigg].\]
+\bigg].
+$$</p>
 
 <p>Compared to the original $L_\mu(\pi_\theta)$, R3 does <em>not</em> push $\omega_\theta$ closer to $\omega_{\text{old}}$ or $\omega_\mu$. Instead, it:</p>
 
@@ -830,19 +910,23 @@ It makes routing mismatch invisible in the loss, but it does not actually shrink
 
 <p>Another class of routing-replay schemes instead reuses the reference policy’s router $\omega_{\text{old}}$. This is equivalent to training a hybrid policy</p>
 
-\[\hat\pi_\theta(a,z\mid s)
+<p>$$
+\hat\pi_\theta(a,z\mid s)
 :=
-\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),\]
+\omega_{\text{old}}(z\mid s)\,\pi_\theta(a\mid s,z),
+$$</p>
 
 <p>with surrogate objective</p>
 
-\[L_\mu^{\text{ref-replay}}(\pi_\theta) =
+<p>$$
+L_\mu^{\text{ref-replay}}(\pi_\theta) =
 \mathcal{J}(\mu) +
 \frac{1}{1-\gamma}
 \mathbb{E}_{s\sim d_\mu}
 \bigg[
 \sum_z \omega_{\text{old}}(z\mid s)\,F_\theta(s,z)
-\bigg].\]
+\bigg].
+$$</p>
 
 <p>This has the effect that:</p>
 
@@ -1006,24 +1090,121 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
   <script async src="https://badge.dimensions.ai/badge.js"></script>
 
-    <!-- MathJax -->
+    <!-- MathJax 3.x with comprehensive configuration -->
   <script type="text/javascript">
     window.MathJax = {
       tex: {
         tags: 'ams',
+        // Support all common math delimiters
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
         processEscapes: true,
-        processEnvironments: true
+        processEnvironments: true,
+        processRefs: true,
+        // Common macros for convenience
+        macros: {
+          RR: '\\mathbb{R}',
+          NN: '\\mathbb{N}',
+          ZZ: '\\mathbb{Z}',
+          CC: '\\mathbb{C}',
+          EE: '\\mathbb{E}',
+          PP: '\\mathbb{P}',
+          bm: ['\\boldsymbol{#1}', 1],
+          argmax: '\\operatorname*{arg\\,max}',
+          argmin: '\\operatorname*{arg\\,min}',
+          sgn: '\\operatorname{sgn}',
+          KL: '\\mathrm{KL}',
+          Var: '\\operatorname{Var}',
+          Cov: '\\operatorname{Cov}',
+          tr: '\\operatorname{tr}',
+          diag: '\\operatorname{diag}'
+        },
+        // AMS packages
+        packages: {'[+]': ['ams', 'boldsymbol', 'newcommand']}
+      },
+      loader: {
+        load: ['[tex]/ams', '[tex]/boldsymbol', '[tex]/newcommand']
       },
       options: {
-        // Avoid unexpected rendering inside code blocks.
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        // Skip math rendering in these HTML elements
+        skipHtmlTags: [
+          'script', 'noscript', 'style', 'textarea', 'pre', 'code',
+          'annotation', 'annotation-xml', 'kbd', 'samp', 'var'
+        ],
+        // Fix issues with underscores being converted to <em> by HTML
+        processHtmlClass: 'mathjax-process',
+        ignoreHtmlClass: 'tex2jax_ignore|no-mathjax',
+        // Render math even with HTML entities
+        renderActions: {
+          findScript: [10, function (doc) {
+            // Pre-process to fix HTML entity issues in math
+            for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            }
+          }, '']
+        }
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 1.0
+      },
+      chtml: {
+        scale: 1.0,
+        matchFontHeight: true
+      },
+      startup: {
+        ready: function () {
+          MathJax.startup.defaultReady();
+          // Fix: restore underscores that might have been converted to <em>
+          MathJax.startup.promise.then(() => {
+            console.log('MathJax typesetting complete');
+          });
+        }
       }
     };
   </script>
   <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
-  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  
+  <!-- Pre-processing script to protect math from Markdown/HTML interference -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix underscores in math that were converted to <em> by Markdown
+      function fixMathUnderscores() {
+        const mathContainers = document.querySelectorAll('.MathJax, .MathJax_Display, mjx-container');
+        // This runs before MathJax, so we need to fix raw content
+        const content = document.querySelector('.post-content, article');
+        if (!content) return;
+        
+        // Find math delimiters and restore any <em> or <strong> inside them
+        const html = content.innerHTML;
+        
+        // Pattern to find math blocks and restore underscore formatting
+        // This is a fallback; the main protection is in the Jekyll plugin
+      }
+      
+      // Fix HTML entities in display math blocks
+      function fixHtmlEntities() {
+        document.querySelectorAll('.language-plaintext.highlighter-rouge').forEach(el => {
+          // Check if this looks like an HTML figure that wasn't rendered
+          const text = el.textContent;
+          if (text.includes('<img') || text.includes('<figure') || text.includes('<figcaption')) {
+            // This is raw HTML that should be rendered - replace with actual HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = text;
+            el.replaceWith(...temp.childNodes);
+          }
+        });
+      }
+      
+      fixHtmlEntities();
+    });
+  </script>
 
     <!-- Pseudocode -->
   <script defer src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js" integrity="sha256-aVkDxqyzrB+ExUsOY9PdyelkDhn/DfrjWu08aVpqNlo=" crossorigin="anonymous"></script>

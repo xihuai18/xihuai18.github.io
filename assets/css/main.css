@@ -8,7 +8,7 @@
  ******************************************************************************/
 :root {
   --global-bg-color: #ffffff;
-  --global-code-bg-color: rgba(181, 9, 172, 0.05);
+  --global-code-bg-color: rgba(0, 0, 0, 0.04);
   --global-text-color: #000000;
   --global-text-color-light: #252525;
   --global-theme-color: #00ab37;
@@ -67,8 +67,8 @@ body {
   padding-bottom: 50px;
   color: var(--global-text-color);
   background-color: var(--global-bg-color);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.75;
 }
 body h1, body h2, body h3, body h4, body h5, body h6 {
   scroll-margin-top: 60px;
@@ -217,7 +217,7 @@ blockquote {
   margin-bottom: 3px;
   margin-top: 3px;
   font-family: monospace;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-align: center;
 }
 .profile .address p {
@@ -245,7 +245,7 @@ blockquote {
 }
 .post-description {
   margin-bottom: 1rem;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
 }
 .post-description a {
   color: inherit;
@@ -295,7 +295,7 @@ blockquote {
 }
 .navbar.navbar-light .navbar-nav .nav-item .nav-link {
   color: var(--global-text-color);
-  font-size: 1.05rem;
+  font-size: 1.125rem;
   font-weight: 500;
   transition: color 0.2s ease;
 }
@@ -313,7 +313,7 @@ blockquote {
 .navbar.navbar-light .navbar-brand.social {
   padding-bottom: 0;
   padding-top: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 .navbar.navbar-light .navbar-brand.social a i::before {
   color: var(--global-text-color);
@@ -359,7 +359,7 @@ blockquote {
   border: 0;
   background-color: inherit;
   color: var(--global-text-color);
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -374,7 +374,7 @@ blockquote {
   text-align: center;
 }
 .social .contact-icons {
-  font-size: 3rem;
+  font-size: 2.5rem;
 }
 .social .contact-icons a i::before {
   color: var(--global-text-color);
@@ -384,12 +384,12 @@ blockquote {
   color: var(--global-theme-color);
 }
 .social .contact-note {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 footer.fixed-bottom {
   background-color: var(--global-footer-bg-color);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 footer.fixed-bottom .container {
   color: var(--global-footer-text-color);
@@ -408,7 +408,7 @@ footer.sticky-bottom {
   border-top: 1px solid var(--global-divider-color);
   padding-top: 25px;
   padding-bottom: 25px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .cv {
@@ -469,19 +469,21 @@ footer.sticky-bottom {
 .post-list li {
   border-bottom: 1px solid var(--global-divider-color);
   list-style: none;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
 }
 .post-list li .post-meta {
   color: var(--global-text-color-light);
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   margin-bottom: 0;
+  line-height: 1.4;
 }
 .post-list li .post-tags {
   color: var(--global-text-color-light);
-  font-size: 0.8rem;
-  padding-top: 0.15rem;
+  font-size: 0.875rem;
+  padding-top: 0.1rem;
   padding-bottom: 0;
+  line-height: 1.4;
 }
 .post-list li a {
   color: var(--global-text-color);
@@ -491,15 +493,15 @@ footer.sticky-bottom {
   color: var(--global-theme-color);
 }
 .post-list li h3 {
-  font-size: 1.15rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 0.35rem;
-  line-height: 1.4;
+  margin-bottom: 0.2rem;
+  line-height: 1.35;
 }
 .post-list li p {
-  font-size: 0.85rem;
-  line-height: 1.5;
-  margin-bottom: 0.35rem;
+  font-size: 1rem;
+  line-height: 1.45;
+  margin-bottom: 0.2rem;
   color: var(--global-text-color-light);
 }
 
@@ -692,7 +694,7 @@ footer.sticky-bottom {
   margin: 10px;
 }
 .publications ol.bibliography li .hidden pre {
-  font-size: 0.9em;
+  font-size: 0.875rem;
   line-height: 1.4em;
   padding: 10px;
 }
@@ -828,7 +830,7 @@ pre .copy {
   border-radius: 0.3rem;
   border-style: solid;
   color: var(--global-text-color);
-  font-size: medium;
+  font-size: 1rem;
   opacity: 0;
   position: absolute;
   right: 0.25rem;
@@ -838,9 +840,42 @@ pre .copy:active, pre .copy:focus, pre .copy:hover {
   color: var(--global-hover-color);
   opacity: 1;
 }
-pre:active .copy, pre:focus .copy, pre:hover .copy {
+pre {
+  /* Wrap toggle button */
+}
+pre .wrap-toggle {
+  background: var(--global-card-bg-color);
+  border-color: var(--global-bg-color);
+  border-radius: 0.3rem;
+  border-style: solid;
+  color: var(--global-text-color);
+  font-size: 1rem;
+  opacity: 0;
+  position: absolute;
+  right: 2.75rem;
+  top: 0.25rem;
+}
+pre .wrap-toggle:active, pre .wrap-toggle:focus, pre .wrap-toggle:hover {
   color: var(--global-hover-color);
   opacity: 1;
+}
+pre:active .copy, pre:focus .copy, pre:hover .copy, pre:active .wrap-toggle, pre:focus .wrap-toggle, pre:hover .wrap-toggle {
+  color: var(--global-hover-color);
+  opacity: 1;
+}
+pre {
+  /* Wrap functionality */
+}
+pre.wrapped code,
+pre.wrapped pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+pre:not(.wrapped) code,
+pre:not(.wrapped) pre {
+  white-space: pre;
+  overflow-x: auto;
 }
 
 /*******************************************************************************
@@ -858,10 +893,10 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 .news th[scope=row] {
   white-space: nowrap;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .news td {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   padding: 0.3rem 0 !important;
   line-height: 1.5;
 }
@@ -899,7 +934,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   text-decoration: none !important;
 }
 .navbar-social-icons a i, .navbar-social-icons a i::before {
-  font-size: 2.2rem;
+  font-size: 1.75rem;
   color: var(--global-text-color);
   transition: all 0.2s ease;
 }
@@ -913,7 +948,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 
 .profile .address {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--global-text-color-light);
   letter-spacing: 0.01em;
 }
@@ -948,7 +983,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   font-family: "Georgia", "Times New Roman", serif;
   font-style: italic;
   font-weight: 400;
-  font-size: 1.9rem;
+  font-size: 1.75rem;
 }
 .post-header .post-title.signature-name .name-zh {
   font-family: "KaiTi", "STKaiti", "FZKai-Z03", "AR PL UKai CN", serif;
@@ -956,7 +991,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   font-size: 1.75rem;
 }
 .post-header .desc {
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   color: var(--global-text-color-light);
 }
 .post-header .desc a {
@@ -970,10 +1005,10 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 
 .post h2 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
   padding-bottom: 0.3rem;
   border-bottom: 2px solid var(--global-theme-color);
   display: inline-block;
@@ -1017,7 +1052,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   border-bottom: none;
 }
 .news table th[scope=row] {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--global-text-color);
   padding: 1.2rem 1rem !important;
@@ -1052,7 +1087,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   transform: none !important;
 }
 .cv .card .card-title {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--global-theme-color);
   margin-bottom: 0.5rem;
@@ -1080,14 +1115,14 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   align-items: flex-start;
 }
 .cv .list-group .list-group-item .badge {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 500;
   padding: 0.25rem 0.5rem;
   min-width: auto;
   background-color: var(--global-theme-color) !important;
 }
 .cv .list-group .list-group-item h6.title {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 600;
   margin: 0 0 0.1rem 0;
   color: var(--global-text-color);
@@ -1101,14 +1136,14 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 .cv .list-group .list-group-item .items {
   margin: 0.2rem 0 0 0;
   padding-left: 0.85rem;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 .cv .list-group .list-group-item .items li {
   margin-bottom: 0.05rem;
 }
 .cv .table {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 .cv .table tr td {
   padding: 0.25rem 0.4rem;
@@ -1188,7 +1223,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   margin-bottom: 0.2rem;
 }
 .publications ol.bibliography li .title abbr.badge {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   padding: 0.3rem 0.8rem;
   border-radius: 4px;
   line-height: 1.2;
@@ -1221,17 +1256,17 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   margin-top: 0.25rem;
 }
 .publications ol.bibliography li .links a.btn {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   padding: 0.15rem 0.4rem;
   margin-right: 0.2rem;
   border-radius: 3px;
 }
 .publications ol.bibliography li .hidden {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   margin-top: 0;
 }
 .publications ol.bibliography li .hidden pre {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   padding: 0.4rem;
 }
 .publications ol.bibliography li .hidden.open {
@@ -1269,7 +1304,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   font-size: 1rem;
 }
 .post ol.bibliography li .links a.btn {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   padding: 0.12rem 0.35rem;
 }
 
@@ -1309,7 +1344,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 
 .toc-sidebar__title {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--global-text-color-light);
   letter-spacing: 0.02em;
@@ -1317,7 +1352,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 
 .toc {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.35;
 }
 .toc ul {
@@ -1354,17 +1389,108 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 /*******************************************************************************
  * Enhancements for regular blog posts (non-distill).
  ******************************************************************************/
+.post-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+.post-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+.post-content h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
 .post-content .table-responsive {
   margin: 1rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .post-content table {
   width: 100%;
-  margin: 0;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 768px) {
+  .post-content table {
+    display: table;
+    overflow-x: visible;
+  }
+}
+.post-content table thead {
+  background-color: var(--global-code-bg-color);
+  border-bottom: 2px solid var(--global-theme-color);
+}
+.post-content table thead th {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--global-text-color);
+}
+.post-content table thead th[style*="text-align: center"] {
+  text-align: center !important;
+}
+.post-content table thead th[style*="text-align: right"] {
+  text-align: right !important;
+}
+.post-content table tbody tr {
+  border-bottom: 1px solid var(--global-divider-color);
+}
+.post-content table tbody tr:last-child {
+  border-bottom: none;
+}
+.post-content table tbody td {
+  padding: 0.6rem 1rem;
+  vertical-align: top;
+}
+.post-content table tbody td[style*="text-align: center"] {
+  text-align: center !important;
+}
+.post-content table tbody td[style*="text-align: right"] {
+  text-align: right !important;
+}
+.post-content table tbody td .MathJax, .post-content table tbody td mjx-container {
+  font-size: 0.9em !important;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.post-content table.striped tbody tr:nth-child(even) {
+  background-color: var(--global-code-bg-color);
+}
+.post-content table.compact {
+  font-size: 0.875rem;
+}
+.post-content table.compact th, .post-content table.compact td {
+  padding: 0.4rem 0.75rem;
+}
+.post-content table code {
+  font-size: 0.85em;
+  padding: 0.1rem 0.3rem;
+  white-space: nowrap;
 }
 .post-content :not(pre) > code {
   padding: 0.15rem 0.35rem;
   font-size: 0.875em;
   word-break: break-word;
+  background-color: var(--global-code-bg-color);
+  border-radius: 3px;
 }
 .post-content .footnotes {
   margin-top: 2rem;
@@ -1458,11 +1584,11 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
  ******************************************************************************/
 .lang-switcher {
   margin-top: 0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 .lang-switcher .nav {
   display: inline-flex;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 0;
   margin: 0;
   border: none;
@@ -1481,7 +1607,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 .lang-switcher .nav-link {
   position: relative;
-  padding: 0.15rem 0 0.55rem;
+  padding: 0.1rem 0 0.35rem;
   margin: 0;
   border: none !important;
   border-bottom: none !important;
@@ -1491,6 +1617,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   box-shadow: none !important;
   text-decoration: none !important;
   color: var(--global-text-color) !important;
+  font-size: 0.875rem;
   opacity: 0.7;
   transition: opacity 160ms ease, color 160ms ease;
 }
@@ -1524,6 +1651,13 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   background: var(--global-theme-color);
 }
 
+.post-list .tab-content {
+  margin-top: 0;
+}
+.post-list .tab-content .tab-pane {
+  padding: 0;
+}
+
 @media (min-width: 992px) {
   .post.post--sidenotes .footnotes {
     display: none;
@@ -1538,7 +1672,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   .post.post--sidenotes .sidenote {
     position: absolute;
     left: 0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     line-height: 1.35;
     color: var(--global-text-color-light);
     padding-right: 0.75rem;
@@ -1572,7 +1706,7 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
   background-color: transparent;
   border: 1px solid var(--global-divider-color);
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 400;
   text-decoration: none;
   color: var(--global-text-color);
@@ -1596,6 +1730,244 @@ pre:active .copy, pre:focus .copy, pre:hover .copy {
 }
 .post .post-links {
   margin-bottom: 1.75rem;
+}
+
+/*******************************************************************************
+ * Enhanced Code Block Styling
+ ******************************************************************************/
+.post-content .highlight {
+  position: relative;
+  margin: 1.25rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.post-content .highlight pre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.post-content .highlight pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+.post-content .highlight[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--global-text-color-light);
+  background: var(--global-code-bg-color);
+  border-bottom-left-radius: 0.375rem;
+  opacity: 0.7;
+}
+.post-content pre:not(.highlight pre) {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem;
+  background-color: var(--global-code-bg-color);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.post-content .highlighter-rouge {
+  margin: 1.25rem 0;
+}
+.post-content .highlighter-rouge.language-plaintext .highlight {
+  background-color: var(--global-code-bg-color);
+}
+.post-content .lineno {
+  color: var(--global-text-color-light);
+  opacity: 0.5;
+  padding-right: 1rem;
+  user-select: none;
+  text-align: right;
+  min-width: 2rem;
+  display: inline-block;
+}
+.post-content .highlight .err {
+  color: var(--global-text-color);
+  background-color: transparent !important;
+  border: none !important;
+}
+.post-content .highlight .gd {
+  color: var(--global-text-color);
+  background-color: transparent !important;
+}
+.post-content .highlight .gi {
+  color: var(--global-text-color);
+  background-color: transparent !important;
+}
+.post-content .highlight .hll {
+  background-color: var(--global-code-bg-color) !important;
+}
+
+/*******************************************************************************
+ * Global Rouge Theme Override (for all highlight blocks, not just post-content)
+ ******************************************************************************/
+.highlight .err {
+  color: inherit !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+.highlight .gd {
+  background-color: transparent !important;
+}
+.highlight .gi {
+  background-color: transparent !important;
+}
+.highlight .hll {
+  background-color: var(--global-code-bg-color) !important;
+}
+
+/*******************************************************************************
+ * Enhanced Math/LaTeX Styling
+ ******************************************************************************/
+.post-content .MathJax_Display,
+.post-content mjx-container[display=true],
+.post-content .katex-display {
+  margin: 1.5rem 0;
+  padding: 0.5rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.post-content .MathJax,
+.post-content mjx-container:not([display=true]),
+.post-content .katex:not(.katex-display .katex) {
+  font-size: 1em;
+}
+.post-content .MathJax_ref,
+.post-content mjx-mrow.MJX-TEX {
+  font-size: 0.9em;
+}
+.post-content td .MathJax,
+.post-content td mjx-container,
+.post-content td .katex, .post-content th .MathJax,
+.post-content th mjx-container,
+.post-content th .katex {
+  font-size: 0.92em !important;
+}
+.post-content li .MathJax_Display,
+.post-content li mjx-container[display=true],
+.post-content li .katex-display {
+  margin-left: 0;
+  margin-right: 0;
+}
+.post-content .MathJax .mbox,
+.post-content mjx-mrow[style*=border] {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+/*******************************************************************************
+ * Figure and Image Enhancements
+ ******************************************************************************/
+.post-content figure {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+.post-content figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+}
+.post-content figure figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--global-text-color-light);
+  font-style: italic;
+}
+.post-content figure figcaption a {
+  color: var(--global-theme-color);
+}
+.post-content p > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  border-radius: 0.375rem;
+}
+.post-content .img-caption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--global-text-color-light);
+  font-style: italic;
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
+}
+
+/*******************************************************************************
+ * Blockquote Enhancements
+ ******************************************************************************/
+.post-content blockquote {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.25rem;
+  border-left: 4px solid var(--global-theme-color);
+  background-color: transparent;
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+.post-content blockquote p {
+  margin: 0;
+}
+.post-content blockquote p:not(:last-child) {
+  margin-bottom: 0.75rem;
+}
+.post-content blockquote blockquote {
+  margin: 0.75rem 0;
+  border-left-color: var(--global-text-color-light);
+}
+.post-content blockquote.note, .post-content blockquote.info {
+  border-left-color: #3498db;
+  background-color: rgba(52, 152, 219, 0.1);
+}
+.post-content blockquote.warning {
+  border-left-color: #f39c12;
+  background-color: rgba(243, 156, 18, 0.1);
+}
+.post-content blockquote.danger, .post-content blockquote.error {
+  border-left-color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+}
+.post-content blockquote.success, .post-content blockquote.tip {
+  border-left-color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.1);
+}
+
+/*******************************************************************************
+ * List Enhancements
+ ******************************************************************************/
+.post-content ul, .post-content ol {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+.post-content ul li, .post-content ol li {
+  margin-bottom: 0.35rem;
+  line-height: 1.7;
+}
+.post-content ul li ul, .post-content ul li ol, .post-content ol li ul, .post-content ol li ol {
+  margin: 0.5rem 0;
+}
+.post-content ul.task-list {
+  list-style: none;
+  padding-left: 0;
+}
+.post-content ul.task-list li {
+  padding-left: 1.5rem;
+  position: relative;
+}
+.post-content ul.task-list li input[type=checkbox] {
+  position: absolute;
+  left: 0;
+  top: 0.35rem;
 }
 
 /*******************************************************************************
@@ -1748,7 +2120,7 @@ d-appendix a:hover, d-appendix a.footnote-backlink:hover {
   }
 }
 :root {
-  --max-content-width: 960px;
+  --max-content-width: 1080px;
 }
 
 /*# sourceMappingURL=main.css.map */

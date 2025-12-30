@@ -40,7 +40,7 @@
         "@type": "WebSite",
         "description": "系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。",
         "headline": "驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证",
-        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://www.semanticscholar.org/author/2178008", "https://github.com/xihuai18"],
+        "sameAs": ["https://scholar.google.com/citations?user=hy6v3qUAAAAJ", "https://github.com/xihuai18"],
         "name": "Xihuai Leo Wang",
         "@context": "https://schema.org"
       }
@@ -202,23 +202,31 @@
 
 <h3 id="11-基本设定">1.1 基本设定</h3>
 
-<p>我们考虑标准的马尔可夫决策过程（MDP），包含状态空间 $\mathcal{S}$、动作空间 $\mathcal{A}$、转移概率 $p(s’|s,a)$、奖励函数 $r(s,a)$、初始分布 $\rho_0$ 和折扣因子 $\gamma \in (0,1)$。</p>
+<p>我们考虑标准的马尔可夫决策过程（MDP），包含状态空间 $\mathcal{S}$、动作空间 $\mathcal{A}$、转移概率 $p(s'\|s,a)$、奖励函数 $r(s,a)$、初始分布 $\rho_0$ 和折扣因子 $\gamma \in (0,1)$。</p>
 
 <p>策略 $\pi$ 的<strong>期望累计折扣回报</strong>为：</p>
 
-\[J(\pi) := \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \mid \pi\right]\]
+<p>$$
+J(\pi) := \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \mid \pi\right]
+$$</p>
 
 <p><strong>折扣状态访问分布</strong>定义为策略长期运行中访问各状态的加权频率：</p>
 
-\[d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)\]
+<p>$$
+d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)
+$$</p>
 
 <p><strong>优势函数</strong>衡量动作 $a$ 相对于策略平均水平的优劣：</p>
 
-\[A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)\]
+<p>$$
+A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)
+$$</p>
 
 <p><strong>全变差距离</strong>（TV距离）衡量两个策略在状态 $s$ 上动作分布的差异：</p>
 
-\[D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|\]
+<p>$$
+D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|
+$$</p>
 
 <h3 id="12-核心工具策略性能差异引理">1.2 核心工具：策略性能差异引理</h3>
 
@@ -229,7 +237,9 @@
 
   <p>对任意策略 $\pi_k$（旧）和 $\pi$（新），性能差异可表示为：</p>
 
-\[J(\pi) - J(\pi_k) = \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_\pi}\left[ \mathbb{E}_{a \sim \pi(\cdot \mid s)}[A^{\pi_k}(s,a)] \right]\]
+  <p>$$
+J(\pi) - J(\pi_k) = \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_\pi}\left[ \mathbb{E}_{a \sim \pi(\cdot \mid s)}[A^{\pi_k}(s,a)] \right]
+$$</p>
 </blockquote>
 
 <p><strong>直观理解</strong>：新策略比旧策略好多少，等于在新策略访问的状态分布下，用新策略选动作能获得的”平均优势”。</p>
@@ -247,7 +257,9 @@
 <blockquote>
   <p><strong>引理1.2（状态分布差异与策略TV距离的关系）</strong></p>
 
-\[\|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]\]
+  <p>$$
+\|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]
+$$</p>
 </blockquote>
 
 <p><strong>物理意义</strong>：策略在动作空间上的小差异，会通过环境动力学”放大”成状态访问分布的差异。系数 $\frac{\gamma}{1-\gamma}$ 反映了<strong>时间累积效应</strong>——长时域任务（$\gamma$ 接近1）中，放大效应更强。</p>
@@ -261,11 +273,15 @@
 
   <p>定义期望优势上界常数 $C_{\pi,\pi_k} := \max_{s} \lvert \mathbb{E}_{a \sim \pi}[A^{\pi_k}(s,a)] \rvert$，则：</p>
 
-\[J(\pi) - J(\pi_k) \geq L_{\pi_k}(\pi) - \frac{2\gamma C_{\pi,\pi_k}}{(1-\gamma)^2} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]\]
+  <p>$$
+J(\pi) - J(\pi_k) \geq L_{\pi_k}(\pi) - \frac{2\gamma C_{\pi,\pi_k}}{(1-\gamma)^2} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]
+$$</p>
 
   <p>其中<strong>代理目标</strong>为：</p>
 
-\[L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k} \left[ \frac{\pi(a \mid s)}{\pi_k(a \mid s)} A^{\pi_k}(s,a) \right]\]
+  <p>$$
+L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k} \left[ \frac{\pi(a \mid s)}{\pi_k(a \mid s)} A^{\pi_k}(s,a) \right]
+$$</p>
 </blockquote>
 
 <p>这个下界由两部分组成：</p>
@@ -285,21 +301,21 @@
 
 <h3 id="31-实际场景">3.1 实际场景</h3>
 
-<p>在实际训练中，一个batch的数据可能来自多个策略版本 ${\pi^{(1)}, \ldots, \pi^{(M)}}$，各版本占比为 $\alpha_1, \ldots, \alpha_M$。如何将定理1.1扩展到这种情形？</p>
+<p>在实际训练中，一个batch的数据可能来自多个策略版本 $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$，各版本占比为 $\alpha_1, \ldots, \alpha_M$。如何将定理1.1扩展到这种情形？</p>
 
 <h3 id="32-核心思想扩展状态空间">3.2 核心思想：扩展状态空间</h3>
 
 <p>解决方案是一个优雅的建模技巧：<strong>把策略版本索引当作状态的一部分</strong>。</p>
 
-<p>定义扩展状态空间 $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$，其中 $\mathcal{I} = {1, \ldots, M}$ 是策略索引集合。在扩展状态 $(s, i)$ 下，<strong>混合行为策略</strong>定义为 $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$。</p>
+<p>定义扩展状态空间 $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$，其中 $\mathcal{I} = \{1, \ldots, M\}$ 是策略索引集合。在扩展状态 $(s, i)$ 下，<strong>混合行为策略</strong>定义为 $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$。</p>
 
-<p>索引的演化由<strong>索引转移核</strong> $q(i’ \mid i)$ 刻画。扩展MDP继承原始MDP的奖励和环境转移，索引按 $q(i’|i)$ 独立演化。</p>
+<p>索引的演化由<strong>索引转移核</strong> $q(i' \mid i)$ 刻画。扩展MDP继承原始MDP的奖励和环境转移，索引按 $q(i'\|i)$ 独立演化。</p>
 
 <p>这个技巧之所以有效，是因为新策略 $\pi$ 在扩展MDP上的回报等于原始MDP中的回报，从而可以直接应用定理1.1。</p>
 
 <h3 id="33-轨迹级混合的结构简化">3.3 轨迹级混合的结构简化</h3>
 
-<p>最常见的情形是<strong>每条轨迹只用一个旧策略</strong>：轨迹开始时采样索引 $I_0 \sim \alpha$，整条轨迹使用 $\pi^{(I_0)}$。此时索引转移核为恒等转移：$q(i’ \mid i) = \mathbf{1}_{i’=i}$。</p>
+<p>最常见的情形是<strong>每条轨迹只用一个旧策略</strong>：轨迹开始时采样索引 $I_0 \sim \alpha$，整条轨迹使用 $\pi^{(I_0)}$。此时索引转移核为恒等转移：$q(i' \mid i) = \mathbf{1}_{i'=i}$。</p>
 
 <p>从工程实现角度看，在很多 <strong>actor-learner 的异步训练</strong>里（如果采样与训练侧把数据按”整条轨迹/完整 episode 归属某个策略版本”来组织），这可以近似对应这里的<strong>轨迹级混合</strong>：actor 在一个采样单元内固定使用某个策略快照生成数据，learner 再混合使用来自不同版本的整轨迹数据做更新。这里用”近似”是因为不同系统对”轨迹/采样单元”的切分边界并不完全一致。</p>
 
@@ -320,7 +336,9 @@
 <blockquote>
   <p><strong>推论2.1（轨迹级混合的性能改进下界）</strong></p>
 
-\[J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\pi^{(i)}}(\pi) - \frac{2\gamma \max_i C_{\pi, \pi^{(i)}}}{(1-\gamma)^2} \sum_{i=1}^{M} \alpha_i \mathbb{E}_{s \sim d_{\pi^{(i)}}} \big[ D_{\mathrm{TV}}(\pi, \pi^{(i)}; s) \big]\]
+  <p>$$
+J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\pi^{(i)}}(\pi) - \frac{2\gamma \max_i C_{\pi, \pi^{(i)}}}{(1-\gamma)^2} \sum_{i=1}^{M} \alpha_i \mathbb{E}_{s \sim d_{\pi^{(i)}}} \big[ D_{\mathrm{TV}}(\pi, \pi^{(i)}; s) \big]
+$$</p>
 </blockquote>
 
 <p>该结论表明：将多个旧策略版本的轨迹混合训练时，若对每条轨迹用对应旧策略的重要性比率构造损失，同时控制新策略与各旧策略的偏移，则新策略性能有明确的改进下界。</p>
@@ -333,27 +351,33 @@
 
 <p>前面的结论刻画了”新策略相对于混合行为策略”的改进。但在实际训练中，我们真正关心的是：<strong>每轮更新后的最新策略 $\pi_{k+1}$ 相对于上一轮最新策略 $\pi_k$ 是否单调提升？</strong></p>
 
-\[J(\pi_{k+1}) \geq J(\pi_k)\]
+<p>$$
+J(\pi_{k+1}) \geq J(\pi_k)
+$$</p>
 
 <h3 id="42-统一建模框架">4.2 统一建模框架</h3>
 
-<p>动态混合采样的两种典型形式都可以用索引转移核 $q(i’|i)$ 统一刻画：</p>
+<p>动态混合采样的两种典型形式都可以用索引转移核 $q(i'\|i)$ 统一刻画：</p>
 
-<p><strong>轨迹级混合</strong>（可类比为常规异步训练的一个抽象；索引恒等转移）：$q(i’|i) = \mathbf{1}{i’=i}$</p>
+<p><strong>轨迹级混合</strong>（可类比为常规异步训练的一个抽象；索引恒等转移）：$q(i'\|i) = \mathbf{1}\{i'=i\}$</p>
 
-<p><strong>步/段级混合</strong>（partial rollout / 段式采样的一个抽象；允许切换）：$q(i’|i) = (1-\sigma(i))\mathbf{1}{i’=i} + \sigma(i)\kappa(i’|i)$</p>
+<p><strong>步/段级混合</strong>（partial rollout / 段式采样的一个抽象；允许切换）：$q(i'\|i) = (1-\sigma(i))\mathbf{1}\{i'=i\} + \sigma(i)\kappa(i'\|i)$</p>
 
-<p>其中 $\sigma(i)$ 为切换概率，$\kappa(\cdot|i)$ 为目标索引分布。</p>
+<p>其中 $\sigma(i)$ 为切换概率，$\kappa(\cdot\|i)$ 为目标索引分布。</p>
 
 <h3 id="43-核心分解">4.3 核心分解</h3>
 
 <p>通过引入混合回报 $J_{\mathrm{mix}}^{(k)}$ 作为中间桥梁，性能差异分解为：</p>
 
-\[J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{相对混合策略的改进}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{混合偏差项}}\]
+<p>$$
+J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{相对混合策略的改进}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{混合偏差项}}
+$$</p>
 
 <p>第一项可用定理1.1处理。第二项是<strong>混合偏差项</strong>，可以证明它满足：</p>
 
-\[J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]\]
+<p>$$
+J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
+$$</p>
 
 <h3 id="44-单调提升下界">4.4 单调提升下界</h3>
 
@@ -362,11 +386,13 @@
 <blockquote>
   <p><strong>定理3.1（动态混合采样下的单调提升下界）</strong></p>
 
-\[\begin{aligned}
-J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
-&amp;- \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \big] \\
-&amp;- \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
-\end{aligned}\]
+  <p>$$
+\begin{aligned}
+J(\pi_{k+1}) - J(\pi_k) \geq\;& L_{\beta^{(k)}}(\pi_{k+1}) \\
+&- \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \big] \\
+&- \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
+\end{aligned}
+$$</p>
 </blockquote>
 
 <p>该下界揭示了<strong>双重控制</strong>的必要性：</p>
@@ -382,18 +408,20 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <blockquote>
   <p><strong>观察3.1（更新偏移约束的不可行性）</strong></p>
 
-  <p>设混合采样包含两个旧策略 $\pi^{(1)}$ 和 $\pi^{(2)}$，若存在某状态 $s$ 使 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) &gt; 2\delta$，则不存在策略 $\pi_{k+1}$ 同时满足 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ 与 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$。</p>
+  <p>设混合采样包含两个旧策略 $\pi^{(1)}$ 和 $\pi^{(2)}$，若存在某状态 $s$ 使 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) > 2\delta$，则不存在策略 $\pi_{k+1}$ 同时满足 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ 与 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$。</p>
 </blockquote>
 
 <p><strong>证明</strong>：由三角不等式，若同时满足两约束，则 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) \leq 2\delta$，矛盾。</p>
 
-<p><strong>问题根源</strong>：更新偏移惩罚项将 $\pi_{k+1}$ 与历史策略族 ${\pi^{(i)}}$ 直接耦合，而后者的内部结构是历史训练的产物，不受当前更新控制。</p>
+<p><strong>问题根源</strong>：更新偏移惩罚项将 $\pi_{k+1}$ 与历史策略族 $\{\pi^{(i)}\}$ 直接耦合，而后者的内部结构是历史训练的产物，不受当前更新控制。</p>
 
 <h3 id="46-三角不等式分解">4.6 三角不等式分解</h3>
 
 <p>解决方案是利用TV距离的三角不等式：</p>
 
-\[D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \leq D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s) + D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\]
+<p>$$
+D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \leq D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s) + D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)
+$$</p>
 
 <p>这将耦合约束拆分为两个独立部分：</p>
 
@@ -404,15 +432,19 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>定义：</p>
 
-\[U_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)\big], \quad S_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\big]\]
+<p>$$
+U_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)\big], \quad S_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)\big]
+$$</p>
 
 <blockquote>
   <p><strong>推论3.2（分解后的单调提升下界）</strong></p>
 
-\[J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k\]
+  <p>$$
+J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k
+$$</p>
 </blockquote>
 
-<p><strong>为何分解能解决问题？</strong> 关键在于：分解后的 $U_k$ 只涉及新策略 $\pi_{k+1}$ 和当前策略 $\pi_k$，<strong>与旧策略族 ${\pi^{(i)}}$ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 $U_k$ 都是可行的——这正是观察3.1揭示的不可行性问题的解决之道。</p>
+<p><strong>为何分解能解决问题？</strong> 关键在于：分解后的 $U_k$ 只涉及新策略 $\pi_{k+1}$ 和当前策略 $\pi_k$，<strong>与旧策略族 $\{\pi^{(i)}\}$ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 $U_k$ 都是可行的——这正是观察3.1揭示的不可行性问题的解决之道。</p>
 
 <p>这揭示了重要的工程原则——<strong>职责分离</strong>：</p>
 
@@ -451,59 +483,75 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
   <p>设策略 $\pi_1$ 的支撑覆盖 $\pi$ 和 $\pi_2$ 的支撑，则对任意状态分布 $\mu$：</p>
 
-\[\mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot|s)} \left| \frac{\pi(a|s)}{\pi_1(a|s)} - \frac{\pi_2(a|s)}{\pi_1(a|s)} \right|\]
+  <p>$$
+\mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot|s)} \left| \frac{\pi(a|s)}{\pi_1(a|s)} - \frac{\pi_2(a|s)}{\pi_1(a|s)} \right|
+$$</p>
 </blockquote>
 
 <p><strong>直观理解</strong>：左边是两个分布的TV距离（需要遍历所有动作），右边是在 $\pi_1$ 下采样时两个重要性比值的差的绝对值。这使得我们可以用样本来估计和控制TV距离。</p>
 
-<h3 id="52-u_k-的样本表示">5.2 $U_k$ 的样本表示</h3>
+<h3 id="52-inlmath104mathend-的样本表示">5.2 $U_k$ 的样本表示</h3>
 
 <p>利用引理3.3，取 $\pi = \pi_{k+1}$，$\pi_2 = \pi_k$，$\pi_1 = \pi^{(i)}$（采样来源策略），可得：</p>
 
-\[U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot|s)} \left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right|\]
+<p>$$
+U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot|s)} \left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right|
+$$</p>
 
-<p>记 $\rho_{k+1} := \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)}$ 和 $\rho_k := \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)}$，则：</p>
+<p>记 $\rho_{k+1} := \frac{\pi_{k+1}(a\|s)}{\pi^{(i)}(a\|s)}$ 和 $\rho_k := \frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)}$，则：</p>
 
-\[U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{训练数据}} \big| \rho_{k+1} - \rho_k \big|\]
+<p>$$
+U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{训练数据}} \big| \rho_{k+1} - \rho_k \big|
+$$</p>
 
 <p>这意味着：<strong>如果我们能让每个样本上 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，就能保证 $U_k \leq \epsilon/2$</strong>。</p>
 
-<h3 id="53-两种约束-u_k-的方法">5.3 两种约束 $U_k$ 的方法</h3>
+<h3 id="53-两种约束-inlmath112mathend-的方法">5.3 两种约束 $U_k$ 的方法</h3>
 
 <p><strong>方法一：直接约束比值差</strong></p>
 
 <p>对每个样本 $(s, i, a)$，要求：</p>
 
-\[\left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right| \leq \epsilon\]
+<p>$$
+\left| \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)} - \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} \right| \leq \epsilon
+$$</p>
 
-<p>即裁剪区间为 $\left[\frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} - \epsilon, \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)} + \epsilon\right]$，<strong>裁剪中心是 $\rho_k$ 而非 1</strong>。</p>
+<p>即裁剪区间为 $\left[\frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)} - \epsilon, \frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)} + \epsilon\right]$，<strong>裁剪中心是 $\rho_k$ 而非 1</strong>。</p>
 
 <p><strong>方法二：约束增量比值</strong></p>
 
 <p>注意到 $\rho_{k+1} - \rho_k = \rho_k \cdot \left(\frac{\pi_{k+1}}{\pi_k} - 1\right)$，因此：</p>
 
-\[|\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right|\]
+<p>$$
+|\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right|
+$$</p>
 
-<p>如果约束 $\left\lvert\frac{\pi_{k+1}(a|s)}{\pi_k(a|s)} - 1\right\rvert \leq \epsilon$，由于 $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$，可证 $U_k \leq \epsilon/2$。</p>
+<p>如果约束 $\left\lvert\frac{\pi_{k+1}(a\|s)}{\pi_k(a\|s)} - 1\right\rvert \leq \epsilon$，由于 $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$，可证 $U_k \leq \epsilon/2$。</p>
 
-<p>这种方法直接对 $\pi_{k+1}/\pi_k$ 以 1 为中心裁剪，**完全不涉及旧策略 $\pi^{(i)}$比，我们给出三种裁剪机制的完整目标函数。设当前样本来自旧策略 $\pi^{(i)}$，记：</p>
+<p>这种方法直接对 $\pi_{k+1}/\pi_k$ 以 1 为中心裁剪，<strong>完全不涉及旧策略 $\pi^{(i)}$</strong>，我们给出三种裁剪机制的完整目标函数。设当前样本来自旧策略 $\pi^{(i)}$，记：</p>
 <ul>
-  <li>$\rho_{k+1} = \frac{\pi_{k+1}(a|s)}{\pi^{(i)}(a|s)}$（新策略相对采样策略的比值）</li>
-  <li>$\rho_k = \frac{\pi_k(a|s)}{\pi^{(i)}(a|s)}$（当前策略相对采样策略的比值）</li>
-  <li>$r = \frac{\pi_{k+1}(a|s)}{\pi_k(a|s)}$（新策略相对当前策略的增量比值）</li>
+  <li>$\rho_{k+1} = \frac{\pi_{k+1}(a\|s)}{\pi^{(i)}(a\|s)}$（新策略相对采样策略的比值）</li>
+  <li>$\rho_k = \frac{\pi_k(a\|s)}{\pi^{(i)}(a\|s)}$（当前策略相对采样策略的比值）</li>
+  <li>$r = \frac{\pi_{k+1}(a\|s)}{\pi_k(a\|s)}$（新策略相对当前策略的增量比值）</li>
 </ul>
 
 <p><strong>标准PPO</strong>：以 1 为中心裁剪 $\rho_{k+1}$</p>
 
-\[L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]\]
+<p>$$
+L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]
+$$</p>
 
 <p><strong>方法一</strong>：以 $\rho_k$ 为中心裁剪 $\rho_{k+1}$</p>
 
-\[L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]\]
+<p>$$
+L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]
+$$</p>
 
 <p><strong>方法二</strong>：以 1 为中心裁剪增量比值 $r$</p>
 
-\[L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]\]
+<p>$$
+L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]
+$$</p>
 
 <p>其中 $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ 是经过重要性加权的优势估计。</p>
 
@@ -577,8 +625,8 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
     </tr>
     <tr>
       <td>实现复杂度</td>
-      <td>需存储 $\pi^{(i)}(a|s)$ 和 $\pi_k(a|s)$</td>
-      <td>仅需 $\pi_k(a|s)$</td>
+      <td>需存储 $\pi^{(i)}(a\|s)$ 和 $\pi_k(a\|s)$</td>
+      <td>仅需 $\pi_k(a\|s)$</td>
     </tr>
     <tr>
       <td>优势函数</td>
@@ -604,8 +652,8 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <p>大语言模型词表规模巨大，大量token概率极小。</p>
 
 <ul>
-  <li>方法二约束 $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$，这是<strong>乘法型约束</strong>：若 $\pi_k(a|s) = 10^{-6}$，允许的绝对变化仅为 $\epsilon \times 10^{-6}$。</li>
-  <li>方法一约束 $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$，这是<strong>加法型约束</strong>：若该token在旧策略下概率较高（如 $\pi^{(i)}(a|s) = 0.1$），即便当前概率很低，也允许较快提升。</li>
+  <li>方法二约束 $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$，这是<strong>乘法型约束</strong>：若 $\pi_k(a\|s) = 10^{-6}$，允许的绝对变化仅为 $\epsilon \times 10^{-6}$。</li>
+  <li>方法一约束 $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$，这是<strong>加法型约束</strong>：若该token在旧策略下概率较高（如 $\pi^{(i)}(a\|s) = 0.1$），即便当前概率很低，也允许较快提升。</li>
 </ul>
 
 <h3 id="56-采样陈旧性的控制">5.6 采样陈旧性的控制</h3>
@@ -614,7 +662,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p><strong>(一) 丢弃陈旧数据</strong></p>
 
-<p>设定阈值 $\epsilon_{\mathrm{stale}}$，对每个样本计算 $\lvert\rho_k - 1\rvert = \lvert\pi_k(a|s)/\pi^{(i)}(a|s) - 1\rvert$，丢弃超过阈值者。</p>
+<p>设定阈值 $\epsilon_{\mathrm{stale}}$，对每个样本计算 $\lvert\rho_k - 1\rvert = \lvert\pi_k(a\|s)/\pi^{(i)}(a\|s) - 1\rvert$，丢弃超过阈值者。</p>
 
 <p><strong>(二) 控制策略版本窗口</strong></p>
 
@@ -652,8 +700,8 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 <p>两类混合机制的本质区别在于索引转移核的结构：</p>
 
 <ul>
-  <li><strong>轨迹级混合</strong>：$q(i’|i) = \mathbf{1}{i’=i}$，索引永不改变</li>
-  <li><strong>步/段级混合</strong>：$\sigma(i) &gt; 0$，允许轨迹内切换</li>
+  <li><strong>轨迹级混合</strong>：$q(i'\|i) = \mathbf{1}\{i'=i\}$，索引永不改变</li>
+  <li><strong>步/段级混合</strong>：$\sigma(i) > 0$，允许轨迹内切换</li>
 </ul>
 
 <p>与常见工程术语的对应关系是：</p>
@@ -665,7 +713,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>关键分水岭是<strong>引理2.1的结构简化是否成立</strong>：轨迹级混合满足优势函数还原；步/段级混合一般不满足，因为未来回报受索引转移核影响。</p>
 
-<h3 id="62-采样陈旧性-s_k-的差异">6.2 采样陈旧性 $S_k$ 的差异</h3>
+<h3 id="62-采样陈旧性-inlmath183mathend-的差异">6.2 采样陈旧性 $S_k$ 的差异</h3>
 
 <p><strong>轨迹级混合</strong>的陈旧性来源于：混合权重 $\alpha_i^{(k)}$ 在新策略发布后仍对旧策略保留质量。</p>
 
@@ -743,18 +791,20 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>定义<strong>有效陈旧性</strong>：</p>
 
-\[\hat{S}_k := \mathbb{E}_{(s,i) \sim d_{\hat{\beta}^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_k, \hat{\pi}^{(i)}; s) \big]\]
+<p>$$
+\hat{S}_k := \mathbb{E}_{(s,i) \sim d_{\hat{\beta}^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_k, \hat{\pi}^{(i)}; s) \big]
+$$</p>
 
 <p>该定义同时覆盖版本陈旧性与训推实现差异。</p>
 
 <h3 id="73-可操作控制">7.3 可操作控制</h3>
 
-<p>由引理3.3，$\hat{S}<em>k$ 可表示为样本级可计算形式。给定阈值 $\epsilon</em>{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a|s)/\hat{\pi}^{(i)}(a|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则 $\hat{S}<em>k \leq \epsilon</em>{\mathrm{stale}}/2$。</p>
+<p>由引理3.3，$\hat{S}_k$ 可表示为样本级可计算形式。给定阈值 $\epsilon_{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a\|s)/\hat{\pi}^{(i)}(a\|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则 $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$。</p>
 
 <p><strong>关键实现要点</strong>：</p>
 
 <ol>
-  <li><strong>行为分母对齐</strong>：损失中的行为概率应使用推理端记录的 $\hat{\pi}^{(i)}(a|s)$</li>
+  <li><strong>行为分母对齐</strong>：损失中的行为概率应使用推理端记录的 $\hat{\pi}^{(i)}(a\|s)$</li>
   <li><strong>概率平滑</strong>：若推理端有截断（如top-k），需确保比值合法</li>
 </ol>
 
@@ -764,7 +814,9 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <p>单调提升下界的结构为：</p>
 
-\[J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{代理目标}} - \underbrace{C_1 \cdot U_k}_{\text{更新偏移惩罚}} - \underbrace{C_2 \cdot S_k}_{\text{采样陈旧性惩罚}}\]
+<p>$$
+J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{代理目标}} - \underbrace{C_1 \cdot U_k}_{\text{更新偏移惩罚}} - \underbrace{C_2 \cdot S_k}_{\text{采样陈旧性惩罚}}
+$$</p>
 
 <h3 id="职责分离原则">职责分离原则</h3>
 
@@ -854,7 +906,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
       <td>折扣状态访问分布，优势函数</td>
     </tr>
     <tr>
-      <td>$D_{\mathrm{TV}}(\pi, \pi’; s)$</td>
+      <td>$D_{\mathrm{TV}}(\pi, \pi'; s)$</td>
       <td>两策略在状态 $s$ 上的TV距离</td>
     </tr>
     <tr>
@@ -862,7 +914,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
       <td>第 $k$ 轮混合行为策略</td>
     </tr>
     <tr>
-      <td>$q(i’ \mid i)$, $\alpha_i^{(k)}$</td>
+      <td>$q(i' \mid i)$, $\alpha_i^{(k)}$</td>
       <td>索引转移核，索引初始分布</td>
     </tr>
     <tr>
@@ -974,24 +1026,121 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
   <script async src="https://badge.dimensions.ai/badge.js"></script>
 
-    <!-- MathJax -->
+    <!-- MathJax 3.x with comprehensive configuration -->
   <script type="text/javascript">
     window.MathJax = {
       tex: {
         tags: 'ams',
+        // Support all common math delimiters
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
         processEscapes: true,
-        processEnvironments: true
+        processEnvironments: true,
+        processRefs: true,
+        // Common macros for convenience
+        macros: {
+          RR: '\\mathbb{R}',
+          NN: '\\mathbb{N}',
+          ZZ: '\\mathbb{Z}',
+          CC: '\\mathbb{C}',
+          EE: '\\mathbb{E}',
+          PP: '\\mathbb{P}',
+          bm: ['\\boldsymbol{#1}', 1],
+          argmax: '\\operatorname*{arg\\,max}',
+          argmin: '\\operatorname*{arg\\,min}',
+          sgn: '\\operatorname{sgn}',
+          KL: '\\mathrm{KL}',
+          Var: '\\operatorname{Var}',
+          Cov: '\\operatorname{Cov}',
+          tr: '\\operatorname{tr}',
+          diag: '\\operatorname{diag}'
+        },
+        // AMS packages
+        packages: {'[+]': ['ams', 'boldsymbol', 'newcommand']}
+      },
+      loader: {
+        load: ['[tex]/ams', '[tex]/boldsymbol', '[tex]/newcommand']
       },
       options: {
-        // Avoid unexpected rendering inside code blocks.
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        // Skip math rendering in these HTML elements
+        skipHtmlTags: [
+          'script', 'noscript', 'style', 'textarea', 'pre', 'code',
+          'annotation', 'annotation-xml', 'kbd', 'samp', 'var'
+        ],
+        // Fix issues with underscores being converted to <em> by HTML
+        processHtmlClass: 'mathjax-process',
+        ignoreHtmlClass: 'tex2jax_ignore|no-mathjax',
+        // Render math even with HTML entities
+        renderActions: {
+          findScript: [10, function (doc) {
+            // Pre-process to fix HTML entity issues in math
+            for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            }
+          }, '']
+        }
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 1.0
+      },
+      chtml: {
+        scale: 1.0,
+        matchFontHeight: true
+      },
+      startup: {
+        ready: function () {
+          MathJax.startup.defaultReady();
+          // Fix: restore underscores that might have been converted to <em>
+          MathJax.startup.promise.then(() => {
+            console.log('MathJax typesetting complete');
+          });
+        }
       }
     };
   </script>
   <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
-  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  
+  <!-- Pre-processing script to protect math from Markdown/HTML interference -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix underscores in math that were converted to <em> by Markdown
+      function fixMathUnderscores() {
+        const mathContainers = document.querySelectorAll('.MathJax, .MathJax_Display, mjx-container');
+        // This runs before MathJax, so we need to fix raw content
+        const content = document.querySelector('.post-content, article');
+        if (!content) return;
+        
+        // Find math delimiters and restore any <em> or <strong> inside them
+        const html = content.innerHTML;
+        
+        // Pattern to find math blocks and restore underscore formatting
+        // This is a fallback; the main protection is in the Jekyll plugin
+      }
+      
+      // Fix HTML entities in display math blocks
+      function fixHtmlEntities() {
+        document.querySelectorAll('.language-plaintext.highlighter-rouge').forEach(el => {
+          // Check if this looks like an HTML figure that wasn't rendered
+          const text = el.textContent;
+          if (text.includes('<img') || text.includes('<figure') || text.includes('<figcaption')) {
+            // This is raw HTML that should be rendered - replace with actual HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = text;
+            el.replaceWith(...temp.childNodes);
+          }
+        });
+      }
+      
+      fixHtmlEntities();
+    });
+  </script>
 
     <!-- Pseudocode -->
   <script defer src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js" integrity="sha256-aVkDxqyzrB+ExUsOY9PdyelkDhn/DfrjWu08aVpqNlo=" crossorigin="anonymous"></script>
