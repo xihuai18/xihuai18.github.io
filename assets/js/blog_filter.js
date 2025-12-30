@@ -84,12 +84,14 @@
   /**
    * Applies the current filters to blog posts, showing or hiding them as appropriate.
    * Updates the filter status banner with the active filters and post count.
+   * Also manages the border styling to ensure the last visible post has no bottom border.
    */
   function applyFilters() {
     const { year, category } = getFilters();
     const posts = document.querySelectorAll('.post-list > li.blog-post-list-item');
     let visibleCount = 0;
     const totalCount = posts.length;
+    let lastVisiblePost = null;
 
     posts.forEach((post) => {
       const matchesYear = !year || post.dataset.year === year;
@@ -98,8 +100,19 @@
       const isVisible = matchesYear && matchesCategory;
 
       post.style.display = isVisible ? '' : 'none';
-      if (isVisible) visibleCount += 1;
+      // Reset border for all posts
+      post.style.borderBottom = '';
+      
+      if (isVisible) {
+        visibleCount += 1;
+        lastVisiblePost = post;
+      }
     });
+
+    // Remove border from the last visible post
+    if (lastVisiblePost) {
+      lastVisiblePost.style.borderBottom = 'none';
+    }
 
     updateFilterStatus(year, category, visibleCount, totalCount);
   }

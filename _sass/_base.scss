@@ -516,6 +516,10 @@ footer.sticky-bottom {
     padding-top: 1.25rem;
     padding-bottom: 1.25rem;
 
+    &:last-child {
+      border-bottom: none;
+    }
+
     .post-meta {
       color: var(--global-text-color-light);
       font-size: $font-size-sm;
