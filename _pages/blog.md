@@ -124,48 +124,18 @@ nav_order: 1
       {% continue %}
     {% endif %}
 
+    {% comment %}
+      Find matching Chinese post for English posts with zh_url.
+      Match by directly comparing candidate.en_url with post.url.
+      Performance: O(n) lookup per English post, acceptable for small-medium blogs.
+      The {% break %} tag exits the loop early once a match is found.
+    {% endcomment %}
     {% assign zh_post = nil %}
     {% if post.lang == 'en' and post.zh_url %}
-      {% assign post_url_norm = post.url | remove_first: site.baseurl %}
-      {% assign zh_url_norm = post.zh_url | remove_first: site.baseurl %}
-
-      {% if post_url_norm != "" and post_url_norm != nil %}
-        {% assign post_url_first = post_url_norm | slice: 0, 1 %}
-        {% if post_url_first != "/" %}
-          {% assign post_url_norm = "/" | append: post_url_norm %}
-        {% endif %}
-      {% endif %}
-      {% assign post_url_no_html = post_url_norm | replace: ".html", "" %}
-      {% assign post_url_with_html = post_url_norm %}
-      {% unless post_url_with_html contains ".html" %}
-        {% assign post_url_with_html = post_url_norm | append: ".html" %}
-      {% endunless %}
-      {% if zh_url_norm != "" and zh_url_norm != nil %}
-        {% assign zh_url_first = zh_url_norm | slice: 0, 1 %}
-        {% if zh_url_first != "/" %}
-          {% assign zh_url_norm = "/" | append: zh_url_norm %}
-        {% endif %}
-      {% endif %}
-
       {% for candidate in site.posts %}
-        {% if candidate.url == zh_url_norm %}
+        {% if candidate.lang == 'zh' and candidate.en_url == post.url %}
           {% assign zh_post = candidate %}
           {% break %}
-        {% endif %}
-
-        {% if candidate.lang == 'zh' and candidate.en_url %}
-          {% assign candidate_en_url_norm = candidate.en_url | remove_first: site.baseurl %}
-          {% if candidate_en_url_norm != "" and candidate_en_url_norm != nil %}
-            {% assign candidate_en_url_first = candidate_en_url_norm | slice: 0, 1 %}
-            {% if candidate_en_url_first != "/" %}
-              {% assign candidate_en_url_norm = "/" | append: candidate_en_url_norm %}
-            {% endif %}
-          {% endif %}
-
-          {% if candidate_en_url_norm == post_url_norm or candidate_en_url_norm == post_url_no_html or candidate_en_url_norm == post_url_with_html %}
-            {% assign zh_post = candidate %}
-            {% break %}
-          {% endif %}
         {% endif %}
       {% endfor %}
     {% endif %}
@@ -183,10 +153,10 @@ nav_order: 1
       <div class="lang-switcher">
         <ul class="nav" id="myTab-{{ post_slug }}" role="tablist">
           <li class="nav-item">
-            <a class="nav-link active" id="en-tab-{{ post_slug }}" href="#en-{{ post_slug }}" role="tab" aria-controls="en-{{ post_slug }}" aria-selected="true">English</a>
+            <a class="nav-link active" id="en-tab-{{ post_slug }}" href="#en-{{ post_slug }}" role="tab" aria-controls="en-{{ post_slug }}" aria-selected="true" aria-label="View English version">English</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="zh-tab-{{ post_slug }}" href="#zh-{{ post_slug }}" role="tab" aria-controls="zh-{{ post_slug }}" aria-selected="false">简体中文</a>
+            <a class="nav-link" id="zh-tab-{{ post_slug }}" href="#zh-{{ post_slug }}" role="tab" aria-controls="zh-{{ post_slug }}" aria-selected="false" aria-label="查看简体中文版本">简体中文</a>
           </li>
         </ul>
       </div>

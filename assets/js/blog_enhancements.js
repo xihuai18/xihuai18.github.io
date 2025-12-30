@@ -27,14 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Blog index: bilingual tab switcher (English / 简体中文).
-  const detectLang = (tabLink) => {
-    const targetSel = tabLink.getAttribute('data-target') || tabLink.getAttribute('href') || '';
-    const controls = tabLink.getAttribute('aria-controls') || '';
-    const hint = `${tabLink.id} ${targetSel} ${controls}`.toLowerCase();
-    if (hint.includes('#zh-') || hint.includes('zh-')) return 'zh';
-    return 'en';
-  };
-
+  // No caching - always shows default English tab on page load.
+  // Supports click and keyboard (arrow keys) navigation for accessibility.
   const activateTab = (tabLink) => {
     const postListItem = tabLink.closest('.post-list > li');
     if (!postListItem) return;
@@ -80,10 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
     targetPane.style.display = '';
     targetPane.setAttribute('aria-hidden', 'false');
     window.requestMathTypeset?.(targetPane);
-
-    try {
-      window.localStorage.setItem('blogLang', detectLang(tabLink));
-    } catch (e) {}
   };
 
   document.addEventListener(
@@ -98,25 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     true
   );
 
-  // Apply persisted language preference (if available).
-  let preferredLang = null;
-  try {
-    preferredLang = window.localStorage.getItem('blogLang');
-  } catch (e) {
-    preferredLang = null;
-  }
-  if (preferredLang === 'en' || preferredLang === 'zh') {
-    document.querySelectorAll('.lang-switcher [role="tablist"]').forEach((tabList) => {
-      const tabs = Array.from(tabList.querySelectorAll('a[role="tab"]'));
-      const match =
-        tabs.find((t) => detectLang(t) === preferredLang) ||
-        tabs.find((t) => t.classList.contains('active')) ||
-        tabs[0];
-      if (match) activateTab(match);
-    });
-  }
-
-  // Ensure initial state is consistent even without a stored preference.
+  // Ensure initial state is consistent (always English first).
   document.querySelectorAll('.lang-switcher [role="tablist"]').forEach((tabList) => {
     const active = tabList.querySelector('a[role="tab"].active') || tabList.querySelector('a[role="tab"]');
     if (active) activateTab(active);

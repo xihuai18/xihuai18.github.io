@@ -185,6 +185,10 @@ markdown: kramdown
 highlighter: rouge
 kramdown:
   input: GFM
+  math_engine: mathjax
+  math_engine_opts:
+    preview: true
+    preview_as_code: false
   syntax_highlighter_opts:
     css_class: 'highlight'
     span:
@@ -192,6 +196,11 @@ kramdown:
     block:
       line_numbers: false
       start_line: 1
+  # Enable parsing of block/span level HTML
+  parse_block_html: true
+  parse_span_html: true
+  # Hard wrap for better compatibility
+  hard_wrap: false
 
 # Includes & excludes
 include: ['_pages']
