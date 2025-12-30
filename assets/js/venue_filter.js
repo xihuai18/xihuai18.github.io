@@ -244,16 +244,16 @@ function updateFilterStatus(venue, visibleCount, totalCount) {
   }
 }
 
-// Initialize About page dividers
-function initAboutPageDividers() {
-  // Just call updatePublicationDividers to handle About page initial state
+// Initialize publication dividers on page load
+function initPublicationDividers() {
+  // Call updatePublicationDividers to handle both About and Publications pages
   updatePublicationDividers();
 }
 
 // Check URL parameters on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize About page dividers if on About page
-  initAboutPageDividers();
+  // Initialize publication dividers for both About and Publications pages
+  initPublicationDividers();
   
   // Only apply filter on publications page
   if (!document.querySelector('.publications')) return;
@@ -267,6 +267,13 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(() => {
         filterByVenue(venueParam);
       }, 100);
+    } else {
+      // Double-check dividers after initial render completes
+      // This handles edge cases where the initial call (line 256) runs before
+      // all styles are computed, ensuring single publications get proper styling
+      requestAnimationFrame(() => {
+        updatePublicationDividers();
+      });
     }
   } catch (error) {
     console.warn('Failed to parse URL parameters:', error);
