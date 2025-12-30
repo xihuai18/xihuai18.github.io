@@ -145,14 +145,14 @@ function updatePublicationDividers() {
     
     const visiblePubs = getVisiblePublications(bibliography);
     
+    // Remove the class from all publications first
+    bibliography.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
+    
     // If only one publication is visible, hide all dividers
     if (visiblePubs.length === 1) {
       visiblePubs.forEach(li => {
         li.classList.add('single-pub-in-year');
       });
-    } else {
-      // Remove the class to show dividers normally
-      bibliography.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
     }
   } else {
     // Publications page: check per year
@@ -165,14 +165,14 @@ function updatePublicationDividers() {
       if (nextElement && nextElement.tagName === 'OL' && nextElement.classList.contains('bibliography')) {
         const visiblePubs = getVisiblePublications(nextElement);
         
+        // Remove the class from all publications first
+        nextElement.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
+        
         // If only one publication is visible in this year, add a class to hide dividers
         if (visiblePubs.length === 1) {
           visiblePubs.forEach(li => {
             li.classList.add('single-pub-in-year');
           });
-        } else {
-          // Remove the class to show dividers normally
-          nextElement.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
         }
       }
     });
