@@ -61,11 +61,6 @@ nav_order: 1
   </p>
 {% endif %}
 
-  <div id="blog-filter-status" class="alert alert-info d-none" role="status" aria-live="polite">
-    <span class="filter-label"></span>
-    <button id="blog-filter-clear" class="btn btn-sm btn-outline-secondary float-end" aria-label="Clear active blog filters">Clear filter</button>
-  </div>
-
 {% assign featured_posts = site.posts | where: "featured", "true" %}
 {% if featured_posts.size > 0 %}
 <br>
