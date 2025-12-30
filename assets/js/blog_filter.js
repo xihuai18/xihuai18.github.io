@@ -118,6 +118,8 @@
       // Create status element with inline styles matching publications page
       statusElement = document.createElement('div');
       statusElement.id = 'blog-filter-status';
+      statusElement.setAttribute('role', 'status');
+      statusElement.setAttribute('aria-live', 'polite');
       statusElement.style.cssText = `
         display: none;
         margin: 1rem 0;
@@ -138,6 +140,7 @@
       const clearBtn = document.createElement('button');
       clearBtn.id = 'blog-filter-clear-btn';
       clearBtn.textContent = 'Clear Filter';
+      clearBtn.setAttribute('aria-label', 'Clear active blog filters');
       clearBtn.style.cssText = `
         margin-left: 1rem;
         padding: 0.2rem 0.5rem;
