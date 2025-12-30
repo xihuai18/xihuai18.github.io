@@ -130,7 +130,7 @@ function hideEmptyYearHeaders() {
 function getVisiblePublications(listElement) {
   return Array.from(listElement.querySelectorAll('li')).filter(li => {
     const computedStyle = window.getComputedStyle(li);
-    return li.offsetParent !== null && computedStyle.opacity !== '0';
+    return computedStyle.display !== 'none' && computedStyle.opacity !== '0';
   });
 }
 
