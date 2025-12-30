@@ -27,13 +27,13 @@ My research lies at the intersection of **Reinforcement Learning** and **Multi-A
   - Sample-efficient algorithms for cooperative MARL
   - Zero-shot coordination and generalization in multi-agent systems
 
-<div class="job-ad">
-  <div style="display: flex; align-items: center;">
-    <i class="fas fa-bullhorn" style="font-size: 2em; margin-right: 1rem; color: var(--global-theme-color);"></i>
-    <div>
-      <strong>I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via <em>leoxhwang@sjtu.edu.cn</em> for potential opportunities.</strong>
-      <br>
-      <strong>本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 <em>leoxhwang@sjtu.edu.cn</em> 与我联系。</strong>
-    </div>
-  </div>
+<div class="job-ad" markdown="0">
+<div style="display: flex; align-items: center;">
+<i class="fas fa-bullhorn" style="font-size: 2em; margin-right: 1rem; color: var(--global-theme-color);"></i>
+<div>
+<strong>I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via <em>leoxhwang@sjtu.edu.cn</em> for potential opportunities.</strong>
+<br>
+<strong>本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 <em>leoxhwang@sjtu.edu.cn</em> 与我联系。</strong>
+</div>
+</div>
 </div>

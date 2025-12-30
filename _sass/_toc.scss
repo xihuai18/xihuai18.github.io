@@ -2,6 +2,8 @@
  * Sticky / floating Table of Contents
  ******************************************************************************/
 
+@use "variables" as *;
+
 .toc-layout {
   .toc-content {
     min-width: 0; // prevent long code/words from forcing overflow in flex/grid
@@ -43,7 +45,7 @@
 }
 
 .toc-sidebar__title {
-  font-size: 0.85rem;
+  font-size: $font-size-sm;
   font-weight: 600;
   color: var(--global-text-color-light);
   letter-spacing: 0.02em;
@@ -51,7 +53,7 @@
 }
 
 .toc {
-  font-size: 0.9rem;
+  font-size: $font-size-sm;
   line-height: 1.35;
 
   ul {

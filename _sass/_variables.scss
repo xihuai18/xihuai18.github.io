@@ -35,11 +35,23 @@ $black-color: #000000 !default;
 
 // Theme colors
 
-$code-bg-color-light:     rgba($purple-color, 0.05);
+$code-bg-color-light:     rgba(0, 0, 0, 0.04);  // Light gray instead of purple
 $code-bg-color-dark:      #2c3237 !default;
 
-// Typography
+// Typography - Unified font size system
 $base-font-size: 16px !default;
-$small-font-size: 0.875rem !default;
-$medium-font-size: 1rem !default;
-$large-font-size: 1.25rem !default;
+
+// Standard font sizes (use these consistently)
+$font-size-xs: 0.75rem !default;    // Extra small - footnotes, captions
+$font-size-sm: 0.875rem !default;   // Small - metadata, labels, small text
+$font-size-base: 1rem !default;     // Base - body text
+$font-size-md: 1.125rem !default;   // Medium - slightly larger body text
+$font-size-lg: 1.25rem !default;    // Large - subheadings, important text
+$font-size-xl: 1.5rem !default;     // Extra large - section headings
+$font-size-2xl: 1.75rem !default;   // 2X large - page headings
+$font-size-3xl: 2.5rem !default;    // 3X large - hero text
+
+// Legacy variable support (map to new system)
+$small-font-size: $font-size-sm !default;
+$medium-font-size: $font-size-base !default;
+$large-font-size: $font-size-lg !default;

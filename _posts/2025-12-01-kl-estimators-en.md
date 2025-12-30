@@ -28,8 +28,8 @@ $$
 D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_\theta(x)}{p(x)}\right]
 $$
 
-<figure style="text-align:center;">
-	<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:95%;max-width:100%;">
+<figure style="text-align:center;" markdown="0">
+	<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;">
 	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -38,8 +38,8 @@ $$
 D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\theta(x)}\right]
 $$
 
-<figure style="text-align:center;">
-	<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:95%;max-width:100%;">
+<figure style="text-align:center;" markdown="0">
+	<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;">
 	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 

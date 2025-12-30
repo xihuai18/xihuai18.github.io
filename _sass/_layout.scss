@@ -2,12 +2,14 @@
  * Content
  ******************************************************************************/
 
+@use "variables" as *;
+
 body {
   padding-bottom: 50px;
   color: var(--global-text-color);
   background-color: var(--global-bg-color);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: $font-size-base;
+  line-height: 1.75;
 
   h1, h2, h3, h4, h5, h6 {
     scroll-margin-top: 60px;

@@ -33,7 +33,7 @@ table {
   }
 
   td {
-    font-size: 1rem;
+    font-size: $font-size-base;
   }
 }
 
@@ -61,7 +61,7 @@ blockquote {
   border-left: 2px solid var(--global-theme-color);
   margin: 1.5em 10px;
   padding: 0.5em 10px;
-  font-size: 1rem;
+  font-size: $font-size-base;
 }
 
 .job-ad {
@@ -96,7 +96,7 @@ blockquote {
 // Caption
 
 .caption {
-  font-size: 0.875rem;
+  font-size: $font-size-sm;
   margin-top: 0.75rem;
   margin-bottom: 1.5rem;
   text-align: center;
@@ -142,7 +142,7 @@ blockquote {
     margin-bottom: 3px;
     margin-top: 3px;
     font-family: monospace;
-    font-size: 0.8rem;
+    font-size: $font-size-xs;
     text-align: center;
 
     p {
@@ -176,7 +176,7 @@ blockquote {
 
 .post-description {
   margin-bottom: 1rem;
-  font-size: 0.85rem;
+  font-size: $font-size-sm;
 
   a {
     color: inherit;
@@ -240,7 +240,7 @@ blockquote {
 
   .navbar-nav .nav-item .nav-link {
     color: var(--global-text-color);
-    font-size: 1.05rem;
+    font-size: $font-size-md;
     font-weight: 500;
     transition: color 0.2s ease;
 
@@ -262,7 +262,7 @@ blockquote {
   .navbar-brand.social {
     padding-bottom: 0;
     padding-top: 0;
-    font-size: 1.2rem;
+    font-size: $font-size-lg;
 
     a {
       i::before {
@@ -324,7 +324,7 @@ blockquote {
   border: 0;
   background-color: inherit;
   color: var(--global-text-color);
-  font-size: 1.3rem;
+  font-size: $font-size-lg;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -342,7 +342,7 @@ blockquote {
   text-align: center;
 
   .contact-icons {
-    font-size: 3rem;
+    font-size: $font-size-3xl;
 
     a {
       i::before {
@@ -359,7 +359,7 @@ blockquote {
   }
 
   .contact-note {
-    font-size: 0.8rem;
+    font-size: $font-size-xs;
   }
 }
 
@@ -367,7 +367,7 @@ blockquote {
 // Footer
 footer.fixed-bottom {
   background-color: var(--global-footer-bg-color);
-  font-size: 0.7rem;
+  font-size: $font-size-xs;
 
   .container {
     color: var(--global-footer-text-color);
@@ -389,7 +389,7 @@ footer.sticky-bottom {
   border-top: 1px solid var(--global-divider-color);
   padding-top: 25px;
   padding-bottom: 25px;
-  font-size: 0.8rem;
+  font-size: $font-size-xs;
 }
 
 // CV
@@ -432,7 +432,7 @@ footer.sticky-bottom {
 
   h1 {
     color: var(--global-theme-color);
-    font-size: 2.5rem;
+    font-size: $font-size-3xl;
   }
 }
 
@@ -463,20 +463,22 @@ footer.sticky-bottom {
   li {
     border-bottom: 1px solid var(--global-divider-color);
     list-style: none;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
 
     .post-meta {
       color: var(--global-text-color-light);
-      font-size: 0.8rem;
+      font-size: $font-size-sm;
       margin-bottom: 0;
+      line-height: 1.4;
     }
 
     .post-tags {
       color: var(--global-text-color-light);
-      font-size: 0.8rem;
-      padding-top: 0.15rem;
+      font-size: $font-size-sm;
+      padding-top: 0.1rem;
       padding-bottom: 0;
+      line-height: 1.4;
     }
 
     a {
@@ -489,16 +491,16 @@ footer.sticky-bottom {
     }
 
     h3 {
-      font-size: 1.15rem;
+      font-size: $font-size-md;
       font-weight: 600;
-      margin-bottom: 0.35rem;
-      line-height: 1.4;
+      margin-bottom: 0.2rem;
+      line-height: 1.35;
     }
 
     p {
-      font-size: 0.85rem;
-      line-height: 1.5;
-      margin-bottom: 0.35rem;
+      font-size: $font-size-base;
+      line-height: 1.45;
+      margin-bottom: 0.2rem;
       color: var(--global-text-color-light);
     }
   }
@@ -589,7 +591,7 @@ footer.sticky-bottom {
 
   h1 {
     color: var(--global-theme-color);
-    font-size: 1.5rem;
+    font-size: $font-size-xl;
     text-align: center;
     margin-top: 0.75em;
     margin-bottom: 0.75em;
@@ -599,7 +601,7 @@ footer.sticky-bottom {
     margin-bottom: 0.75rem;
 
     span {
-      font-size: 1.25rem;
+      font-size: $font-size-lg;
     }
   }
 
@@ -611,7 +613,7 @@ footer.sticky-bottom {
     margin-top: 1.25rem;
     margin-bottom: -1.25rem;
     text-align: right;
-    font-size: 1.5rem;
+    font-size: $font-size-xl;
     font-weight: bold;
   }
 
@@ -637,7 +639,7 @@ footer.sticky-bottom {
           display: inline-block;
           background-color: var(--global-theme-color);
           padding: 0.3rem 0.8rem;
-          font-size: 0.75rem;
+          font-size: $font-size-xs;
           border-radius: 4px;
           font-weight: 600;
           box-shadow: none;
@@ -663,12 +665,12 @@ footer.sticky-bottom {
 
       .title {
         font-weight: bolder;
-        font-size: 1rem;
+        font-size: $font-size-base;
         line-height: 1.4;
       }
 
       .author {
-        font-size: 1rem;
+        font-size: $font-size-base;
         line-height: 1.4;
 
         a {
@@ -698,7 +700,7 @@ footer.sticky-bottom {
       }
 
       .periodical {
-        font-size: 1rem;
+        font-size: $font-size-base;
       }
 
       .links {
@@ -709,7 +711,7 @@ footer.sticky-bottom {
           padding-right: 0.5rem;
           padding-top: 0.12rem;
           padding-bottom: 0.12rem;
-          font-size: 0.75rem;
+          font-size: $font-size-xs;
           margin-right: 0.15rem;
 
           &:hover {
@@ -734,7 +736,7 @@ footer.sticky-bottom {
       }
 
       .hidden {
-        font-size: 1rem;
+        font-size: $font-size-base;
         max-height: 0px;
         overflow: hidden;
         text-align: justify;
@@ -750,7 +752,7 @@ footer.sticky-bottom {
         }
 
         pre {
-          font-size: 0.9em;
+          font-size: $font-size-sm;
           line-height: 1.4em;
           padding: 10px;
         }
@@ -817,13 +819,13 @@ html.transition *:after {
 .post {
   .post-meta {
     color: var(--global-text-color-light);
-    font-size: 0.875rem;
+    font-size: $font-size-sm;
     margin-bottom: 0;
   }
 
   .post-tags {
     color: var(--global-text-color-light);
-    font-size: 0.875rem;
+    font-size: $font-size-sm;
     padding-top: 0.25rem;
     padding-bottom: 1rem;
 
@@ -911,7 +913,7 @@ pre {
     border-radius: .3rem;
     border-style: solid;
     color: var(--global-text-color);
-    font-size: medium;
+    font-size: $font-size-base;
     opacity: 0;
     position: absolute;
     right: .25rem;
@@ -925,11 +927,53 @@ pre {
     }
   }
 
+  /* Wrap toggle button */
+  .wrap-toggle {
+    background: var(--global-card-bg-color);
+    border-color: var(--global-bg-color);
+    border-radius: .3rem;
+    border-style: solid;
+    color: var(--global-text-color);
+    font-size: $font-size-base;
+    opacity: 0;
+    position: absolute;
+    right: 2.75rem;
+    top: .25rem;
+
+    &:active,
+    &:focus,
+    &:hover {
+      color: var(--global-hover-color);
+      opacity: 1;
+    }
+  }
+
   &:active .copy,
   &:focus .copy,
-  &:hover .copy {
+  &:hover .copy,
+  &:active .wrap-toggle,
+  &:focus .wrap-toggle,
+  &:hover .wrap-toggle {
     color: var(--global-hover-color);
     opacity: 1;
+  }
+
+  /* Wrap functionality */
+  &.wrapped {
+    code,
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+  }
+
+  &:not(.wrapped) {
+    code,
+    pre {
+      white-space: pre;
+      overflow-x: auto;
+    }
   }
 }
 
@@ -952,11 +996,11 @@ pre {
 
   th[scope="row"] {
     white-space: nowrap;
-    font-size: 0.7rem;
+    font-size: $font-size-xs;
   }
 
   td {
-    font-size: 0.85rem;
+    font-size: $font-size-sm;
     padding: 0.3rem 0 !important;
     line-height: 1.5;
 
@@ -1000,7 +1044,7 @@ pre {
     text-decoration: none !important;
 
     i, i::before {
-      font-size: 2.2rem;
+      font-size: $font-size-2xl;
       color: var(--global-text-color);
       transition: all 0.2s ease;
     }
@@ -1020,7 +1064,7 @@ pre {
 // Enhanced Profile Section
 .profile {
   .address {
-    font-size: 0.9rem;
+    font-size: $font-size-sm;
     color: var(--global-text-color-light);
     letter-spacing: 0.01em;
 
@@ -1053,7 +1097,7 @@ pre {
 
   .post-title {
     font-weight: 700;
-    font-size: 1.75rem;
+    font-size: $font-size-2xl;
     letter-spacing: -0.02em;
     line-height: 1.2;
 
@@ -1063,18 +1107,18 @@ pre {
         font-family: 'Georgia', 'Times New Roman', serif;
         font-style: italic;
         font-weight: 400;
-        font-size: 1.9rem;
+        font-size: $font-size-2xl;
       }
       .name-zh {
         font-family: 'KaiTi', 'STKaiti', 'FZKai-Z03', 'AR PL UKai CN', serif;
         font-weight: 400;
-        font-size: 1.75rem;
+        font-size: $font-size-2xl;
       }
     }
   }
 
   .desc {
-    font-size: 1.1rem;
+    font-size: $font-size-md;
     color: var(--global-text-color-light);
 
     a {
@@ -1092,10 +1136,10 @@ pre {
 
 // Section Headers with subtle accent
 .post h2 {
-  font-size: 1.3rem;
+  font-size: $font-size-xl;
   font-weight: 700;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
   padding-bottom: 0.3rem;
   border-bottom: 2px solid var(--global-theme-color);
   display: inline-block;
@@ -1121,7 +1165,7 @@ pre {
 
 // News Section - Clean List Style
 .news table {
-  font-size: 1rem;
+  font-size: $font-size-base;
   border-collapse: collapse;
   border-spacing: 0;
   width: 100%;
@@ -1145,7 +1189,7 @@ pre {
   }
 
   th[scope="row"] {
-    font-size: 0.9rem;
+    font-size: $font-size-sm;
     font-weight: 600;
     color: var(--global-text-color);
     padding: 1.2rem 1rem !important;
@@ -1184,7 +1228,7 @@ pre {
     }
 
     .card-title {
-      font-size: 0.9rem;
+      font-size: $font-size-sm;
       font-weight: 600;
       color: var(--global-theme-color);
       margin-bottom: 0.5rem;
@@ -1218,7 +1262,7 @@ pre {
       }
 
       .badge {
-        font-size: 0.65rem;
+        font-size: $font-size-xs;
         font-weight: 500;
         padding: 0.25rem 0.5rem;
         min-width: auto;
@@ -1226,14 +1270,14 @@ pre {
       }
 
       h6.title {
-        font-size: 0.85rem;
+        font-size: $font-size-sm;
         font-weight: 600;
         margin: 0 0 0.1rem 0;
         color: var(--global-text-color);
       }
 
       h6:not(.title) {
-        font-size: 0.75rem;
+        font-size: $font-size-xs;
         font-weight: 400;
         margin: 0;
         color: var(--global-text-color-light);
@@ -1242,7 +1286,7 @@ pre {
       .items {
         margin: 0.2rem 0 0 0;
         padding-left: 0.85rem;
-        font-size: 0.8rem;
+        font-size: $font-size-xs;
 
         li {
           margin-bottom: 0.05rem;
@@ -1254,7 +1298,7 @@ pre {
   // Compact Map Table
   .table {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: $font-size-xs;
 
     tr {
       td {
@@ -1277,7 +1321,7 @@ pre {
     aside {
       position: sticky;
       top: 70px;
-      font-size: 0.75rem;
+      font-size: $font-size-xs;
 
       .nav-link {
         padding: 0.2rem 0.4rem;
@@ -1301,7 +1345,7 @@ pre {
   margin-top: 0.75rem;
 
   h2.year {
-    font-size: 1rem;
+    font-size: $font-size-base;
     font-weight: 600;
     margin-top: 0.75rem;
     margin-bottom: 0.6rem;
@@ -1350,13 +1394,13 @@ pre {
       }
 
       .title {
-        font-size: 1rem;
+        font-size: $font-size-base;
         font-weight: 600;
         line-height: 1.35;
         margin-bottom: 0.2rem;
 
         abbr.badge {
-          font-size: 0.9rem;
+          font-size: $font-size-sm;
           padding: 0.3rem 0.8rem;
           border-radius: 4px;
           line-height: 1.2;
@@ -1379,13 +1423,13 @@ pre {
       }
 
       .author {
-        font-size: 1rem;
+        font-size: $font-size-base;
         line-height: 1.35;
         margin-bottom: 0.15rem;
       }
 
       .periodical {
-        font-size: 1rem;
+        font-size: $font-size-base;
         color: var(--global-text-color-light);
         margin-bottom: 0.2rem;
       }
@@ -1394,7 +1438,7 @@ pre {
         margin-top: 0.25rem;
 
         a.btn {
-          font-size: 0.65rem;
+          font-size: $font-size-xs;
           padding: 0.15rem 0.4rem;
           margin-right: 0.2rem;
           border-radius: 3px;
@@ -1402,11 +1446,11 @@ pre {
       }
 
       .hidden {
-        font-size: 0.7rem;
+        font-size: $font-size-xs;
         margin-top: 0;
 
         pre {
-          font-size: 0.65rem;
+          font-size: $font-size-xs;
           padding: 0.4rem;
         }
       }
@@ -1444,19 +1488,19 @@ pre {
     }
 
     .title {
-      font-size: 1rem;
+      font-size: $font-size-base;
     }
 
     .author {
-      font-size: 1rem;
+      font-size: $font-size-base;
     }
 
     .periodical {
-      font-size: 1rem;
+      font-size: $font-size-base;
     }
 
     .links a.btn {
-      font-size: 0.6rem;
+      font-size: $font-size-xs;
       padding: 0.12rem 0.35rem;
     }
   }

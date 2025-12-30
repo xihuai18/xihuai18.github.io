@@ -2,15 +2,132 @@
  * Enhancements for regular blog posts (non-distill).
  ******************************************************************************/
 
+@use "variables" as *;
+
+// Blog post heading hierarchy
+.post-content {
+  // Ensure proper heading hierarchy and spacing
+  h2 {
+    font-size: $font-size-xl;  // 1.5rem = 24px
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: $font-size-lg;  // 1.25rem = 20px
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+
+  h4 {
+    font-size: $font-size-md;  // 1.125rem = 18px
+    font-weight: 600;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+}
+
 .post-content {
   // Make wide tables usable on small screens.
   .table-responsive {
     margin: 1rem 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
+  // Enhanced table styling for better readability
   table {
     width: 100%;
-    margin: 0;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: $font-size-base;
+    line-height: 1.5;
+    
+    // Responsive wrapper
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    @media (min-width: 768px) {
+      display: table;
+      overflow-x: visible;
+    }
+
+    thead {
+      background-color: var(--global-code-bg-color);
+      border-bottom: 2px solid var(--global-theme-color);
+      
+      th {
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        text-align: left;
+        white-space: nowrap;
+        color: var(--global-text-color);
+        
+        &[style*="text-align: center"] {
+          text-align: center !important;
+        }
+        &[style*="text-align: right"] {
+          text-align: right !important;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid var(--global-divider-color);
+        
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+
+      td {
+        padding: 0.6rem 1rem;
+        vertical-align: top;
+        
+        &[style*="text-align: center"] {
+          text-align: center !important;
+        }
+        &[style*="text-align: right"] {
+          text-align: right !important;
+        }
+        
+        // Math in tables should not overflow
+        .MathJax, mjx-container {
+          font-size: 0.9em !important;
+          overflow-x: auto;
+          max-width: 100%;
+        }
+      }
+    }
+
+    // Zebra striping (optional, subtle)
+    &.striped tbody tr:nth-child(even) {
+      background-color: var(--global-code-bg-color);
+    }
+
+    // Compact variant
+    &.compact {
+      font-size: $font-size-sm;
+      
+      th, td {
+        padding: 0.4rem 0.75rem;
+      }
+    }
+
+    // Code in tables
+    code {
+      font-size: 0.85em;
+      padding: 0.1rem 0.3rem;
+      white-space: nowrap;
+    }
   }
 
   // Improve readability of inline code without breaking Rouge blocks.
@@ -18,6 +135,8 @@
     padding: 0.15rem 0.35rem;
     font-size: 0.875em;
     word-break: break-word;
+    background-color: var(--global-code-bg-color);
+    border-radius: 3px;
   }
 
   // Footnotes (default)
@@ -25,7 +144,7 @@
     margin-top: 2rem;
     padding-top: 1rem;
     border-top: 1px solid var(--global-divider-color);
-    font-size: 0.875rem;
+    font-size: $font-size-sm;
   }
 
   .footnotes ol {
@@ -112,7 +231,7 @@
   border-top: 1px solid var(--global-divider-color);
 
   h2 {
-    font-size: 1.25rem;
+    font-size: $font-size-lg;
     margin-bottom: 0.75rem;
   }
 
@@ -131,11 +250,11 @@
 
 .lang-switcher {
   margin-top: 0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 
   .nav {
     display: inline-flex;
-    gap: 1.5rem;
+    gap: 1rem;
     padding: 0;
     margin: 0;
     border: none;
@@ -158,7 +277,7 @@
 
   .nav-link {
     position: relative;
-    padding: 0.15rem 0 0.55rem;
+    padding: 0.1rem 0 0.35rem;
     margin: 0;
     border: none !important;
     border-bottom: none !important;
@@ -168,6 +287,7 @@
     box-shadow: none !important;
     text-decoration: none !important;
     color: var(--global-text-color) !important;
+    font-size: $font-size-sm;
     opacity: 0.7;
     transition: opacity 160ms ease, color 160ms ease;
 
@@ -210,6 +330,15 @@
   }
 }
 
+// Blog list tab content - more compact
+.post-list .tab-content {
+  margin-top: 0;
+  
+  .tab-pane {
+    padding: 0;
+  }
+}
+
 // Sidenotes (opt-in per post: `sidenotes: true`)
 .post.post--sidenotes {
   @media (min-width: 992px) {
@@ -229,7 +358,7 @@
     .sidenote {
       position: absolute;
       left: 0;
-      font-size: 0.85rem;
+      font-size: $font-size-sm;
       line-height: 1.35;
       color: var(--global-text-color-light);
       padding-right: 0.75rem;
@@ -266,7 +395,7 @@
     background-color: transparent;
     border: 1px solid var(--global-divider-color);
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: $font-size-xs;
     font-weight: 400;
     text-decoration: none;
     color: var(--global-text-color);
@@ -296,5 +425,326 @@
 
   .post-links {
     margin-bottom: 1.75rem;
+  }
+}
+
+/*******************************************************************************
+ * Enhanced Code Block Styling
+ ******************************************************************************/
+
+.post-content {
+  // Code blocks with syntax highlighting
+  .highlight {
+    position: relative;
+    margin: 1.25rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+
+    pre {
+      margin: 0;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      font-size: $font-size-sm;
+      line-height: 1.6;
+      
+      code {
+        background: transparent;
+        padding: 0;
+        font-size: inherit;
+        border-radius: 0;
+      }
+    }
+
+    // Language label (added via CSS pseudo-element or JS)
+    &[data-lang]::before {
+      content: attr(data-lang);
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 0.25rem 0.5rem;
+      font-size: $font-size-xs;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--global-text-color-light);
+      background: var(--global-code-bg-color);
+      border-bottom-left-radius: 0.375rem;
+      opacity: 0.7;
+    }
+  }
+
+  // Standalone code blocks (no syntax highlighting)
+  pre:not(.highlight pre) {
+    margin: 1.25rem 0;
+    padding: 1rem 1.25rem;
+    background-color: var(--global-code-bg-color);
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    font-size: $font-size-sm;
+    line-height: 1.6;
+  }
+
+  // Rouge highlighter wrapper
+  .highlighter-rouge {
+    margin: 1.25rem 0;
+
+    &.language-plaintext {
+      .highlight {
+        background-color: var(--global-code-bg-color);
+      }
+    }
+  }
+
+  // Line numbers (if enabled)
+  .lineno {
+    color: var(--global-text-color-light);
+    opacity: 0.5;
+    padding-right: 1rem;
+    user-select: none;
+    text-align: right;
+    min-width: 2rem;
+    display: inline-block;
+  }
+
+  // Override Rouge theme's red/pink backgrounds for errors and diffs
+  // These colors from external themes can be distracting
+  .highlight {
+    // Error tokens - remove red background
+    .err {
+      color: var(--global-text-color);
+      background-color: transparent !important;
+      border: none !important;
+    }
+    
+    // Generic.Deleted - soften the red background
+    .gd {
+      color: var(--global-text-color);
+      background-color: transparent !important;
+    }
+    
+    // Generic.Inserted - soften the green background  
+    .gi {
+      color: var(--global-text-color);
+      background-color: transparent !important;
+    }
+    
+    // Highlighted line - use theme-appropriate color
+    .hll {
+      background-color: var(--global-code-bg-color) !important;
+    }
+  }
+}
+
+/*******************************************************************************
+ * Global Rouge Theme Override (for all highlight blocks, not just post-content)
+ ******************************************************************************/
+
+.highlight {
+  .err {
+    color: inherit !important;
+    background-color: transparent !important;
+    border: none !important;
+  }
+  
+  .gd {
+    background-color: transparent !important;
+  }
+  
+  .gi {
+    background-color: transparent !important;
+  }
+  
+  .hll {
+    background-color: var(--global-code-bg-color) !important;
+  }
+}
+
+/*******************************************************************************
+ * Enhanced Math/LaTeX Styling
+ ******************************************************************************/
+
+.post-content {
+  // Display math blocks
+  .MathJax_Display,
+  mjx-container[display="true"],
+  .katex-display {
+    margin: 1.5rem 0;
+    padding: 0.5rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  // Inline math
+  .MathJax,
+  mjx-container:not([display="true"]),
+  .katex:not(.katex-display .katex) {
+    font-size: 1em;
+  }
+
+  // Equation numbers (AMS style)
+  .MathJax_ref,
+  mjx-mrow.MJX-TEX {
+    font-size: 0.9em;
+  }
+
+  // Fix for math in tables
+  td, th {
+    .MathJax,
+    mjx-container,
+    .katex {
+      font-size: 0.92em !important;
+    }
+  }
+
+  // Fix for math in lists
+  li {
+    .MathJax_Display,
+    mjx-container[display="true"],
+    .katex-display {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  // Boxed equations (using \boxed{})
+  .MathJax .mbox,
+  mjx-mrow[style*="border"] {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+}
+
+/*******************************************************************************
+ * Figure and Image Enhancements
+ ******************************************************************************/
+
+.post-content {
+  figure {
+    margin: 1.5rem 0;
+    text-align: center;
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.375rem;
+    }
+
+    figcaption {
+      margin-top: 0.75rem;
+      font-size: $font-size-sm;
+      color: var(--global-text-color-light);
+      font-style: italic;
+
+      a {
+        color: var(--global-theme-color);
+      }
+    }
+  }
+
+  // Standalone images
+  p > img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 0.375rem;
+  }
+
+  // Image with caption using markdown
+  .img-caption {
+    text-align: center;
+    font-size: $font-size-sm;
+    color: var(--global-text-color-light);
+    font-style: italic;
+    margin-top: -1rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/*******************************************************************************
+ * Blockquote Enhancements
+ ******************************************************************************/
+
+.post-content {
+  blockquote {
+    margin: 1.5rem 0;
+    padding: 0.75rem 1.25rem;
+    border-left: 4px solid var(--global-theme-color);
+    background-color: transparent;
+    border-radius: 0 0.375rem 0.375rem 0;
+
+    p {
+      margin: 0;
+      
+      &:not(:last-child) {
+        margin-bottom: 0.75rem;
+      }
+    }
+
+    // Nested blockquotes
+    blockquote {
+      margin: 0.75rem 0;
+      border-left-color: var(--global-text-color-light);
+    }
+
+    // Note/Warning/Info styled blockquotes
+    &.note, &.info {
+      border-left-color: #3498db;
+      background-color: rgba(52, 152, 219, 0.1);
+    }
+
+    &.warning {
+      border-left-color: #f39c12;
+      background-color: rgba(243, 156, 18, 0.1);
+    }
+
+    &.danger, &.error {
+      border-left-color: #e74c3c;
+      background-color: rgba(231, 76, 60, 0.1);
+    }
+
+    &.success, &.tip {
+      border-left-color: #2ecc71;
+      background-color: rgba(46, 204, 113, 0.1);
+    }
+  }
+}
+
+/*******************************************************************************
+ * List Enhancements
+ ******************************************************************************/
+
+.post-content {
+  ul, ol {
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+
+    li {
+      margin-bottom: 0.35rem;
+      line-height: 1.7;
+
+      // Nested lists
+      ul, ol {
+        margin: 0.5rem 0;
+      }
+    }
+  }
+
+  // Task lists
+  ul.task-list {
+    list-style: none;
+    padding-left: 0;
+
+    li {
+      padding-left: 1.5rem;
+      position: relative;
+
+      input[type="checkbox"] {
+        position: absolute;
+        left: 0;
+        top: 0.35rem;
+      }
+    }
   }
 }

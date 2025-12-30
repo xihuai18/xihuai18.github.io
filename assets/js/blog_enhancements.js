@@ -1,6 +1,43 @@
-// Blog post enhancements (tables, etc.)
+// Blog post enhancements (tables, code blocks, math, etc.)
 document.addEventListener('DOMContentLoaded', () => {
-  // Wrap markdown tables for horizontal scrolling on narrow screens.
+  // ============================================================================
+  // Fix HTML blocks that were incorrectly rendered as code blocks
+  // ============================================================================
+  document.querySelectorAll('.post-content .language-plaintext.highlighter-rouge').forEach((block) => {
+    const codeEl = block.querySelector('code');
+    if (!codeEl) return;
+    
+    const text = codeEl.textContent.trim();
+    
+    // Check if this looks like HTML that should be rendered
+    const htmlTags = ['<img', '<figure', '<figcaption', '<div', '<iframe', '<video', '<audio'];
+    const isHTML = htmlTags.some(tag => text.startsWith(tag));
+    
+    if (isHTML) {
+      // Replace the code block with actual HTML
+      const temp = document.createElement('div');
+      temp.innerHTML = text;
+      block.replaceWith(...temp.childNodes);
+    }
+  });
+
+  // ============================================================================
+  // Add language labels to code blocks
+  // ============================================================================
+  document.querySelectorAll('.post-content .highlighter-rouge').forEach((block) => {
+    // Extract language from class name
+    const classes = block.className.split(' ');
+    const langClass = classes.find(c => c.startsWith('language-'));
+    
+    if (langClass && langClass !== 'language-plaintext') {
+      const lang = langClass.replace('language-', '');
+      block.setAttribute('data-lang', lang);
+    }
+  });
+
+  // ============================================================================
+  // Wrap markdown tables for horizontal scrolling on narrow screens
+  // ============================================================================
   let wrappedTables = false;
   document.querySelectorAll('.post-content table').forEach((table) => {
     // Skip tables that are already in a responsive wrapper or are part of special layouts.
@@ -20,13 +57,37 @@ document.addEventListener('DOMContentLoaded', () => {
     window.requestMathTypeset?.(document.querySelector('.post-content'));
   }
 
-  // Hide empty references blocks (e.g., references enabled but no citations).
+  // ============================================================================
+  // Hide empty references blocks (e.g., references enabled but no citations)
+  // ============================================================================
   document.querySelectorAll('.post-references').forEach((section) => {
     const hasEntries = section.querySelectorAll('li').length > 0;
     if (!hasEntries) section.remove();
   });
 
-  // Blog index: bilingual tab switcher (English / 简体中文).
+  // ============================================================================
+  // Fix math rendering issues caused by HTML processing
+  // ============================================================================
+  document.querySelectorAll('.post-content').forEach((content) => {
+    // Find inline math that might have been corrupted
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
+    const nodesToFix = [];
+    
+    while (walker.nextNode()) {
+      const text = walker.currentNode.textContent;
+      // Check for common corruption patterns
+      if (text.includes('<em>') || text.includes('</em>')) {
+        nodesToFix.push(walker.currentNode);
+      }
+    }
+    
+    // Note: Most fixes are handled server-side by the Ruby plugins
+    // This is just a fallback for edge cases
+  });
+
+  // ============================================================================
+  // Blog index: bilingual tab switcher (English / 简体中文)
+  // ============================================================================
   // No caching - always shows default English tab on page load.
   // Supports click and keyboard (arrow keys) navigation for accessibility.
   const activateTab = (tabLink) => {

@@ -52,7 +52,7 @@ navbar_fixed: true
 footer_fixed: true
 
 # Dimensions
-max_width: 960px
+max_width: 1080px
 
 # TODO: add layout settings (single page vs. multi-page)
 
@@ -75,7 +75,7 @@ mastodon_username: # your mastodon instance+username in the format instance.tld/
 linkedin_username: # your LinkedIn user name
 telegram_username: # your Telegram user name
 scholar_userid: hy6v3qUAAAAJ # your Google Scholar ID
-semanticscholar_id: 2178008 # your Semantic Scholar ID
+semanticscholar_id: # your Semantic Scholar ID
 whatsapp_number: # your WhatsApp number (full phone number in international format. Omit any zeroes, brackets, or dashes when adding the phone number in international format.)
 orcid_id: # your ORCID ID
 medium_username: # your Medium username
@@ -185,10 +185,8 @@ markdown: kramdown
 highlighter: rouge
 kramdown:
   input: GFM
-  math_engine: mathjax
-  math_engine_opts:
-    preview: true
-    preview_as_code: false
+  # Disable Kramdown's math engine - we use our own plugin + MathJax
+  math_engine: null
   syntax_highlighter_opts:
     css_class: 'highlight'
     span:
