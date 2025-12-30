@@ -8,7 +8,7 @@
  ******************************************************************************/
 :root {
   --global-bg-color: #ffffff;
-  --global-code-bg-color: rgba(0, 0, 0, 0.04);
+  --global-code-bg-color: rgba(0, 0, 0, 0.05);
   --global-text-color: #000000;
   --global-text-color-light: #252525;
   --global-theme-color: #00ab37;
@@ -120,9 +120,24 @@ hr {
   border-top: 1px solid var(--global-divider-color);
 }
 
-table td,
-table th {
+table {
+  width: 100%;
+  margin-bottom: 1rem;
   color: var(--global-text-color);
+  border-collapse: collapse;
+}
+table th,
+table td {
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid var(--global-divider-color);
+}
+table thead th {
+  vertical-align: bottom;
+  border-bottom: 2px solid var(--global-divider-color);
+}
+table tbody + tbody {
+  border-top: 2px solid var(--global-divider-color);
 }
 table td {
   font-size: 1rem;
@@ -144,15 +159,18 @@ table.table a:hover:after :not(.nav-item.dropdown) {
 
 figure,
 img {
-  max-width: 90vw;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
 }
 
 blockquote {
-  background: var(--global-bg-color);
-  border-left: 2px solid var(--global-theme-color);
+  background: var(--global-code-bg-color);
+  border-left: 5px solid var(--global-theme-color);
   margin: 1.5em 10px;
-  padding: 0.5em 10px;
+  padding: 1em 1.5em;
   font-size: 1rem;
+  border-radius: 5px;
 }
 
 .job-ad {
@@ -171,9 +189,6 @@ blockquote {
 .job-ad p:last-child {
   margin-bottom: 0;
 }
-.job-ad strong {
-  color: var(--global-theme-color);
-}
 
 .equation {
   margin-bottom: 1rem;
@@ -185,6 +200,29 @@ blockquote {
   margin-top: 0.75rem;
   margin-bottom: 1.5rem;
   text-align: center;
+}
+
+pre.highlight {
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--global-code-bg-color);
+  overflow-x: auto;
+}
+
+code {
+  font-family: monospace;
+  background-color: var(--global-code-bg-color);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 1em;
 }
 
 .card {
@@ -295,7 +333,7 @@ blockquote {
 }
 .navbar.navbar-light .navbar-nav .nav-item .nav-link {
   color: var(--global-text-color);
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-weight: 500;
   transition: color 0.2s ease;
 }
@@ -424,8 +462,9 @@ footer.sticky-bottom {
   border-color: var(--global-divider-color);
 }
 .cv .card .list-group-item .badge {
-  color: var(--global-card-bg-color) !important;
-  background-color: var(--global-theme-color) !important;
+  color: var(--global-theme-color) !important;
+  background-color: transparent !important;
+  border: none;
 }
 
 @media (min-width: 768px) {
@@ -601,22 +640,24 @@ footer.sticky-bottom {
 }
 .publications ol.bibliography li .abbr abbr {
   display: inline-block;
-  background-color: var(--global-theme-color);
-  padding: 0.3rem 0.8rem;
+  background-color: transparent;
+  padding: 0;
   font-size: 0.75rem;
-  border-radius: 4px;
-  font-weight: 600;
+  border-radius: 0;
+  font-weight: 400;
   box-shadow: none;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none;
   white-space: normal;
   line-height: 1.2;
-  text-align: center;
+  text-align: left;
+  color: var(--global-text-color-light);
 }
 .publications ol.bibliography li .abbr abbr a {
-  color: white;
+  color: var(--global-text-color-light);
 }
 .publications ol.bibliography li .abbr abbr a:hover {
-  text-decoration: none;
+  text-decoration: underline;
+  color: var(--global-theme-color);
 }
 .publications ol.bibliography li .abbr .award {
   color: var(--global-theme-color) !important;
@@ -925,8 +966,8 @@ pre:not(.wrapped) pre {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.8rem;
-  height: 2.8rem;
+  width: 2.2rem;
+  height: 2.2rem;
   border-radius: 50%;
   background: transparent;
   transition: all 0.2s ease;
@@ -1116,10 +1157,12 @@ pre:not(.wrapped) pre {
 }
 .cv .list-group .list-group-item .badge {
   font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
+  font-weight: 600;
+  padding: 0;
   min-width: auto;
-  background-color: var(--global-theme-color) !important;
+  background-color: transparent !important;
+  color: var(--global-theme-color) !important;
+  border: none;
 }
 .cv .list-group .list-group-item h6.title {
   font-size: 0.875rem;
@@ -1203,6 +1246,12 @@ pre:not(.wrapped) pre {
 .publications ol.bibliography li:last-child:hover {
   border-bottom: none !important;
 }
+.publications ol.bibliography li.single-pub-in-year {
+  border-bottom: none !important;
+}
+.publications ol.bibliography li.single-pub-in-year:hover {
+  border-bottom: none !important;
+}
 .publications ol.bibliography li .row {
   margin: 0;
 }
@@ -1223,24 +1272,25 @@ pre:not(.wrapped) pre {
   margin-bottom: 0.2rem;
 }
 .publications ol.bibliography li .title abbr.badge {
-  font-size: 0.875rem;
-  padding: 0.3rem 0.8rem;
-  border-radius: 4px;
+  font-size: 0.75rem;
+  padding: 0;
+  border-radius: 0;
   line-height: 1.2;
-  text-align: center;
-  display: block;
-  width: fit-content;
-  margin-bottom: 0.5rem;
-  background-color: var(--global-theme-color);
-  color: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  white-space: normal;
+  text-align: left;
+  display: inline;
+  width: auto;
+  margin-bottom: 0;
+  background-color: transparent;
+  color: var(--global-text-color-light);
+  border: none;
+  font-weight: 400;
 }
 .publications ol.bibliography li .title abbr.badge a {
-  color: white;
+  color: var(--global-text-color-light);
 }
 .publications ol.bibliography li .title abbr.badge a:hover {
-  text-decoration: none;
+  text-decoration: underline;
+  color: var(--global-theme-color);
 }
 .publications ol.bibliography li .author {
   font-size: 1rem;
@@ -1260,6 +1310,66 @@ pre:not(.wrapped) pre {
   padding: 0.15rem 0.4rem;
   margin-right: 0.2rem;
   border-radius: 3px;
+}
+.publications ol.bibliography li .venue-tag {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--global-code-bg-color);
+  padding: 0.15rem 0.5rem 0.15rem 0.35rem;
+  border-radius: 0 3px 3px 0;
+  border: 1px solid var(--global-divider-color);
+  border-left: 3px solid var(--global-theme-color);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.publications ol.bibliography li .venue-tag:hover, .publications ol.bibliography li .venue-tag:focus {
+  background-color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+  transform: translateX(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+.publications ol.bibliography li .venue-tag:focus {
+  box-shadow: 0 0 0 2px var(--global-bg-color), 0 0 0 4px var(--global-theme-color);
+}
+.publications ol.bibliography li .venue-tag.active-filter {
+  background-color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+}
+.publications ol.bibliography li .venue-tag.active-filter .venue-link, .publications ol.bibliography li .venue-tag.active-filter .venue-name {
+  color: white;
+}
+.publications ol.bibliography li .venue-tag.active-filter::after {
+  content: "✓";
+  margin-left: 0.3rem;
+  color: white;
+  font-weight: bold;
+}
+.publications ol.bibliography li .venue-tag::before {
+  content: "";
+  position: absolute;
+  left: 0.35rem;
+  width: 4px;
+  height: 4px;
+  background-color: white;
+  border-radius: 50%;
+  border: 1px solid var(--global-divider-color);
+}
+.publications ol.bibliography li .venue-tag .venue-link, .publications ol.bibliography li .venue-tag .venue-name {
+  color: var(--global-text-color-light);
+  text-decoration: none;
+  font-weight: 400;
+  margin-left: 0.4rem;
+  transition: color 0.2s ease;
+}
+.publications ol.bibliography li .venue-tag:hover .venue-link, .publications ol.bibliography li .venue-tag:hover .venue-name, .publications ol.bibliography li .venue-tag:focus .venue-link, .publications ol.bibliography li .venue-tag:focus .venue-name {
+  color: white;
+}
+.publications ol.bibliography li .venue-tag .venue-name {
+  cursor: pointer;
 }
 .publications ol.bibliography li .hidden {
   font-size: 0.75rem;
@@ -1294,6 +1404,12 @@ pre:not(.wrapped) pre {
 .post ol.bibliography li:last-child:hover {
   border-bottom: none !important;
 }
+.post ol.bibliography li.single-pub-in-year {
+  border-bottom: none !important;
+}
+.post ol.bibliography li.single-pub-in-year:hover {
+  border-bottom: none !important;
+}
 .post ol.bibliography li .title {
   font-size: 1rem;
 }
@@ -1306,6 +1422,50 @@ pre:not(.wrapped) pre {
 .post ol.bibliography li .links a.btn {
   font-size: 0.75rem;
   padding: 0.12rem 0.35rem;
+}
+.post ol.bibliography li .venue-tag {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--global-code-bg-color);
+  padding: 0.15rem 0.5rem 0.15rem 0.35rem;
+  border-radius: 0 3px 3px 0;
+  border: 1px solid var(--global-divider-color);
+  border-left: 3px solid var(--global-theme-color);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.post ol.bibliography li .venue-tag:hover, .post ol.bibliography li .venue-tag:focus {
+  background-color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+  transform: translateX(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+.post ol.bibliography li .venue-tag::before {
+  content: "";
+  position: absolute;
+  left: 0.35rem;
+  width: 4px;
+  height: 4px;
+  background-color: white;
+  border-radius: 50%;
+  border: 1px solid var(--global-divider-color);
+}
+.post ol.bibliography li .venue-tag .venue-link, .post ol.bibliography li .venue-tag .venue-name {
+  color: var(--global-text-color-light);
+  text-decoration: none;
+  font-weight: 400;
+  margin-left: 0.4rem;
+  transition: color 0.2s ease;
+}
+.post ol.bibliography li .venue-tag:hover .venue-link, .post ol.bibliography li .venue-tag:hover .venue-name, .post ol.bibliography li .venue-tag:focus .venue-link, .post ol.bibliography li .venue-tag:focus .venue-name {
+  color: white;
+}
+.post ol.bibliography li .venue-tag .venue-name {
+  cursor: pointer;
 }
 
 /******************************************************************************
@@ -1349,6 +1509,7 @@ pre:not(.wrapped) pre {
   color: var(--global-text-color-light);
   letter-spacing: 0.02em;
   margin-bottom: 0.5rem;
+  text-transform: uppercase;
 }
 
 .toc {
@@ -1377,6 +1538,7 @@ pre:not(.wrapped) pre {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 0.2s ease;
 }
 .toc a:hover {
   color: var(--global-theme-color);
@@ -2120,7 +2282,7 @@ d-appendix a:hover, d-appendix a.footnote-backlink:hover {
   }
 }
 :root {
-  --max-content-width: 1080px;
+  --max-content-width: 900px;
 }
 
 /*# sourceMappingURL=main.css.map */
