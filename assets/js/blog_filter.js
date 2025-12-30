@@ -43,6 +43,7 @@
   /**
    * Updates the browser URL with the provided filter parameters.
    * Supports both year and category filters simultaneously.
+   * Passing an empty object clears all active filters.
    * @param {Object} params - Object containing filter values to update
    * @param {string} [params.year] - Year filter value
    * @param {string} [params.category] - Category filter value
@@ -92,7 +93,7 @@
     posts.forEach((post) => {
       const matchesYear = !year || post.dataset.year === year;
       const categories = (post.dataset.categories || '').toLowerCase().split(/\s+/).filter(Boolean);
-      const matchesCategory = !category || categories.includes(category.toLowerCase());
+      const matchesCategory = !category || categories.includes(category);
       const isVisible = matchesYear && matchesCategory;
 
       post.style.display = isVisible ? '' : 'none';
@@ -108,7 +109,7 @@
     if (category) parts.push(`Category: ${category}`);
 
     if (parts.length) {
-      label.textContent = `${parts.join(' · ')} — ${visibleCount} post${visibleCount === 1 ? '' : 's'}`;
+      label.textContent = `${parts.join(' and ')} — ${visibleCount} post${visibleCount === 1 ? '' : 's'}`;
       statusElement.classList.remove('d-none');
     } else {
       statusElement.classList.add('d-none');
@@ -154,10 +155,7 @@
       clearButton.addEventListener('click', clearFilters);
     }
 
-    const postList = document.querySelector('.post-list');
-    if (postList) {
-      postList.addEventListener('click', handleFilterLink);
-    }
+    document.addEventListener('click', handleFilterLink);
     window.addEventListener('popstate', applyFilters);
   });
 })();
