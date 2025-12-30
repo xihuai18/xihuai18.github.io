@@ -89,6 +89,7 @@
     const { year, category } = getFilters();
     const posts = document.querySelectorAll('.post-list > li.blog-post-list-item');
     let visibleCount = 0;
+    const totalCount = posts.length;
 
     posts.forEach((post) => {
       const matchesYear = !year || post.dataset.year === year;
@@ -100,19 +101,84 @@
       if (isVisible) visibleCount += 1;
     });
 
-    const statusElement = document.getElementById('blog-filter-status');
-    if (!statusElement) return;
+    updateFilterStatus(year, category, visibleCount, totalCount);
+  }
 
-    const label = statusElement.querySelector('.filter-label');
+  /**
+   * Updates or creates the filter status element with styling matching publications page.
+   * @param {string|null} year - Active year filter
+   * @param {string|null} category - Active category filter
+   * @param {number} visibleCount - Number of visible posts
+   * @param {number} totalCount - Total number of posts
+   */
+  function updateFilterStatus(year, category, visibleCount, totalCount) {
+    let statusElement = document.getElementById('blog-filter-status');
+
+    if (!statusElement) {
+      // Create status element with inline styles matching publications page
+      statusElement = document.createElement('div');
+      statusElement.id = 'blog-filter-status';
+      statusElement.setAttribute('role', 'status');
+      statusElement.setAttribute('aria-live', 'polite');
+      statusElement.style.cssText = `
+        display: none;
+        margin: 1rem 0;
+        padding: 0.5rem 1rem;
+        background-color: var(--global-code-bg-color);
+        border-left: 3px solid var(--global-theme-color);
+        border-radius: 0 4px 4px 0;
+        font-size: 0.875rem;
+        color: var(--global-text-color);
+      `;
+
+      // Create the message span
+      const messageSpan = document.createElement('span');
+      messageSpan.id = 'blog-filter-message';
+      statusElement.appendChild(messageSpan);
+
+      // Create the clear button once with event listener
+      const clearBtn = document.createElement('button');
+      clearBtn.id = 'blog-filter-clear-btn';
+      clearBtn.textContent = 'Clear Filter';
+      clearBtn.setAttribute('aria-label', 'Clear active blog filters');
+      clearBtn.style.cssText = `
+        margin-left: 1rem;
+        padding: 0.2rem 0.5rem;
+        background: var(--global-theme-color);
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.75rem;
+      `;
+      clearBtn.addEventListener('click', clearFilters);
+      statusElement.appendChild(clearBtn);
+
+      // Insert before the first post list or featured posts section
+      const postSection = document.querySelector('.post');
+      if (postSection) {
+        const featuredPosts = postSection.querySelector('.featured-posts');
+        const postList = postSection.querySelector('.post-list');
+        const insertBefore = featuredPosts || postList;
+        if (insertBefore) {
+          insertBefore.parentNode.insertBefore(statusElement, insertBefore);
+        }
+      }
+    }
+
     const parts = [];
     if (year) parts.push(`Year: ${year}`);
     if (category) parts.push(`Category: ${category}`);
 
     if (parts.length) {
-      label.textContent = `${parts.join(' and ')} — ${visibleCount} post${visibleCount === 1 ? '' : 's'}`;
-      statusElement.classList.remove('d-none');
+      statusElement.style.display = 'block';
+      // Update only the message text, not the entire innerHTML
+      const messageSpan = statusElement.querySelector('#blog-filter-message');
+      if (messageSpan) {
+        messageSpan.innerHTML = `Filtering by <strong>${parts.join(' and ')}</strong>: showing ${visibleCount} of ${totalCount} posts`;
+      }
     } else {
-      statusElement.classList.add('d-none');
+      statusElement.style.display = 'none';
     }
   }
 
@@ -149,11 +215,6 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     applyFilters();
-
-    const clearButton = document.getElementById('blog-filter-clear');
-    if (clearButton) {
-      clearButton.addEventListener('click', clearFilters);
-    }
 
     document.addEventListener('click', handleFilterLink);
     window.addEventListener('popstate', applyFilters);
