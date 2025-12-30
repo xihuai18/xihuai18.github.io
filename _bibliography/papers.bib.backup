@@ -1,0 +1,90 @@
+---
+---
+
+@article{zhang2025dpt,
+  author        = {Shao Zhang* and Xihuai Wang* and Wenhao Zhang and Chaoran Li and Junru Song and Tingyu Li and Lin Qiu and Xuezhi Cao and Xunliang Cai and Wen Yao and Weinan Zhang and Xinbing Wang and Ying Wen},
+  title         = {Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration},
+  journal       = {63rd ACL},
+  year          = {2025},
+  url           = {https://arxiv.org/abs/2502.11882},
+  pdf           = {https://arxiv.org/abs/2502.11882.pdf},
+  code          = {https://github.com/sjtu-marl/DPT-Agent},
+  abbr          = {LLM Reasoning and Agency},
+  bibtex_show   = {true},
+  selected      = {true}
+}
+
+@article{zhang2024mutualtheorymindhumanai,
+  author        = {Shao Zhang* and Xihuai Wang* and Wenhao Zhang and Yongshan Chen and Landi Gao and Dakuo Wang and Weinan Zhang and Xinbing Wang and Ying Wen},
+  title         = {Mutual Theory of Mind in Human-AI Collaboration: An Empirical Study with LLM-driven AI Agents in a Real-time Shared Workspace Task},
+  journal       = {Preprint Under Review},
+  year          = {2024},
+  url           = {https://arxiv.org/abs/2409.08811},
+  pdf           = {https://arxiv.org/abs/2409.08811.pdf},
+  bibtex_show   = {true},
+  abbr          = {LLM Reasoning and Agency},
+  selected      = {false}
+}
+
+@article{hu2025pmat,
+  author        = {Hu, Kun and Wen, Muning and Wang, Xihuai and Zhang, Shao and Shi, Yiwei and Li, Minne and Li, Minglong and Wen, Ying},
+  title         = {PMAT: Optimizing Action Generation Order in Multi-Agent Reinforcement Learning},
+  journal       = {24th AAMAS},
+  year          = {2025},
+  url           = {https://arxiv.org/abs/2502.16496},
+  pdf           = {https://arxiv.org/pdf/2502.16496},
+  code          = {https://github.com/NUDT-BI-MARL/PMAT},
+  abbr          = {MARL Efficiency},
+  bibtex_show   = {true},
+  selected      = {false}
+}
+
+@article{wang2023zsceval,
+  author        = {Xihuai Wang and Shao Zhang and Wenhao Zhang and Wentao Dong and Jingxiao Chen and Ying Wen and Weinan Zhang},
+  title         = {ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
+  journal       = {38th NeurIPS},
+  year          = {2024},
+  url           = {https://arxiv.org/abs/2310.05208},
+  pdf           = {https://arxiv.org/pdf/2310.05208.pdf},
+  code          = {https://github.com/sjtu-marl/zsc-eval},
+  abbr          = {MARL Generalization},
+  bibtex_show   = {true},
+  selected      = {true}
+}
+
+@article{wang2023order,
+  author        = {Xihuai Wang and Zheng Tian and Ziyu Wan and Ying Wen and Jun Wang and Weinan Zhang},
+  title         = {Order Matters: Agent-by-agent Policy Optimization},
+  journal       = {11th ICLR},
+  year          = {2023},
+  url           = {https://openreview.net/forum?id=Q-neeWNVv1},
+  pdf           = {https://arxiv.org/pdf/2302.06205.pdf},
+  code          = {https://github.com/xihuai18/A2PO-ICLR2023},
+  abbr          = {MARL Efficiency},
+  bibtex_show   = {true},
+  selected      = {true}
+}
+
+@article{wang2022modelbased,
+  author        = {Xihuai Wang and Zhicheng Zhang and Weinan Zhang},
+  title         = {Model-based Multi-agent Reinforcement Learning: Recent Progress and Prospects},
+  journal       = {arXiv preprint arXiv:2203.10603},
+  year          = {2022},
+  url           = {https://arxiv.org/pdf/2203.10603.pdf},
+  pdf           = {https://arxiv.org/pdf/2203.10603.pdf},
+  abbr          = {MARL Efficiency},
+  bibtex_show   = {true}
+}
+
+@article{zhang2021modelbased,
+  author        = {Weinan Zhang and Xihuai Wang and Jian Shen and Ming Zhou},
+  title         = {Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts},
+  journal       = {30th IJCAI},
+  year          = {2021},
+  url           = {https://arxiv.org/pdf/2105.03363.pdf},
+  pdf           = {https://arxiv.org/pdf/2105.03363.pdf},
+  code          = {https://github.com/xihuai18/AORPO},
+  abbr          = {MARL Efficiency},
+  bibtex_show   = {true},
+  selected      = {true}
+}
