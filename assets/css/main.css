@@ -393,7 +393,7 @@ pre code {
 }
 
 #light-toggle {
-  padding: 0;
+  padding: 0.5rem 1rem;
   border: 0;
   background-color: inherit;
   color: var(--global-text-color);
@@ -401,13 +401,21 @@ pre code {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  margin-left: 0.5rem;
+  width: 100%;
+  margin-left: 0;
 }
 #light-toggle:hover {
   color: var(--global-theme-color);
 }
 
+@media (min-width: 576px) {
+  #light-toggle {
+    padding: 0;
+    width: auto;
+    height: 100%;
+    margin-left: 0.5rem;
+  }
+}
 .social {
   text-align: center;
 }
