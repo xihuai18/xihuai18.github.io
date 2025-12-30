@@ -35,11 +35,11 @@ $black-color: #000000 !default;
 
 // Theme colors
 
-$code-bg-color-light:     rgba(0, 0, 0, 0.04);  // Light gray instead of purple
+$code-bg-color-light:     rgba(0, 0, 0, 0.05);  // Slightly darker for better contrast
 $code-bg-color-dark:      #2c3237 !default;
 
 // Typography - Unified font size system
-$base-font-size: 16px !default;
+$base-font-size: 18px !default; // Increased base font size for better readability
 
 // Standard font sizes (use these consistently)
 $font-size-xs: 0.75rem !default;    // Extra small - footnotes, captions

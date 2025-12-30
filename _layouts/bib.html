@@ -17,20 +17,9 @@
         {%- endif -%}
 
         <!-- Entry bib key -->
-        <div id="{{entry.key}}" class="{% if entry.preview %}col-sm-10{% else %}col-sm-12{% endif %}">
+        <div id="{{entry.key}}" class="{% if entry.preview %}col-sm-10{% else %}col-sm-12{% endif %}" data-venue="{% if entry.abbr %}{{entry.abbr}}{% endif %}">
         <!-- Title -->
         <div class="title">
-          {%- if entry.abbr and entry.preview == nil -%}
-            {%- if site.data.venues[entry.abbr] -%}
-              {%- assign venue_style = nil -%}
-              {%- if site.data.venues[entry.abbr].color != blank -%}
-                {%- assign venue_style = site.data.venues[entry.abbr].color | prepend: 'style="background-color:' | append: '"' -%}
-              {%- endif -%}
-              <abbr class="badge" {% if venue_style %}{{venue_style}}{% endif %}><a href="{{site.data.venues[entry.abbr].url}}">{{entry.abbr}}</a></abbr>
-            {%- else -%}
-              <abbr class="badge">{{entry.abbr}}</abbr>
-            {%- endif -%}
-          {%- endif -%}
           {{entry.title}}
         </div>
         <!-- Author -->
@@ -187,7 +176,19 @@
           {%- if entry.website %}
             <a href="{{ entry.website }}" class="btn btn-sm z-depth-0" role="button">Website</a>
           {%- endif %}
+          
+          <!-- Conference/Venue Tag -->
+          {%- if entry.abbr -%}
+          <div class="venue-tag" data-venue-filter="{{entry.abbr}}" onclick="filterByVenue('{{entry.abbr}}')" title="Click to filter papers from {{entry.abbr}}" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('{{entry.abbr}}')">
+            {%- if site.data.venues[entry.abbr] -%}
+              <a href="{{site.data.venues[entry.abbr].url}}" class="venue-link" onclick="event.stopPropagation();" title="Visit {{entry.abbr}} website">{{entry.abbr}}</a>
+            {%- else -%}
+              <span class="venue-name">{{entry.abbr}}</span>
+            {%- endif -%}
           </div>
+          {%- endif -%}
+          </div>
+          
           {% if site.badges %}
           <div class="badges">
             {%- if site.badges.altmetric_badge %}

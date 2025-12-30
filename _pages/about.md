@@ -29,7 +29,7 @@ My research lies at the intersection of **Reinforcement Learning** and **Multi-A
 
 <div class="job-ad" markdown="0">
 <div style="display: flex; align-items: center;">
-<i class="fas fa-bullhorn" style="font-size: 2em; margin-right: 1rem; color: var(--global-theme-color);"></i>
+<span style="font-size: 2em; margin-right: 1rem;">🙋</span>
 <div>
 <strong>I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via <em>leoxhwang@sjtu.edu.cn</em> for potential opportunities.</strong>
 <br>

@@ -50,6 +50,7 @@
   color: var(--global-text-color-light);
   letter-spacing: 0.02em;
   margin-bottom: 0.5rem;
+  text-transform: uppercase;
 }
 
 .toc {
@@ -81,6 +82,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: color 0.2s ease;
 
     &:hover {
       color: var(--global-theme-color);
