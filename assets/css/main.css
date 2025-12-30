@@ -520,6 +520,9 @@ footer.sticky-bottom {
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
 }
+.post-list li:last-child {
+  border-bottom: none;
+}
 .post-list li .post-meta {
   color: var(--global-text-color-light);
   font-size: 0.875rem;
