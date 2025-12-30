@@ -245,10 +245,10 @@ $$
 
 This reveals an important engineering principle—**separation of concerns**:
 
-| Control Term | Responsible Party | Control Mechanism |
-| --- | --- | --- |
-| $U_k$ (update increment shift) | Optimization algorithm | Policy clipping |
-| $S_k$ (sampling staleness) | Sampling system | Data filtering, version window |
+| Control Term                   | Responsible Party      | Control Mechanism              |
+| ------------------------------ | ---------------------- | ------------------------------ |
+| $U_k$ (update increment shift) | Optimization algorithm | Policy clipping                |
+| $S_k$ (sampling staleness)     | Sampling system        | Data filtering, version window |
 
 ## Part V: Theoretical Foundations of Clipping Mechanisms
 
@@ -339,11 +339,11 @@ where $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advant
 
 **Table 5.1　Comparison of Three Clipping Mechanisms**
 
-| Method | Clipped Variable | Clipping Center | Clipping Interval | Constrained TV Distance |
-| --- | --- | --- | --- | --- |
-| Standard PPO | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $1$ | $[1-\epsilon, 1+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$ |
-| Method 1 | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $\rho_k = \pi_k/\pi^{(i)}$ | $[\rho_k-\epsilon, \rho_k+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$ |
-| Method 2 | $r = \pi_{k+1}/\pi_k$ | $1$ | $[1-\epsilon, 1+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$ |
+| Method       | Clipped Variable                   | Clipping Center            | Clipping Interval                    | Constrained TV Distance                 |
+| ------------ | ---------------------------------- | -------------------------- | ------------------------------------ | --------------------------------------- |
+| Standard PPO | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $1$                        | $[1-\epsilon, 1+\epsilon]$           | $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$ |
+| Method 1     | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $\rho_k = \pi_k/\pi^{(i)}$ | $[\rho_k-\epsilon, \rho_k+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$     |
+| Method 2     | $r = \pi_{k+1}/\pi_k$              | $1$                        | $[1-\epsilon, 1+\epsilon]$           | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$     |
 
 **The Fundamental Problem with Standard PPO Under Multi-Policy Mixture**
 
@@ -355,12 +355,12 @@ Both methods constrain $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$—the deviation of th
 
 **Method 1 vs Method 2**
 
-| Comparison Dimension | Method 1 (Adaptive Clipping) | Method 2 (Incremental Clipping) |
-| --- | --- | --- |
-| Stale samples ($\rho_k \gg 1$) | Automatically tightens constraints, more conservative | May produce large gradient variance |
-| LLM large vocabulary low-probability tokens | Allows larger absolute changes (additive) | Absolute changes are limited (multiplicative) |
-| Implementation complexity | Requires storing $\pi^{(i)}(a\|s)$ and $\pi_k(a\|s)$ | Only requires $\pi_k(a\|s)$ |
-| Advantage function | Uses $A^{\beta^{(k)}}$ | Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$ |
+| Comparison Dimension                        | Method 1 (Adaptive Clipping)                          | Method 2 (Incremental Clipping)                        |
+| ------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
+| Stale samples ($\rho_k \gg 1$)              | Automatically tightens constraints, more conservative | May produce large gradient variance                    |
+| LLM large vocabulary low-probability tokens | Allows larger absolute changes (additive)             | Absolute changes are limited (multiplicative)          |
+| Implementation complexity                   | Requires storing $\pi^{(i)}(a\|s)$ and $\pi_k(a\|s)$  | Only requires $\pi_k(a\|s)$                            |
+| Advantage function                          | Uses $A^{\beta^{(k)}}$                                | Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$ |
 
 **Detailed Explanations**:
 
@@ -449,13 +449,13 @@ Step/segment-level mixture has another hidden concern: even if single-step impor
 
 **Table 6.1　Applicable Scenarios for Two Mixture Mechanisms**
 
-| Scenario Characteristics | Recommended Mechanism | Rationale |
-| --- | --- | --- |
-| Long trajectories, high-frequency updates, strong asynchrony | Step/segment-level | Can significantly compress $S_k$ |
-| Short trajectories (non-bandit) | Trajectory-level | $S_k$ is naturally low |
-| Large policy change per update | Trajectory-level | Avoids variance amplification |
-| Single-step episode (bandit) | Either | Choose based on implementation convenience |
-| Need for compromise | Segment-level | Switch at natural boundaries |
+| Scenario Characteristics                                     | Recommended Mechanism | Rationale                                  |
+| ------------------------------------------------------------ | --------------------- | ------------------------------------------ |
+| Long trajectories, high-frequency updates, strong asynchrony | Step/segment-level    | Can significantly compress $S_k$           |
+| Short trajectories (non-bandit)                              | Trajectory-level      | $S_k$ is naturally low                     |
+| Large policy change per update                               | Trajectory-level      | Avoids variance amplification              |
+| Single-step episode (bandit)                                 | Either                | Choose based on implementation convenience |
+| Need for compromise                                          | Segment-level         | Switch at natural boundaries               |
 
 **Core trade-off**: Step/segment-level mixture is stronger on the sampling side (fast staleness removal), while trajectory-level mixture is more stable on the estimation side (easier surrogate objective estimation).
 
@@ -501,19 +501,19 @@ $$
 
 ### Separation of Concerns Principle
 
-| Control Term | Responsible Party | Control Mechanism | Specific Operation |
-| --- | --- | --- | --- |
-| $U_k$ | Optimization algorithm | Policy clipping | Clip $\pi_{k+1}/\pi_k$ |
-| $S_k$ | Sampling system | Data filtering | Discard stale samples |
-| $S_k$ | Sampling system | Version window | Use only most recent $W$ versions |
+| Control Term | Responsible Party      | Control Mechanism | Specific Operation                |
+| ------------ | ---------------------- | ----------------- | --------------------------------- |
+| $U_k$        | Optimization algorithm | Policy clipping   | Clip $\pi_{k+1}/\pi_k$            |
+| $S_k$        | Sampling system        | Data filtering    | Discard stale samples             |
+| $S_k$        | Sampling system        | Version window    | Use only most recent $W$ versions |
 
 ### Clipping Method Selection
 
-| Scenario | Recommended Method | Rationale |
-| --- | --- | --- |
-| High staleness | Method 1 (adaptive) | Automatically tightens constraints for stale samples |
-| Implementation simplicity prioritized | Method 2 (incremental) | No need to store old policy information |
-| LLM large vocabulary | Method 1 | Avoids slow updates for low-probability tokens |
+| Scenario                              | Recommended Method     | Rationale                                            |
+| ------------------------------------- | ---------------------- | ---------------------------------------------------- |
+| High staleness                        | Method 1 (adaptive)    | Automatically tightens constraints for stale samples |
+| Implementation simplicity prioritized | Method 2 (incremental) | No need to store old policy information              |
+| LLM large vocabulary                  | Method 1               | Avoids slow updates for low-probability tokens       |
 
 ### Handling Training-Inference Inconsistency
 
@@ -522,16 +522,16 @@ $$
 
 ## Appendix: Quick Reference for Key Symbols
 
-| Symbol | Meaning |
-| --- | --- |
-| $\pi_k$, $\pi^{(i)}$ | Latest policy at round $k$, $i$-th old policy |
-| $d_\pi(s)$, $A^\pi(s,a)$ | Discounted state visitation distribution, advantage function |
-| $D_{\mathrm{TV}}(\pi, \pi'; s)$ | TV distance between two policies at state $s$ |
-| $\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$ | Mixture behavior policy at round $k$ |
-| $q(i' \mid i)$, $\alpha_i^{(k)}$ | Index transition kernel, initial index distribution |
-| $U_k$, $S_k$ | Update increment shift, sampling staleness |
-| $\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$ | Clipping radius, staleness threshold, version window |
-| $C_{\pi,\pi_k}$ | Expected advantage upper bound constant |
+| Symbol                                            | Meaning                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------ |
+| $\pi_k$, $\pi^{(i)}$                              | Latest policy at round $k$, $i$-th old policy                |
+| $d_\pi(s)$, $A^\pi(s,a)$                          | Discounted state visitation distribution, advantage function |
+| $D_{\mathrm{TV}}(\pi, \pi'; s)$                   | TV distance between two policies at state $s$                |
+| $\beta^{(k)}(a \mid s, i) := \pi^{(i)}(a \mid s)$ | Mixture behavior policy at round $k$                         |
+| $q(i' \mid i)$, $\alpha_i^{(k)}$                  | Index transition kernel, initial index distribution          |
+| $U_k$, $S_k$                                      | Update increment shift, sampling staleness                   |
+| $\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$      | Clipping radius, staleness threshold, version window         |
+| $C_{\pi,\pi_k}$                                   | Expected advantage upper bound constant                      |
 
 ## References
 

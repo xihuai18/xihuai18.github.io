@@ -115,11 +115,11 @@ Convexity keeps $\phi$ above its tangent, so this gap is **nonnegative**. As $r 
 
 ### Quick comparison
 
-| Estimator | Definition | Design idea | Bias (value) | Variance |
-| :---: | :---: | :---: | :---: | :---: |
-| $k_1$ | $\log r$ | Naive log-ratio | Unbiased | High (can be negative) |
-| $k_2$ | $\tfrac{1}{2}(\log r)^2$ | f-divergence, KL-matching 2nd order | Biased (very small) | Low (always positive) |
-| $k_3$ | $r - 1 - \log r$ | Control variate + Bregman | Unbiased | Low (always positive) |
+| Estimator |        Definition        |             Design idea             |    Bias (value)     |        Variance        |
+| :-------: | :----------------------: | :---------------------------------: | :-----------------: | :--------------------: |
+|   $k_1$   |         $\log r$         |           Naive log-ratio           |      Unbiased       | High (can be negative) |
+|   $k_2$   | $\tfrac{1}{2}(\log r)^2$ | f-divergence, KL-matching 2nd order | Biased (very small) | Low (always positive)  |
+|   $k_3$   |     $r - 1 - \log r$     |      Control variate + Bregman      |      Unbiased       | Low (always positive)  |
 
 For estimating the KL **value**, $k_3$ is "unbiased + low variance"; but as we'll analyze, **the gradient story is completely different** — different estimators' gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.
 
@@ -144,18 +144,18 @@ $$
 John Schulman's toy experiments ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005):
 
 | Estimator | bias/true | stdev/true |
-| :---: | :---: | :---: |
-| $k_1$ | 0 | 20 |
-| $k_2$ | 0.002 | 1.42 |
-| $k_3$ | 0 | 1.42 |
+| :-------: | :-------: | :--------: |
+|   $k_1$   |     0     |     20     |
+|   $k_2$   |   0.002   |    1.42    |
+|   $k_3$   |     0     |    1.42    |
 
 When KL is large ($p = \mathcal{N}(1,1)$, true KL = 0.5):
 
 | Estimator | bias/true | stdev/true |
-| :---: | :---: | :---: |
-| $k_1$ | 0 | 2 |
-| $k_2$ | 0.25 | 1.73 |
-| $k_3$ | 0 | 1.7 |
+| :-------: | :-------: | :--------: |
+|   $k_1$   |     0     |     2      |
+|   $k_2$   |   0.25    |    1.73    |
+|   $k_3$   |     0     |    1.7     |
 
 **Intuition:**
 - $k_1 = -\log r$ is first-order around $r=1$, can be negative, so variance explodes when close.
@@ -221,11 +221,11 @@ $$
 
 Taking expectation under $q_\theta$:
 
-| Estimator | $\mathbb{E}_{q}[\nabla_\theta k_i]$ | Equals |
-| :---: | :---: | :---: |
-| $k_1$ | $\mathbb{E}_{q}[s_\theta] = 0$ | Zero (useless as loss) |
-| $k_2$ | $-\mathbb{E}_{q}[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Gradient of reverse KL |
-| $k_3$ | $\mathbb{E}_{q}[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$ | Gradient of forward KL |
+| Estimator |                     $\mathbb{E}_{q}[\nabla_\theta k_i]$                      |         Equals         |
+| :-------: | :--------------------------------------------------------------------------: | :--------------------: |
+|   $k_1$   |                        $\mathbb{E}_{q}[s_\theta] = 0$                        | Zero (useless as loss) |
+|   $k_2$   | $-\mathbb{E}_{q}[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Gradient of reverse KL |
+|   $k_3$   |   $\mathbb{E}_{q}[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$   | Gradient of forward KL |
 
 **Key takeaways:**
 - **$k_2$ gradient** matches reverse KL gradient (the usual "stay near ref" objective).
@@ -300,12 +300,12 @@ $$
 
 Which give expected gradients:
 
-| Weighted estimator | Value target | Expected gradient |
-| :---: | :---: | :---: |
-| $\tfrac{q_\theta}{\mu} k_1$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
-| $\tfrac{q_\theta}{\mu} k_2$ | $\mathbb{E}_q[k_2]$ (f-divergence) | $\nabla_\theta \mathbb{E}_q[k_2]$, not reverse KL ✗ |
+|                Weighted estimator                 |            Value target            |                       Expected gradient                       |
+| :-----------------------------------------------: | :--------------------------------: | :-----------------------------------------------------------: |
+|            $\tfrac{q_\theta}{\mu} k_1$            |  $D_{\mathrm{KL}}(q_\theta \| p)$  | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
+|            $\tfrac{q_\theta}{\mu} k_2$            | $\mathbb{E}_q[k_2]$ (f-divergence) |      $\nabla_\theta \mathbb{E}_q[k_2]$, not reverse KL ✗      |
 | $\text{sg}\left(\tfrac{q_\theta}{\mu}\right) k_2$ | $\mathbb{E}_q[k_2]$ (f-divergence) | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
-| $\tfrac{q_\theta}{\mu} k_3$ | $D_{\mathrm{KL}}(q_\theta \| p)$ | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
+|            $\tfrac{q_\theta}{\mu} k_3$            |  $D_{\mathrm{KL}}(q_\theta \| p)$  | $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓ |
 
 **Interesting reversal vs. on-policy:**
 - On-policy: $k_2$ as loss gives reverse KL gradient; $k_1$ gradient is zero.
@@ -352,11 +352,11 @@ Intuition:
 
 Table summary:
 
-| Estimator | Gradient rv | Scale ($r\approx1$) | Variance |
-| :---: | :---: | :---: | :---: |
-| $w k_1$ | $w s_\theta (k_1+1)$ | $O(1)$ | High |
-| $\mathrm{sg}(w) k_2$ | $w s_\theta k_1$ | $O(\varepsilon)$ | Low |
-| $w k_3$ | $w s_\theta k_1$ | $O(\varepsilon)$ | Low |
+|      Estimator       |     Gradient rv      | Scale ($r\approx1$) | Variance |
+| :------------------: | :------------------: | :-----------------: | :------: |
+|       $w k_1$        | $w s_\theta (k_1+1)$ |       $O(1)$        |   High   |
+| $\mathrm{sg}(w) k_2$ |   $w s_\theta k_1$   |  $O(\varepsilon)$   |   Low    |
+|       $w k_3$        |   $w s_\theta k_1$   |  $O(\varepsilon)$   |   Low    |
 
 Conclusion: off-policy IS with reverse-KL gradients has three unbiased options: $w k_1$, $\bar w k_2$, $w k_3$. The latter two are identical in gradient and variance and are preferred; $w k_1$ is unbiased but noisier.
 
@@ -364,15 +364,15 @@ Conclusion: off-policy IS with reverse-KL gradients has three unbiased options: 
 
 ### Gradient cheat sheet
 
-| Sampling | Loss | $\mathbb{E}[\nabla_\theta \text{Loss}]$ | Optimizes | Right for reverse KL? |
-| :---: | :---: | :---: | :---: | :---: |
-| $q$ (on) | $k_1$ | $\mathbb{E}_q[s_\theta] = 0$ | None (zero grad) | ✗ |
-| $q$ (on) | $k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ |
-| $q$ (on) | $k_3$ | $\nabla_\theta D_{\mathrm{KL}}(p \| q)$ | Forward KL | ✗ |
-| $\mu$ (off) | $\tfrac{q}{\mu} k_1$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ (higher var) |
-| $\mu$ (off) | $\tfrac{q}{\mu} k_2$ | $\nabla_\theta \mathbb{E}_q[k_2]$ | f-divergence (not KL) | ✗ |
-| $\mu$ (off) | $\text{sg}\left(\tfrac{q}{\mu}\right) k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ |
-| $\mu$ (off) | $\tfrac{q}{\mu} k_3$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ | Reverse KL | ✓ (recommended, low var) |
+|  Sampling   |                    Loss                    | $\mathbb{E}[\nabla_\theta \text{Loss}]$ |       Optimizes       |  Right for reverse KL?   |
+| :---------: | :----------------------------------------: | :-------------------------------------: | :-------------------: | :----------------------: |
+|  $q$ (on)   |                   $k_1$                    |      $\mathbb{E}_q[s_\theta] = 0$       |   None (zero grad)    |            ✗             |
+|  $q$ (on)   |                   $k_2$                    | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |      Reverse KL       |            ✓             |
+|  $q$ (on)   |                   $k_3$                    | $\nabla_\theta D_{\mathrm{KL}}(p \| q)$ |      Forward KL       |            ✗             |
+| $\mu$ (off) |            $\tfrac{q}{\mu} k_1$            | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |      Reverse KL       |      ✓ (higher var)      |
+| $\mu$ (off) |            $\tfrac{q}{\mu} k_2$            |    $\nabla_\theta \mathbb{E}_q[k_2]$    | f-divergence (not KL) |            ✗             |
+| $\mu$ (off) | $\text{sg}\left(\tfrac{q}{\mu}\right) k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |      Reverse KL       |            ✓             |
+| $\mu$ (off) |            $\tfrac{q}{\mu} k_3$            | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |      Reverse KL       | ✓ (recommended, low var) |
 
 **Key conclusions:**
 1) **On-policy reverse KL:** use $k_2$ (only correct choice).
@@ -456,12 +456,12 @@ Consider a scenario: first few steps are routing behavior, final step has high r
 
 ### Summary
 
-| Dimension | KL as Reward (stop-grad) | KL as Loss (backprop) |
-| :---: | :---: | :---: |
-| Optimization target | Regularized new MDP | Original task + supervised regularization |
-| Actor gradient | Single PG, based on shaped advantage | RL gradient + explicit KL gradient |
-| Critic | Learns $V^{\text{reg}}$: reward + KL mixed | Learns $V^{\text{env}}$: only environment reward |
-| Credit Assignment | Multi-step backprop, planning-capable | Local per-state, no planning |
+|      Dimension      |          KL as Reward (stop-grad)          |              KL as Loss (backprop)               |
+| :-----------------: | :----------------------------------------: | :----------------------------------------------: |
+| Optimization target |            Regularized new MDP             |    Original task + supervised regularization     |
+|   Actor gradient    |    Single PG, based on shaped advantage    |        RL gradient + explicit KL gradient        |
+|       Critic        | Learns $V^{\text{reg}}$: reward + KL mixed | Learns $V^{\text{env}}$: only environment reward |
+|  Credit Assignment  |   Multi-step backprop, planning-capable    |           Local per-state, no planning           |
 
 **One-liner:** KL as reward makes the agent "plan to avoid high-KL paths" — constraints are more global and thorough; KL as loss makes the agent "visit but locally correct" — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be "preventive" or "corrective".
 
@@ -528,11 +528,11 @@ $$
 
 The table below provides recommended estimator choices along three dimensions: "target KL direction" × "sampling source" × "usage mode". "For **value**" corresponds to KL as reward penalty (no gradient needed); "For **gradient**" corresponds to KL as loss (gradient backpropagation needed).
 
-| Target | Sampling | For value (KL as Reward) | For gradient (KL as Loss) |
-| :---: | :---: | :---: | :---: |
-| Reverse KL $D_{\mathrm{KL}}(q \| p)$ | $q$ (on-policy) | $k_1$ or $k_3$ (unbiased) | $k_2$ |
+|                Target                |      Sampling      |                For value (KL as Reward)                 |                       For gradient (KL as Loss)                       |
+| :----------------------------------: | :----------------: | :-----------------------------------------------------: | :-------------------------------------------------------------------: |
+| Reverse KL $D_{\mathrm{KL}}(q \| p)$ |  $q$ (on-policy)   |                $k_1$ or $k_3$ (unbiased)                |                                 $k_2$                                 |
 | Reverse KL $D_{\mathrm{KL}}(q \| p)$ | $\mu$ (off-policy) | $\tfrac{q}{\mu} k_1$ or $\tfrac{q}{\mu} k_3$ (unbiased) | $\tfrac{q}{\mu} k_3$ (recommended) or $\text{sg}(\tfrac{q}{\mu}) k_2$ |
-| Forward KL $D_{\mathrm{KL}}(p \| q)$ | $q$ | $\mathbb{E}_q[r\log r]$ | $k_3$ |
+| Forward KL $D_{\mathrm{KL}}(p \| q)$ |        $q$         |                 $\mathbb{E}_q[r\log r]$                 |                                 $k_3$                                 |
 
 ## Common implementation traps
 
