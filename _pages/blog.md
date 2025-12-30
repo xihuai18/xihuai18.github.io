@@ -120,14 +120,55 @@ nav_order: 1
 
     {% for post in postlist %}
 
-    {% if post.external_source == blank %}
-      {% assign read_time = post.content | number_of_words | divided_by: 180 | plus: 1 %}
-    {% else %}
-      {% assign read_time = post.feed_content | strip_html | number_of_words | divided_by: 180 | plus: 1 %}
+    {% if post.lang == 'zh' and post.en_url %}
+      {% continue %}
     {% endif %}
-    {% assign year = post.date | date: "%Y" %}
-    {% assign tags = post.tags | join: "" %}
-    {% assign categories = post.categories | join: "" %}
+
+    {% assign zh_post = nil %}
+    {% if post.lang == 'en' and post.zh_url %}
+      {% assign post_url_norm = post.url | remove_first: site.baseurl %}
+      {% assign zh_url_norm = post.zh_url | remove_first: site.baseurl %}
+
+      {% if post_url_norm != "" and post_url_norm != nil %}
+        {% assign post_url_first = post_url_norm | slice: 0, 1 %}
+        {% if post_url_first != "/" %}
+          {% assign post_url_norm = "/" | append: post_url_norm %}
+        {% endif %}
+      {% endif %}
+      {% assign post_url_no_html = post_url_norm | replace: ".html", "" %}
+      {% assign post_url_with_html = post_url_norm %}
+      {% unless post_url_with_html contains ".html" %}
+        {% assign post_url_with_html = post_url_norm | append: ".html" %}
+      {% endunless %}
+      {% if zh_url_norm != "" and zh_url_norm != nil %}
+        {% assign zh_url_first = zh_url_norm | slice: 0, 1 %}
+        {% if zh_url_first != "/" %}
+          {% assign zh_url_norm = "/" | append: zh_url_norm %}
+        {% endif %}
+      {% endif %}
+
+      {% for candidate in site.posts %}
+        {% if candidate.url == zh_url_norm %}
+          {% assign zh_post = candidate %}
+          {% break %}
+        {% endif %}
+
+        {% if candidate.lang == 'zh' and candidate.en_url %}
+          {% assign candidate_en_url_norm = candidate.en_url | remove_first: site.baseurl %}
+          {% if candidate_en_url_norm != "" and candidate_en_url_norm != nil %}
+            {% assign candidate_en_url_first = candidate_en_url_norm | slice: 0, 1 %}
+            {% if candidate_en_url_first != "/" %}
+              {% assign candidate_en_url_norm = "/" | append: candidate_en_url_norm %}
+            {% endif %}
+          {% endif %}
+
+          {% if candidate_en_url_norm == post_url_norm or candidate_en_url_norm == post_url_no_html or candidate_en_url_norm == post_url_with_html %}
+            {% assign zh_post = candidate %}
+            {% break %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
 
     <li>
 
@@ -136,57 +177,31 @@ nav_order: 1
 <div class="row">
           <div class="col-sm-9">
 {% endif %}
-        <h3>
-        {% if post.redirect == blank %}
-          <a class="post-title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-        {% elsif post.redirect contains '://' %}
-          <a class="post-title" href="{{ post.redirect }}" target="_blank">{{ post.title }}</a>
-          <svg width="2rem" height="2rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        {% else %}
-          <a class="post-title" href="{{ post.redirect | relative_url }}">{{ post.title }}</a>
-        {% endif %}
-      </h3>
-      <p>{{ post.description }}</p>
-      <p class="post-meta">
-        {{ read_time }} min read &nbsp; &middot; &nbsp;
-        {{ post.date | date: '%B %d, %Y' }}
-        {% if post.external_source %}
-        &nbsp; &middot; &nbsp; {{ post.external_source }}
-        {% endif %}
-        {% if uv_enabled and uv_has_modes > 0 %}
-          {% include post_uv.html url=post.url %}
-          &nbsp; &middot; &nbsp;
-          <span class="post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">{{ uv_all }} views</span>
-        {% endif %}
-      </p>
-      <p class="post-tags">
-        <a href="{{ year | prepend: '/blog/' | relative_url }}">
-          📅 {{ year }} </a>
 
-          {% if tags != "" %}
-          &nbsp; &middot; &nbsp;
-            {% for tag in post.tags %}
-            <a href="{{ tag | slugify | prepend: '/blog/tag/' | relative_url }}">
-              #️⃣ {{ tag }}</a>
-              {% unless forloop.last %}
-                &nbsp;
-              {% endunless %}
-              {% endfor %}
-          {% endif %}
+    {% if zh_post %}
+      {% assign post_slug = post.id | slugify %}
+      <div class="lang-switcher">
+        <ul class="nav" id="myTab-{{ post_slug }}" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="en-tab-{{ post_slug }}" href="#en-{{ post_slug }}" role="tab" aria-controls="en-{{ post_slug }}" aria-selected="true">English</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="zh-tab-{{ post_slug }}" href="#zh-{{ post_slug }}" role="tab" aria-controls="zh-{{ post_slug }}" aria-selected="false">简体中文</a>
+          </li>
+        </ul>
+      </div>
 
-          {% if categories != "" %}
-          &nbsp; &middot; &nbsp;
-            {% for category in post.categories %}
-            <a href="{{ category | slugify | prepend: '/blog/category/' | relative_url }}">
-              🏷️ {{ category }}</a>
-              {% unless forloop.last %}
-                &nbsp;
-              {% endunless %}
-              {% endfor %}
-          {% endif %}
-    </p>
+      <div class="tab-content" id="myTabContent-{{ post_slug }}">
+        <div class="tab-pane fade show active" id="en-{{ post_slug }}" role="tabpanel" aria-labelledby="en-tab-{{ post_slug }}">
+          {% include blog_post_body.html post=post uv_enabled=uv_enabled uv_has_modes=uv_has_modes %}
+        </div>
+        <div class="tab-pane fade" id="zh-{{ post_slug }}" role="tabpanel" aria-labelledby="zh-tab-{{ post_slug }}">
+          {% include blog_post_body.html post=zh_post uv_enabled=uv_enabled uv_has_modes=uv_has_modes %}
+        </div>
+      </div>
+    {% else %}
+      {% include blog_post_body.html post=post uv_enabled=uv_enabled uv_has_modes=uv_has_modes %}
+    {% endif %}
 
 {% if post.thumbnail %}
 

@@ -85,7 +85,7 @@ $$
 
 **设计动机**：我们想要一个**既无偏又低方差**的估计器。标准做法是给 $k_1$ 加一个**控制变量**（control variate）——一个期望为零但与 $k_1$ 负相关的量。
 
-注意到 $\mathbb{E}\_q[r - 1] = \mathbb{E}\_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$，所以对于任意 $\lambda$，
+注意到 $\mathbb{E}_q[r - 1] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$，所以对于任意 $\lambda$，
 
 $$
 k_1 + \lambda(r - 1) = -\log r + \lambda(r - 1)
@@ -177,7 +177,7 @@ John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，�
 
 在分析估计器之前，我们先推导正向和反向 KL 散度对 $\theta$ 的**真梯度**作为参照。
 
-记 score function $s\_\theta(x) = \nabla\_\theta \log q\_\theta(x)$，它有一个重要性质：$\mathbb{E}\_{q\_\theta}[s\_\theta] = 0$（因为 $\int \nabla\_\theta q\_\theta dx = \nabla\_\theta \int q\_\theta dx = \nabla\_\theta 1 = 0$）。
+记 score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$，它有一个重要性质：$\mathbb{E}_{q_\theta}[s_\theta] = 0$（因为 $\int \nabla_\theta q_\theta dx = \nabla_\theta \int q_\theta dx = \nabla_\theta 1 = 0$）。
 
 **反向 KL 的梯度**：
 
@@ -221,7 +221,7 @@ $$
 -\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} \cdot s_\theta\right] = -\mathbb{E}_q[r \cdot s_\theta]
 $$
 
-利用 $\mathbb{E}\_q[s\_\theta] = 0$，可改写为：
+利用 $\mathbb{E}_q[s_\theta] = 0$，可改写为：
 
 $$
 \boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q[(1-r) \cdot s_\theta]}
@@ -319,7 +319,7 @@ $$
 \nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
 $$
 
-两者都给出反向 KL 的梯度。但在代码中直接对 $k_3$ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 $\mathbb{E}\_q[\nabla\_\theta k\_3]$，即**正向 KL 的梯度**。
+两者都给出反向 KL 的梯度。但在代码中直接对 $k_3$ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 $\mathbb{E}_q[\nabla_\theta k_3]$，即**正向 KL 的梯度**。
 
 这个区分非常重要：**同一个估计器，两种求导顺序可能给出完全不同的结果**。
 
@@ -346,8 +346,8 @@ $$
 
 一个关键差异是：
 
-> **以前**的期望是 $\mathbb{E}\_{q\_{\theta}}[\cdot]$，分布本身依赖 $\theta$；
-> **现在**的期望是 $\mathbb{E}\_{\mu}[\cdot]$，而 $\mu$ 与 $\theta$ 无关。
+> **以前**的期望是 $\mathbb{E}_{q_{\theta}}[\cdot]$，分布本身依赖 $\theta$；
+> **现在**的期望是 $\mathbb{E}_{\mu}[\cdot]$，而 $\mu$ 与 $\theta$ 无关。
 
 这会让「先期望后梯度」与「先梯度后期望」的关系发生根本变化。
 
@@ -367,7 +367,7 @@ $$
 
 #### 数值层面：无偏性仍然保持
 
-由标准的重要性采样关系 $\mathbb{E}\_\mu[w \cdot f] = \mathbb{E}\_{q\_\theta}[f]$，有
+由标准的重要性采样关系 $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$，有
 
 $$
 \mathbb{E}_\mu[w k_1] = D_{\mathrm{KL}}(q_\theta \| p), \quad
@@ -422,23 +422,23 @@ $$
 
 #### 哪些给出无偏的反向 KL 梯度？
 
-利用 $\mathbb{E}\_\mu[w \cdot f] = \mathbb{E}\_{q\_\theta}[f]$ 和 $\mathbb{E}\_{q\_\theta}[s\_\theta] = 0$：
+利用 $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$ 和 $\mathbb{E}_{q_\theta}[s_\theta] = 0$：
 
-**$\mathbb{E}\_\mu[\nabla\_\theta(w k\_1)]$**：
+**$\mathbb{E}_\mu[\nabla_\theta(w k_1)]$**：
 
 $$
 \mathbb{E}_\mu[w s_\theta (k_1 + 1)] = \mathbb{E}_{q}[s_\theta k_1] + \underbrace{\mathbb{E}_{q}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
 $$
 
-**$\mathbb{E}\_\mu[\nabla\_\theta(w k\_2)]$**：
+**$\mathbb{E}_\mu[\nabla_\theta(w k_2)]$**：
 
 $$
 \mathbb{E}_\mu[w s_\theta (k_2 - \log r)] = \mathbb{E}_{q}[s_\theta (k_2 - \log r)] = \nabla_\theta \mathbb{E}_{q}[k_2]
 $$
 
-这是 $\mathbb{E}\_q[k\_2]$ 这个 f-散度的真梯度，**不是**反向 KL 的梯度。
+这是 $\mathbb{E}_q[k_2]$ 这个 f-散度的真梯度，**不是**反向 KL 的梯度。
 
-**$\mathbb{E}\_\mu[\nabla\_\theta(\bar{w} k\_2)]$**（$\bar{w} = \text{sg}(w)$ 表示 detach）：
+**$\mathbb{E}_\mu[\nabla_\theta(\bar{w} k_2)]$**（$\bar{w} = \text{sg}(w)$ 表示 detach）：
 
 如果把重要性权重视为常数（在代码中 detach 掉），则：
 
@@ -454,7 +454,7 @@ $$
 
 这正是反向 KL 的真梯度！
 
-**$\mathbb{E}\_\mu[\nabla\_\theta(w k\_3)]$**：
+**$\mathbb{E}_\mu[\nabla_\theta(w k_3)]$**：
 
 $$
 \mathbb{E}_\mu[w s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
@@ -541,7 +541,7 @@ $$
 g_1 = A(B+1),\qquad g_\star = A B.
 $$
 
-两者的期望都等于 $\nabla_\theta D\_{\mathrm{KL}}(q_\theta\|p)$，因此有相同的均值项。展开方差定义并相减得到：
+两者的期望都等于 $\nabla_\theta D_{\mathrm{KL}}(q_\theta\|p)$，因此有相同的均值项。展开方差定义并相减得到：
 
 $$
 \boxed{
@@ -558,7 +558,7 @@ $$
 = \mathbb{E}_\mu\Big[w(x)^2 s_\theta(x)^2 \big(2k_1(x)+1\big)\Big].
 $$
 
-在常见的 KL 惩罚 regime 下，$q\_\theta \approx p \approx \mu$，取 $r(x)=1+\varepsilon(x)$，$\lvert \varepsilon\rvert \ll1$。此时 $k\_1 = -\log r \approx -\varepsilon$，因此 $2k\_1+1 \approx 1 - 2\varepsilon$，主导项为正的 $O(1)$ 常数。这意味着上式右侧近似为 $\mathbb{E}\_\mu[w^2 s\_\theta^2] > 0$，从而 $\mathrm{Var}\_\mu(g\_1) > \mathrm{Var}\_\mu(g\_\star)$。
+在常见的 KL 惩罚 regime 下，$q_\theta \approx p \approx \mu$，取 $r(x)=1+\varepsilon(x)$，$\lvert \varepsilon\rvert \ll1$。此时 $k_1 = -\log r \approx -\varepsilon$，因此 $2k_1+1 \approx 1 - 2\varepsilon$，主导项为正的 $O(1)$ 常数。这意味着上式右侧近似为 $\mathbb{E}_\mu[w^2 s_\theta^2] > 0$，从而 $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$。
 
 更具体地，一阶近似
 
@@ -609,9 +609,9 @@ $$
 - 从行为策略 $\mu$ 采样时，自然的 off-policy KL 估计为 $\frac{q_\theta}{\mu} k_i$。
 - **数值上**，$\frac{q_\theta}{\mu} k_1$ 与 $\frac{q_\theta}{\mu} k_3$ 仍然是反向 KL 的无偏估计。
 - **梯度上**，因为 $\mu$ 与 $\theta$ 无关，「先期望后梯度」与「先梯度后期望」等价：
-  - $\mathbb{E}\_\mu[\nabla\_\theta(\frac{q\_\theta}{\mu} k\_1)] = \nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$
-  - $\mathbb{E}\_\mu[\nabla\_\theta(\frac{q\_\theta}{\mu} k\_3)] = \nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$
-  - $\mathbb{E}\_\mu[\nabla\_\theta(\frac{q\_\theta}{\mu} k\_2)] \neq \nabla\_\theta D\_{\mathrm{KL}}(q\_\theta \| p)$
+  - $\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_1)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$
+  - $\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_3)] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$
+  - $\mathbb{E}_\mu[\nabla_\theta(\frac{q_\theta}{\mu} k_2)] \neq \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$
 - **方差上**，$\frac{q_\theta}{\mu} k_3$ 与 $\mathrm{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ 的梯度**完全相同**（两者都是 $w s_\theta k_1$），在统计性质上等价。相比之下，$\frac{q_\theta}{\mu} k_1$ 的梯度多了一个零均值噪声项 $w s_\theta$，在 $q_\theta \approx p \approx \mu$ 的典型场景下方差显著更高。
 
 ### 梯度估计总览
@@ -753,7 +753,7 @@ $$
 \mathcal{L}_{k_2} = \frac{1}{2}(\log r)^2
 $$
 
-其梯度期望 $\mathbb{E}\_q[\nabla k\_2] = \nabla\_\theta D\_{\mathrm{KL}}(q \| p)$ 正是反向 KL 的真梯度。
+其梯度期望 $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ 正是反向 KL 的真梯度。
 
 #### On-policy：优化正向 KL（覆盖型场景）
 
@@ -765,7 +765,7 @@ $$
 \mathbb{E}_q[\nabla k_3] = \mathbb{E}_q[(1-r) \cdot s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)
 $$
 
-直接对 $k_3$ 的样本均值调用反传，自动微分计算的就是 $\mathbb{E}\_q[\nabla\_\theta k\_3]$，即正向 KL 的梯度，无需额外处理。
+直接对 $k_3$ 的样本均值调用反传，自动微分计算的就是 $\mathbb{E}_q[\nabla_\theta k_3]$，即正向 KL 的梯度，无需额外处理。
 
 #### Off-policy：优化反向 KL
 
@@ -804,7 +804,7 @@ $$
 
 **陷阱 1：把 $k_1$ 直接当 loss 反传（on-policy）**
 
-当 KL 作为 loss 使用时，$k_1$ 的梯度期望恒为零（$\mathbb{E}\_q[\nabla k\_1] = \mathbb{E}\_q[s\_\theta] = 0$），作为 loss 完全无效。
+当 KL 作为 loss 使用时，$k_1$ 的梯度期望恒为零（$\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$），作为 loss 完全无效。
 
 > **解决**：首先明确 KL 的使用方式。如果是 reward shaping（不需要梯度），用 $k_1$ 或 $k_3$ 均可；如果是 loss（需要梯度），on-policy 下用 $k_2$（反向 KL）或 $k_3$（正向 KL）。
 

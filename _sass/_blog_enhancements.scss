@@ -50,7 +50,7 @@
   border-radius: 0.5rem;
   border: 1px solid var(--global-divider-color);
   background: var(--global-bg-color);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
   color: var(--global-text-color);
 
   p:last-child {
@@ -125,6 +125,91 @@
   }
 }
 
+/*******************************************************************************
+ * Blog index language tabs
+ ******************************************************************************/
+
+.lang-switcher {
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+
+  .nav {
+    display: inline-flex;
+    gap: 1.5rem;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+  }
+
+  .nav-item {
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+
+    &::before,
+    &::after {
+      content: none !important;
+    }
+  }
+
+  .nav-link {
+    position: relative;
+    padding: 0.15rem 0 0.55rem;
+    margin: 0;
+    border: none !important;
+    border-bottom: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    color: var(--global-text-color) !important;
+    opacity: 0.7;
+    transition: opacity 160ms ease, color 160ms ease;
+
+    &:hover {
+      opacity: 1;
+      color: var(--global-text-color) !important;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--global-theme-color);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    // Use ::before for the active indicator so we can hard-disable ::after
+    // in case a UI library injects an underline there.
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0.15rem;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      transform: none;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    &::after {
+      content: none !important;
+    }
+  }
+
+  .nav-link.active {
+    opacity: 1;
+
+    &::before {
+      background: var(--global-theme-color);
+    }
+  }
+}
+
 // Sidenotes (opt-in per post: `sidenotes: true`)
 .post.post--sidenotes {
   @media (min-width: 992px) {
@@ -158,5 +243,58 @@
       color: var(--global-text-color);
       border-right-color: var(--global-theme-color);
     }
+  }
+}
+
+// Post links (bilingual/external)
+.post-links {
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.5rem;
+    background-color: transparent;
+    border: 1px solid var(--global-divider-color);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    text-decoration: none;
+    color: var(--global-text-color);
+    transition: all 0.2s ease;
+    opacity: 0.85;
+    box-shadow: none;
+
+    &:hover {
+      opacity: 1;
+      color: var(--global-theme-color);
+      border-color: var(--global-theme-color);
+      background-color: transparent;
+    }
+
+    img {
+      margin: 0 !important;
+    }
+  }
+}
+
+// Tighten spacing above post link buttons on post pages.
+.post {
+  .post-tags {
+    padding-bottom: 0.35rem;
+    margin-bottom: 0;
+  }
+
+  .post-links {
+    margin-bottom: 1.75rem;
   }
 }
