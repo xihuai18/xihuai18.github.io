@@ -93,6 +93,11 @@
     const totalCount = posts.length;
     let lastVisiblePost = null;
 
+    // Reset all borders first (remove inline styles to let CSS take over)
+    posts.forEach((post) => {
+      post.style.borderBottom = '';
+    });
+
     posts.forEach((post) => {
       const matchesYear = !year || post.dataset.year === year;
       const categories = (post.dataset.categories || '').toLowerCase().split(/\s+/).filter(Boolean);
@@ -100,8 +105,6 @@
       const isVisible = matchesYear && matchesCategory;
 
       post.style.display = isVisible ? '' : 'none';
-      // Reset border for all posts
-      post.style.borderBottom = '';
       
       if (isVisible) {
         visibleCount += 1;
@@ -109,8 +112,10 @@
       }
     });
 
-    // Remove border from the last visible post
-    if (lastVisiblePost) {
+    // Only apply inline style if we have filters active (to override CSS :last-child)
+    // When filters are active, the :last-child CSS selector may not target the last visible post
+    const hasActiveFilters = year || category;
+    if (hasActiveFilters && lastVisiblePost) {
       lastVisiblePost.style.borderBottom = 'none';
     }
 
