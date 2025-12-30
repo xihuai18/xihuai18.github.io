@@ -127,6 +127,13 @@ function hideEmptyYearHeaders() {
   });
 }
 
+function getVisiblePublications(listElement) {
+  return Array.from(listElement.querySelectorAll('li')).filter(li => {
+    const computedStyle = window.getComputedStyle(li);
+    return computedStyle.display !== 'none' && computedStyle.opacity !== '0';
+  });
+}
+
 function updatePublicationDividers() {
   // Handle both Publications page (.publications h2.year) and About page (.post .publications)
   const isAboutPage = document.querySelector('.post .publications');
@@ -136,20 +143,15 @@ function updatePublicationDividers() {
     const bibliography = isAboutPage.querySelector('ol.bibliography');
     if (!bibliography) return;
     
-    const visiblePubs = Array.from(bibliography.querySelectorAll('li')).filter(li => {
-      const computedStyle = window.getComputedStyle(li);
-      return computedStyle.display !== 'none' && computedStyle.opacity !== '0';
-    });
+    const visiblePubs = getVisiblePublications(bibliography);
+    
+    // Remove the class from all publications first
+    bibliography.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
     
     // If only one publication is visible, hide all dividers
     if (visiblePubs.length === 1) {
-      bibliography.querySelectorAll('li').forEach(li => {
+      visiblePubs.forEach(li => {
         li.classList.add('single-pub-in-year');
-      });
-    } else {
-      // Remove the class to show dividers normally
-      bibliography.querySelectorAll('li').forEach(li => {
-        li.classList.remove('single-pub-in-year');
       });
     }
   } else {
@@ -161,20 +163,15 @@ function updatePublicationDividers() {
       let nextElement = header.nextElementSibling;
       
       if (nextElement && nextElement.tagName === 'OL' && nextElement.classList.contains('bibliography')) {
-        const visiblePubs = Array.from(nextElement.querySelectorAll('li')).filter(li => {
-          const computedStyle = window.getComputedStyle(li);
-          return computedStyle.display !== 'none' && computedStyle.opacity !== '0';
-        });
+        const visiblePubs = getVisiblePublications(nextElement);
+        
+        // Remove the class from all publications first
+        nextElement.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
         
         // If only one publication is visible in this year, add a class to hide dividers
         if (visiblePubs.length === 1) {
-          nextElement.querySelectorAll('li').forEach(li => {
+          visiblePubs.forEach(li => {
             li.classList.add('single-pub-in-year');
-          });
-        } else {
-          // Remove the class to show dividers normally
-          nextElement.querySelectorAll('li').forEach(li => {
-            li.classList.remove('single-pub-in-year');
           });
         }
       }
