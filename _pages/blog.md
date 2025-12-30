@@ -40,8 +40,9 @@ nav_order: 1
         <p>&bull;</p>
       {% endif %}
       {% for category in site.display_categories %}
+        {% assign category_slug = category | slugify %}
         <li>
-          🏷️ <a href="{{ category | slugify | prepend: '/blog/category/' | relative_url }}">{{ category }}</a>
+          🏷️ <a href="{{ '/blog/' | relative_url }}?category={{ category_slug }}" data-filter-link data-filter-type="category" data-filter-value="{{ category_slug }}">{{ category }}</a>
         </li>
         {% unless forloop.last %}
           <p>&bull;</p>
@@ -59,6 +60,11 @@ nav_order: 1
     <a href="#" class="uv-toggle" data-uv-mode="d30">Last 30 days</a>
   </p>
 {% endif %}
+
+  <div id="blog-filter-status" class="alert alert-info d-none" role="status" aria-live="polite">
+    <span class="filter-label"></span>
+    <button id="blog-filter-clear" class="btn btn-sm btn-outline-secondary float-end" aria-label="Clear active blog filters">Clear filter</button>
+  </div>
 
 {% assign featured_posts = site.posts | where: "featured", "true" %}
 {% if featured_posts.size > 0 %}
@@ -89,7 +95,7 @@ nav_order: 1
 
                     <p class="post-meta">
                       {{ read_time }} min read &nbsp; &middot; &nbsp;
-                      <a href="{{ year | prepend: '/blog/' | relative_url }}">
+                      <a href="{{ '/blog/' | relative_url }}?year={{ year }}" data-filter-link data-filter-type="year" data-filter-value="{{ year }}">
                         📅 {{ year }} </a>
                       {% if uv_enabled and uv_has_modes > 0 %}
                         {% include post_uv.html url=post.url %}
@@ -120,6 +126,17 @@ nav_order: 1
 
     {% for post in postlist %}
 
+    {% assign post_year = post.date | date: "%Y" %}
+    {% assign post_categories_slug = "" %}
+    {% for category in post.categories %}
+      {% assign category_slug = category | slugify %}
+      {% if post_categories_slug == "" %}
+        {% assign post_categories_slug = category_slug %}
+      {% else %}
+        {% assign post_categories_slug = post_categories_slug | append: " " | append: category_slug %}
+      {% endif %}
+    {% endfor %}
+
     {% if post.lang == 'zh' and post.en_url %}
       {% continue %}
     {% endif %}
@@ -140,7 +157,7 @@ nav_order: 1
       {% endfor %}
     {% endif %}
 
-    <li>
+    <li class="blog-post-list-item" data-year="{{ post_year }}" data-categories="{{ post_categories_slug }}">
 
 {% if post.thumbnail %}
 
@@ -193,3 +210,5 @@ nav_order: 1
 {% endif %}
 
 </div>
+
+<script defer src="{{ '/assets/js/blog_filter.js' | relative_url }}"></script>

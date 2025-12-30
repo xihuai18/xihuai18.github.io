@@ -46,7 +46,7 @@
 {% endif %}
 </p>
 <p class="post-tags">
-<a href="{{ year | prepend: '/blog/' | relative_url }}">
+<a href="{{ '/blog/' | relative_url }}?year={{ year }}" data-filter-link data-filter-type="year" data-filter-value="{{ year }}">
   📅 {{ year }} </a>
 
   {% if tags != "" %}
@@ -63,7 +63,8 @@
   {% if categories != "" %}
   &nbsp; &middot; &nbsp;
     {% for category in include.post.categories %}
-    <a href="{{ category | slugify | prepend: '/blog/category/' | relative_url }}">
+    {% assign category_slug = category | slugify %}
+    <a href="{{ '/blog/' | relative_url }}?category={{ category_slug }}" data-filter-link data-filter-type="category" data-filter-value="{{ category_slug }}">
       🏷️ {{ category }}</a>
       {% unless forloop.last %}
         &nbsp;
