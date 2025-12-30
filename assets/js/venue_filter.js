@@ -268,11 +268,12 @@ document.addEventListener('DOMContentLoaded', function() {
         filterByVenue(venueParam);
       }, 100);
     } else {
-      // Even without filter, ensure dividers are properly initialized
-      // Add a small delay to ensure all DOM manipulations are complete
-      setTimeout(() => {
+      // Double-check dividers after initial render completes
+      // This handles edge cases where the initial call (line 256) runs before
+      // all styles are computed, ensuring single publications get proper styling
+      requestAnimationFrame(() => {
         updatePublicationDividers();
-      }, 50);
+      });
     }
   } catch (error) {
     console.warn('Failed to parse URL parameters:', error);
