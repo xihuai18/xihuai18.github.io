@@ -5,6 +5,8 @@ date: 2025-12-01
 description: "How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate."
 categories: reinforcement-learning
 lang: en
+zh_url: /reinforcement-learning/2025/12/01/kl-estimators-zh.html
+zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
 ---
 
 
@@ -12,8 +14,6 @@ lang: en
 ![Mini-class](/assets/img/kl-estimators/kl-estimator-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.
-
-[中文版](/reinforcement-learning/2025/12/01/kl-estimators-zh.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1978993413425763764)
 
 ## Introduction: What KL Does in RL
 

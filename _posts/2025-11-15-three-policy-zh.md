@@ -5,12 +5,10 @@ date: 2025-11-15
 description: 现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。
 categories: reinforcement-learning
 lang: zh
+en_url: /reinforcement-learning/2025/11/15/three-policy-en.html
+zhihu_url: https://zhuanlan.zhihu.com/p/1973206684907365344
+wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 ---
-
-
-
-
-[English Version](/reinforcement-learning/2025/11/15/three-policy-en.html) \| [知乎版本 ![Zhihu](https://static.zhihu.com/heifetz/favicon.ico)](https://zhuanlan.zhihu.com/p/1973206684907365344)
 
 ![Mini-class](/assets/img/three-policy/three-policy-mini-class-zh.jpg){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 

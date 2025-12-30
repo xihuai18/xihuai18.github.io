@@ -16,24 +16,24 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Xihuai Wang is currently a Ph.D. candidate at Shanghai Jiao Tong University, supervised by [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/). He is a member of SJTU-Apex Group and a member of SJTU-MARL Group leaded by Prof. Ying Wen, and is also selected into [Wen-Tsun Wu AI Honorary Doctoral Class](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Xihuai earned his B.Eng. in Computer Science and Technology at [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
+I am a Ph.D. candidate in the [APEX Lab](https://apex.sjtu.edu.cn/) at Shanghai Jiao Tong University, under the supervision of [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/). I am affiliated with both the SJTU-Apex Group and the SJTU-MARL Group led by Prof. Ying Wen. I was honored to be selected into the [Wen-Tsun Wu AI Honorary Doctoral Program](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Prior to this, I received my B.Eng. in Computer Science and Technology from the [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
 
-Xihuai's research interests include **Decision-making** and **Multi-agent System**. Specifically, he is now focusing on
+My research lies at the intersection of **Reinforcement Learning** and **Multi-Agent Learning**. My current research focuses on:
 
-- **Large Language Models**, including
-  - Reinforcement Learning for Reasoning and Agentic Capability of LLMs;
-  - Human-LLMs collaboration in Decision-making Tasks.
-- **Multi-agent Decision-making in Cooperative Scenarios**, especially
-  - Efficiency of Cooperative Multi-agent Reinforcement Learning;
-  - Zero-shot Generalization Ability in Cooperative Multi-agent Systems.
+- **Large Language Model Reasoning and Agency**
+  - Reinforcement learning methodologies for enhancing reasoning and agentic capabilities of LLMs
+  - Human-AI collaborative decision-making with LLM-based agents
+- **Cooperative Multi-Agent Reinforcement Learning**
+  - Sample-efficient algorithms for cooperative MARL
+  - Zero-shot coordination and generalization in multi-agent systems
 
 <div class="job-ad">
   <div style="display: flex; align-items: center;">
     <i class="fas fa-bullhorn" style="font-size: 2em; margin-right: 1rem; color: var(--global-theme-color);"></i>
     <div>
-      <strong>I am on the job market, actively seeking opportunities in large language model reasoning and agent research and development. Feel free to email me at <em>leoxhwang@sjtu.edu.cn</em> if we are a good fit!</strong>
+      <strong>I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via <em>leoxhwang@sjtu.edu.cn</em> for potential opportunities.</strong>
       <br>
-      <strong>目前正在积极寻找大语言模型推理和智能体相关职位。如果有合适的机会，欢迎发邮件至 <em>leoxhwang@sjtu.edu.cn</em> 联系我！</strong>
+      <strong>本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 <em>leoxhwang@sjtu.edu.cn</em> 与我联系。</strong>
     </div>
   </div>
 </div>

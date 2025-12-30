@@ -5,11 +5,10 @@ date: 2025-12-17
 description: "A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies."
 categories: reinforcement-learning
 lang: en
+zh_url: /reinforcement-learning/2025/12/17/offpolicy-zh.html
 ---
 
 
-
-[中文版](/reinforcement-learning/2025/12/17/offpolicy-zh.html)
 
 ## Introduction: Why Should We Care About "Off-Policy"?
 

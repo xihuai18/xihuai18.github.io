@@ -5,11 +5,10 @@ date: 2025-12-17
 description: "系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。"
 categories: reinforcement-learning
 lang: zh
+en_url: /reinforcement-learning/2025/12/17/offpolicy-en.html
 ---
 
 
-
-[English Version](/reinforcement-learning/2025/12/17/offpolicy-en.html)
 
 ## 引言：为什么我们需要关心"异策略"？
 
