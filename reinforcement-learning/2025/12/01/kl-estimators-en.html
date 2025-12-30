@@ -99,7 +99,7 @@
 
           <!-- About -->
           <li class="nav-item ">
-            <a class="nav-link" href="/">about</a>
+            <a class="nav-link" href="/">About</a>
           </li>
           
           <!-- Blog -->
@@ -115,10 +115,10 @@
           </li> -->
           <!-- Other pages -->
           <li class="nav-item ">
-            <a class="nav-link" href="/publications/">publications</a>
+            <a class="nav-link" href="/publications/">Publications</a>
           </li>
           <li class="nav-item ">
-            <a class="nav-link" href="/cv/">cv</a>
+            <a class="nav-link" href="/cv/">CV</a>
           </li>
 
           <!-- Toogle theme mode -->
@@ -159,6 +159,31 @@
     </p>
   </header>
 
+  <div class="post-links">
+  
+
+  <!-- Bilingual Links -->
+  
+
+  
+
+  <!-- External Platform Links -->
+  
+
+  
+
+  <!-- External Source (from plugin) -->
+  
+
+  <!-- Output links -->
+  
+    <a href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版本</a>
+  
+    <a href="https://zhuanlan.zhihu.com/p/1978993413425763764" target="_blank">知乎版本 <img src="/assets/img/icons/zhihu.ico" style="height: 1em; vertical-align: middle;"></a>
+  
+</div>
+
+
   <div class="row">
     
       <div class="col-lg toc-content">
@@ -170,8 +195,6 @@
 <blockquote>
   <p>How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
 </blockquote>
-
-<p><a href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" alt="Zhihu" /></a></p>
 
 <h2 id="introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</h2>
 
@@ -185,16 +208,18 @@
 \(D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_\theta(x)}{p(x)}\right]\)</p>
 
 <figure style="text-align:center;">
-	<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:95%;max-width:100%;" />
-	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:95%;max-width:100%;"&gt;
+&lt;figcaption style="font-size:0.9em;color:gray;"&gt;Image source: &lt;a href="https://dibyaghosh.com/blog/probability/kldivergence/"&gt;Dibya Ghosh's Blog&lt;/a&gt;&lt;/figcaption&gt;
+</code></pre></div>  </div>
 </figure>
 
 <p><strong>Forward KL:</strong>
 \(D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\theta(x)}\right]\)</p>
 
 <figure style="text-align:center;">
-	<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:95%;max-width:100%;" />
-	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:95%;max-width:100%;"&gt;
+&lt;figcaption style="font-size:0.9em;color:gray;"&gt;Image source: &lt;a href="https://dibyaghosh.com/blog/probability/kldivergence/"&gt;Dibya Ghosh's Blog&lt;/a&gt;&lt;/figcaption&gt;
+</code></pre></div>  </div>
 </figure>
 
 <p><strong>Intuition:</strong></p>
@@ -385,7 +410,7 @@ D_\phi(r, 1) &amp;= \phi(r) - \phi(1) - \phi'(1)(r - 1) \\
 
 <h4 id="true-gradients-for-reference">True gradients for reference</h4>
 
-<p>Let score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$, with key property $\mathbb{E}_{q_\theta}[s_\theta] = 0$.</p>
+<p>Let score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$, with key property $\mathbb{E}<em>{q</em>\theta}[s_\theta] = 0$.</p>
 
 <p><strong>Reverse KL gradient:</strong></p>
 
@@ -819,13 +844,13 @@ g_3 &amp;= w s_\theta k_1.
 
 \[\mathcal{L}_{k_2} = \tfrac{1}{2}(\log r)^2\]
 
-<p>Then $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q | p)$.</p>
+<p>Then $\mathbb{E}<em>q[\nabla k_2] = \nabla</em>\theta D_{\mathrm{KL}}(q | p)$.</p>
 
 <h4 id="on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</h4>
 
 <p>Goal: cover the reference distribution (offline RL, imitation, etc.).</p>
 
-<p><strong>Use $k_3$ as loss.</strong> Autograd on sample means gives $\mathbb{E}_q[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$.</p>
+<p><strong>Use $k_3$ as loss.</strong> Autograd on sample means gives $\mathbb{E}<em>q[(1-r) s</em>\theta] = \nabla_\theta D_{\mathrm{KL}}(p | q)$.</p>
 
 <h4 id="off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</h4>
 
@@ -887,7 +912,7 @@ g_3 &amp;= w s_\theta k_1.
 
 <p><strong>Trap 1: Using $k_1$ directly as loss (on-policy)</strong></p>
 
-<p>When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
+<p>When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}<em>q[s</em>\theta]=0$); as a loss it does nothing.</p>
 
 <blockquote>
   <p><strong>Fix:</strong> First clarify the KL usage mode. For reward shaping (no gradient needed), both $k_1$ and $k_3$ work; for losses (gradient needed), use $k_2$ (reverse KL) or $k_3$ (forward KL) on-policy.</p>

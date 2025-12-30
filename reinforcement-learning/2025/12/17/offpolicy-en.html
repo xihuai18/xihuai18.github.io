@@ -99,7 +99,7 @@
 
           <!-- About -->
           <li class="nav-item ">
-            <a class="nav-link" href="/">about</a>
+            <a class="nav-link" href="/">About</a>
           </li>
           
           <!-- Blog -->
@@ -115,10 +115,10 @@
           </li> -->
           <!-- Other pages -->
           <li class="nav-item ">
-            <a class="nav-link" href="/publications/">publications</a>
+            <a class="nav-link" href="/publications/">Publications</a>
           </li>
           <li class="nav-item ">
-            <a class="nav-link" href="/cv/">cv</a>
+            <a class="nav-link" href="/cv/">CV</a>
           </li>
 
           <!-- Toogle theme mode -->
@@ -159,15 +159,36 @@
     </p>
   </header>
 
+  <div class="post-links">
+  
+
+  <!-- Bilingual Links -->
+  
+
+  
+
+  <!-- External Platform Links -->
+  
+
+  
+
+  <!-- External Source (from plugin) -->
+  
+
+  <!-- Output links -->
+  
+    <a href="/reinforcement-learning/2025/12/17/offpolicy-zh.html">中文版本</a>
+  
+</div>
+
+
   <div class="row">
     
       <div class="col-lg toc-content">
     
 
       <article class="post-content">
-        <p><a href="/reinforcement-learning/2025/12/17/offpolicy-zh.html">中文版</a></p>
-
-<h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
+        <h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
 
 <p>Consider the following scenario: you are training a large language model with reinforcement learning to improve its question-answering capabilities. Ideally, each time the model generates a batch of responses, you would immediately update the model with this data, then use the updated model to generate new data, and so on. This approach of “updating with data from the same policy that generated it” is called <strong>on-policy</strong> training.</p>
 
@@ -732,7 +753,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <h3 id="73-actionable-control">7.3 Actionable Control</h3>
 
-<p>By Lemma 3.3, $\hat{S}_k$ can be expressed in sample-level computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a|s)/\hat{\pi}^{(i)}(a|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$.</p>
+<p>By Lemma 3.3, $\hat{S}<em>k$ can be expressed in sample-level computable form. Given threshold $\epsilon</em>{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a|s)/\hat{\pi}^{(i)}(a|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then $\hat{S}<em>k \leq \epsilon</em>{\mathrm{stale}}/2$.</p>
 
 <p><strong>Key implementation points</strong>:</p>
 

@@ -99,7 +99,7 @@
 
           <!-- About -->
           <li class="nav-item ">
-            <a class="nav-link" href="/">about</a>
+            <a class="nav-link" href="/">About</a>
           </li>
           
           <!-- Blog -->
@@ -115,10 +115,10 @@
           </li> -->
           <!-- Other pages -->
           <li class="nav-item ">
-            <a class="nav-link" href="/publications/">publications</a>
+            <a class="nav-link" href="/publications/">Publications</a>
           </li>
           <li class="nav-item ">
-            <a class="nav-link" href="/cv/">cv</a>
+            <a class="nav-link" href="/cv/">CV</a>
           </li>
 
           <!-- Toogle theme mode -->
@@ -159,15 +159,36 @@
     </p>
   </header>
 
+  <div class="post-links">
+  
+
+  <!-- Bilingual Links -->
+  
+
+  
+
+  <!-- External Platform Links -->
+  
+
+  
+
+  <!-- External Source (from plugin) -->
+  
+
+  <!-- Output links -->
+  
+    <a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version</a>
+  
+</div>
+
+
   <div class="row">
     
       <div class="col-lg toc-content">
     
 
       <article class="post-content">
-        <p><a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version</a></p>
-
-<h2 id="引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</h2>
+        <h2 id="引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</h2>
 
 <p>想象这样一个场景：你正在用强化学习训练一个大语言模型，让它学会更好地回答问题。理想情况下，每次模型生成一批回答后，你会立即用这些数据更新模型，然后用更新后的模型生成新数据，如此循环往复。这种”用谁的数据就更新谁”的方式叫做<strong>同策略</strong>（on-policy）训练。</p>
 
@@ -728,7 +749,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;&amp; L_{\beta^{(k)}}(\pi_{k+1}) \\
 
 <h3 id="73-可操作控制">7.3 可操作控制</h3>
 
-<p>由引理3.3，$\hat{S}_k$ 可表示为样本级可计算形式。给定阈值 $\epsilon_{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a|s)/\hat{\pi}^{(i)}(a|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则 $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$。</p>
+<p>由引理3.3，$\hat{S}<em>k$ 可表示为样本级可计算形式。给定阈值 $\epsilon</em>{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a|s)/\hat{\pi}^{(i)}(a|s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则 $\hat{S}<em>k \leq \epsilon</em>{\mathrm{stale}}/2$。</p>
 
 <p><strong>关键实现要点</strong>：</p>
 
