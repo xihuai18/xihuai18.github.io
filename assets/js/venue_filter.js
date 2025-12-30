@@ -135,29 +135,14 @@ function getVisiblePublications(listElement) {
 }
 
 function updatePublicationDividers() {
-  // Handle both Publications page (.publications h2.year) and About page (.post .publications)
-  const isAboutPage = document.querySelector('.post .publications');
-  
-  if (isAboutPage) {
-    // About page: check total visible publications
-    const bibliography = isAboutPage.querySelector('ol.bibliography');
-    if (!bibliography) return;
-    
-    const visiblePubs = getVisiblePublications(bibliography);
-    
-    // Remove the class from all publications first
-    bibliography.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
-    
-    // If only one publication is visible, hide all dividers
-    if (visiblePubs.length === 1) {
-      visiblePubs.forEach(li => {
-        li.classList.add('single-pub-in-year');
-      });
-    }
-  } else {
+  // Handle Publications page (with year headers) vs About/other pages (single list)
+  const publicationsSection = document.querySelector('.publications');
+  if (!publicationsSection) return;
+
+  const yearHeaders = publicationsSection.querySelectorAll('h2.year');
+
+  if (yearHeaders.length > 0) {
     // Publications page: check per year
-    const yearHeaders = document.querySelectorAll('.publications h2.year');
-    
     yearHeaders.forEach(header => {
       // Find the bibliography list following this year header
       let nextElement = header.nextElementSibling;
@@ -175,6 +160,23 @@ function updatePublicationDividers() {
           });
         }
       }
+    });
+    return;
+  }
+
+  // About page or single publication list without year headers
+  const bibliography = publicationsSection.querySelector('ol.bibliography');
+  if (!bibliography) return;
+
+  const visiblePubs = getVisiblePublications(bibliography);
+  
+  // Remove the class from all publications first
+  bibliography.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
+  
+  // If only one publication is visible, hide all dividers
+  if (visiblePubs.length === 1) {
+    visiblePubs.forEach(li => {
+      li.classList.add('single-pub-in-year');
     });
   }
 }
