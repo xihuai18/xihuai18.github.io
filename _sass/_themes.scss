@@ -13,15 +13,13 @@
   --global-footer-text-color: #{$grey-color-light};
   --global-footer-link-color: #{$white-color};
   --global-distill-app-color: #{$grey-color};
-  --global-divider-color: rgba(0,0,0,.1);
+  --global-divider-color: rgba(0,0,0,.3);
   --global-card-bg-color: #{$white-color};
 
   .fa-sun {
     display : none;
   }
   .fa-moon {
-    padding-left: 10px;
-    padding-top: 12px;
     display : block;
   }
 
@@ -48,8 +46,6 @@ html[data-theme='dark'] {
   --global-card-bg-color: #{$grey-900};
 
   .fa-sun {
-    padding-left: 10px;
-    padding-top: 12px;
     display : block;
   }
   .fa-moon {

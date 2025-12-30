@@ -20,9 +20,9 @@
         {{- site.title -}}
         {%- endif -%}
       </a>
-      {%- elsif site.enable_navbar_social -%}
-      <!-- Social Icons -->
-      <div class="navbar-brand social">
+      {%- else -%}
+      <!-- Social Icons in Navbar for About Page -->
+      <div class="navbar-brand navbar-social-icons">
         {% include social.html %}
       </div>
       {% endif %}

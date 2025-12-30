@@ -16,7 +16,7 @@
   // Improve readability of inline code without breaking Rouge blocks.
   :not(pre) > code {
     padding: 0.15rem 0.35rem;
-    font-size: 0.95em;
+    font-size: 0.875em;
     word-break: break-word;
   }
 
@@ -25,7 +25,7 @@
     margin-top: 2rem;
     padding-top: 1rem;
     border-top: 1px solid var(--global-divider-color);
-    font-size: 0.95rem;
+    font-size: 0.875rem;
   }
 
   .footnotes ol {

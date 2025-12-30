@@ -1,0 +1,32 @@
+<div class="post-links" style="margin-bottom: 1rem;">
+  {% assign links = "" | split: "," %}
+
+  <!-- Bilingual Links -->
+  {% if page.zh_url %}
+    {% capture link %}<a href="{{ page.zh_url | relative_url }}">中文版本</a>{% endcapture %}
+    {% assign links = links | push: link %}
+  {% endif %}
+
+  {% if page.en_url %}
+    {% capture link %}<a href="{{ page.en_url | relative_url }}">English Version</a>{% endcapture %}
+    {% assign links = links | push: link %}
+  {% endif %}
+
+  <!-- External Platform Links -->
+  {% if page.zhihu_url %}
+    {% capture link %}<a href="{{ page.zhihu_url }}" target="_blank">知乎版本 <img src="https://static.zhihu.com/heifetz/favicon.ico" style="height: 1em; vertical-align: middle;"></a>{% endcapture %}
+    {% assign links = links | push: link %}
+  {% endif %}
+
+  <!-- External Source (from plugin) -->
+  {% if page.external_source %}
+    {% capture link %}Originally published on <a href="{{ page.redirect }}" target="_blank">{{ page.external_source }}</a>{% endcapture %}
+    {% assign links = links | push: link %}
+  {% endif %}
+
+  <!-- Output links separated by pipe -->
+  {% for link in links %}
+    {{ link }}
+    {% unless forloop.last %} | {% endunless %}
+  {% endfor %}
+</div>

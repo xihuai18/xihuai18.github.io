@@ -3,18 +3,20 @@
  ******************************************************************************/
 
 body {
-  padding-bottom: 70px;
+  padding-bottom: 50px;
   color: var(--global-text-color);
   background-color: var(--global-bg-color);
+  font-size: 0.95rem;
+  line-height: 1.6;
 
   h1, h2, h3, h4, h5, h6 {
-    scroll-margin-top: 66px;
+    scroll-margin-top: 60px;
   }
 }
 
 body.fixed-top-nav {
   // Add some padding for the nav-bar.
-  padding-top: 56px;
+  padding-top: 50px;
 }
 
 body.sticky-bottom-footer {
@@ -24,6 +26,8 @@ body.sticky-bottom-footer {
 
 .container {
   max-width: $max-content-width;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 // Profile

@@ -1,8 +1,8 @@
 ---
 layout: about
-title: about
+title: About
 permalink: /
-subtitle: <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.
+subtitle: Ph.D. Candidate @ <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.
 
 profile:
   align: right
@@ -27,5 +27,13 @@ Xihuai's research interests include **Decision-making** and **Multi-agent System
   - Efficiency of Cooperative Multi-agent Reinforcement Learning;
   - Zero-shot Generalization Ability in Cooperative Multi-agent Systems.
 
-**I am on the job market, actively seeking opportunities in large language model research and development.**  
-**目前正在积极寻找大语言模型研发相关职位。**
+<div class="job-ad">
+  <div style="display: flex; align-items: center;">
+    <i class="fas fa-bullhorn" style="font-size: 2em; margin-right: 1rem; color: var(--global-theme-color);"></i>
+    <div>
+      <strong>I am on the job market, actively seeking opportunities in large language model reasoning and agent research and development. Feel free to email me at <em>leoxhwang@sjtu.edu.cn</em> if we are a good fit!</strong>
+      <br>
+      <strong>目前正在积极寻找大语言模型推理和智能体相关职位。如果有合适的机会，欢迎发邮件至 <em>leoxhwang@sjtu.edu.cn</em> 联系我！</strong>
+    </div>
+  </div>
+</div>

@@ -6,7 +6,7 @@ title: Xihuai Wang's Page # the website title (if blank, full name will be used 
 first_name: Xihuai
 middle_name: Leo
 last_name: Wang
-email: wang_98xh@qq.com
+email: leoxhwang@sjtu.edu.cn
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
   Xihuai's personal page.
 footer_text: >
@@ -52,7 +52,7 @@ navbar_fixed: true
 footer_fixed: true
 
 # Dimensions
-max_width: 1200px
+max_width: 960px
 
 # TODO: add layout settings (single page vs. multi-page)
 

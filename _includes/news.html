@@ -2,17 +2,20 @@
           <div class="news">
             {% if site.news != blank -%}
             {%- assign news_size = site.news | size -%}
-            {%- assign news_scrollable = site.news_scrollable and news_size > 3 -%}
+            {%- assign news_scrollable = false -%}
+            {%- if include.scrollable and news_size > 3 -%}
+              {%- assign news_scrollable = true -%}
+            {%- endif -%}
             <div class="table-responsive news-table{% if news_scrollable %} news-scrollable{% endif %}">
               <table class="table table-sm table-borderless">
               {%- assign news = site.news | reverse -%}
-              {% if site.news_limit %}
-              {% assign news_limit = site.news_limit %}
+              {% if include.limit %}
+              {% assign news_limit = site.news_limit | default: 5 %}
               {% else %}
               {% assign news_limit = news_size %}
               {% endif %}
               {% for item in news limit: news_limit %}
-                <tr>
+                <tr {% unless item.inline %}class="clickable-row" data-href="{{ item.url | relative_url }}" style="cursor: pointer;" onclick="window.location='{{ item.url | relative_url }}';"{% endunless %}>
                   <th scope="row">{{ item.date | date: "%b %-d, %Y" }}</th>
                   <td>
                     {% if item.inline -%}

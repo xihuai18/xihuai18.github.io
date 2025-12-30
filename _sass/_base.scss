@@ -59,7 +59,29 @@ blockquote {
   border-left: 2px solid var(--global-theme-color);
   margin: 1.5em 10px;
   padding: 0.5em 10px;
-  font-size: 1.2rem;
+  font-size: 1rem;
+}
+
+.job-ad {
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--global-divider-color);
+  border-left: 5px solid var(--global-theme-color);
+  border-radius: 5px;
+  background-color: var(--global-code-bg-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+
+  p {
+    margin-bottom: 0.5rem;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  strong {
+    color: var(--global-theme-color);
+  }
 }
 
 // Math
@@ -115,9 +137,11 @@ blockquote {
   width: 100%;
 
   .address {
-    margin-bottom: 5px;
-    margin-top: 5px;
+    margin-bottom: 3px;
+    margin-top: 3px;
     font-family: monospace;
+    font-size: 0.8rem;
+    text-align: center;
 
     p {
       display: inline-block;
@@ -127,16 +151,18 @@ blockquote {
 }
 
 .profile.float-right {
-  margin-left: 1rem;
+  margin-left: 0.75rem;
 }
 
 .profile.float-left {
-  margin-right: 1rem;
+  margin-right: 0.75rem;
 }
 
 @media (min-width: 576px) {
   .profile {
-    width: 30%;
+    width: 22%;
+    min-width: 140px;
+    max-width: 180px;
 
     .address {
       p {
@@ -147,8 +173,8 @@ blockquote {
 }
 
 .post-description {
-  margin-bottom: 2rem;
-  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
 
   a {
     color: inherit;
@@ -167,7 +193,10 @@ blockquote {
   box-shadow: none;
   border-bottom: 1px solid var(--global-divider-color);
   background-color: var(--global-bg-color);
-  opacity: 0.95;
+  opacity: 0.98;
+  padding: 0.5rem 0;
+  min-height: 56px;
+  transition: all 0.3s ease;
 }
 
 .navbar .dropdown-menu {
@@ -209,26 +238,29 @@ blockquote {
 
   .navbar-nav .nav-item .nav-link {
     color: var(--global-text-color);
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
 
     &:hover {
-      color: var(--global-hover-color);
+      color: var(--global-theme-color);
     }
   }
 
   .navbar-nav .nav-item.active>.nav-link {
     background-color: inherit;
-    font-weight: bolder;
+    font-weight: 600;
     color: var(--global-theme-color);
 
     &:hover {
-      color: var(--global-hover-color);
+      color: var(--global-theme-color);
     }
   }
 
   .navbar-brand.social {
     padding-bottom: 0;
     padding-top: 0;
-    font-size: 1.7rem;
+    font-size: 1.2rem;
 
     a {
       i::before {
@@ -290,9 +322,15 @@ blockquote {
   border: 0;
   background-color: inherit;
   color: var(--global-text-color);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-left: 0.5rem;
 
   &:hover {
-    color: var(--global-hover-color);
+    color: var(--global-theme-color);
   }
 }
 
@@ -302,7 +340,7 @@ blockquote {
   text-align: center;
 
   .contact-icons {
-    font-size: 4rem;
+    font-size: 3rem;
 
     a {
       i::before {
@@ -327,12 +365,12 @@ blockquote {
 // Footer
 footer.fixed-bottom {
   background-color: var(--global-footer-bg-color);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 
   .container {
     color: var(--global-footer-text-color);
-    padding-top: 9px;
-    padding-bottom: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 
   a {
@@ -347,9 +385,9 @@ footer.fixed-bottom {
 
 footer.sticky-bottom {
   border-top: 1px solid var(--global-divider-color);
-  padding-top: 40px;
-  padding-bottom: 40px;
-  font-size: 0.9rem;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  font-size: 0.8rem;
 }
 
 // CV
@@ -360,6 +398,7 @@ footer.sticky-bottom {
   .card {
     background-color: var(--global-card-bg-color);
     border: 1px solid var(--global-divider-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 
     .list-group-item {
       background-color: inherit;
@@ -386,19 +425,19 @@ footer.sticky-bottom {
 .header-bar {
   border-bottom: 1px solid var(--global-divider-color);
   text-align: center;
-  padding-top: 2rem;
-  padding-bottom: 3rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.75rem;
 
   h1 {
     color: var(--global-theme-color);
-    font-size: 5rem;
+    font-size: 2.5rem;
   }
 }
 
 .tag-list {
   border-bottom: 1px solid var(--global-divider-color);
   text-align: center;
-  padding-top: 1rem;
+  padding-top: 0.5rem;
 
   ul {
     justify-content: center;
@@ -408,7 +447,7 @@ footer.sticky-bottom {
     li {
       list-style: none;
       display: inline-block;
-      padding: 1rem 0.5rem;
+      padding: 0.5rem 0.4rem;
       color: var(--global-text-color-light);
     }
   }
@@ -416,25 +455,25 @@ footer.sticky-bottom {
 
 .post-list {
   margin: 0;
-  margin-bottom: 40px;
+  margin-bottom: 1.5rem;
   padding: 0;
 
   li {
     border-bottom: 1px solid var(--global-divider-color);
     list-style: none;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 
     .post-meta {
       color: var(--global-text-color-light);
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       margin-bottom: 0;
     }
 
     .post-tags {
       color: var(--global-text-color-light);
-      font-size: 0.875rem;
-      padding-top: 0.25rem;
+      font-size: 0.8rem;
+      padding-top: 0.15rem;
       padding-bottom: 0;
     }
 
@@ -445,6 +484,20 @@ footer.sticky-bottom {
       &:hover {
         color: var(--global-theme-color);
       }
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      line-height: 1.4;
+    }
+
+    p {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 0.35rem;
+      color: var(--global-text-color-light);
     }
   }
 }
@@ -530,31 +583,34 @@ footer.sticky-bottom {
 // Publications
 
 .publications {
-  margin-top: 2rem;
+  margin-top: 1rem;
 
   h1 {
     color: var(--global-theme-color);
-    font-size: 2rem;
+    font-size: 1.5rem;
     text-align: center;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
   }
 
   h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 
     span {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
     }
   }
 
   h2.year {
-    color: var(--global-divider-color);
+    color: var(--global-text-color);
     border-top: 1px solid var(--global-divider-color);
-    padding-top: 1rem;
-    margin-top: 2rem;
-    margin-bottom: -2rem;
+    border-bottom: none;
+    padding-top: 0.75rem;
+    margin-top: 1.25rem;
+    margin-bottom: -1.25rem;
     text-align: right;
+    font-size: 1.5rem;
+    font-weight: bold;
   }
 
   ol.bibliography {
@@ -563,23 +619,28 @@ footer.sticky-bottom {
     margin-top: 0;
 
     li {
-      margin-bottom: 1rem;
+      margin-bottom: 0.65rem;
 
       .preview {
         width: 100%;
-        min-width: 80px;
-        max-width: 200px;
+        min-width: 60px;
+        max-width: 160px;
       }
 
       .abbr {
-        height: 2rem;
+        height: auto;
         margin-bottom: 0.5rem;
 
         abbr {
           display: inline-block;
           background-color: var(--global-theme-color);
-          padding-left: 1rem;
-          padding-right: 1rem;
+          padding: 0.3rem 0.8rem;
+          font-size: 0.75rem;
+          border-radius: 4px;
+          font-weight: 600;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          white-space: normal;
+          line-height: 1.2;
 
           a {
             color: white;
@@ -598,9 +659,14 @@ footer.sticky-bottom {
 
       .title {
         font-weight: bolder;
+        font-size: 0.9rem;
+        line-height: 1.4;
       }
 
       .author {
+        font-size: 0.8rem;
+        line-height: 1.4;
+
         a {
           border-bottom: 1px dashed var(--global-theme-color);
 
@@ -627,14 +693,20 @@ footer.sticky-bottom {
         }
       }
 
+      .periodical {
+        font-size: 0.75rem;
+      }
+
       .links {
         a.btn {
           color: var(--global-text-color);
           border: 1px solid var(--global-text-color);
-          padding-left: 1rem;
-          padding-right: 1rem;
-          padding-top: 0.25rem;
-          padding-bottom: 0.25rem;
+          padding-left: 0.5rem;
+          padding-right: 0.5rem;
+          padding-top: 0.12rem;
+          padding-bottom: 0.12rem;
+          font-size: 0.75rem;
+          margin-right: 0.15rem;
 
           &:hover {
             color: var(--global-theme-color);
@@ -658,7 +730,7 @@ footer.sticky-bottom {
       }
 
       .hidden {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         max-height: 0px;
         overflow: hidden;
         text-align: justify;
@@ -674,7 +746,7 @@ footer.sticky-bottom {
         }
 
         pre {
-          font-size: 1em;
+          font-size: 0.9em;
           line-height: 1.4em;
           padding: 10px;
         }
@@ -863,7 +935,7 @@ pre {
 
 .news {
   .news-table.news-scrollable {
-    max-height: clamp(220px, 32vh, 420px);
+    max-height: clamp(180px, 28vh, 350px);
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
@@ -876,14 +948,453 @@ pre {
 
   th[scope="row"] {
     white-space: nowrap;
+    font-size: 0.7rem;
+  }
+
+  td {
+    font-size: 0.85rem;
+    padding: 0.3rem 0 !important;
+    line-height: 1.5;
   }
 
   .news-table.news-scrollable::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
 
   .news-table.news-scrollable::-webkit-scrollbar-thumb {
     background-color: var(--global-divider-color);
-    border-radius: 8px;
+    border-radius: 6px;
+  }
+}
+
+/*******************************************************************************
+ * Enhanced Personal Homepage Styles
+ ******************************************************************************/
+
+// Navbar Social Icons - Modern minimal style
+.navbar-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background: transparent;
+    transition: all 0.2s ease;
+    position: relative;
+    text-decoration: none !important;
+
+    i, i::before {
+      font-size: 2.2rem;
+      color: var(--global-text-color);
+      transition: all 0.2s ease;
+    }
+
+    &:hover {
+      background: transparent;
+      transform: none;
+      box-shadow: none;
+
+      i, i::before {
+        color: var(--global-theme-color);
+      }
+    }
+  }
+}
+
+// Enhanced Profile Section
+.profile {
+  .address {
+    font-size: 0.9rem;
+    color: var(--global-text-color-light);
+    letter-spacing: 0.01em;
+
+    p {
+      position: relative;
+      padding-left: 0;
+
+      &::before {
+        content: "";
+      }
+    }
+  }
+
+  img {
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+      transform: scale(1.01);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// About Page - Refined Typography
+.post-header {
+  margin-bottom: 1rem;
+
+  .post-title {
+    font-weight: 700;
+    font-size: 1.75rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .desc {
+    font-size: 1.1rem;
+    color: var(--global-text-color-light);
+
+    a {
+      color: var(--global-theme-color);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--global-theme-color);
+      transition: border-bottom-style 0.2s;
+
+      &:hover {
+        border-bottom-style: solid;
+      }
+    }
+  }
+}
+
+// Section Headers with subtle accent
+.post h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid var(--global-theme-color);
+  display: inline-block;
+
+  a {
+    color: inherit;
+    &:hover {
+      text-decoration: none;
+      opacity: 0.8;
+    }
+  }
+}
+
+// Section Cards
+.news, .publications {
+  background-color: var(--global-card-bg-color);
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--global-divider-color);
+}
+
+// News Section - Clean List Style
+.news table {
+  font-size: 1rem;
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+
+  tr {
+    transition: background-color 0.2s;
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid var(--global-divider-color);
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+      background-color: rgba(0,0,0,0.02);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  th[scope="row"] {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--global-text-color);
+    padding: 0.75rem 1rem !important;
+    vertical-align: top;
+    min-width: 120px;
+    border: none;
+  }
+
+  td {
+    padding: 0.75rem 1rem !important;
+    line-height: 1.5;
+    vertical-align: top;
+    border: none;
+  }
+}
+
+/*******************************************************************************
+ * CV Page - Compact & Professional
+ ******************************************************************************/
+
+.cv {
+  margin-bottom: 1.5rem;
+
+  .card {
+    background: var(--global-card-bg-color);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    margin-top: 0.75rem !important;
+    padding: 0.75rem 1rem !important;
+    transition: box-shadow 0.2s;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--global-theme-color);
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--global-divider-color);
+    }
+  }
+
+  // Compact Time Table
+  .list-group {
+    margin: 0;
+    padding: 0;
+
+    .list-group-item {
+      padding: 0.4rem 0;
+      border: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+
+      &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      &:first-child {
+        padding-top: 0;
+      }
+
+      .row {
+        margin: 0;
+        align-items: flex-start;
+      }
+
+      .badge {
+        font-size: 0.65rem;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        min-width: auto;
+        background-color: var(--global-theme-color) !important;
+      }
+
+      h6.title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin: 0 0 0.1rem 0;
+        color: var(--global-text-color);
+      }
+
+      h6:not(.title) {
+        font-size: 0.75rem;
+        font-weight: 400;
+        margin: 0;
+        color: var(--global-text-color-light);
+      }
+
+      .items {
+        margin: 0.2rem 0 0 0;
+        padding-left: 0.85rem;
+        font-size: 0.8rem;
+
+        li {
+          margin-bottom: 0.05rem;
+        }
+      }
+    }
+  }
+
+  // Compact Map Table
+  .table {
+    margin: 0;
+    font-size: 0.8rem;
+
+    tr {
+      td {
+        padding: 0.25rem 0.4rem;
+        border: none;
+
+        &:first-child {
+          font-weight: 500;
+          color: var(--global-text-color-light);
+          width: 100px;
+        }
+      }
+    }
+  }
+}
+
+// CV TOC Sidebar - Refined
+.toc-layout {
+  .col-lg-3 {
+    aside {
+      position: sticky;
+      top: 70px;
+      font-size: 0.75rem;
+
+      .nav-link {
+        padding: 0.2rem 0.4rem;
+        color: var(--global-text-color-light);
+        transition: color 0.2s, padding-left 0.2s;
+
+        &:hover, &.active {
+          color: var(--global-theme-color);
+          padding-left: 0.6rem;
+        }
+      }
+    }
+  }
+}
+
+/*******************************************************************************
+ * Publications Page - Compact & Organized
+ ******************************************************************************/
+
+.publications {
+  margin-top: 0.75rem;
+
+  h2.year {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: -1rem;
+    padding-top: 0.5rem;
+  }
+
+  ol.bibliography {
+    li {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 5px;
+      background: var(--global-card-bg-color);
+      transition: background-color 0.2s, box-shadow 0.2s;
+
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .row {
+        margin: 0;
+      }
+
+      .col-sm-2 {
+        padding: 0 0.4rem 0 0;
+
+        &.abbr {
+          height: auto;
+          margin-bottom: 0;
+
+          abbr {
+            font-size: 0.6rem;
+            padding: 0.25rem 0.4rem;
+            border-radius: 3px;
+          }
+        }
+      }
+
+      .col-sm-8 {
+        padding: 0;
+      }
+
+      .title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1.35;
+        margin-bottom: 0.2rem;
+      }
+
+      .author {
+        font-size: 0.75rem;
+        line-height: 1.35;
+        margin-bottom: 0.15rem;
+      }
+
+      .periodical {
+        font-size: 0.7rem;
+        color: var(--global-text-color-light);
+        margin-bottom: 0.2rem;
+      }
+
+      .links {
+        margin-top: 0.25rem;
+
+        a.btn {
+          font-size: 0.65rem;
+          padding: 0.15rem 0.4rem;
+          margin-right: 0.2rem;
+          border-radius: 3px;
+        }
+      }
+
+      .hidden {
+        font-size: 0.7rem;
+        margin-top: 0.35rem;
+
+        pre {
+          font-size: 0.65rem;
+          padding: 0.4rem;
+        }
+      }
+    }
+  }
+}
+
+// Selected Papers on About Page - More Compact
+.post ol.bibliography {
+  padding: 0;
+
+  li {
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0;
+    background: transparent;
+    border-bottom: 1px solid var(--global-divider-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      box-shadow: none;
+      background: rgba(0, 171, 55, 0.02);
+    }
+
+    .title {
+      font-size: 0.8rem;
+    }
+
+    .author {
+      font-size: 0.7rem;
+    }
+
+    .periodical {
+      font-size: 0.65rem;
+    }
+
+    .links a.btn {
+      font-size: 0.6rem;
+      padding: 0.12rem 0.35rem;
+    }
   }
 }
