@@ -5,6 +5,10 @@ layout: default
 {% assign category_slug = page.title | slugify | url_encode %}
 {% assign target = '/blog/' | relative_url | append: '?category=' | append: category_slug %}
 <meta http-equiv="refresh" content="5; url={{ target }}">
+<script>
+  // Immediate redirect as a fallback for environments where meta refresh may be delayed or missed
+  window.location.href = "{{ target }}";
+</script>
 
 <div class="post">
 

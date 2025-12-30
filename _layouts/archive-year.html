@@ -4,6 +4,10 @@ layout: default
 
 {% assign target = '/blog/' | relative_url | append: '?year=' | append: page.date | date: "%Y" %}
 <meta http-equiv="refresh" content="5; url={{ target }}">
+<script>
+  // Immediate redirect as a fallback for environments where meta refresh may be delayed or missed
+  window.location.href = "{{ target }}";
+</script>
 
 <div class="post">
   <header class="post-header">
