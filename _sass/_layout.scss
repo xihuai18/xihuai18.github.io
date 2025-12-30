@@ -25,7 +25,7 @@ body.sticky-bottom-footer {
 }
 
 .container {
-  max-width: $max-content-width;
+  max-width: var(--max-content-width);
   padding-left: 1rem;
   padding-right: 1rem;
 }

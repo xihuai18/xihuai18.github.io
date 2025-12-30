@@ -23,7 +23,7 @@ My research lies at the intersection of **Reinforcement Learning** and **Multi-A
 - **Large Language Model Reasoning and Agency**
   - Reinforcement learning methodologies for enhancing reasoning and agentic capabilities of LLMs
   - Human-AI collaborative decision-making with LLM-based agents
-- **Cooperative Multi-Agent Reinforcement Learning**
+- **Multi-Agent Reinforcement Learning**
   - Sample-efficient algorithms for cooperative MARL
   - Zero-shot coordination and generalization in multi-agent systems
 

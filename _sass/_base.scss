@@ -2,6 +2,8 @@
  * Styles for the base elements of the theme.
  ******************************************************************************/
 
+@use "variables" as *;
+
 // Typography
 
 p,
@@ -68,8 +70,8 @@ blockquote {
   border: 1px solid var(--global-divider-color);
   border-left: 5px solid var(--global-theme-color);
   border-radius: 5px;
-  background-color: var(--global-code-bg-color);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  background-color: var(--global-bg-color);
+  box-shadow: none;
   overflow: hidden;
 
   p {
@@ -638,9 +640,11 @@ footer.sticky-bottom {
           font-size: 0.75rem;
           border-radius: 4px;
           font-weight: 600;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          box-shadow: none;
+          border: 1px solid rgba(0,0,0,0.1);
           white-space: normal;
           line-height: 1.2;
+          text-align: center;
 
           a {
             color: white;
@@ -659,12 +663,12 @@ footer.sticky-bottom {
 
       .title {
         font-weight: bolder;
-        font-size: 0.9rem;
+        font-size: 1rem;
         line-height: 1.4;
       }
 
       .author {
-        font-size: 0.8rem;
+        font-size: 1rem;
         line-height: 1.4;
 
         a {
@@ -694,7 +698,7 @@ footer.sticky-bottom {
       }
 
       .periodical {
-        font-size: 0.75rem;
+        font-size: 1rem;
       }
 
       .links {
@@ -730,7 +734,7 @@ footer.sticky-bottom {
       }
 
       .hidden {
-        font-size: 0.8rem;
+        font-size: 1rem;
         max-height: 0px;
         overflow: hidden;
         text-align: justify;
@@ -955,6 +959,10 @@ pre {
     font-size: 0.85rem;
     padding: 0.3rem 0 !important;
     line-height: 1.5;
+
+    ul, ol {
+      margin-bottom: 0;
+    }
   }
 
   .news-table.news-scrollable::-webkit-scrollbar {
@@ -1028,12 +1036,13 @@ pre {
 
   img {
     border-radius: 10px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--global-divider-color);
+    box-shadow: none;
+    transition: transform 0.3s ease;
 
     &:hover {
       transform: scale(1.01);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+      box-shadow: none;
     }
   }
 }
@@ -1047,6 +1056,21 @@ pre {
     font-size: 1.75rem;
     letter-spacing: -0.02em;
     line-height: 1.2;
+
+    // Signature-style name fonts
+    &.signature-name {
+      .name-en {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-style: italic;
+        font-weight: 400;
+        font-size: 1.9rem;
+      }
+      .name-zh {
+        font-family: 'KaiTi', 'STKaiti', 'FZKai-Z03', 'AR PL UKai CN', serif;
+        font-weight: 400;
+        font-size: 1.75rem;
+      }
+    }
   }
 
   .desc {
@@ -1087,12 +1111,12 @@ pre {
 
 // Section Cards
 .news, .publications {
-  background-color: var(--global-card-bg-color);
-  border-radius: 8px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-  padding: 1.5rem;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
   margin-bottom: 1rem;
-  border: 1px solid var(--global-divider-color);
+  border: none;
 }
 
 // News Section - Clean List Style
@@ -1103,16 +1127,16 @@ pre {
   width: 100%;
 
   tr {
-    transition: background-color 0.2s;
+    transition: none;
     background-color: transparent;
     border-radius: 0;
     box-shadow: none;
     border-bottom: 1px solid var(--global-divider-color);
 
     &:hover {
-      transform: none;
-      box-shadow: none;
-      background-color: rgba(0,0,0,0.02);
+      transform: none !important;
+      box-shadow: none !important;
+      background-color: transparent !important;
     }
 
     &:last-child {
@@ -1124,15 +1148,15 @@ pre {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--global-text-color);
-    padding: 0.75rem 1rem !important;
+    padding: 1.2rem 1rem !important;
     vertical-align: top;
     min-width: 120px;
     border: none;
   }
 
   td {
-    padding: 0.75rem 1rem !important;
-    line-height: 1.5;
+    padding: 1.2rem 1rem !important;
+    line-height: 1.6;
     vertical-align: top;
     border: none;
   }
@@ -1152,10 +1176,11 @@ pre {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     margin-top: 0.75rem !important;
     padding: 0.75rem 1rem !important;
-    transition: box-shadow 0.2s;
+    transition: none;
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+      transform: none !important;
     }
 
     .card-title {
@@ -1279,20 +1304,32 @@ pre {
     font-size: 1rem;
     font-weight: 600;
     margin-top: 1rem;
-    margin-bottom: -1rem;
+    margin-bottom: 0.6rem;
     padding-top: 0.5rem;
   }
 
   ol.bibliography {
     li {
-      margin-bottom: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 5px;
-      background: var(--global-card-bg-color);
-      transition: background-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-radius: 0;
+      background: transparent;
+      border-bottom: 1px solid var(--global-divider-color);
+      transition: none;
+
+      &:last-child {
+        border-bottom: none;
+      }
 
       &:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        box-shadow: none !important;
+        border: none !important;
+        background-color: transparent !important;
+        border-bottom: 1px solid var(--global-divider-color) !important;
+      }
+
+      &:last-child:hover {
+        border-bottom: none !important;
       }
 
       .row {
@@ -1305,12 +1342,6 @@ pre {
         &.abbr {
           height: auto;
           margin-bottom: 0;
-
-          abbr {
-            font-size: 0.6rem;
-            padding: 0.25rem 0.4rem;
-            border-radius: 3px;
-          }
         }
       }
 
@@ -1319,20 +1350,42 @@ pre {
       }
 
       .title {
-        font-size: 0.85rem;
+        font-size: 1rem;
         font-weight: 600;
         line-height: 1.35;
         margin-bottom: 0.2rem;
+
+        abbr.badge {
+          font-size: 0.9rem;
+          padding: 0.3rem 0.8rem;
+          border-radius: 4px;
+          line-height: 1.2;
+          text-align: center;
+          display: block;
+          width: fit-content;
+          margin-bottom: 0.5rem;
+          background-color: var(--global-theme-color);
+          color: white;
+          border: 1px solid rgba(0,0,0,0.1);
+          white-space: normal;
+
+          a {
+            color: white;
+            &:hover {
+              text-decoration: none;
+            }
+          }
+        }
       }
 
       .author {
-        font-size: 0.75rem;
+        font-size: 1rem;
         line-height: 1.35;
         margin-bottom: 0.15rem;
       }
 
       .periodical {
-        font-size: 0.7rem;
+        font-size: 1rem;
         color: var(--global-text-color-light);
         margin-bottom: 0.2rem;
       }
@@ -1350,12 +1403,16 @@ pre {
 
       .hidden {
         font-size: 0.7rem;
-        margin-top: 0.35rem;
+        margin-top: 0;
 
         pre {
           font-size: 0.65rem;
           padding: 0.4rem;
         }
+      }
+
+      .hidden.open {
+        margin-top: 0.35rem;
       }
     }
   }
@@ -1366,30 +1423,36 @@ pre {
   padding: 0;
 
   li {
-    margin-bottom: 0.5rem;
-    padding: 0.4rem 0;
+    margin-bottom: 1.0rem;
+    padding-bottom: 0.3rem;
     background: transparent;
     border-bottom: 1px solid var(--global-divider-color);
+    transition: none;
 
     &:last-child {
       border-bottom: none;
     }
 
     &:hover {
-      box-shadow: none;
-      background: rgba(0, 171, 55, 0.02);
+      box-shadow: none !important;
+      background: transparent !important;
+      border-bottom: 1px solid var(--global-divider-color) !important;
+    }
+
+    &:last-child:hover {
+      border-bottom: none !important;
     }
 
     .title {
-      font-size: 0.8rem;
+      font-size: 1rem;
     }
 
     .author {
-      font-size: 0.7rem;
+      font-size: 1rem;
     }
 
     .periodical {
-      font-size: 0.65rem;
+      font-size: 1rem;
     }
 
     .links a.btn {

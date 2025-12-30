@@ -3,16 +3,16 @@
 ---
 @charset "utf-8";
 
-// Dimensions
-$max-content-width: {{ site.max_width }};
+@use "variables";
+@use "themes";
+@use "layout";
+@use "base";
+@use "toc";
+@use "blog_enhancements";
+@use "pseudocode";
+@use "distill";
 
-@import
-  "variables",
-  "themes",
-  "layout",
-  "base",
-  "toc",
-  "blog_enhancements",
-  "pseudocode",
-  "distill"
-;
+// Dimensions
+:root {
+  --max-content-width: {{ site.max_width }};
+}
