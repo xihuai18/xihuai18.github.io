@@ -2,8 +2,9 @@
 layout: default
 ---
 
-{% assign target = '/blog/' | relative_url | append: '?category=' | append: page.title | slugify %}
-<meta http-equiv="refresh" content="0; url={{ target }}">
+{% assign category_slug = page.title | slugify | url_encode %}
+{% assign target = '/blog/' | relative_url | append: '?category=' | append: category_slug %}
+<meta http-equiv="refresh" content="5; url={{ target }}">
 
 <div class="post">
 
