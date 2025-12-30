@@ -113,7 +113,7 @@
    */
   function updateFilterStatus(year, category, visibleCount, totalCount) {
     let statusElement = document.getElementById('blog-filter-status');
-    
+
     if (!statusElement) {
       // Create status element with inline styles matching publications page
       statusElement = document.createElement('div');
@@ -128,7 +128,29 @@
         font-size: 0.875rem;
         color: var(--global-text-color);
       `;
-      
+
+      // Create the message span
+      const messageSpan = document.createElement('span');
+      messageSpan.id = 'blog-filter-message';
+      statusElement.appendChild(messageSpan);
+
+      // Create the clear button once with event listener
+      const clearBtn = document.createElement('button');
+      clearBtn.id = 'blog-filter-clear-btn';
+      clearBtn.textContent = 'Clear Filter';
+      clearBtn.style.cssText = `
+        margin-left: 1rem;
+        padding: 0.2rem 0.5rem;
+        background: var(--global-theme-color);
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.75rem;
+      `;
+      clearBtn.addEventListener('click', clearFilters);
+      statusElement.appendChild(clearBtn);
+
       // Insert before the first post list or featured posts section
       const postSection = document.querySelector('.post');
       if (postSection) {
@@ -147,24 +169,10 @@
 
     if (parts.length) {
       statusElement.style.display = 'block';
-      statusElement.innerHTML = `
-        Filtering by <strong>${parts.join(' and ')}</strong>: showing ${visibleCount} of ${totalCount} posts
-        <button id="blog-filter-clear-btn" style="
-          margin-left: 1rem;
-          padding: 0.2rem 0.5rem;
-          background: var(--global-theme-color);
-          color: white;
-          border: none;
-          border-radius: 3px;
-          cursor: pointer;
-          font-size: 0.75rem;
-        ">Clear Filter</button>
-      `;
-      
-      // Re-attach click handler to the new button
-      const clearBtn = statusElement.querySelector('#blog-filter-clear-btn');
-      if (clearBtn) {
-        clearBtn.addEventListener('click', clearFilters);
+      // Update only the message text, not the entire innerHTML
+      const messageSpan = statusElement.querySelector('#blog-filter-message');
+      if (messageSpan) {
+        messageSpan.innerHTML = `Filtering by <strong>${parts.join(' and ')}</strong>: showing ${visibleCount} of ${totalCount} posts`;
       }
     } else {
       statusElement.style.display = 'none';
