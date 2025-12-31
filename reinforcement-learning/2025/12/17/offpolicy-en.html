@@ -149,14 +149,22 @@
 <div class="post toc-layout">
   <header class="post-header">
     <h1 class="post-title">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</h1>
-    <p class="post-meta">December 17, 2025</p>
-    <p class="post-tags">
-      <a href="/blog/2025"> 📅 2025 </a>
-        &nbsp; &middot; &nbsp;
-        <a href="/blog/category/reinforcement-learning">
-            🏷️ reinforcement-learning</a> &nbsp;
-        
-    </p>
+    <div class="post-meta-container">
+      <div class="post-meta-row">
+        <span class="post-date">
+          <i class="far fa-calendar-alt"></i>
+          December 17, 2025
+        </span></div>
+      <div class="post-tags-row">
+        <a href="/blog/2025" class="post-tag post-tag-year">
+          <i class="far fa-calendar"></i> 2025
+        </a>
+          <a href="/blog/category/reinforcement-learning" class="post-tag post-tag-category">
+              <i class="fas fa-folder"></i> reinforcement-learning
+            </a>
+          
+      </div>
+    </div>
   </header>
 
   <div class="post-links">
@@ -979,9 +987,15 @@ $$</p>
       </div>
 
     <div class="col-lg-3 d-none d-lg-block">
-      <aside class="toc-sidebar">
-  <div class="toc-sidebar__title">Contents</div>
+      <aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
+  <div class="toc-sidebar__header">
+    <div class="toc-sidebar__title">Contents</div>
+    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-toggle>
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
   <nav
+    id="toc-content"
     class="toc js-page-toc"
     data-toc
     data-toc-content=".toc-content"
@@ -990,6 +1004,11 @@ $$</p>
     aria-label="Contents"
   ></nav>
 </aside>
+
+<!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
+<button class="toc-collapsed-toggle toc-collapsed-toggle--hidden" aria-label="Show table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-expand>
+  <i class="fas fa-list"></i>
+</button>
 
 
     </div>

@@ -153,10 +153,18 @@
 <div class="post toc-layout">
   <header class="post-header">
     <h1 class="post-title">KL Estimators Blog</h1>
-    <p class="post-meta">December 2, 2025</p>
-    <p class="post-tags">
-      <a href="/blog/2025"> 📅 2025 </a>
-    </p>
+    <div class="post-meta-container">
+      <div class="post-meta-row">
+        <span class="post-date">
+          <i class="far fa-calendar-alt"></i>
+          December 2, 2025
+        </span></div>
+      <div class="post-tags-row">
+        <a href="/blog/2025" class="post-tag post-tag-year">
+          <i class="far fa-calendar"></i> 2025
+        </a>
+      </div>
+    </div>
   </header>
 
   <div class="post-links">
@@ -201,9 +209,15 @@
       </div>
 
     <div class="col-lg-3 d-none d-lg-block">
-      <aside class="toc-sidebar">
-  <div class="toc-sidebar__title">Contents</div>
+      <aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
+  <div class="toc-sidebar__header">
+    <div class="toc-sidebar__title">Contents</div>
+    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-toggle>
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
   <nav
+    id="toc-content"
     class="toc js-page-toc"
     data-toc
     data-toc-content=".toc-content"
@@ -212,6 +226,11 @@
     aria-label="Contents"
   ></nav>
 </aside>
+
+<!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
+<button class="toc-collapsed-toggle toc-collapsed-toggle--hidden" aria-label="Show table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-expand>
+  <i class="fas fa-list"></i>
+</button>
 
 
     </div>

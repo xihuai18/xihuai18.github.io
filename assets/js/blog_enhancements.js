@@ -1,6 +1,46 @@
 // Blog post enhancements (tables, code blocks, math, etc.)
 document.addEventListener('DOMContentLoaded', () => {
   // ============================================================================
+  // Back to Top Button
+  // ============================================================================
+  const createBackToTopButton = () => {
+    // Only add on post pages
+    if (!document.querySelector('.post-content')) return;
+    
+    const btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.setAttribute('aria-label', 'Back to top');
+    // Use createElement instead of innerHTML for security
+    const icon = document.createElement('i');
+    icon.classList.add('fas', 'fa-arrow-up');
+    btn.appendChild(icon);
+    document.body.appendChild(btn);
+    
+    const toggleVisibility = () => {
+      if (window.scrollY > 300) {
+        btn.classList.add('is-visible');
+      } else {
+        btn.classList.remove('is-visible');
+      }
+    };
+    
+    window.addEventListener('scroll', toggleVisibility, { passive: true });
+    
+    btn.addEventListener('click', () => {
+      // Respect user's motion preferences
+      const prefersReducedMotion = window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false;
+      window.scrollTo({
+        top: 0,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      });
+    });
+  };
+  
+  createBackToTopButton();
+
+  // ============================================================================
   // Fix HTML blocks that were incorrectly rendered as code blocks
   // ============================================================================
   document.querySelectorAll('.post-content .language-plaintext.highlighter-rouge').forEach((block) => {

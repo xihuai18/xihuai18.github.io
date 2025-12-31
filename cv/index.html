@@ -459,9 +459,15 @@
             </div>
 
             <div class="col-lg-3 d-none d-lg-block">
-              <aside class="toc-sidebar">
-  <div class="toc-sidebar__title">Contents</div>
+              <aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
+  <div class="toc-sidebar__header">
+    <div class="toc-sidebar__title">Contents</div>
+    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-toggle>
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
   <nav
+    id="toc-content"
     class="toc js-page-toc"
     data-toc
     data-toc-content=".toc-content"
@@ -470,6 +476,11 @@
     aria-label="Contents"
   ></nav>
 </aside>
+
+<!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
+<button class="toc-collapsed-toggle toc-collapsed-toggle--hidden" aria-label="Show table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-expand>
+  <i class="fas fa-list"></i>
+</button>
 
 
             </div>
