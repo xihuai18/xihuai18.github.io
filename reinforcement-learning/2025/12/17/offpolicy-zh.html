@@ -47,6 +47,14 @@
     </script>
 
 
+    <!-- DNS Prefetch & Preconnect for faster external resource loading -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <!-- Bootstrap & MDB -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous" />
@@ -54,7 +62,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&display=swap">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" /><!-- Pseudocode -->
@@ -72,6 +80,15 @@
     <script src="/assets/js/theme.js"></script>
     <script src="/assets/js/dark_mode.js"></script>
     
+
+    <!-- Prefetch/Preload for faster navigation -->
+    <link rel="prefetch" href="/" as="document">
+    <link rel="prefetch" href="/blog/" as="document">
+    <link rel="prefetch" href="/publications/" as="document">
+    <link rel="prefetch" href="/cv/" as="document">
+    
+    <!-- Instant.page for instant page loads on hover -->
+    <script src="https://cdn.jsdelivr.net/npm/instant.page@5.2.0/instantpage.min.js" type="module" defer></script>
 
   </head>
 
@@ -104,7 +121,7 @@
           
           <!-- Blog -->
           <li class="nav-item ">
-            <a class="nav-link" href="/blog/">Xihuai's Blog</a>
+            <a class="nav-link" href="/blog/">Blog</a>
           </li>
 
           <!-- CV -->
@@ -985,11 +1002,11 @@ $$</p>
         
       </div>
 
-    <div class="col-lg-3 d-none d-lg-block">
+    <div class="col-lg-3 d-none d-lg-block toc-sidebar-col">
       <aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
   <div class="toc-sidebar__header">
     <div class="toc-sidebar__title">目录</div>
-    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-toggle>
+    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
@@ -1005,7 +1022,7 @@ $$</p>
 </aside>
 
 <!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
-<button class="toc-collapsed-toggle toc-collapsed-toggle--hidden" aria-label="Show table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-expand>
+<button class="toc-collapsed-toggle" aria-label="Show table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-expand>
   <i class="fas fa-list"></i>
 </button>
 

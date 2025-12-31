@@ -33,6 +33,11 @@ function filterByVenue(venue) {
       tag.classList.remove('active-filter');
     });
     
+    // Remove focus from active element to remove hover/focus effects
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+    
     // Show all year headers
     document.querySelectorAll('.publications h2.year').forEach(header => {
       header.style.display = '';

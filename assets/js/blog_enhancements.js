@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Back to Top Button
   // ============================================================================
   const createBackToTopButton = () => {
-    // Only add on post pages
-    if (!document.querySelector('.post-content')) return;
+    // Only add on post pages or CV page
+    if (!document.querySelector('.post-content') && !document.querySelector('.cv')) return;
     
     const btn = document.createElement('button');
     btn.className = 'back-to-top';

@@ -66,13 +66,18 @@
     const nextYear = hasYearParam ? params.year : current.year;
     const nextCategory = hasCategoryParam ? params.category : current.category;
 
-    if (nextYear) {
+    // Check if we are toggling off the current filter
+    if (hasYearParam && params.year === current.year) {
+      url.searchParams.delete('year');
+    } else if (nextYear) {
       url.searchParams.set('year', nextYear);
     } else {
       url.searchParams.delete('year');
     }
 
-    if (nextCategory) {
+    if (hasCategoryParam && params.category === current.category) {
+      url.searchParams.delete('category');
+    } else if (nextCategory) {
       url.searchParams.set('category', nextCategory);
     } else {
       url.searchParams.delete('category');
@@ -118,6 +123,19 @@
     if (hasActiveFilters && lastVisiblePost) {
       lastVisiblePost.style.borderBottom = 'none';
     }
+
+    // Update active state of filter links
+    document.querySelectorAll('[data-filter-link]').forEach(link => {
+      const filterType = link.getAttribute('data-filter-type');
+      const filterValue = link.getAttribute('data-filter-value');
+      
+      if ((filterType === 'year' && filterValue === year) || 
+          (filterType === 'category' && filterValue === category)) {
+        link.classList.add('active-filter');
+      } else {
+        link.classList.remove('active-filter');
+      }
+    });
 
     updateFilterStatus(year, category, visibleCount, totalCount);
   }
@@ -223,12 +241,23 @@
     const filterType = link.getAttribute('data-filter-type');
     const filterValue = link.getAttribute('data-filter-value');
 
+    // Check if we are about to cancel
+    const current = getFilters();
+    let isCancelling = false;
+    if (filterType === 'year' && current.year === filterValue) isCancelling = true;
+    if (filterType === 'category' && current.category === filterValue) isCancelling = true;
+
     if (filterType === 'year') {
       updateUrl({ year: filterValue });
     } else if (filterType === 'category') {
       updateUrl({ category: filterValue });
     }
     applyFilters();
+    
+    // Remove focus from the clicked link to remove hover/focus effects only when cancelling
+    if (isCancelling) {
+      link.blur();
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {

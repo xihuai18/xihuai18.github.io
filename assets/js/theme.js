@@ -11,28 +11,37 @@ let toggleTheme = (theme) => {
 
 let setTheme = (theme) =>  {
   transTheme();
-  setHighlight(theme);
-  setGiscusTheme(theme);
-
+  
+  // Critical: Set theme attribute first for immediate visual feedback
   if (theme) {
     document.documentElement.setAttribute("data-theme", theme);
   }
   else {
     document.documentElement.removeAttribute("data-theme");
   }
-  localStorage.setItem("theme", theme);
+  
+  // Synchronous but fast: toggle highlight stylesheets
+  setHighlight(theme);
+  
+  // Defer non-critical operations to avoid blocking the main thread
+  requestAnimationFrame(() => {
+    localStorage.setItem("theme", theme);
+    
+    // Giscus theme update can be async
+    setGiscusTheme(theme);
+    
+    try {
+      document.dispatchEvent(new CustomEvent('theme:change', { detail: { theme } }));
+    } catch (e) {}
 
-  try {
-    document.dispatchEvent(new CustomEvent('theme:change', { detail: { theme } }));
-  } catch (e) {}
-
-  // Updates the background of medium-zoom overlay.
-  if (typeof medium_zoom !== 'undefined') {
-    medium_zoom.update({
-      background: getComputedStyle(document.documentElement)
-          .getPropertyValue('--global-bg-color') + 'ee',  // + 'ee' for trasparency.
-    })
-  }
+    // Updates the background of medium-zoom overlay.
+    if (typeof medium_zoom !== 'undefined') {
+      medium_zoom.update({
+        background: getComputedStyle(document.documentElement)
+            .getPropertyValue('--global-bg-color') + 'ee',  // + 'ee' for trasparency.
+      })
+    }
+  });
 };
 
 
@@ -68,7 +77,7 @@ let transTheme = () => {
   document.documentElement.classList.add("transition");
   window.setTimeout(() => {
     document.documentElement.classList.remove("transition");
-  }, 500)
+  }, 250)
 }
 
 
