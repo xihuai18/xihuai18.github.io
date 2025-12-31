@@ -155,6 +155,10 @@
       // Update ARIA expanded state for assistive technologies
       // toggleBtn: aria-expanded reflects TOC visibility (true = expanded, false = collapsed)
       toggleBtn.setAttribute("aria-expanded", !collapsed);
+      // expandBtn: also reflects TOC visibility state
+      if (expandBtn) {
+        expandBtn.setAttribute("aria-expanded", !collapsed);
+      }
       safeLocalStorage("set", STORAGE_KEY, collapsed.toString());
     }
 
