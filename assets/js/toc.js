@@ -83,7 +83,10 @@
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "toc-section-toggle";
         toggleBtn.setAttribute("aria-label", "Toggle section");
-        toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        // Use createElement instead of innerHTML for security
+        const icon = document.createElement("i");
+        icon.className = "fas fa-chevron-down";
+        toggleBtn.appendChild(icon);
         toggleBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
