@@ -1312,8 +1312,10 @@ The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mat
   }
 
   function initializeProgressElement() {
-    let navbarHeight = $("#navbar").outerHeight(true);
-    $("body").css({ "padding-top": navbarHeight });
+    // Use the CSS-defined padding-top value to avoid layout shift
+    // The navbar height is already handled by CSS: body.fixed-top-nav { padding-top: 50px; }
+    let navbarHeight = $("#navbar").outerHeight(true) || 50;
+    // Only set progressBar position, don't override body padding to avoid layout shift
     $("progress-container").css({ "padding-top": navbarHeight });
     progressBar.css({ top: navbarHeight });
     progressBar.attr({
