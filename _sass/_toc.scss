@@ -100,7 +100,10 @@
   color: var(--global-text-color-light);
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s ease;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: all 0.2s ease;
+  }
   
   &:hover {
     background-color: var(--global-code-bg-color);

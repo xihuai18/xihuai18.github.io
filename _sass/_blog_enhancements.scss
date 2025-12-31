@@ -78,10 +78,13 @@
   font-weight: 500;
   text-decoration: none;
   border-radius: 16px;
-  transition: all 0.2s ease;
   border: 1px solid var(--global-divider-color);
   background-color: transparent;
   color: var(--global-text-color-light);
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: all 0.2s ease;
+  }
   
   i {
     font-size: 0.75em;
@@ -196,7 +199,10 @@
     color: var(--global-theme-color);
     text-decoration: none;
     border-bottom: 1px dashed var(--global-theme-color);
-    transition: all 0.2s ease;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: all 0.2s ease;
+    }
     
     &:hover {
       border-bottom-style: solid;
@@ -263,7 +269,10 @@
     tbody {
       tr {
         border-bottom: 1px solid var(--global-divider-color);
-        transition: background-color 0.15s ease;
+
+        @media (prefers-reduced-motion: no-preference) {
+          transition: background-color 0.15s ease;
+        }
         
         &:hover {
           background-color: var(--global-code-bg-color);
@@ -585,15 +594,21 @@
     font-weight: 500;
     text-decoration: none;
     color: var(--global-text-color);
-    transition: all 0.2s ease;
     box-shadow: none;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: all 0.2s ease;
+    }
 
     &:hover {
       color: white;
       background-color: var(--global-theme-color);
       border-color: var(--global-theme-color);
-      transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transform: translateY(-1px);
+      }
     }
 
     img {
