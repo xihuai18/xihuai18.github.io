@@ -1654,6 +1654,10 @@ pre:not(.wrapped) pre {
 .about-selected-papers {
   margin-bottom: 3rem;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
 }
 .about-selected-papers__intro {
   margin-bottom: 1.5rem;
@@ -1664,6 +1668,13 @@ pre:not(.wrapped) pre {
 .about-selected-papers .publications {
   padding-left: 0;
   margin-left: 0;
+  width: 100%;
+}
+.about-selected-papers .publications ol,
+.about-selected-papers .publications li {
+  padding-left: 0;
+  margin-left: 0;
+  list-style: none;
 }
 .about-selected-papers .publications ol.bibliography {
   padding-left: 0;
