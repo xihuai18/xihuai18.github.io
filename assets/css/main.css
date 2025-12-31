@@ -4,6 +4,9 @@
  * To adjust anything, simply edit the variables below and rebuild the theme.
  ******************************************************************************/
 /*******************************************************************************
+ * Reusable mixins
+ ******************************************************************************/
+/*******************************************************************************
  * Themes
  ******************************************************************************/
 :root {
@@ -19,6 +22,7 @@
   --global-distill-app-color: #252525;
   --global-divider-color: rgba(0,0,0,.3);
   --global-card-bg-color: #ffffff;
+  --global-shadow-color: rgba(0, 0, 0, 0.1);
 }
 :root .fa-sun {
   display: none;
@@ -46,6 +50,7 @@ html[data-theme=dark] {
   --global-distill-app-color: #8b8b8b;
   --global-divider-color: #424246;
   --global-card-bg-color: #212529;
+  --global-shadow-color: rgba(0, 0, 0, 0.3);
 }
 html[data-theme=dark] .fa-sun {
   display: block;
@@ -809,13 +814,34 @@ html.transition *:after {
   font-size: 0.875rem;
   padding-top: 0.25rem;
   padding-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
 }
 .post .post-tags a {
-  color: var(--global-text-color-light);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.65rem;
+  background-color: var(--global-bg-color);
+  border: 1px solid var(--global-divider-color);
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
   text-decoration: none;
+  color: var(--global-text-color);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .post .post-tags a:hover {
   color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+  background-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px var(--global-shadow-color);
+}
+.post .post-tags a {
+  white-space: nowrap;
 }
 .post .post-content blockquote {
   border-left: 5px solid var(--global-theme-color);
@@ -1904,6 +1930,115 @@ pre:not(.wrapped) pre {
 }
 .post .post-links {
   margin-bottom: 1.75rem;
+}
+
+/*******************************************************************************
+ * Blog Page Time and Tag Button Styles
+ * (Mixin defined in _mixins.scss)
+ ******************************************************************************/
+.tag-category-list {
+  margin-bottom: 1.5rem;
+}
+.tag-category-list ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.tag-category-list ul li {
+  margin: 0;
+}
+.tag-category-list ul li a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  background-color: var(--global-bg-color);
+  border: 1px solid var(--global-divider-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--global-text-color);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.tag-category-list ul li a:hover {
+  color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+  background-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px var(--global-shadow-color);
+}
+.tag-category-list ul p {
+  margin: 0;
+  color: var(--global-text-color-light);
+  font-size: 0.875rem;
+}
+
+.post-list li .post-meta a,
+.post-list li .post-tags a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.6rem;
+  background-color: var(--global-bg-color);
+  border: 1px solid var(--global-divider-color);
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--global-text-color);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.post-list li .post-meta a:hover,
+.post-list li .post-tags a:hover {
+  color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+  background-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px var(--global-shadow-color);
+}
+.post-list li .post-meta a,
+.post-list li .post-tags a {
+  white-space: nowrap;
+}
+.post-list li .post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.post-list li .post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 0.5rem;
+}
+
+.featured-posts .post-meta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.6rem;
+  background-color: var(--global-bg-color);
+  border: 1px solid var(--global-divider-color);
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--global-text-color);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.featured-posts .post-meta a:hover {
+  color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+  background-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px var(--global-shadow-color);
 }
 
 /*******************************************************************************
