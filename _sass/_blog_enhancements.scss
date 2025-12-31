@@ -429,6 +429,132 @@
 }
 
 /*******************************************************************************
+ * Blog Page Time and Tag Button Styles
+ ******************************************************************************/
+
+// Tag category list at the top of blog page
+.tag-category-list {
+  margin-bottom: 1.5rem;
+  
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      margin: 0;
+      
+      a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem 0.75rem;
+        background-color: var(--global-bg-color);
+        border: 1px solid var(--global-divider-color);
+        border-radius: 6px;
+        font-size: $font-size-sm;
+        font-weight: 500;
+        text-decoration: none;
+        color: var(--global-text-color);
+        transition: all 0.2s ease;
+        
+        &:hover {
+          color: var(--global-theme-color);
+          border-color: var(--global-theme-color);
+          background-color: transparent;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+    
+    p {
+      margin: 0;
+      color: var(--global-text-color-light);
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// Post metadata and tags in blog list
+.post-list {
+  .post-meta,
+  .post-tags {
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.6rem;
+      background-color: var(--global-bg-color);
+      border: 1px solid var(--global-divider-color);
+      border-radius: 5px;
+      font-size: $font-size-xs;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--global-text-color);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      
+      &:hover {
+        color: var(--global-theme-color);
+        border-color: var(--global-theme-color);
+        background-color: transparent;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+  
+  // Adjust spacing for inline elements
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    padding-top: 0.5rem;
+  }
+}
+
+// Featured posts section
+.featured-posts {
+  .post-meta {
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.6rem;
+      background-color: var(--global-bg-color);
+      border: 1px solid var(--global-divider-color);
+      border-radius: 5px;
+      font-size: $font-size-xs;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--global-text-color);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        color: var(--global-theme-color);
+        border-color: var(--global-theme-color);
+        background-color: transparent;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+}
+
+/*******************************************************************************
  * Enhanced Code Block Styling
  ******************************************************************************/
 
