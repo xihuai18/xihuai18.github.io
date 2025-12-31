@@ -1651,6 +1651,25 @@ pre:not(.wrapped) pre {
   text-align: left;
 }
 
+.about-selected-papers {
+  margin-bottom: 3rem;
+  text-align: left;
+}
+.about-selected-papers__intro {
+  margin-bottom: 1.5rem;
+}
+.about-selected-papers__intro ol {
+  margin: 0.35rem 0 0 1.25rem;
+}
+.about-selected-papers .publications {
+  padding-left: 0;
+  margin-left: 0;
+}
+.about-selected-papers .publications ol.bibliography {
+  padding-left: 0;
+  margin-left: 0;
+}
+
 .post ol.bibliography {
   padding: 0;
   margin: 0;
