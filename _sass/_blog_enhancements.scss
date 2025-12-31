@@ -67,6 +67,11 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+  
+  a {
+    @include tag-button-style(0.25rem 0.6rem, $font-size-xs, 5px);
+    white-space: nowrap;
+  }
 }
 
 .post-tag {
