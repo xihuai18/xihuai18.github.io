@@ -1657,6 +1657,7 @@ pre:not(.wrapped) pre {
 .post ol.bibliography li {
   margin-bottom: 1rem;
   padding-bottom: 0.3rem;
+  padding-left: 0;
   background: transparent;
   border-bottom: 1px solid var(--global-divider-color);
   transition: none;
@@ -1690,6 +1691,14 @@ pre:not(.wrapped) pre {
 .post ol.bibliography li .links a.btn {
   font-size: 0.75rem;
   padding: 0.12rem 0.35rem;
+  margin-left: 0;
+}
+.post ol.bibliography li .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-top: 0.35rem;
+  padding-left: 0;
 }
 .post ol.bibliography li .venue-tag {
   margin-top: 0.4rem;
