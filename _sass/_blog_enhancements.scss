@@ -3,6 +3,7 @@
  ******************************************************************************/
 
 @use "variables" as *;
+@use "mixins" as *;
 
 // Blog post heading hierarchy
 .post-content {
@@ -431,30 +432,6 @@
 /*******************************************************************************
  * Blog Page Time and Tag Button Styles
  ******************************************************************************/
-
-// Mixin for button-like tag/time elements
-@mixin tag-button-style($padding: 0.25rem 0.6rem, $font-size: $font-size-xs, $border-radius: 5px) {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: $padding;
-  background-color: var(--global-bg-color);
-  border: 1px solid var(--global-divider-color);
-  border-radius: $border-radius;
-  font-size: $font-size;
-  font-weight: 500;
-  text-decoration: none;
-  color: var(--global-text-color);
-  transition: all 0.2s ease;
-  
-  &:hover {
-    color: var(--global-theme-color);
-    border-color: var(--global-theme-color);
-    background-color: transparent;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-}
 
 // Tag category list at the top of blog page
 .tag-category-list {

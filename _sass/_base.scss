@@ -3,6 +3,7 @@
  ******************************************************************************/
 
 @use "variables" as *;
+@use "mixins" as *;
 
 // Typography
 
@@ -890,27 +891,8 @@ html.transition *:after {
     gap: 0.4rem;
 
     a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.3rem 0.65rem;
-      background-color: var(--global-bg-color);
-      border: 1px solid var(--global-divider-color);
-      border-radius: 5px;
-      font-size: $font-size-xs;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--global-text-color);
-      transition: all 0.2s ease;
+      @include tag-button-style(0.3rem 0.65rem, $font-size-xs, 5px);
       white-space: nowrap;
-
-      &:hover {
-        color: var(--global-theme-color);
-        border-color: var(--global-theme-color);
-        background-color: transparent;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
     }
   }
 
