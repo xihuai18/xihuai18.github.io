@@ -1,5 +1,5 @@
 /******************************************************************************
- * Sticky / floating Table of Contents
+ * Sticky / floating Table of Contents with Collapsible Functionality
  ******************************************************************************/
 
 @use "variables" as *;
@@ -8,6 +8,23 @@
   .toc-content {
     min-width: 0; // prevent long code/words from forcing overflow in flex/grid
     overflow-wrap: anywhere;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .toc-content {
+      transition: max-width 0.3s ease;
+    }
+  }
+  
+  // When TOC is collapsed, content can expand
+  &.toc-collapsed {
+    .toc-content {
+      max-width: 100%;
+    }
+    
+    .col-lg-3 {
+      display: none;
+    }
   }
 }
 
@@ -39,9 +56,28 @@
   max-height: calc(100vh - 7rem);
   overflow: auto;
 
+  @media (prefers-reduced-motion: no-preference) {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
   &.is-empty {
     display: none;
   }
+  
+  &.is-collapsed {
+    opacity: 0;
+    transform: translateX(20px);
+    pointer-events: none;
+  }
+}
+
+.toc-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--global-divider-color);
 }
 
 .toc-sidebar__title {
@@ -49,8 +85,86 @@
   font-weight: 600;
   color: var(--global-text-color-light);
   letter-spacing: 0.02em;
-  margin-bottom: 0.5rem;
   text-transform: uppercase;
+}
+
+.toc-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: var(--global-text-color-light);
+  cursor: pointer;
+  border-radius: 4px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: all 0.2s ease;
+  }
+  
+  &:hover {
+    background-color: var(--global-code-bg-color);
+    color: var(--global-theme-color);
+  }
+  
+  i {
+    font-size: 0.75rem;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform 0.3s ease;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &.is-collapsed i {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+// Floating button shown when TOC is collapsed
+.toc-collapsed-toggle {
+  position: fixed;
+  right: 1rem;
+  bottom: 6rem; // Position above back-to-top button to avoid overlap
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--global-divider-color);
+  background-color: var(--global-bg-color);
+  color: var(--global-text-color);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: all 0.2s ease;
+  }
+  
+  // Hidden state (via class instead of inline style)
+  &.toc-collapsed-toggle--hidden {
+    display: none;
+  }
+  
+  &:hover {
+    background-color: var(--global-theme-color);
+    color: white;
+    border-color: var(--global-theme-color);
+  }
+  
+  i {
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 991px) {
+    display: none !important;
+  }
 }
 
 .toc {
@@ -65,6 +179,45 @@
 
   li {
     margin: 0.25rem 0;
+    
+    // Collapsible section toggle
+    &.has-children {
+      position: relative;
+      
+      > .toc-section-toggle {
+        position: absolute;
+        left: -1rem;
+        top: 0.1rem;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: transparent;
+        color: var(--global-text-color-light);
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.6rem;
+
+        @media (prefers-reduced-motion: no-preference) {
+          transition: transform 0.2s ease;
+
+          &.is-collapsed {
+            transform: rotate(-90deg);
+          }
+        }
+        
+        &:hover {
+          color: var(--global-theme-color);
+        }
+      }
+    }
+    
+    // Hide children when collapsed
+    &.section-collapsed > ul {
+      display: none;
+    }
   }
 
   ul ul {
