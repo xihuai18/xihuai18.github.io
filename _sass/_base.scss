@@ -1849,6 +1849,54 @@ pre {
 .post .publications {
   padding-left: 0;
   margin-left: 0;
+  text-align: left;
+}
+
+
+.about-selected-papers {
+  margin-bottom: 3rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+
+  &__intro {
+    margin-bottom: 1.5rem;
+
+    ol {
+      margin: 0.35rem 0 0 1.25rem;
+    }
+  }
+
+  .publications {
+    padding-left: 0;
+    margin-left: 0;
+    width: 100%;
+
+    // Remove Bootstrap row/column gutters so the list aligns with the intro text
+    .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    [class*="col-"] {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    ol,
+    li {
+      padding-left: 0;
+      margin-left: 0;
+      list-style: none;
+    }
+
+    ol.bibliography {
+      padding-left: 0;
+      margin-left: 0;
+    }
+  }
 }
 
 .post ol.bibliography {

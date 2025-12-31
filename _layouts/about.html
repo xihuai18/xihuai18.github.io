@@ -49,16 +49,18 @@ layout: default
           <!-- Selected papers -->
           {% if page.selected_papers -%}
             <h2><a href="{{ '/publications/' | relative_url }}" style="color: inherit;">Selected Papers</a></h2>
-            <div style="margin-bottom: 3rem;">
-              Full publications are available on <a href="https://scholar.google.com/citations?user={{ site.scholar_userid }}" target="_blank">Google Scholar</a> or <a href="{{ '/publications/' | relative_url }}">Publications</a> (* denotes equal contribution).
-              <br>
-              Works are organized with respect to topics, including:
-              <ol>
-                  <li><strong>Large Language Model Reasoning and Agency</strong></li>
-                  <li><strong>Multi-agent Reinforcement Learning</strong></li>
-              </ol>
+            <div class="about-selected-papers">
+              <div class="about-selected-papers__intro">
+                Full publications are available on <a href="https://scholar.google.com/citations?user={{ site.scholar_userid }}" target="_blank">Google Scholar</a> or <a href="{{ '/publications/' | relative_url }}">Publications</a> (* denotes equal contribution).
+                <br>
+                Works are organized with respect to topics, including:
+                <ol>
+                    <li><strong>Large Language Model Reasoning and Agency</strong></li>
+                    <li><strong>Multi-agent Reinforcement Learning</strong></li>
+                </ol>
+              </div>
+              {%- include selected_papers.html %}
             </div>
-            {%- include selected_papers.html %}
           {%- endif %}
         </article>
 
