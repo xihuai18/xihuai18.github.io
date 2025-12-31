@@ -27,7 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', toggleVisibility, { passive: true });
     
     btn.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Respect user's motion preferences
+      const prefersReducedMotion = window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false;
+      window.scrollTo({
+        top: 0,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      });
     });
   };
   

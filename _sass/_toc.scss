@@ -8,7 +8,12 @@
   .toc-content {
     min-width: 0; // prevent long code/words from forcing overflow in flex/grid
     overflow-wrap: anywhere;
-    transition: max-width 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .toc-content {
+      transition: max-width 0.3s ease;
+    }
   }
   
   // When TOC is collapsed, content can expand
@@ -50,7 +55,10 @@
   top: 6rem; // accounts for fixed navbar + container margin
   max-height: calc(100vh - 7rem);
   overflow: auto;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
 
   &.is-empty {
     display: none;
@@ -101,7 +109,10 @@
   
   i {
     font-size: 0.75rem;
-    transition: transform 0.3s ease;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform 0.3s ease;
+    }
   }
   
   &.is-collapsed i {
@@ -123,10 +134,13 @@
   color: var(--global-text-color);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: all 0.2s ease;
+  }
   
   // Hidden state (via class instead of inline style)
   &.toc-collapsed-toggle--hidden {
@@ -180,7 +194,10 @@
         cursor: pointer;
         padding: 0;
         font-size: 0.6rem;
-        transition: transform 0.2s ease;
+
+        @media (prefers-reduced-motion: no-preference) {
+          transition: transform 0.2s ease;
+        }
         
         &:hover {
           color: var(--global-theme-color);

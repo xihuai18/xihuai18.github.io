@@ -97,6 +97,7 @@
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "toc-section-toggle";
         toggleBtn.setAttribute("aria-label", "Toggle section");
+        toggleBtn.setAttribute("aria-expanded", "true");
         // Use createElement instead of innerHTML for security
         const icon = document.createElement("i");
         icon.className = "fas fa-chevron-down";
@@ -106,6 +107,9 @@
           e.stopPropagation();
           currentTopLi.classList.toggle("section-collapsed");
           toggleBtn.classList.toggle("is-collapsed");
+          // Update aria-expanded state
+          const isCollapsed = currentTopLi.classList.contains("section-collapsed");
+          toggleBtn.setAttribute("aria-expanded", !isCollapsed);
         });
         currentTopLi.insertBefore(toggleBtn, currentTopLi.firstChild);
       }
