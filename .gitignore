@@ -14,4 +14,5 @@ _posts/AGENTS.md
 AGENTs.md
 .skills/
 .playwright-mcp/
-node_modules/
+node_modules/vendor/
+.bundle/
