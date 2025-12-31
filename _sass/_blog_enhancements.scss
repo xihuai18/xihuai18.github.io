@@ -3,6 +3,7 @@
  ******************************************************************************/
 
 @use "variables" as *;
+@use "mixins" as *;
 
 // Blog post heading hierarchy
 .post-content {
@@ -425,6 +426,78 @@
 
   .post-links {
     margin-bottom: 1.75rem;
+  }
+}
+
+/*******************************************************************************
+ * Blog Page Time and Tag Button Styles
+ * (Mixin defined in _mixins.scss)
+ ******************************************************************************/
+
+// Tag category list at the top of blog page
+.tag-category-list {
+  margin-bottom: 1.5rem;
+  
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      margin: 0;
+      
+      a {
+        @include tag-button-style(0.35rem 0.75rem, $font-size-sm, 6px);
+      }
+    }
+    
+    p {
+      margin: 0;
+      color: var(--global-text-color-light);
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// Post metadata and tags in blog list
+.post-list {
+  li {
+    .post-meta,
+    .post-tags {
+      a {
+        @include tag-button-style();
+        white-space: nowrap;
+      }
+    }
+    
+    // Adjust spacing for inline elements
+    .post-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .post-tags {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      padding-top: 0.5rem;
+    }
+  }
+}
+
+// Featured posts section
+.featured-posts {
+  .post-meta {
+    a {
+      @include tag-button-style();
+    }
   }
 }
 
