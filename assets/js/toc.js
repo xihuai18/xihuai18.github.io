@@ -1,9 +1,17 @@
 /* Auto-generate a table of contents for pages that include an element with
  * `data-toc`. Intended for CV + blog posts (or any page) and designed to be
  * no-op when the container doesn't exist.
+ * 
+ * Features:
+ * - Auto-generated TOC from headings
+ * - Collapsible sidebar toggle
+ * - Collapsible sections within TOC
+ * - Scroll spy for active section highlighting
  */
 
 (() => {
+  const STORAGE_KEY = "toc-collapsed";
+
   function onReady(fn) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", fn, { once: true });
@@ -69,11 +77,66 @@
       if (!subUl) {
         subUl = document.createElement("ul");
         currentTopLi.appendChild(subUl);
+        
+        // Add section toggle button for collapsible sections
+        currentTopLi.classList.add("has-children");
+        const toggleBtn = document.createElement("button");
+        toggleBtn.className = "toc-section-toggle";
+        toggleBtn.setAttribute("aria-label", "Toggle section");
+        toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        toggleBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          currentTopLi.classList.toggle("section-collapsed");
+          toggleBtn.classList.toggle("is-collapsed");
+        });
+        currentTopLi.insertBefore(toggleBtn, currentTopLi.firstChild);
       }
       subUl.appendChild(li);
     }
 
     return rootUl;
+  }
+
+  function initCollapsibleToc() {
+    const tocSidebar = document.querySelector("[data-toc-sidebar]");
+    const toggleBtn = document.querySelector("[data-toc-toggle]");
+    const expandBtn = document.querySelector("[data-toc-expand]");
+    const tocLayout = document.querySelector(".toc-layout");
+
+    if (!tocSidebar || !toggleBtn || !tocLayout) return;
+
+    // Restore collapsed state from localStorage
+    const isCollapsed = localStorage.getItem(STORAGE_KEY) === "true";
+    if (isCollapsed) {
+      setCollapsed(true);
+    }
+
+    function setCollapsed(collapsed) {
+      if (collapsed) {
+        tocSidebar.classList.add("is-collapsed");
+        toggleBtn.classList.add("is-collapsed");
+        tocLayout.classList.add("toc-collapsed");
+        if (expandBtn) expandBtn.style.display = "flex";
+      } else {
+        tocSidebar.classList.remove("is-collapsed");
+        toggleBtn.classList.remove("is-collapsed");
+        tocLayout.classList.remove("toc-collapsed");
+        if (expandBtn) expandBtn.style.display = "none";
+      }
+      localStorage.setItem(STORAGE_KEY, collapsed.toString());
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      const willCollapse = !tocSidebar.classList.contains("is-collapsed");
+      setCollapsed(willCollapse);
+    });
+
+    if (expandBtn) {
+      expandBtn.addEventListener("click", () => {
+        setCollapsed(false);
+      });
+    }
   }
 
   function initOne(tocEl) {
@@ -153,6 +216,7 @@
 
   function initAll() {
     document.querySelectorAll("[data-toc]").forEach(initOne);
+    initCollapsibleToc();
   }
 
   onReady(initAll);

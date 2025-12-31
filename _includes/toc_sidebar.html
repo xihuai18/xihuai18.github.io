@@ -1,5 +1,5 @@
 {%- comment -%}
-  Auto-generated floating/sticky table of contents.
+  Auto-generated floating/sticky table of contents with collapsible functionality.
 
   Usage:
     {% include toc_sidebar.html headings="h2,h3" content=".toc-content" %}
@@ -15,8 +15,13 @@
   {%- endif -%}
 {%- endif -%}
 
-<aside class="toc-sidebar{% if include.class %} {{ include.class }}{% endif %}">
-  <div class="toc-sidebar__title">{{ toc_title }}</div>
+<aside class="toc-sidebar{% if include.class %} {{ include.class }}{% endif %}" data-toc-sidebar>
+  <div class="toc-sidebar__header">
+    <div class="toc-sidebar__title">{{ toc_title }}</div>
+    <button class="toc-toggle-btn" aria-label="Toggle table of contents" data-toc-toggle>
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
   <nav
     class="toc js-page-toc"
     data-toc
@@ -26,4 +31,9 @@
     aria-label="{{ toc_title }}"
   ></nav>
 </aside>
+
+<!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
+<button class="toc-collapsed-toggle" aria-label="Show table of contents" data-toc-expand style="display: none;">
+  <i class="fas fa-list"></i>
+</button>
 

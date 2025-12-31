@@ -1,6 +1,36 @@
 // Blog post enhancements (tables, code blocks, math, etc.)
 document.addEventListener('DOMContentLoaded', () => {
   // ============================================================================
+  // Back to Top Button
+  // ============================================================================
+  const createBackToTopButton = () => {
+    // Only add on post pages
+    if (!document.querySelector('.post-content')) return;
+    
+    const btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.setAttribute('aria-label', 'Back to top');
+    btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    document.body.appendChild(btn);
+    
+    const toggleVisibility = () => {
+      if (window.scrollY > 300) {
+        btn.classList.add('is-visible');
+      } else {
+        btn.classList.remove('is-visible');
+      }
+    };
+    
+    window.addEventListener('scroll', toggleVisibility, { passive: true });
+    
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  };
+  
+  createBackToTopButton();
+
+  // ============================================================================
   // Fix HTML blocks that were incorrectly rendered as code blocks
   // ============================================================================
   document.querySelectorAll('.post-content .language-plaintext.highlighter-rouge').forEach((block) => {
