@@ -131,8 +131,14 @@
   
   p {
     margin-bottom: 1.25rem;
-    text-align: justify;
-    hyphens: auto;
+  }
+  
+  // Apply justify only on larger viewports where line length is sufficient
+  @media (min-width: 768px) {
+    p {
+      text-align: justify;
+      hyphens: auto;
+    }
   }
   
   // First paragraph after heading - no extra spacing
@@ -966,9 +972,7 @@
       font-family: Georgia, serif;
       line-height: 1;
       pointer-events: none;
-      // Hide from screen readers - this is purely decorative
-      speak: never;
-      aria-hidden: true;
+      // Pseudo-elements with decorative content are already ignored by screen readers
     }
 
     p {
@@ -1091,20 +1095,27 @@
   justify-content: center;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(20px);
-  transition: all 0.3s ease;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  
+
   &.is-visible {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
   }
-  
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+
+  // Respect prefers-reduced-motion for animations
+  @media (prefers-reduced-motion: no-preference) {
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+
+    &.is-visible {
+      transform: translateY(0);
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
   }
   
   i {
@@ -1119,9 +1130,11 @@
   }
 }
 
-// Smooth scroll for anchor links
-html {
-  scroll-behavior: smooth;
+// Smooth scroll for anchor links - respect prefers-reduced-motion
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 // Enhanced reading progress bar

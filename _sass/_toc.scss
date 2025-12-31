@@ -113,8 +113,7 @@
 .toc-collapsed-toggle {
   position: fixed;
   right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 6rem; // Position above back-to-top button to avoid overlap
   z-index: 100;
   width: 40px;
   height: 40px;
@@ -128,6 +127,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  // Hidden state (via class instead of inline style)
+  &.toc-collapsed-toggle--hidden {
+    display: none;
+  }
   
   &:hover {
     background-color: var(--global-theme-color);

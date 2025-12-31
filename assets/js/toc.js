@@ -12,6 +12,20 @@
 (() => {
   const STORAGE_KEY = "toc-collapsed";
 
+  // Safe localStorage wrapper for privacy-focused browsers
+  function safeLocalStorage(action, key, value) {
+    try {
+      if (action === "get") {
+        return localStorage.getItem(key);
+      } else if (action === "set") {
+        localStorage.setItem(key, value);
+      }
+    } catch (e) {
+      // localStorage may be unavailable in private browsing mode
+      return null;
+    }
+  }
+
   function onReady(fn) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", fn, { once: true });
@@ -109,8 +123,11 @@
 
     if (!tocSidebar || !toggleBtn || !tocLayout) return;
 
+    // Set initial aria-expanded state
+    toggleBtn.setAttribute("aria-expanded", "true");
+
     // Restore collapsed state from localStorage
-    const isCollapsed = localStorage.getItem(STORAGE_KEY) === "true";
+    const isCollapsed = safeLocalStorage("get", STORAGE_KEY) === "true";
     if (isCollapsed) {
       setCollapsed(true);
     }
@@ -120,14 +137,23 @@
         tocSidebar.classList.add("is-collapsed");
         toggleBtn.classList.add("is-collapsed");
         tocLayout.classList.add("toc-collapsed");
-        if (expandBtn) expandBtn.style.display = "flex";
+        if (expandBtn) {
+          expandBtn.classList.remove("toc-collapsed-toggle--hidden");
+        }
       } else {
         tocSidebar.classList.remove("is-collapsed");
         toggleBtn.classList.remove("is-collapsed");
         tocLayout.classList.remove("toc-collapsed");
-        if (expandBtn) expandBtn.style.display = "none";
+        if (expandBtn) {
+          expandBtn.classList.add("toc-collapsed-toggle--hidden");
+        }
       }
-      localStorage.setItem(STORAGE_KEY, collapsed.toString());
+      // Update ARIA expanded state for assistive technologies
+      toggleBtn.setAttribute("aria-expanded", !collapsed);
+      if (expandBtn) {
+        expandBtn.setAttribute("aria-expanded", collapsed);
+      }
+      safeLocalStorage("set", STORAGE_KEY, collapsed.toString());
     }
 
     toggleBtn.addEventListener("click", () => {

@@ -10,7 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.createElement('button');
     btn.className = 'back-to-top';
     btn.setAttribute('aria-label', 'Back to top');
-    btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    // Use createElement instead of innerHTML for security
+    const icon = document.createElement('i');
+    icon.classList.add('fas', 'fa-arrow-up');
+    btn.appendChild(icon);
     document.body.appendChild(btn);
     
     const toggleVisibility = () => {
