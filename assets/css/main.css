@@ -1782,6 +1782,30 @@ pre:not(.wrapped) pre {
   gap: 0.5rem;
   align-items: center;
 }
+.post-tags-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.6rem;
+  background-color: var(--global-bg-color);
+  border: 1px solid var(--global-divider-color);
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--global-text-color);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.post-tags-row a:hover {
+  color: var(--global-theme-color);
+  border-color: var(--global-theme-color);
+  background-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px var(--global-shadow-color);
+}
+.post-tags-row a {
+  white-space: nowrap;
+}
 
 .post-tag {
   display: inline-flex;
