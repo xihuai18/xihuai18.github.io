@@ -11,6 +11,7 @@
 
 (() => {
   const STORAGE_KEY = "toc-collapsed";
+  const SECTION_STORAGE_KEY = "toc-sections-collapsed";
 
   // Safe localStorage wrapper for privacy-focused browsers
   function safeLocalStorage(action, key, value) {
@@ -24,6 +25,24 @@
       // localStorage may be unavailable in private browsing mode
       return null;
     }
+  }
+
+  // Get collapsed sections from localStorage
+  function getCollapsedSections() {
+    const saved = safeLocalStorage("get", SECTION_STORAGE_KEY);
+    if (saved) {
+      try {
+        return new Set(JSON.parse(saved));
+      } catch (e) {
+        return new Set();
+      }
+    }
+    return new Set();
+  }
+
+  // Save collapsed sections to localStorage
+  function saveCollapsedSections(collapsedSet) {
+    safeLocalStorage("set", SECTION_STORAGE_KEY, JSON.stringify([...collapsedSet]));
   }
 
   function onReady(fn) {
@@ -71,6 +90,7 @@
   function buildTocList(headings) {
     const rootUl = document.createElement("ul");
     let currentTopLi = null;
+    const collapsedSections = getCollapsedSections();
 
     for (const heading of headings) {
       const level = Number(heading.tagName.replace(/^H/i, ""));
@@ -97,19 +117,44 @@
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "toc-section-toggle";
         toggleBtn.setAttribute("aria-label", "Toggle section");
-        toggleBtn.setAttribute("aria-expanded", "true");
+        
         // Use createElement instead of innerHTML for security
         const icon = document.createElement("i");
         icon.className = "fas fa-chevron-down";
         toggleBtn.appendChild(icon);
+        
+        // Capture the current li for the event listener to avoid closure issues
+        const parentLi = currentTopLi;
+        // Use heading id as section identifier for persistence
+        const sectionId = heading.id;
+        
+        // Restore collapsed state from localStorage
+        const wasCollapsed = collapsedSections.has(sectionId);
+        if (wasCollapsed) {
+          parentLi.classList.add("section-collapsed");
+          toggleBtn.classList.add("is-collapsed");
+          toggleBtn.setAttribute("aria-expanded", "false");
+        } else {
+          toggleBtn.setAttribute("aria-expanded", "true");
+        }
+        
         toggleBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          currentTopLi.classList.toggle("section-collapsed");
+          parentLi.classList.toggle("section-collapsed");
           toggleBtn.classList.toggle("is-collapsed");
           // Update aria-expanded state
-          const isCollapsed = currentTopLi.classList.contains("section-collapsed");
+          const isCollapsed = parentLi.classList.contains("section-collapsed");
           toggleBtn.setAttribute("aria-expanded", !isCollapsed);
+          
+          // Save section collapsed state to localStorage
+          const currentCollapsed = getCollapsedSections();
+          if (isCollapsed) {
+            currentCollapsed.add(sectionId);
+          } else {
+            currentCollapsed.delete(sectionId);
+          }
+          saveCollapsedSections(currentCollapsed);
         });
         currentTopLi.insertBefore(toggleBtn, currentTopLi.firstChild);
       }
@@ -127,11 +172,15 @@
 
     if (!tocSidebar || !toggleBtn || !tocLayout) return;
 
-    // Set initial aria-expanded state
-    toggleBtn.setAttribute("aria-expanded", "true");
-
-    // Restore collapsed state from localStorage
-    const isCollapsed = safeLocalStorage("get", STORAGE_KEY) === "true";
+    // Restore collapsed state from localStorage (default to collapsed)
+    const savedState = safeLocalStorage("get", STORAGE_KEY);
+    // Default to collapsed (true) if no saved state exists
+    const isCollapsed = savedState === null ? true : savedState === "true";
+    
+    // Set initial aria-expanded state based on collapsed state
+    toggleBtn.setAttribute("aria-expanded", !isCollapsed);
+    
+    // Apply initial collapsed state
     if (isCollapsed) {
       setCollapsed(true);
     }

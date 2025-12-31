@@ -18,7 +18,7 @@
 <aside class="toc-sidebar{% if include.class %} {{ include.class }}{% endif %}" data-toc-sidebar id="toc-sidebar">
   <div class="toc-sidebar__header">
     <div class="toc-sidebar__title">{{ toc_title }}</div>
-    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-toggle>
+    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
@@ -34,7 +34,7 @@
 </aside>
 
 <!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
-<button class="toc-collapsed-toggle toc-collapsed-toggle--hidden" aria-label="Show table of contents" aria-expanded="true" aria-controls="toc-content" data-toc-expand>
+<button class="toc-collapsed-toggle" aria-label="Show table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-expand>
   <i class="fas fa-list"></i>
 </button>
 

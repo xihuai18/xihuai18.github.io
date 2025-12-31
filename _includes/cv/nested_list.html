@@ -1,13 +1,19 @@
 <ul class="card-text list-group list-group-flush">
     {% for content in entry.contents %}
       <li class="list-group-item">
-      <h5 class="font-italic">{{ content.title }}</h5>
+      {% if content.title %}
+        <h5 class="font-italic">{{ content.title }}</h5>
+      {% endif %}
       {% if content.items %}
-        <ul class="subitems">
-          {% for subitem in content.items %}
-            <li><span class="subitem">{{ subitem }}</span></li>
-          {% endfor %}
-        </ul>
+        {% if content.items.first %}
+          <ul class="subitems">
+            {% for subitem in content.items %}
+              <li><span class="subitem">{{ subitem }}</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <span class="nested-content">{{ content.items }}</span>
+        {% endif %}
       {% endif %}
       </li>
     {% endfor %}

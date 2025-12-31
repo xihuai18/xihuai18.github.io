@@ -16,7 +16,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I am a Ph.D. candidate in the [APEX Lab](https://apex.sjtu.edu.cn/) at Shanghai Jiao Tong University, under the supervision of [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/). I am affiliated with both the SJTU-Apex Group and the SJTU-MARL Group led by Prof. Ying Wen. I was honored to be selected into the [Wen-Tsun Wu AI Honorary Doctoral Program](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Prior to this, I received my B.Eng. in Computer Science and Technology from the [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
+I am a Ph.D. candidate in the [APEX Lab](https://apex.sjtu.edu.cn/) at Shanghai Jiao Tong University, under the supervision of [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/), affiliated with both the SJTU-Apex Group and the SJTU-MARL Group. I was honored to be selected into the [Wen-Tsun Wu AI Honorary Doctoral Program](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Prior to this, I received my B.Eng. in Computer Science and Technology from the [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
 
 My research lies at the intersection of **Reinforcement Learning** and **Multi-Agent Learning**. My current research focuses on:
 

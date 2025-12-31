@@ -1,12 +1,17 @@
 ---
 layout: default
 permalink: /blog/
-title: Xihuai's Blog
+title: Blog
 nav: false
 nav_order: 1
 ---
 
 <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Xihuai's Blog</h1>
+    <p class="post-description"></p>
+  </header>
 
 {% assign uv_enabled = site.data.post_uv_meta.generated_at %}
 {% assign uv_data_all = site.data.post_uv.all %}

@@ -241,15 +241,33 @@ pre code {
   box-shadow: none;
   border-bottom: 1px solid var(--global-divider-color);
   background-color: var(--global-bg-color);
-  opacity: 0.98;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 0.5rem 0;
   min-height: 56px;
-  transition: all 0.3s ease;
+  z-index: 1000;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: all 0.3s ease, background-color 0.25s ease;
+  }
+  
+  // Scrolled state - add shadow
+  &.scrolled {
+    box-shadow: var(--global-shadow-sm);
+  }
 }
 
 .navbar .dropdown-menu {
   background-color: var(--global-bg-color);
   border: 1px solid var(--global-divider-color);
+  border-radius: 8px;
+  box-shadow: var(--global-shadow-md);
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: dropdownFadeIn 0.2s ease;
+  }
 
   a:not(.active) {
     color: var(--global-text-color);
@@ -257,6 +275,7 @@ pre code {
 
   a:hover {
     color: var(--global-hover-color);
+    background-color: var(--global-code-bg-color);
   }
 
   .dropdown-divider {
@@ -264,12 +283,30 @@ pre code {
   }
 }
 
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .dropdown-item {
   color: var(--global-text-color);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  margin: 0 0.25rem;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: all 0.15s ease;
+  }
 
   &:hover {
     color: var(--global-hover-color);
-    background-color: var(--global-bg-color);
+    background-color: var(--global-code-bg-color);
   }
 }
 
@@ -282,16 +319,32 @@ pre code {
 
   .navbar-brand {
     color: var(--global-text-color);
+    font-weight: 600;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: color 0.2s ease;
+    }
+    
+    &:hover {
+      color: var(--global-theme-color);
+    }
   }
 
   .navbar-nav .nav-item .nav-link {
     color: var(--global-text-color);
     font-size: $font-size-sm;
     font-weight: 500;
-    transition: color 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    position: relative;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: color 0.2s ease, background-color 0.2s ease;
+    }
 
     &:hover {
       color: var(--global-theme-color);
+      background-color: var(--global-code-bg-color);
     }
   }
 
@@ -299,6 +352,19 @@ pre code {
     background-color: inherit;
     font-weight: 600;
     color: var(--global-theme-color);
+
+    // Active indicator
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background-color: var(--global-theme-color);
+      border-radius: 1px;
+    }
 
     &:hover {
       color: var(--global-theme-color);
@@ -313,7 +379,10 @@ pre code {
     a {
       i::before {
         color: var(--global-text-color);
-        transition-property: all 0.2s ease-in-out;
+
+        @media (prefers-reduced-motion: no-preference) {
+          transition: all 0.2s ease-in-out;
+        }
       }
 
       &:hover {
@@ -366,27 +435,66 @@ pre code {
 }
 
 #light-toggle {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   border: 0;
-  background-color: inherit;
+  background-color: transparent;
   color: var(--global-text-color);
   font-size: $font-size-lg;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  width: 100%;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   margin-left: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
 
   &:hover {
     color: var(--global-theme-color);
+    background-color: var(--global-code-bg-color);
+    transform: rotate(15deg);
+  }
+  
+  &:active {
+    transform: scale(0.9);
+  }
+  
+  i {
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform 0.3s ease;
+    }
+  }
+  
+  // Sun/moon icon animation
+  .fa-sun, .fa-moon {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: themeIconPop 0.3s ease;
+    }
+  }
+}
+
+@keyframes themeIconPop {
+  0% {
+    transform: scale(0.5) rotate(-30deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
   }
 }
 
 @media (min-width: 576px) {
   #light-toggle {
-    padding: 0;
-    width: auto;
-    height: 100%;
+    padding: 0.5rem;
+    width: 36px;
+    height: 36px;
     margin-left: 0.5rem;
     justify-content: center;
   }
@@ -870,12 +978,17 @@ code {
 }
 
 
-// Transitioning Themes
+// Transitioning Themes - Optimized for performance
+// Only transition color-related properties instead of 'all' to avoid layout thrashing
 html.transition,
 html.transition *,
 html.transition *:before,
 html.transition *:after {
-  transition: all 750ms !important;
+  transition: color 200ms ease-out,
+              background-color 200ms ease-out,
+              border-color 200ms ease-out,
+              fill 200ms ease-out,
+              box-shadow 200ms ease-out !important;
   transition-delay: 0 !important;
 }
 
@@ -1092,8 +1205,10 @@ pre {
   display: flex;
   align-items: center;
   gap: 0;
-  padding: 0;
+  // Match navbar-brand height exactly (padding 5px + line-height 35px = 45px)
+  padding: 5px 0;
   margin: 0;
+  min-height: 35px;
 
   a {
     display: inline-flex;
@@ -1108,7 +1223,7 @@ pre {
     text-decoration: none !important;
 
     i, i::before {
-      font-size: $font-size-2xl;
+      font-size: $font-size-xl;
       color: var(--global-text-color);
       transition: all 0.2s ease;
     }
@@ -1292,7 +1407,7 @@ pre {
     }
 
     .card-title {
-      font-size: $font-size-sm;
+      font-size: $font-size-base;  // 1rem - section title
       font-weight: 600;
       color: var(--global-theme-color);
       margin-bottom: 0.5rem;
@@ -1336,47 +1451,84 @@ pre {
       }
 
       h6.title {
-        font-size: $font-size-sm;
+        font-size: $font-size-base;  // 1rem (16px) - entry title
         font-weight: 600;
-        margin: 0 0 0.1rem 0;
+        margin: 0 0 0.15rem 0;
         color: var(--global-text-color);
       }
 
       h6:not(.title) {
-        font-size: $font-size-xs;
+        font-size: 0.9375rem;  // 15px - institution name
         font-weight: 400;
         margin: 0;
         color: var(--global-text-color-light);
       }
 
       .items {
-        margin: 0.2rem 0 0 0;
+        margin: 0.25rem 0 0 0;
         padding-left: 0.85rem;
-        font-size: $font-size-xs;
+        font-size: $font-size-base;  // 1rem (16px) - list items
 
         li {
-          margin-bottom: 0.05rem;
+          margin-bottom: 0.15rem;
         }
       }
     }
   }
 
+  // Year badge styling
+  .cv-year-badge {
+    font-size: $font-size-sm;  // 0.875rem (14px)
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--global-text-color);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
   // Compact Map Table
   .table {
     margin: 0;
-    font-size: $font-size-xs;
+    font-size: $font-size-base;  // 1rem (16px) - table content
 
     tr {
       td {
-        padding: 0.25rem 0.4rem;
+        padding: 0.4rem 0.6rem;
         border: none;
 
         &:first-child {
-          font-weight: 500;
-          color: var(--global-text-color-light);
-          width: 100px;
+          font-weight: 600;
+          color: var(--global-text-color);
+          width: 120px;
         }
       }
+    }
+  }
+
+  // List and Nested List styling
+  .list-group-item {
+    font-size: $font-size-base;  // 1rem (16px)
+
+    h5.font-italic {
+      font-size: $font-size-base;  // 1rem (16px)
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .subitems {
+      font-size: $font-size-base;  // 1rem (16px)
+      margin-top: 0.2rem;
+      padding-left: 1rem;
+      color: var(--global-text-color);
+      
+      li {
+        margin-bottom: 0.15rem;
+      }
+    }
+
+    .nested-content {
+      font-size: $font-size-base;  // 1rem (16px)
+      color: var(--global-text-color);
     }
   }
 }

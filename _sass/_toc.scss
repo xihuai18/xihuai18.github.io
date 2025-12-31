@@ -20,9 +20,19 @@
   &.toc-collapsed {
     .toc-content {
       max-width: 100%;
+      flex: 0 0 100%; // Force full width
     }
     
-    .col-lg-3 {
+    // For posts with sidenotes, content should take 9 columns (75%)
+    // Sidenotes take 3 columns (25%)
+    @media (min-width: 992px) {
+      &.post--sidenotes .toc-content {
+        flex: 0 0 75%;
+        max-width: 75%;
+      }
+    }
+    
+    .toc-sidebar-col {
       display: none;
     }
   }
@@ -128,14 +138,18 @@
 // Floating button shown when TOC is collapsed
 .toc-collapsed-toggle {
   position: fixed;
-  right: 1rem;
-  bottom: 6rem; // Position above back-to-top button to avoid overlap
+  right: 30px;
+  bottom: 104px; // Position above back-to-top button (50px + 44px + 10px gap)
   z-index: 100;
-  width: 40px;
-  height: 40px;
+  width: 44px; // Match back-to-top button size
+  height: 44px;
   border-radius: 50%;
+  border: none; // Remove border to match back-to-top style
+  background-color: var(--global-bg-color); // Keep bg color but maybe add border or shadow to distinguish?
+  // Or match back-to-top style? Usually secondary action is different.
+  // Let's keep it white/bg-color but with shadow.
   border: 1px solid var(--global-divider-color);
-  background-color: var(--global-bg-color);
+  
   color: var(--global-text-color);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -156,14 +170,23 @@
     background-color: var(--global-theme-color);
     color: white;
     border-color: var(--global-theme-color);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   }
   
   i {
-    font-size: 1rem;
+    font-size: 1.25rem; // Match back-to-top icon size
   }
   
   @media (max-width: 991px) {
     display: none !important;
+  }
+  
+  @media (max-width: 768px) {
+    right: 20px;
+    bottom: 70px; // 20px + 40px + 10px
+    width: 40px;
+    height: 40px;
   }
 }
 
