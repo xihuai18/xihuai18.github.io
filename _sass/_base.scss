@@ -1852,9 +1852,14 @@ pre {
   text-align: left;
 }
 
+
 .about-selected-papers {
   margin-bottom: 3rem;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
 
   &__intro {
     margin-bottom: 1.5rem;
@@ -1867,6 +1872,14 @@ pre {
   .publications {
     padding-left: 0;
     margin-left: 0;
+    width: 100%;
+
+    ol,
+    li {
+      padding-left: 0;
+      margin-left: 0;
+      list-style: none;
+    }
 
     ol.bibliography {
       padding-left: 0;
