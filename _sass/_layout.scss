@@ -36,8 +36,8 @@ body {
 }
 
 body.fixed-top-nav {
-  // Add some padding for the nav-bar.
-  padding-top: 50px;
+  // Add some padding for the nav-bar (matches navbar min-height: 56px).
+  padding-top: 56px;
 }
 
 body.sticky-bottom-footer {
