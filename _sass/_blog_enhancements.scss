@@ -48,6 +48,7 @@
     border-spacing: 0;
     font-size: $font-size-base;
     line-height: 1.5;
+    color: var(--global-text-color); // Ensure text color is correct
     
     // Responsive wrapper
     display: block;
@@ -69,6 +70,7 @@
         text-align: left;
         white-space: nowrap;
         color: var(--global-text-color);
+        border-color: var(--global-divider-color);
         
         &[style*="text-align: center"] {
           text-align: center !important;
@@ -91,6 +93,8 @@
       td {
         padding: 0.6rem 1rem;
         vertical-align: top;
+        color: var(--global-text-color); // Ensure text color is correct
+        border-color: var(--global-divider-color);
         
         &[style*="text-align: center"] {
           text-align: center !important;

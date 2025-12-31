@@ -25,10 +25,12 @@ hr {
   border-top: 1px solid var(--global-divider-color);
 }
 
-table {
+table,
+.table {
   width: 100%;
   margin-bottom: 1rem;
   color: var(--global-text-color);
+  background-color: transparent;
   border-collapse: collapse;
 
   th,
@@ -36,21 +38,25 @@ table {
     padding: 0.75rem;
     vertical-align: top;
     border-top: 1px solid var(--global-divider-color);
+    border-color: var(--global-divider-color); // Ensure border color overrides bootstrap
   }
 
   thead th {
     vertical-align: bottom;
     border-bottom: 2px solid var(--global-divider-color);
+    border-color: var(--global-divider-color);
   }
 
   tbody + tbody {
     border-top: 2px solid var(--global-divider-color);
+    border-color: var(--global-divider-color);
   }
 
   td {
     font-size: $font-size-base;
   }
 }
+
 
 a,
 table.table a {
@@ -444,6 +450,7 @@ footer.sticky-bottom {
     .list-group-item {
       background-color: inherit;
       border-color: var(--global-divider-color);
+      color: var(--global-text-color); // Ensure text color is correct
 
       .badge {
         color: var(--global-theme-color) !important;
