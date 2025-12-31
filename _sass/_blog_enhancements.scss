@@ -972,7 +972,8 @@
       font-family: Georgia, serif;
       line-height: 1;
       pointer-events: none;
-      // Pseudo-elements with decorative content are already ignored by screen readers
+      // Note: CSS pseudo-elements are inherently not exposed to the accessibility tree,
+      // so no additional ARIA attributes are needed for this decorative content.
     }
 
     p {
