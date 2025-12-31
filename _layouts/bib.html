@@ -125,6 +125,17 @@
           {{ entry.note | strip }}
         </div>
 
+          <!-- Conference/Venue Tag -->
+          {%- if entry.abbr -%}
+          <div class="venue-tag" data-venue-filter="{{entry.abbr}}" onclick="filterByVenue('{{entry.abbr}}')" title="Click to filter papers from {{entry.abbr}}" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('{{entry.abbr}}')">
+            {%- if site.data.venues[entry.abbr] -%}
+              <a href="{{site.data.venues[entry.abbr].url}}" class="venue-link" onclick="event.stopPropagation();" title="Visit {{entry.abbr}} website">{{entry.abbr}}</a>
+            {%- else -%}
+              <span class="venue-name">{{entry.abbr}}</span>
+            {%- endif -%}
+          </div>
+          {%- endif -%}
+
           <!-- Links/Buttons -->
           <div class="links">
           {%- if entry.abstract %}
@@ -176,17 +187,6 @@
           {%- if entry.website %}
             <a href="{{ entry.website }}" class="btn btn-sm z-depth-0" role="button">Website</a>
           {%- endif %}
-          
-          <!-- Conference/Venue Tag -->
-          {%- if entry.abbr -%}
-          <div class="venue-tag" data-venue-filter="{{entry.abbr}}" onclick="filterByVenue('{{entry.abbr}}')" title="Click to filter papers from {{entry.abbr}}" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('{{entry.abbr}}')">
-            {%- if site.data.venues[entry.abbr] -%}
-              <a href="{{site.data.venues[entry.abbr].url}}" class="venue-link" onclick="event.stopPropagation();" title="Visit {{entry.abbr}} website">{{entry.abbr}}</a>
-            {%- else -%}
-              <span class="venue-name">{{entry.abbr}}</span>
-            {%- endif -%}
-          </div>
-          {%- endif -%}
           </div>
           
           {% if site.badges %}
