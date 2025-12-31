@@ -1849,6 +1849,30 @@ pre {
 .post .publications {
   padding-left: 0;
   margin-left: 0;
+  text-align: left;
+}
+
+.about-selected-papers {
+  margin-bottom: 3rem;
+  text-align: left;
+
+  &__intro {
+    margin-bottom: 1.5rem;
+
+    ol {
+      margin: 0.35rem 0 0 1.25rem;
+    }
+  }
+
+  .publications {
+    padding-left: 0;
+    margin-left: 0;
+
+    ol.bibliography {
+      padding-left: 0;
+      margin-left: 0;
+    }
+  }
 }
 
 .post ol.bibliography {
