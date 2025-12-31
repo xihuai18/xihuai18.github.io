@@ -465,28 +465,30 @@
 
 // Post metadata and tags in blog list
 .post-list {
-  .post-meta,
-  .post-tags {
-    a {
-      @include tag-button-style();
-      white-space: nowrap;
+  li {
+    .post-meta,
+    .post-tags {
+      a {
+        @include tag-button-style();
+        white-space: nowrap;
+      }
     }
-  }
-  
-  // Adjust spacing for inline elements
-  .post-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  
-  .post-tags {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-    padding-top: 0.5rem;
+    
+    // Adjust spacing for inline elements
+    .post-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .post-tags {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      padding-top: 0.5rem;
+    }
   }
 }
 
