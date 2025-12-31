@@ -1857,6 +1857,7 @@ pre {
   li {
     margin-bottom: 1.0rem;
     padding-bottom: 0.3rem;
+    padding-left: 0;
     background: transparent;
     border-bottom: 1px solid var(--global-divider-color);
     transition: none;
@@ -1898,6 +1899,15 @@ pre {
     .links a.btn {
       font-size: $font-size-xs;
       padding: 0.12rem 0.35rem;
+      margin-left: 0;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+      margin-top: 0.35rem;
+      padding-left: 0;
     }
 
     .venue-tag {
