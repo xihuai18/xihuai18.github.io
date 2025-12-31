@@ -552,6 +552,69 @@ pre code {
     justify-content: center;
   }
 }
+@media (max-width: 575.98px) {
+  .navbar .container {
+    position: relative;
+  }
+  .navbar .navbar-social-icons {
+    position: relative;
+    z-index: 5;
+  }
+  .navbar .navbar-toggler {
+    z-index: 10;
+  }
+  .navbar .navbar-collapse {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--global-bg-color);
+    border: 1px solid var(--global-divider-color);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    box-shadow: var(--global-shadow-md);
+    padding: 0.75rem 1.25rem 1rem;
+    z-index: 1000;
+  }
+  .navbar .navbar-collapse .navbar-nav {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+  }
+  .navbar .navbar-collapse .navbar-nav .nav-item {
+    text-align: right;
+  }
+  .navbar .navbar-collapse .navbar-nav .nav-item .nav-link {
+    padding: 0.5rem 0.75rem;
+    display: inline-block;
+    font-size: 0.95rem;
+    border-radius: 6px;
+  }
+  .navbar .navbar-collapse .navbar-nav .nav-item .nav-link:hover {
+    background-color: var(--global-code-bg-color);
+  }
+  .navbar .navbar-collapse .navbar-nav .nav-item.active > .nav-link::after {
+    left: 0.75rem;
+    right: 0.75rem;
+    transform: none;
+    width: auto;
+    bottom: 0.15rem;
+  }
+  .navbar .navbar-collapse .navbar-nav .toggle-container {
+    margin-top: 0.5rem;
+  }
+  .navbar .navbar-collapse .navbar-nav .toggle-container #light-toggle {
+    margin: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background-color: var(--global-code-bg-color);
+  }
+  .navbar .navbar-collapse .navbar-nav .toggle-container #light-toggle:hover {
+    background-color: var(--global-divider-color);
+    transform: none;
+  }
+}
 .social {
   text-align: center;
 }
