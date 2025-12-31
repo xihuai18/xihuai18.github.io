@@ -1647,6 +1647,12 @@ pre:not(.wrapped) pre {
 
 .post ol.bibliography {
   padding: 0;
+  margin: 0;
+}
+@media (max-width: 768px) {
+  .post ol.bibliography {
+    padding-left: 0;
+  }
 }
 .post ol.bibliography li {
   margin-bottom: 1rem;
