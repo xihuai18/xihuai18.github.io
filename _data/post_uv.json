@@ -1,6 +1,6 @@
 {
   "all": {
-    "/": 2296,
+    "/": 2297,
     "/'assets/pdf/'%20%7C%20relative_url%20%7D%7D": 1,
     "//0.0.0.1/": 11,
     "//fb/": 2,
@@ -27,11 +27,11 @@
     "/reinforcement-learning/2025/11/20/three-policy-cn.html": 7,
     "/reinforcement-learning/2025/11/20/three-policy-en.html": 4,
     "/reinforcement-learning/2025/12/01/kl-estimators-cn.html": 389,
-    "/reinforcement-learning/2025/12/01/kl-estimators-en.html": 107,
+    "/reinforcement-learning/2025/12/01/kl-estimators-en.html": 109,
     "/reinforcement-learning/2025/12/01/kl-estimators-zh.htm": 1,
     "/reinforcement-learning/2025/12/01/kl-estimators-zh.html": 64,
-    "/reinforcement-learning/2025/12/17/offpolicy-en.html": 9,
-    "/reinforcement-learning/2025/12/17/offpolicy-zh.html": 40,
+    "/reinforcement-learning/2025/12/17/offpolicy-en.html": 11,
+    "/reinforcement-learning/2025/12/17/offpolicy-zh.html": 41,
     "/xihuai18.github.io/": 2,
     "/xihuai18.github.io/404.html": 3,
     "/xihuai18.github.io/cv/": 3,
@@ -43,7 +43,7 @@
     "/xihuai18.github.io/publications/": 2
   },
   "d30": {
-    "/": 341,
+    "/": 342,
     "/blog/": 88,
     "/blog/2025/": 2,
     "/blog/category/reinforcement-learning/": 2,
@@ -57,10 +57,10 @@
     "/reinforcement-learning/2025/11/20/three-policy-cn.html": 7,
     "/reinforcement-learning/2025/11/20/three-policy-en.html": 4,
     "/reinforcement-learning/2025/12/01/kl-estimators-cn.html": 389,
-    "/reinforcement-learning/2025/12/01/kl-estimators-en.html": 107,
+    "/reinforcement-learning/2025/12/01/kl-estimators-en.html": 109,
     "/reinforcement-learning/2025/12/01/kl-estimators-zh.htm": 1,
     "/reinforcement-learning/2025/12/01/kl-estimators-zh.html": 64,
-    "/reinforcement-learning/2025/12/17/offpolicy-en.html": 9,
-    "/reinforcement-learning/2025/12/17/offpolicy-zh.html": 40
+    "/reinforcement-learning/2025/12/17/offpolicy-en.html": 11,
+    "/reinforcement-learning/2025/12/17/offpolicy-zh.html": 41
   }
 }
