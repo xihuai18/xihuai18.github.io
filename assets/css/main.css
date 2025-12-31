@@ -1645,9 +1645,19 @@ pre:not(.wrapped) pre {
   margin-top: 0.35rem;
 }
 
+.post .publications {
+  padding-left: 0;
+  margin-left: 0;
+}
+
 .post ol.bibliography {
   padding: 0;
   margin: 0;
+  list-style: none;
+}
+.publications .post ol.bibliography {
+  padding-left: 0;
+  margin-left: 0;
 }
 @media (max-width: 768px) {
   .post ol.bibliography {
@@ -1699,6 +1709,7 @@ pre:not(.wrapped) pre {
   gap: 0.2rem;
   margin-top: 0.35rem;
   padding-left: 0;
+  margin-left: 0;
 }
 .post ol.bibliography li .venue-tag {
   margin-top: 0.4rem;
