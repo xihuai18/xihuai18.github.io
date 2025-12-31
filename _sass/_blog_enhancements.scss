@@ -136,11 +136,11 @@
     margin-bottom: 1.25rem;
   }
   
-  // Apply justify only on larger viewports where line length is sufficient
+  // Apply layout-specific paragraph alignment on larger viewports
   @media (min-width: 768px) {
     p {
-      text-align: justify;
-      hyphens: auto;
+      text-align: left;
+      hyphens: none;
     }
   }
   
@@ -910,10 +910,14 @@
 
       @media (prefers-reduced-motion: no-preference) {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        &:hover {
+          transform: scale(1.01);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
       }
-      
+
       &:hover {
-        transform: scale(1.01);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
       }
     }
@@ -948,10 +952,14 @@
 
     @media (prefers-reduced-motion: no-preference) {
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+      &:hover {
+        transform: scale(1.01);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      }
     }
-    
+
     &:hover {
-      transform: scale(1.01);
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
   }
