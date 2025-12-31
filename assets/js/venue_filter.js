@@ -127,57 +127,56 @@ function hideEmptyYearHeaders() {
   });
 }
 
+function getVisiblePublications(listElement) {
+  return Array.from(listElement.querySelectorAll('li')).filter(li => {
+    const computedStyle = window.getComputedStyle(li);
+    return computedStyle.display !== 'none' && computedStyle.opacity !== '0';
+  });
+}
+
 function updatePublicationDividers() {
-  // Handle both Publications page (.publications h2.year) and About page (.post .publications)
-  const isAboutPage = document.querySelector('.post .publications');
-  
-  if (isAboutPage) {
-    // About page: check total visible publications
-    const bibliography = isAboutPage.querySelector('ol.bibliography');
-    if (!bibliography) return;
-    
-    const visiblePubs = Array.from(bibliography.querySelectorAll('li')).filter(li => {
-      const computedStyle = window.getComputedStyle(li);
-      return computedStyle.display !== 'none' && computedStyle.opacity !== '0';
-    });
-    
-    // If only one publication is visible, hide all dividers
-    if (visiblePubs.length === 1) {
-      bibliography.querySelectorAll('li').forEach(li => {
-        li.classList.add('single-pub-in-year');
-      });
-    } else {
-      // Remove the class to show dividers normally
-      bibliography.querySelectorAll('li').forEach(li => {
-        li.classList.remove('single-pub-in-year');
-      });
-    }
-  } else {
+  // Handle Publications page (with year headers) vs About/other pages (single list)
+  const publicationsSection = document.querySelector('.publications');
+  if (!publicationsSection) return;
+
+  const yearHeaders = publicationsSection.querySelectorAll('h2.year');
+
+  if (yearHeaders.length > 0) {
     // Publications page: check per year
-    const yearHeaders = document.querySelectorAll('.publications h2.year');
-    
     yearHeaders.forEach(header => {
       // Find the bibliography list following this year header
       let nextElement = header.nextElementSibling;
       
       if (nextElement && nextElement.tagName === 'OL' && nextElement.classList.contains('bibliography')) {
-        const visiblePubs = Array.from(nextElement.querySelectorAll('li')).filter(li => {
-          const computedStyle = window.getComputedStyle(li);
-          return computedStyle.display !== 'none' && computedStyle.opacity !== '0';
-        });
+        const visiblePubs = getVisiblePublications(nextElement);
+        
+        // Remove the class from all publications first
+        nextElement.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
         
         // If only one publication is visible in this year, add a class to hide dividers
         if (visiblePubs.length === 1) {
-          nextElement.querySelectorAll('li').forEach(li => {
+          visiblePubs.forEach(li => {
             li.classList.add('single-pub-in-year');
-          });
-        } else {
-          // Remove the class to show dividers normally
-          nextElement.querySelectorAll('li').forEach(li => {
-            li.classList.remove('single-pub-in-year');
           });
         }
       }
+    });
+    return;
+  }
+
+  // About page or single publication list without year headers
+  const bibliography = publicationsSection.querySelector('ol.bibliography');
+  if (!bibliography) return;
+
+  const visiblePubs = getVisiblePublications(bibliography);
+  
+  // Remove the class from all publications first
+  bibliography.querySelectorAll('li').forEach(li => li.classList.remove('single-pub-in-year'));
+  
+  // If only one publication is visible, hide all dividers
+  if (visiblePubs.length === 1) {
+    visiblePubs.forEach(li => {
+      li.classList.add('single-pub-in-year');
     });
   }
 }
@@ -247,16 +246,16 @@ function updateFilterStatus(venue, visibleCount, totalCount) {
   }
 }
 
-// Initialize About page dividers
-function initAboutPageDividers() {
-  // Just call updatePublicationDividers to handle About page initial state
+// Initialize publication dividers on page load
+function initPublicationDividers() {
+  // Call updatePublicationDividers to handle both About and Publications pages
   updatePublicationDividers();
 }
 
 // Check URL parameters on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize About page dividers if on About page
-  initAboutPageDividers();
+  // Initialize publication dividers for both About and Publications pages
+  initPublicationDividers();
   
   // Only apply filter on publications page
   if (!document.querySelector('.publications')) return;
@@ -270,6 +269,13 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(() => {
         filterByVenue(venueParam);
       }, 100);
+    } else {
+      // Double-check dividers after initial render completes
+      // This handles edge cases where the initial call (line 256) runs before
+      // all styles are computed, ensuring single publications get proper styling
+      requestAnimationFrame(() => {
+        updatePublicationDividers();
+      });
     }
   } catch (error) {
     console.warn('Failed to parse URL parameters:', error);

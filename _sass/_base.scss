@@ -3,6 +3,7 @@
  ******************************************************************************/
 
 @use "variables" as *;
+@use "mixins" as *;
 
 // Typography
 
@@ -365,19 +366,29 @@ pre code {
 }
 
 #light-toggle {
-  padding: 0;
+  padding: 0.5rem 1rem;
   border: 0;
   background-color: inherit;
   color: var(--global-text-color);
   font-size: $font-size-lg;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  margin-left: 0.5rem;
+  justify-content: flex-end;
+  width: 100%;
+  margin-left: 0;
 
   &:hover {
     color: var(--global-theme-color);
+  }
+}
+
+@media (min-width: 576px) {
+  #light-toggle {
+    padding: 0;
+    width: auto;
+    height: 100%;
+    margin-left: 0.5rem;
+    justify-content: center;
   }
 }
 
@@ -512,6 +523,10 @@ footer.sticky-bottom {
     list-style: none;
     padding-top: 1.25rem;
     padding-bottom: 1.25rem;
+
+    &:last-child {
+      border-bottom: none;
+    }
 
     .post-meta {
       color: var(--global-text-color-light);
@@ -877,14 +892,14 @@ html.transition *:after {
     font-size: $font-size-sm;
     padding-top: 0.25rem;
     padding-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
 
     a {
-      color: var(--global-text-color-light);
-      text-decoration: none;
-
-      &:hover {
-        color: var(--global-theme-color);
-      }
+      @include tag-button-style(0.3rem 0.65rem, $font-size-xs, 5px);
+      white-space: nowrap;
     }
   }
 

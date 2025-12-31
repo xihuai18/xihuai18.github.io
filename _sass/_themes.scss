@@ -17,6 +17,7 @@
   --global-distill-app-color: #{$grey-color};
   --global-divider-color: rgba(0,0,0,.3);
   --global-card-bg-color: #{$white-color};
+  --global-shadow-color: rgba(0, 0, 0, 0.1);
 
   .fa-sun {
     display : none;
@@ -46,6 +47,7 @@ html[data-theme='dark'] {
   --global-distill-app-color: #{$grey-color-light};
   --global-divider-color: #424246;
   --global-card-bg-color: #{$grey-900};
+  --global-shadow-color: rgba(0, 0, 0, 0.3);
 
   .fa-sun {
     display : block;
