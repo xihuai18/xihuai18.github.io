@@ -2235,9 +2235,9 @@ pre:not(.wrapped) pre {
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.75rem;
-  background-color: var(--global-code-bg-color);
+  background-color: transparent;
   border: 1px solid var(--global-divider-color);
-  border-radius: 20px;
+  border-radius: 5px;
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
