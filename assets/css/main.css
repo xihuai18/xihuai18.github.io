@@ -2960,6 +2960,37 @@ a[data-filter-link].active-filter:hover {
   margin-top: -1rem;
   margin-bottom: 2rem;
 }
+.post-content img[data-zoomable] {
+  position: relative;
+  cursor: zoom-in;
+}
+.post-content figure:has(img[data-zoomable]),
+.post-content p:has(> img[data-zoomable]) {
+  position: relative;
+}
+.post-content figure:has(img[data-zoomable])::after,
+.post-content p:has(> img[data-zoomable])::after {
+  content: "🔍";
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 1.25rem;
+  background: var(--global-bg-color);
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: var(--global-shadow-sm);
+  transition: opacity 0.2s ease;
+}
+.post-content figure:has(img[data-zoomable]):hover::after,
+.post-content p:has(> img[data-zoomable]):hover::after {
+  opacity: 0.85;
+}
 
 /*******************************************************************************
  * Blockquote Enhancements
