@@ -1516,6 +1516,11 @@ pre:not(.wrapped) pre {
 }
 .publications ol.bibliography li .row {
   margin: 0;
+  padding: 0;
+}
+.publications ol.bibliography li .col-sm-10,
+.publications ol.bibliography li .col-sm-12 {
+  padding-left: 0;
 }
 .publications ol.bibliography li .col-sm-2 {
   padding: 0 0.4rem 0 0;
@@ -1566,12 +1571,17 @@ pre:not(.wrapped) pre {
 }
 .publications ol.bibliography li .links {
   margin-top: 0.25rem;
+  margin-left: 0;
 }
 .publications ol.bibliography li .links a.btn {
   font-size: 0.75rem;
   padding: 0.15rem 0.4rem;
   margin-right: 0.2rem;
+  margin-left: 0;
   border-radius: 3px;
+}
+.publications ol.bibliography li .links a.btn:first-child {
+  margin-left: 0;
 }
 .publications ol.bibliography li .venue-tag {
   margin-top: 0.4rem;
@@ -1702,6 +1712,14 @@ pre:not(.wrapped) pre {
   background: transparent;
   border-bottom: 1px solid var(--global-divider-color);
   transition: none;
+}
+.post ol.bibliography li .row {
+  margin: 0;
+  padding: 0;
+}
+.post ol.bibliography li .col-sm-10,
+.post ol.bibliography li .col-sm-12 {
+  padding-left: 0;
 }
 .post ol.bibliography li:last-child {
   border-bottom: none;
