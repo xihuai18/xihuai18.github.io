@@ -153,7 +153,7 @@
   color: var(--global-text-color);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
+  display: none; // Hidden by default, shown only when TOC is collapsed
   align-items: center;
   justify-content: center;
 
@@ -161,7 +161,12 @@
     transition: all 0.2s ease;
   }
   
-  // Hidden state (via class instead of inline style)
+  // Visible state when TOC is collapsed
+  &.toc-collapsed-toggle--visible {
+    display: flex;
+  }
+  
+  // Hidden state (legacy class, kept for compatibility)
   &.toc-collapsed-toggle--hidden {
     display: none;
   }
