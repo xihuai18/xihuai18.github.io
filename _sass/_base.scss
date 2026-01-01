@@ -1686,6 +1686,13 @@ pre {
 
       .row {
         margin: 0;
+        padding: 0;
+      }
+
+      // Remove left padding from Bootstrap columns to align with text
+      .col-sm-10,
+      .col-sm-12 {
+        padding-left: 0;
       }
 
       .col-sm-2 {
@@ -1745,12 +1752,18 @@ pre {
 
       .links {
         margin-top: 0.25rem;
+        margin-left: 0;
 
         a.btn {
           font-size: $font-size-xs;
           padding: 0.15rem 0.4rem;
           margin-right: 0.2rem;
+          margin-left: 0;
           border-radius: 3px;
+
+          &:first-child {
+            margin-left: 0;
+          }
         }
       }
 
@@ -1855,6 +1868,17 @@ pre {
     background: transparent;
     border-bottom: 1px solid var(--global-divider-color);
     transition: none;
+
+    .row {
+      margin: 0;
+      padding: 0;
+    }
+
+    // Remove left padding from Bootstrap columns to align with text
+    .col-sm-10,
+    .col-sm-12 {
+      padding-left: 0;
+    }
 
     &:last-child {
       border-bottom: none;
