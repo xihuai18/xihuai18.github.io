@@ -191,14 +191,14 @@
         toggleBtn.classList.add("is-collapsed");
         tocLayout.classList.add("toc-collapsed");
         if (expandBtn) {
-          expandBtn.classList.remove("toc-collapsed-toggle--hidden");
+          expandBtn.classList.add("toc-collapsed-toggle--visible");
         }
       } else {
         tocSidebar.classList.remove("is-collapsed");
         toggleBtn.classList.remove("is-collapsed");
         tocLayout.classList.remove("toc-collapsed");
         if (expandBtn) {
-          expandBtn.classList.add("toc-collapsed-toggle--hidden");
+          expandBtn.classList.remove("toc-collapsed-toggle--visible");
         }
       }
       // Update ARIA expanded state for assistive technologies

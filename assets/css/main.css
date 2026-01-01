@@ -1935,7 +1935,7 @@ pre:not(.wrapped) pre {
   color: var(--global-text-color);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
 }
@@ -1943,6 +1943,9 @@ pre:not(.wrapped) pre {
   .toc-collapsed-toggle {
     transition: all 0.2s ease;
   }
+}
+.toc-collapsed-toggle.toc-collapsed-toggle--visible {
+  display: flex;
 }
 .toc-collapsed-toggle.toc-collapsed-toggle--hidden {
   display: none;
