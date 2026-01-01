@@ -1859,12 +1859,67 @@ pre {
 }
 
 // Selected Papers on About Page - More Compact
+.post .publications {
+  padding-left: 0;
+  margin-left: 0;
+  text-align: left;
+}
+
+
+.about-selected-papers {
+  margin-bottom: 3rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+
+  &__intro {
+    margin-bottom: 1.5rem;
+
+    ol {
+      margin: 0.35rem 0 0 1.25rem;
+    }
+  }
+
+  .publications {
+    padding-left: 0;
+    margin-left: 0;
+    width: 100%;
+
+    ol,
+    li {
+      padding-left: 0;
+      margin-left: 0;
+      list-style: none;
+    }
+
+    ol.bibliography {
+      padding-left: 0;
+      margin-left: 0;
+    }
+  }
+}
+
 .post ol.bibliography {
   padding: 0;
+  margin: 0;
+  list-style: none;
+
+  // Ensure the entire Selected Papers block lines up with the intro text
+  .publications & {
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  @media (max-width: 768px) {
+    padding-left: 0;
+  }
 
   li {
     margin-bottom: 1.0rem;
     padding-bottom: 0.3rem;
+    padding-left: 0;
     background: transparent;
     border-bottom: 1px solid var(--global-divider-color);
     transition: none;
@@ -1917,6 +1972,16 @@ pre {
     .links a.btn {
       font-size: $font-size-xs;
       padding: 0.12rem 0.35rem;
+      margin-left: 0;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+      margin-top: 0.35rem;
+      padding-left: 0;
+      margin-left: 0;
     }
 
     .venue-tag {
