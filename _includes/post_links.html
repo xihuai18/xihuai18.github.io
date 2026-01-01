@@ -14,7 +14,7 @@
 
   <!-- External Platform Links -->
   {% if page.zhihu_url %}
-    {% capture link %}<a href="{{ page.zhihu_url }}" target="_blank">知乎版本 <img src="{{ '/assets/img/icons/zhihu.ico' | relative_url }}" style="height: 1em; vertical-align: middle;"></a>{% endcapture %}
+    {% capture link %}<a href="{{ page.zhihu_url }}" target="_blank">知乎 <img src="{{ '/assets/img/icons/zhihu.ico' | relative_url }}" style="height: 1em; vertical-align: middle;"></a>{% endcapture %}
     {% assign links = links | push: link %}
   {% endif %}
 
