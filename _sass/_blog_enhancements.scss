@@ -1042,6 +1042,41 @@ a[data-filter-link].active-filter {
     margin-top: -1rem;
     margin-bottom: 2rem;
   }
+
+  // Zoomable image indicator
+  img[data-zoomable] {
+    position: relative;
+    cursor: zoom-in;
+  }
+
+  // Container for zoomable images with overlay hint
+  figure:has(img[data-zoomable]),
+  p:has(> img[data-zoomable]) {
+    position: relative;
+
+    &::after {
+      content: '🔍';
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 1.25rem;
+      background: var(--global-bg-color);
+      border-radius: 50%;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: var(--global-shadow-sm);
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover::after {
+      opacity: 0.85;
+    }
+  }
 }
 
 /*******************************************************************************
