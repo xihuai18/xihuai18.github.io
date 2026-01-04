@@ -903,7 +903,7 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 
 ```bibtex
 @misc{WangZhang2025KLEstimators,
-  author       = {Wang, Xihuai and Zhang, Shao}
+  author       = {Wang, Xihuai and Zhang, Shao},
   title        = {Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation},
   year         = {2025},
   month        = dec,
