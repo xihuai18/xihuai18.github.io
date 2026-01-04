@@ -2,7 +2,7 @@
 layout: post
 title: "从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展"
 date: 2025-11-15
-description: 现代 LLM RL 流程常常在"旧策略"悄然偏离实际生成 rollout 的行为策略时进行训练，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可以推理和控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同方式。
+description: 现代 LLM RL 流程中，"旧策略"常常悄然偏离实际生成 rollout 的行为策略，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可推理、可控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同实现方式。
 categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/11/15/three-policy-en.html
@@ -14,39 +14,39 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 
 ## 训推不一致和异步框架
 
-最近看到不少关于大模型强化学习中“训推不一致”和“异步训推框架”的讨论，我自己的直觉是：这些看上去复杂多样的问题，很大一部分其实都围绕着一个更基础的矛盾——**行为策略（behavior policy）和参考策略（reference policy）不一致。**
+最近看到不少关于大模型强化学习中"训推不一致"和"异步训推框架"的讨论。我的直觉是：这些看似复杂多样的问题，很大程度上都围绕着一个更基础的矛盾——**行为策略（behavior policy）和参考策略（reference policy）不一致。**
 
-本文先简单梳理一下我目前看到的相关工作，然后再尝试从“行为策略 vs 参考策略”的角度，把它们串到同一条线上，为读者提供一个补充视角。
+本文先简单梳理一下我目前看到的相关工作，然后尝试从"行为策略 vs 参考策略"的角度，把它们串到同一条线上，为读者提供一个补充视角。
 
-在本文中我会用：
+在本文中，我将使用以下记号：
 
-- **行为策略** $\mu$：实际负责生成 rollout 的策略，也就是“你在什么分布下采样到了这些数据”。在现代 LLM-RL 系统里，它对应的是推理引擎里的那套实现（vLLM / SGLang 等），在异步框架下往往还是**多个 worker 策略的混合分布**。
-- **参考策略** $\pi_{\theta_{\text{old}}}$：训练目标里拿来做重要性采样、clipping 或 KL 约束的策略，典型地就是 PPO / GRPO 里的“旧策略”（old policy）。
-- **目标策略** $\pi_\theta$：训练目标里要优化的策略，也就是“你想让模型变成什么样”。典型地就是 PPO / GRPO 里的“新策略”（new policy）。
+- **行为策略** $\mu$：实际负责生成 rollout 的策略，即"在什么分布下采样到了这些数据"。在现代 LLM-RL 系统中，它对应推理引擎里的实现（vLLM / SGLang 等），在异步框架下往往还是**多个 worker 策略的混合分布**。
+- **参考策略** $\pi_{\theta_{\text{old}}}$：训练目标中用于重要性采样、clipping 或 KL 约束的策略，典型的就是 PPO / GRPO 里的"旧策略"（old policy）。
+- **目标策略** $\pi_\theta$：训练目标中要优化的策略，即"希望模型变成什么样"。典型的就是 PPO / GRPO 里的"新策略"（new policy）。
 
-在最经典、理想化的设定里，我们通常**默认** $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理 / 训练后端、MoE 路由波动甚至硬件数值差异等因素影响，二者往往会出现不同程度的偏离。
+在最经典、理想化的设定中，我们通常**默认** $\mu = \pi_{\theta_{\text{old}}}$。但在现实系统中，受异步更新、不同推理/训练后端、MoE 路由波动甚至硬件数值差异等因素影响，二者往往会出现不同程度的偏离。
 
 ## 相关工作
 
-下面按时间线简单列一下我印象比较深的一些工作（只代表我个人看到的片面子集）：
+下面按时间线简要列举一些我印象较深的工作（仅代表个人看到的片面子集）：
 
-- [Decoupled PPO](https://arxiv.org/abs/2110.00641) 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，“旧策略”（old policy）实际承担了两个不同的角色：一是用于重要性采样进行异策略修正，在这个目的下，“旧策略”用于代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，在这个目的下，“旧策略”被用于衡量新旧策略的变化程度，称作近端策略（proximal policy，对应本文中的“参考策略”）。文章指出这两个目的下的“旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，把“采样用谁”和“对谁做 trust region”在形式上解耦开来。
+- [Decoupled PPO](https://arxiv.org/abs/2110.00641) 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，"旧策略"（old policy）实际上承担了两个不同的角色：一是用于重要性采样以进行异策略修正，此时"旧策略"代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，此时"旧策略"被用于衡量新旧策略的变化程度，称为近端策略（proximal policy，对应本文中的"参考策略"）。文章指出这两个目的下的"旧策略"可以是不同的策略，从而提出了 Decoupled PPO 更新目标，将"采样用谁"和"对谁做 trust region"在形式上解耦开来。
 
-- [AReaL](https://arxiv.org/abs/2505.24298) 关注到了异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将“行为策略分布”和“参考策略”显式区分开来，从而在异步场景下仍然维持类似 PPO 的优化性质。
+- [AReaL](https://arxiv.org/abs/2505.24298) 关注到异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将"行为策略分布"和"参考策略"显式区分开来，从而在异步场景下仍能维持类似 PPO 的优化性质。
 
-- [GSPO](https://arxiv.org/abs/2507.18071) 从 GRPO 在长序列和 MoE 模型上的稳定性问题出发，指出 token-level 的 PPO / GRPO 在专家路由高度波动（尤其是新旧策略之间的路由差异）时，会引入巨大的方差与不稳定。GSPO 提出在 **sequence-level** 定义 PPO-style 目标与比率约束，用整条序列的比率来约束更新，从而在 MoE 场景下显著缓解由路由不一致带来的训练崩溃问题。
+- [GSPO](https://arxiv.org/abs/2507.18071) 从 GRPO 在长序列和 MoE 模型上的稳定性问题出发，指出 token-level 的 PPO / GRPO 在专家路由高度波动（尤其是新旧策略之间的路由差异）时，会引入巨大的方差与不稳定。GSPO 提出在 **sequence-level** 定义 PPO-style 目标与比率约束，用整条序列的比率来约束更新，从而在 MoE 场景下显著缓解由路由不一致带来的训练崩溃。
 
-- [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl#28b721e3f6c480c3a756f8fb319e860d) 关注到了现有的一些大模型强化学习训练框架（如 VeRL）中，推理框架和训练框架在不少相同的功能模块上有不同的实现（例如 vLLM 和 FSDP / Megatron 等算子上的差异），导致行为策略 $\mu$ 与参考策略 $\pi_{\theta_{\text{old}}}$ 不一致。这种不一致使得原本假定为同策略（on-policy）的训练，实际上变成了带有明显偏差的异策略（off-policy）训练。文章总结了两种处理这一问题的现有方法：PPO-IS 与 vanilla-IS，并提出在 **token-level** 做截断重要性采样（truncated IS, TIS），以减少训推不一致程度较重的样本在训练中的影响。作者还写了两篇更为基础的分析文章，从原理上分析训推不一致问题：[Part I](https://fengyao.notion.site/pg-seq-token-part1-basics) 和 [Part II](https://fengyao.notion.site/pg-seq-token-part2-mismatch)。
+- [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl#28b721e3f6c480c3a756f8fb319e860d) 关注到现有的一些大模型强化学习训练框架（如 VeRL）中，推理框架和训练框架在不少相同功能模块上有不同实现（例如 vLLM 和 FSDP / Megatron 等算子差异），导致行为策略 $\mu$ 与参考策略 $\pi_{\theta_{\text{old}}}$ 不一致。这种不一致使得原本假定为同策略（on-policy）的训练，实际上变成了带有明显偏差的异策略（off-policy）训练。文章总结了两种处理这一问题的现有方法：PPO-IS 与 vanilla-IS，并提出在 **token-level** 进行截断重要性采样（truncated IS, TIS），以减少训推不一致程度较重的样本在训练中的影响。作者还写了两篇更基础的分析文章，从原理上分析训推不一致问题：[Part I](https://fengyao.notion.site/pg-seq-token-part1-basics) 和 [Part II](https://fengyao.notion.site/pg-seq-token-part2-mismatch)。
 
-- [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference) 指出，批处理大小不变性（batch-size invariance）的缺失是大模型推理框架随机性的核心来源之一：同一个输入在不同的 batch 组合和 kernel 路径下，得到的概率分布会发生可观差异。这意味着，即便“名义上”是同一套参数，真实运行时的行为策略 $\mu$ 也会因为系统负载和调度差异而波动，从而进一步加剧训推不一致。
+- [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference) 指出，批处理大小不变性（batch-size invariance）的缺失是大模型推理框架随机性的核心来源之一：同一个输入在不同的 batch 组合和 kernel 路径下，得到的概率分布会发生可观差异。这意味着，即便"名义上"是同一套参数，真实运行时的行为策略 $\mu$ 也会因系统负载和调度差异而波动，从而进一步加剧训推不一致。
 
-- [Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!](https://ringtech.notion.site/icepop) 观察到，上述训推不一致问题在 MoE 模型上会进一步加剧：路由本身就对微小扰动高度敏感，再叠加推理 / 训练实现差异和异步采样，很容易放大偏差。文章提出 IcePop 方法：在 **token-level** 通过计算重要性采样比率，对过于大或者过于小的比率进行双侧掩码（masking），将这些“噪声较大”的数据从梯度中丢弃，从而稳定 MoE 上的 RL 训练。
+- [Small Leak Can Sink a Great Ship—Boost RL Training on MoE with 𝑰𝒄𝒆𝑷𝒐𝒑!](https://ringtech.notion.site/icepop) 观察到，上述训推不一致问题在 MoE 模型上会进一步加剧：路由本身就对微小扰动高度敏感，再叠加推理/训练实现差异和异步采样，很容易放大偏差。文章提出 IcePop 方法：在 **token-level** 通过计算重要性采样比率，对过大或过小的比率进行双侧掩码（masking），将这些"噪声较大"的数据从梯度中丢弃，从而稳定 MoE 上的 RL 训练。
 
-- [When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch](https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Collapse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda) 系统性分析了训推不一致的各种成因，包括智能体工作流中引入的大量分布外和低概率信息、硬件和内核 / kernel 实现带来的计算不确定性，并分析了在 **token-level** 进行重要性采样如何在长序列上引入严重的偏差。文章进一步提出在 **sequence-level** 计算重要性采样掩码（sequence-level masked IS, sequence-level MIS）：只丢弃那些整条序列的重要性采样比率过大的数据，从而在控制偏差的同时，显著抑制由极端样本导致的训练崩溃。文中给出了较为完整的理论推导和丰富的实验支撑。
+- [When Speed Kills Stability: Demystifying RL Collapse from the Training-Inference Mismatch](https://yingru.notion.site/When-Speed-Kills-Stability-Demystifying-RL-Capse-from-the-Training-Inference-Mismatch-271211a558b7808d8b12d403fd15edda) 系统性分析了训推不一致的各种成因，包括智能体工作流中引入的大量分布外和低概率信息、硬件和内核/kernel 实现带来的计算不确定性，并分析了在 **token-level** 进行重要性采样如何在长序列上引入严重偏差。文章进一步提出在 **sequence-level** 计算重要性采样掩码（sequence-level masked IS, sequence-level MIS）：只丢弃那些整条序列重要性采样比率过大的数据，从而在控制偏差的同时，显著抑制由极端样本导致的训练崩溃。文中给出了较为完整的理论推导和丰富的实验支撑。
 
-- [Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers](https://arxiv.org/abs/2510.11370) 聚焦于 MoE 架构下特有的 **路由不一致（Routing Inconsistency）** 问题。文章发现，推理端和训练端即便在输入完全相同的情况下，由于算子实现或并行的微小差异，Router 选中的专家往往不同。这种“物理路径”上的不一致，使得行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的差异远超预期，极易导致训练崩溃。文章提出了 **Rollout Routing Replay (R3)**：在推理阶段记录下每个 token 实际命中的专家索引，并在训练阶段**强制回放**这些路由决策，不再重新进行计算。通过这种方式，R3 在 MoE 拓扑结构上强制对齐了训推两端的计算路径。
+- [Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers](https://arxiv.org/abs/2510.11370) 聚焦于 MoE 架构下特有的 **路由不一致（Routing Inconsistency）** 问题。文章发现，推理端和训练端即便在输入完全相同的情况下，由于算子实现或并行的微小差异，Router 选中的专家往往不同。这种"物理路径"上的不一致，使得行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 之间的差异远超预期，极易导致训练崩溃。文章提出了 **Rollout Routing Replay (R3)**：在推理阶段记录每个 token 实际命中的专家索引，并在训练阶段**强制回放**这些路由决策，不再重新计算。通过这种方式，R3 在 MoE 拓扑结构上强制对齐了训推两端的计算路径。
 
-- [RL 老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 则更多从实践角度出发，分享了如何在实现上尽可能靠近“训推一致”的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
+- [RL 老训崩？训推差异是基石](https://zhuanlan.zhihu.com/p/1959976628290590602) 更多从实践角度出发，分享了如何在实现上尽可能靠近"训推一致"的经验，包括如何选用一致的算子和精度配置、如何监控与约束训练端和推理端 log-prob 的偏差等，更着力于从训推框架层面入手，在工程上尽量从根本缓解训推差异问题。
 
 - [verl Rollout Importance Sampling](https://verl.readthedocs.io/en/latest/algo/rollout_corr.html) 在其 rollout correction 模块中引入了 Token Veto（一票否决）机制：在 **token-level** 计算重要性比率 $\rho_t^{(\text{ref}\leftarrow\text{beh})}$，若轨迹中存在任意 token 使得 $\min_t \rho_t < \tau_{\text{veto}}$，则将整条序列从训练中剔除。这种"token 粒度检测、sequence 粒度否决"的设计体现了一种"一票否决"的保守策略。
 
@@ -54,18 +54,18 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 
 ## 三策略 TRPO 视角下的最小统一理解
 
-上面列的这些工作，看上去各自解决的是：
+上面列举的这些工作，看似各自解决不同层面的问题：
 
 - 算法层：PPO / GRPO 的目标怎么写，token-level 还是 sequence-level，用 clip 还是 mask；
-- 系统层：推理框架和训练框架怎样对齐；
+- 系统层：推理框架和训练框架如何对齐；
 - 模型层：MoE 模型路由问题如何放大训练不稳定，等等。
 
-但如果我们把“行为策略 vs 参考策略”这条线拉直，会发现相当一部分问题，其实都可以放到一个相对简单的理论框架里理解：**三策略 TRPO**。
+但如果我们把"行为策略 vs 参考策略"这条线拉直，会发现相当一部分问题其实都可以纳入一个相对简单的理论框架来理解：**三策略 TRPO**。
 
-下面这节我会用尽量简单的数学，把这个三策略版 TRPO 摊开——它可以被看作是“TRPO + 三角不等式”的一个小扩展，但在分析大模型 RL 里的训推不一致时非常好用：
+下面我将用尽量简洁的数学，把这个三策略版 TRPO 展开——它可以看作是"TRPO + 三角不等式"的一个小扩展，但在分析大模型 RL 中的训推不一致时非常好用：
 
-- 一方面让我们重新理解“训推不一致”和“异步训练框架”到底在影响什么；
-- 另一方面，也帮我们统一理解 TIS、IcePop、sequence-level MIS 等，在本文的视角下，它们其实都是在实施下文的“**约束 2**”。
+- 一方面帮助我们重新理解"训推不一致"和"异步训练框架"到底在影响什么；
+- 另一方面，也帮助我们统一理解 TIS、IcePop、sequence-level MIS 等方法，在本文的视角下，它们其实都是在实施下文的"**约束 2**"。
 
 ### 三个策略
 
@@ -86,19 +86,19 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
   V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s)。
   $$
 
-稍微赘述一下，在“三策略”设定里，我们有：
+简单说明一下，在"三策略"设定中，我们有：
 
-- **行为策略**（behavior policy）：$\mu$，真正用来 rollout 的策略；数据 $(s,a,r,\dots)$ 都是从它来的。
-- **参考策略**（reference policy）：$\pi_{\theta_{\text{old}}}$，优化目标里拿来做 ratio、clip 或 KL 约束的那一份“旧策略”。
-- **目标策略**（target policy）：$\pi_\theta$，我们这一步想要优化的策略。
+- **行为策略**（behavior policy）：$\mu$，真正用来 rollout 的策略；数据 $(s,a,r,\dots)$ 都来自它。
+- **参考策略**（reference policy）：$\pi_{\theta_{\text{old}}}$，优化目标中用来做 ratio、clip 或 KL 约束的那份"旧策略"。
+- **目标策略**（target policy）：$\pi_\theta$，我们这一步要优化的策略。
 
-在理想设定里我们默认 $\mu = \pi_{\theta_{\text{old}}}$；现实系统里二者往往不等，这就是“训推不一致”的数学影子。
+在理想设定中，我们通常默认 $\mu = \pi_{\theta_{\text{old}}}$；但在现实系统里，二者往往不等，这就是"训推不一致"的数学体现。
 
 ### 两策略 TRPO
 
 > 熟悉 TRPO 的读者可以直接跳到后面的“三策略 TRPO”小节。
 
-TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势函数**之上的。既然实际能算清楚的**只有** $A_\mu$（数据是按 $\mu$ 采的），那我们就直接把 $\mu$ 当成基准。
+TRPO 的所有理论保证，都建立在**某个"基准策略"的优势函数**之上。既然实际能算清楚的**只有** $A_\mu$（数据是按 $\mu$ 采的），我们就直接把 $\mu$ 当作基准。
 
 一个经典的结论是 **性能差分引理（Performance Difference Lemma）**：
 
@@ -110,20 +110,20 @@ TRPO 的所有理论保证，都是建立在**某个“基准策略”的优势�
 > \mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)]。
 > $$
 
-直觉非常简单：
+直觉很简单：
 
-- $A_\mu(s,a)$ 就是在说“如果在 $s$ 里本来按 $\mu$ 行动，现在换成动作 $a$，长期回报会多或少多少”；
-- 把所有时刻、所有状态、所有动作的“增益”累积起来，就得到新策略比行为策略总共赚了多少。
+- $A_\mu(s,a)$ 表示"如果在状态 $s$ 中本来按 $\mu$ 行动，现在换成动作 $a$，长期回报会增加或减少多少"；
+- 把所有时刻、所有状态、所有动作的"增益"累积起来，就得到新策略比行为策略总共多赚了多少。
 
-TRPO 的问题在于，我们没法准确算
+TRPO 的问题在于，我们无法准确计算
 
 $$
 \mathbb{E}_{s\sim d_{\pi_\theta}, a\sim\pi_\theta}[A_\mu(s,a)]，
 $$
 
-因为 $d_{\pi_\theta}$ 是“新策略”的状态分布，我们没有在它下面采样过。
+因为 $d_{\pi_\theta}$ 是"新策略"的状态分布，我们没有在这个分布下采样过。
 
-于是 TRPO 引入了一个替代目标：把状态分布换成行为策略的：
+于是 TRPO 引入了一个替代目标：将状态分布换成行为策略的：
 
 $$
 L_\mu(\pi_\theta)
@@ -220,11 +220,11 @@ $$
 
 ### 三策略 TRPO
 
-现实问题在于：**大模型强化学习训练里我们可能无法直接控制 $\beta$ 本身。**
+现实问题在于：**在大模型强化学习训练中，我们可能无法直接控制 $\beta$ 本身。**
 
-在大部分 PPO / GRPO / GSPO / 现有 RLHF 框架里，实际发生的是：
+在大部分 PPO / GRPO / GSPO 及现有 RLHF 框架中，实际发生的是：
 
-- rollout 数据是由某个**行为策略** $\mu$ 产生的（推理引擎里的“那一版参数” + 若干系统细节）；
+- rollout 数据由某个**行为策略** $\mu$ 产生（推理引擎中的"那一版参数"加上若干系统细节）；
 - 更新时，我们希望利用**参考策略** $\pi_{\theta_{\text{old}}}$ 来限制**目标策略** $\pi_\theta$ 的更新幅度。
 
 也就是说，实际可以“动手”的是两个量：
@@ -255,10 +255,10 @@ $$
 
 直觉上：
 
-- $\alpha_0$：新策略到底离“你宣称的那份旧策略”有多远——这就是 trust region 控制的那部分；
-- $\alpha_1$：你用来训练的参考策略，到底跟真实采样时的行为策略差了多少——这就是训推不一致或异步的影子。
+- $\alpha_0$：新策略离"你宣称的那份旧策略"有多远——这就是 trust region 控制的部分；
+- $\alpha_1$：用于训练的参考策略，与真实采样时的行为策略相差多少——这就是训推不一致或异步的影子。
 
-现在，可以把这两个量塞回 TRPO 的下界里。
+现在，我们可以把这两个量代回 TRPO 的下界中。
 
 对任意状态 $s$，有
 
@@ -646,18 +646,18 @@ $$
 
 ## 小结
 
-如果把这篇文章压缩成一句话，就是：
+如果把这篇文章压缩成一句话，那就是：
 
-> **许多“大模型 RL 训推不一致”和“异步训练”问题，在本文的视角下，其实都可以理解为：在 TRPO 框架下，当行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 不一致时，二者之间的偏移（$\alpha_1$）被严重低估了。**
+> **许多"大模型 RL 训推不一致"和"异步训练"问题，在本文的视角下，其实都可以理解为：在 TRPO 框架下，当行为策略 $\mu$ 和参考策略 $\pi_{\theta_{\text{old}}}$ 不一致时，二者之间的偏移（$\alpha_1$）被严重低估了。**
 
 从两策略到三策略，我们做的事情其实很简单：
 
-- 把 TRPO 的下界从“旧策略 vs 新策略”的叙述，改写成“**行为策略 – 参考策略 – 目标策略**”三者的关系；
+- 将 TRPO 的下界从"旧策略 vs 新策略"的叙述，改写成"**行为策略 – 参考策略 – 目标策略**"三者的关系；
 - 显式地拆出了两个 TV 距离：
-  - **约束 1：参考 vs 目标** $\alpha_0$，对应 PPO / GRPO / GSPO 等工作里最常见的 KL / clip / trust region；
+  - **约束 1：参考 vs 目标** $\alpha_0$，对应 PPO / GRPO / GSPO 等工作中最常见的 KL / clip / trust region；
   - **约束 2：行为 vs 参考** $\alpha_1$，对应异步框架、训推差异、MoE 路由、kernel 非确定性等现实因素；
 - 得到了一个非常直接的结论：
-  替代目标 $L_\mu(\pi_\theta)$ 和真实性能 $\mathcal{J}(\pi_\theta)$ 的 gap 正比于 $\alpha_0 + \alpha_1$。
+  替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 的差距正比于 $\alpha_0 + \alpha_1$。
 
 在这个视角下（当然这只是众多可能视角之一）：
 
