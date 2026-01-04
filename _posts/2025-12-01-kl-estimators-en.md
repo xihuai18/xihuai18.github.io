@@ -117,7 +117,7 @@ Convexity keeps $\phi$ above its tangent, so this gap is **nonnegative**. As $r 
 
 | Estimator |        Definition        |             Design idea             |    Bias (value)     |        Variance        |
 | :-------: | :----------------------: | :---------------------------------: | :-----------------: | :--------------------: |
-|   $k_1$   |         $\log r$         |           Naive log-ratio           |      Unbiased       | High (can be negative) |
+|   $k_1$   |        $-\log r$         |           Naive log-ratio           |      Unbiased       | High (can be negative) |
 |   $k_2$   | $\tfrac{1}{2}(\log r)^2$ | f-divergence, KL-matching 2nd order | Biased (very small) | Low (always positive)  |
 |   $k_3$   |     $r - 1 - \log r$     |      Control variate + Bregman      |      Unbiased       | Low (always positive)  |
 
