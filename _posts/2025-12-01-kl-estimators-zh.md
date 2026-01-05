@@ -11,7 +11,7 @@ zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
 
 
 
-![Mini-class](/assets/img/kl-estimators/kl-estimator-zh.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![Mini-class](/assets/img/kl-estimators/kl-estimator.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 loss 梯度回传」与「用于 reward 惩罚」时的选型指南。
 
@@ -345,13 +345,13 @@ $$
 
 ### 为什么这个区分至关重要
 
-|       维度        |    KL 作为 Loss（loss 梯度回传）     |      KL 作为 Reward（stop-grad）      |
-| :---------------: | :----------------------------------: | :-----------------------------------: |
-|     更新目标      |          原任务 + 监督正则           |           正则化后的新 MDP            |
-|    Actor 梯度     |        RL 梯度 + 显式 KL 梯度        |    单一 PG，基于 shaped advantage     |
-|      Critic       | 学 $V^{\text{env}}$：只看环境 reward | 学 $V^{\text{reg}}$：reward + KL 混合 |
-| Credit Assignment |       局部 per-state，无规划性       |          多步回传，有规划性           |
-|     关心什么      |  KL 估计器的**显式梯度**（对应哪个优化目标）   |      KL 的**数值** + 诱导的**策略梯度**是否正确      |
+|       维度        |        KL 作为 Loss（loss 梯度回传）        |        KL 作为 Reward（stop-grad）         |
+| :---------------: | :-----------------------------------------: | :----------------------------------------: |
+|     更新目标      |              原任务 + 监督正则              |              正则化后的新 MDP              |
+|    Actor 梯度     |           RL 梯度 + 显式 KL 梯度            |       单一 PG，基于 shaped advantage       |
+|      Critic       |    学 $V^{\text{env}}$：只看环境 reward     |   学 $V^{\text{reg}}$：reward + KL 混合    |
+| Credit Assignment |          局部 per-state，无规划性           |             多步回传，有规划性             |
+|     关心什么      | KL 估计器的**显式梯度**（对应哪个优化目标） | KL 的**数值** + 诱导的**策略梯度**是否正确 |
 
 **一句话总结**：KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活；KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底。
 
