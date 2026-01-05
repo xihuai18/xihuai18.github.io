@@ -2,7 +2,7 @@
 layout: post
 title: "简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计"
 date: 2025-12-01
-description: "在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。"
+description: "在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 loss 回传」与「用于 reward 惩罚」时的选型指南。"
 categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/12/01/kl-estimators-en.html
@@ -13,11 +13,11 @@ zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
 
 ![Mini-class](/assets/img/kl-estimators/kl-estimator-zh.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
-> 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 reward 惩罚」与「用于 loss 回传」时的选型指南。
+> 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 loss 回传」与「用于 reward 惩罚」时的选型指南。
 
 ## 引言：KL 散度在强化学习中的角色
 
-在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，用于防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：**使用哪个估计器**（$k_1$, $k_2$, $k_3$）、**从哪个策略采样**（on-policy 与 off-policy）、以及**如何使用**（作为 reward shaping 还是作为 loss 回传）。本文将系统地梳理这些选择及其相互关系，帮助读者厘清相关概念。
+在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，用于防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：**使用哪个估计器**（$k_1$, $k_2$, $k_3$）、**从哪个策略采样**（on-policy 与 off-policy）、以及**如何使用**（作为 loss 回传还是作为 reward shaping）。本文将系统地梳理这些选择及其相互关系，帮助读者厘清相关概念。
 
 ### 正向 KL 与反向 KL 的区别
 
@@ -114,116 +114,11 @@ $$
 
 由于凸函数始终位于其切线上方，这个差值**自然非负**。更重要的是，在 $r \to 1$ 时，函数与切线「贴合」得越来越紧密，差值以 $(r-1)^2$ 的二阶速度趋近于零——这正是 $k_3$ 在策略接近时方差小的根本原因。
 
-了解了三种估计器的定义与设计原理后，我们需要明确 KL 惩罚在代码中的使用方式，因为这决定了我们是只关心数值估计，还是必须关心梯度估计。
-
-## KL 惩罚的两种实现范式
-
-在进入估计器的深入分析之前，我们需要先明确一个更根本的问题：**KL 惩罚在强化学习中到底怎么用？**
-
-回顾 KL 正则化强化学习的目标函数：
-
-$$
-J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^T \gamma^t r(s_t, a_t) \right] - \beta \cdot D_{\mathrm{KL}}(\pi_\theta \| \pi_{\text{ref}})
-$$
-
-这个数学形式看起来很统一，但在基于 Actor-Critic 的算法（如 PPO）中落地时，却衍生出了两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。
-
-这一选择决定了我们后续是只关心估计器的「**数值性质**」（偏差与方差），还是必须同时关心其「**梯度性质**」（梯度对应哪个目标）。
-
-### 范式一：KL 作为 Reward（stop-gradient）
-
-```python
-kl = compute_kl(log_prob_q, log_prob_p).detach()
-shaped_reward = reward - beta * kl
-```
-
-KL 被视为环境奖励的一部分，用 shaped reward 做标准 actor-critic 更新。KL 项不参与梯度回传。
-
-### 范式二：KL 作为 Loss（backprop）
-
-```python
-actor_loss = -advantage * log_prob + beta * kl  # kl 参与梯度计算
-```
-
-Critic 只学环境价值，KL 作为 actor 的正则项直接参与梯度回传。
-
-这两种做法看似只是代码里一个 `.detach()` 的区别，实际上对应着截然不同的优化语义。
-
-### 核心差异一：更新目标
-
-**KL 作为 Reward**：优化一个**正则化后的新 MDP**，奖励函数变为 $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$。
-
-**KL 作为 Loss**：优化**原任务 + 监督正则**，KL 不改变 MDP 定义，只是外挂的约束项。
-
-**直觉**：前者是「改变游戏规则」，后者是「在原规则下加约束」。
-
-### 核心差异二：Actor 梯度
-
-**KL 作为 Reward**：单一 policy gradient，KL 的影响**通过 advantage 间接体现**：
-
-$$
-g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ 基于 } (r_t - \beta \cdot \text{KL}_t)
-$$
-
-**KL 作为 Loss**：梯度分成两条独立路径：
-
-$$
-g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL 梯度}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla_\theta \text{KL}_t\right]}_{\text{KL 显式梯度}}
-$$
-
-**关键区别**：KL 的力量是「乘在 advantage 上」还是「单独一股力」。后者的 KL 梯度是确定性的，不受 critic 质量影响。
-
-### 核心差异三：Critic 学习目标
-
-**KL 作为 Reward**：Critic 学混合价值
-
-$$
-V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]
-$$
-
-**KL 作为 Loss**：Critic 只学环境价值
-
-$$
-V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]
-$$
-
-后者分工更清晰，便于分别监控任务回报和 KL 散度。
-
-### 核心差异四：Credit Assignment
-
-考虑场景：前几步是路由行为，最后一步 reward 高但 KL 也大。
-
-**KL 作为 Reward**：末状态的大 KL 通过 TD **回传到前面所有步骤**，策略倾向于**从根本上避开**高 KL 区域——这是「规划性的 KL 预算分配」。
-
-**KL 作为 Loss**：末状态的 KL 只在该状态的梯度项里体现，策略仍愿意**访问高回报区域，但局部修正**行为。
-
-### 小结：两种范式的对比
-
-|       维度        |      KL 作为 Reward（stop-grad）      |       KL 作为 Loss（backprop）       |
-| :---------------: | :-----------------------------------: | :----------------------------------: |
-|     更新目标      |           正则化后的新 MDP            |          原任务 + 监督正则           |
-|    Actor 梯度     |    单一 PG，基于 shaped advantage     |        RL 梯度 + 显式 KL 梯度        |
-|      Critic       | 学 $V^{\text{reg}}$：reward + KL 混合 | 学 $V^{\text{env}}$：只看环境 reward |
-| Credit Assignment |          多步回传，有规划性           |       局部 per-state，无规划性       |
-|     关心什么      |      KL 的**数值**（偏差、方差）      |  KL 的**梯度**（对应哪个优化目标）   |
-
-**一句话总结**：KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底；KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活。
-
-**选型建议**：
-- 如果你希望约束是「**预防性**」的，让 agent 从根源上避开高 KL 区域，选择**KL 作为 Reward**
-- 如果你希望约束是「**修正性**」的，允许 agent 探索但在局部修正行为，选择**KL 作为 Loss**
-
-
-
-理解了这两种范式的区别后，我们就能明确：
-- **KL 作为 Reward**：只需要 KL 的准确数值估计，关心偏差和方差
-- **KL 作为 Loss**：需要 KL 的正确梯度估计，关心梯度对应哪个优化目标
-
-下面我们将从这两个维度深入剖析三种估计器的数学性质。
+了解了三种估计器的定义与设计原理后，我们首先分析它们在**估计 KL 数值**时的性质——即偏差与方差。
 
 ## 数值：估计器的偏差与方差
 
-**首先分析数值估计**。本节分析三种估计器在**估计 KL 数值**时的性质——这对应「KL 作为 Reward」的使用场景。
+本节分析三种估计器在**估计 KL 数值**时的性质。这些性质在任何使用场景下都是基础。
 
 假设从 $q_\theta$ 采样来估计反向 KL $D_{\mathrm{KL}}(q_\theta \| p)$：
 
@@ -272,15 +167,120 @@ John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，�
 | $k_2$  | $\frac{1}{2}(\log r)^2$ | f-散度，二阶行为与 KL 一致 | 有偏（但极小） |   低（恒正）   |
 | $k_3$  |    $r - 1 - \log r$     |  控制变量 + Bregman 散度   |      无偏      |   低（恒正）   |
 
-从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择；然而，正如后文将揭示的，**梯度层面的情况完全不同**——不同估计器的梯度可能对应不同的优化目标。
+从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择。
 
 > **注**：若要估计**正向 KL 的数值** $D_{\mathrm{KL}}(p \| q) = \mathbb{E}_p[\log r]$，而只能从 $q$ 采样，可用重要性采样 $\mathbb{E}_q[r \log r]$。
 
+## KL 惩罚的两种实现范式
+
+了解了估计器的数值性质后，我们需要进一步明确：**KL 惩罚在强化学习中到底怎么用？** 这一选择决定了我们是只关心估计器的数值性质，还是必须同时关心其梯度性质。
+
+回顾 KL 正则化强化学习的目标函数：
+
+$$
+J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^T \gamma^t r(s_t, a_t) \right] - \beta \cdot D_{\mathrm{KL}}(\pi_\theta \| \pi_{\text{ref}})
+$$
+
+这个数学形式看起来很统一，但在基于 Actor-Critic 的算法（如 PPO）中落地时，却衍生出了两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。
+
+这一选择决定了我们后续是只关心估计器的「**数值性质**」（偏差与方差），还是必须同时关心其「**梯度性质**」（梯度对应哪个目标）。
+
+> **符号说明**：本节用 $\text{KL}_t$ 或 $\text{KL}(s)$ 泛指某个 token/state 级的 KL 估计器（如 $k_1, k_2, k_3$），具体定义见前文「三种估计器的定义与设计原理」一节。
+
+### 范式一：KL 作为 Loss（backprop）
+
+```python
+actor_loss = -advantage * log_prob + beta * kl  # kl 参与梯度计算
+```
+
+Critic 只学环境价值，KL 作为 actor 的正则项直接参与梯度回传。
+
+### 范式二：KL 作为 Reward（stop-gradient）
+
+```python
+kl = compute_kl(log_prob_q, log_prob_p).detach()
+shaped_reward = reward - beta * kl
+```
+
+KL 被视为环境奖励的一部分，用 shaped reward 做标准 actor-critic 更新。KL 项不参与梯度回传。
+
+这两种做法看似只是代码里一个 `.detach()` 的区别，实际上对应着截然不同的优化语义。
+
+### 核心差异一：更新目标
+
+**KL 作为 Loss**：优化**原任务 + 监督正则**，KL 不改变 MDP 定义，只是外挂的约束项。
+
+**KL 作为 Reward**：优化一个**正则化后的新 MDP**，奖励函数变为 $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$。
+
+**直觉**：前者是「在原规则下加约束」，后者是「改变游戏规则」。
+
+### 核心差异二：Actor 梯度
+
+**KL 作为 Loss**：梯度分成两条独立路径：
+
+$$
+g_{\text{loss}} = \underbrace{\mathbb{E}\left[\nabla_\theta \log \pi_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL 梯度}} + \underbrace{\beta \cdot \nabla_\theta \text{KL}}_{\text{KL 显式梯度}}
+$$
+
+**KL 作为 Reward**：单一 policy gradient，KL 的影响**通过 advantage 间接体现**：
+
+$$
+g_{\text{reward}} = \mathbb{E}\left[\nabla_\theta \log \pi_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ 基于 } (r_t - \beta \cdot \text{KL}_t)
+$$
+
+**关键区别**：KL 的力量是「单独一股力」还是「乘在 advantage 上」。前者的 KL 梯度是确定性的，不受 critic 质量影响。
+
+### 核心差异三：Critic 学习目标
+
+**KL 作为 Loss**：Critic 只学环境价值
+
+$$
+V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]
+$$
+
+分工更清晰，便于分别监控任务回报和 KL 散度。
+
+**KL 作为 Reward**：Critic 学混合价值
+
+$$
+V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]
+$$
+
+### 核心差异四：Credit Assignment
+
+考虑场景：前几步是路由行为，最后一步 reward 高但 KL 也大。
+
+**KL 作为 Loss**：末状态的 KL 只在该状态的梯度项里体现，策略仍愿意**访问高回报区域，但局部修正**行为。
+
+**KL 作为 Reward**：末状态的大 KL 通过 TD **回传到前面所有步骤**，策略倾向于**从根本上避开**高 KL 区域——这是「规划性的 KL 预算分配」。
+
+### 小结：两种范式的对比
+
+|       维度        |       KL 作为 Loss（backprop）       |      KL 作为 Reward（stop-grad）      |
+| :---------------: | :----------------------------------: | :-----------------------------------: |
+|     更新目标      |          原任务 + 监督正则           |           正则化后的新 MDP            |
+|    Actor 梯度     |        RL 梯度 + 显式 KL 梯度        |    单一 PG，基于 shaped advantage     |
+|      Critic       | 学 $V^{\text{env}}$：只看环境 reward | 学 $V^{\text{reg}}$：reward + KL 混合 |
+| Credit Assignment |       局部 per-state，无规划性       |          多步回传，有规划性           |
+|     关心什么      |  KL 的**梯度**（对应哪个优化目标）   |      KL 的**数值**（偏差、方差）      |
+
+**一句话总结**：KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活；KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底。
+
+**选型建议**：
+- 如果你希望约束是「**修正性**」的，允许 agent 探索但在局部修正行为，选择**KL 作为 Loss**
+- 如果你希望约束是「**预防性**」的，让 agent 从根源上避开高 KL 区域，选择**KL 作为 Reward**
 
 
-## 梯度：估计器对应的优化目标
 
-**接下来分析梯度估计**——当 KL 作为 loss 回传梯度时，我们需要关心估计器对应的优化目标。这是实践中最容易混淆也最关键的部分。
+理解了这两种范式的区别后，我们就能明确：
+- **KL 作为 Loss**：需要 KL 的正确梯度估计，关心梯度对应哪个优化目标
+- **KL 作为 Reward**：只需要 KL 的准确数值估计，关心偏差和方差
+
+下面我们按照「作为 Loss」和「作为 Reward」两种使用方式，深入剖析估计器的梯度性质。
+
+## 作为 Loss：估计器对应的优化目标
+
+当 KL 作为 loss 参与梯度回传时，我们需要关心估计器对应的优化目标。这是实践中最容易混淆也最关键的部分。
 
 我们先分析**从 $q_\theta$ 采样**（on-policy）的情形，后文将进一步讨论从行为策略 $\mu$ 采样（off-policy）时的变化。
 
@@ -454,7 +454,7 @@ $$
 
 关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：[从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展](/reinforcement-learning/2025/11/15/three-policy-zh.html)。
 
-### 设置与记号
+#### 设置与记号
 
 仍然沿用前文的记号，现在加入采样分布 $\mu(x)$，并定义**重要性权重**
 
@@ -471,7 +471,7 @@ $$
 
 这会让「先期望后梯度」与「先梯度后期望」的关系发生根本变化。
 
-### 两种求导顺序的等价性
+#### 两种求导顺序的等价性
 
 因为 $\mu$ 与 $\theta$ 无关，对任何关于 $\theta$ 可微的函数 $f_\theta(x)$，有
 
@@ -485,7 +485,7 @@ $$
 
 这是与 on-policy 情形的根本区别。
 
-### 数值层面：无偏性仍然保持
+#### 数值层面：无偏性仍然保持
 
 由标准的重要性采样关系 $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$，有
 
@@ -500,7 +500,7 @@ $$
 
 这与 on-policy 情形完全一致。
 
-### 梯度推导
+#### 梯度推导
 
 首先计算重要性权重的梯度。由 $w = q_\theta / \mu$ 且 $\mu$ 不依赖 $\theta$：
 
@@ -540,7 +540,7 @@ $$
 \boxed{\nabla_\theta(w k_3) = w s_\theta k_1 = -w s_\theta \log r}
 $$
 
-### 哪些给出无偏的反向 KL 梯度？
+#### 哪些给出无偏的反向 KL 梯度？
 
 利用 $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q_\theta}[f]$ 和 $\mathbb{E}_{q_\theta}[s_\theta] = 0$：
 
@@ -595,7 +595,7 @@ $$
 - Off-policy + 重要性加权时，$\frac{q_\theta}{\mu} k_1$ 和 $\frac{q_\theta}{\mu} k_3$ 给出反向 KL 的真梯度，而 $\frac{q_\theta}{\mu} k_2$（权重参与梯度计算）**不再适用**
 - 但如果把重要性权重 **detach** 掉，$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$ 的梯度也是反向 KL 的真梯度
 
-### 三个无偏梯度估计器的方差对比
+#### 三个无偏梯度估计器的方差对比
 
 前一小节我们看到，在 off-policy + 重要性采样的设置下，下面三个 loss 都给出**反向 KL** 的无偏梯度估计：
 
@@ -758,21 +758,126 @@ $$
   - $\frac{q}{\mu} k_3$：无偏且方差更低（与上一项等价，均为推荐选择）
 3. **$\frac{q}{\mu} k_2$（权重参与梯度）在 off-policy 下失效**：这是一个容易被忽视的陷阱
 
+## 作为 Reward：数值无偏 ≠ 梯度正确
+
+前文分析了三种估计器在估计 KL **数值**时的偏差与方差。一个自然的想法是：既然 $k_1$ 和 $k_3$ 对反向 KL 数值都是无偏的，那么把它们（加 stop-gradient）作为 reward 惩罚应该都没问题。
+
+**但这是错误的。**
+
+问题在于：当 KL 作为 reward shaping 时，虽然 KL 项本身不反传梯度，但它会通过 advantage 间接影响策略梯度。因此，评价一个估计器「能否用于 reward 惩罚」，不应只看数值偏差，而应看**它诱导的策略梯度是否正确**。
+
+### 真正的 KL 正则化策略梯度
+
+考虑 KL 正则化的强化学习目标：
+
+$$
+J(\theta) = \mathbb{E}_{q_\theta}[R] - \beta \cdot D_{\mathrm{KL}}(q_\theta \| p)
+$$
+
+其真梯度为：
+
+$$
+\nabla_\theta J = \mathbb{E}_{q_\theta}[s_\theta \cdot R] - \beta \cdot \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)
+$$
+
+利用前文「正向与反向 KL 真梯度的推导」小节的结论，反向 KL 的梯度为：
+
+$$
+\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{q_\theta}[s_\theta \cdot (-\log r)] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
+$$
+
+因此，真正的 KL 正则化策略梯度是：
+
+$$
+\nabla_\theta J = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(R - \beta \cdot k_1\right)\right]
+$$
+
+### 使用 $\hat{k}$ 作为 Reward 惩罚时的梯度
+
+当我们用某个估计器 $\hat{k}$（加 stop-gradient）作为 reward 惩罚时，shaped reward 为 $\tilde{R} = R - \beta \cdot \text{sg}(\hat{k})$，策略梯度变为：
+
+$$
+\nabla_\theta \tilde{J} = \mathbb{E}_{q_\theta}\left[s_\theta \cdot (R - \beta \cdot \hat{k})\right]
+$$
+
+**无偏条件**：$\nabla_\theta \tilde{J} = \nabla_\theta J$ 当且仅当
+
+$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot \hat{k}] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
+$$
+
+### $k_1$ in Reward：梯度无偏
+
+当 $\hat{k} = k_1$ 时，条件自动满足：
+
+$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot k_1] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1] \quad \checkmark
+$$
+
+因此，**$k_1$ 作为 reward 惩罚时，诱导的策略梯度是无偏的**。
+
+### $k_3$ in Reward：梯度有偏
+
+当 $\hat{k} = k_3 = r - 1 - \log r$ 时：
+
+$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot k_3] = \mathbb{E}_{q_\theta}[s_\theta \cdot (r - 1)] + \mathbb{E}_{q_\theta}[s_\theta \cdot (-\log r)]
+$$
+
+第二项正是 $\mathbb{E}_{q_\theta}[s_\theta \cdot k_1]$。问题出在第一项：
+
+$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot (r - 1)] = \mathbb{E}_{q_\theta}[s_\theta \cdot r] - \underbrace{\mathbb{E}_{q_\theta}[s_\theta]}_{=0} = \mathbb{E}_{q_\theta}[s_\theta \cdot r]
+$$
+
+而这个量可以改写为：
+
+$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot r] = \int q_\theta(x) \cdot \nabla_\theta \log q_\theta(x) \cdot \frac{p(x)}{q_\theta(x)} dx = \int p(x) \cdot \nabla_\theta \log q_\theta(x) dx = \mathbb{E}_p[s_\theta]
+$$
+
+利用正向 KL 的梯度公式 $\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = -\mathbb{E}_p[s_\theta]$，有：
+
+$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot r] = -\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)
+$$
+
+因此：
+
+$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot k_3] = \underbrace{-\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)}_{\text{偏差项}} + \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)
+$$
+
+**$k_3$ 作为 reward 惩罚时，梯度是有偏的**，偏差项等于正向 KL 梯度的负值。
+
+### 直觉理解与实践后果
+
+**偏差的几何含义**：使用 $k_3$ 作为 reward 惩罚，相当于在优化一个「错误的混合目标」：
+- 既惩罚反向 KL（希望策略不偏离参考）
+- 又**错误地鼓励正向 KL 变大**（希望参考不覆盖策略）
+
+这两个方向相互冲突，可能导致优化不稳定。
+
+**实验验证**：Shah et al. (2025) 的实验表明，在 on-policy RL 微调 LLM 时：
+- **$k_1$ in reward**：训练稳定
+- **$k_3$ in reward**：**训练崩溃**
+
+这与我们的理论分析完全一致。
+
+### 小结
+
+| 估计器 | 数值无偏？ | 作为 Reward 惩罚时梯度无偏？ | 实际表现 |
+| :----: | :--------: | :--------------------------: | :------: |
+| $k_1$  |     ✓      |              ✓               |   稳定   |
+| $k_3$  |     ✓      |              ✗               |   崩溃   |
+
+**核心教训**：评价 KL 估计器时，「数值无偏」和「梯度正确」是两个独立的维度。对于 reward shaping 场景，**只有 $k_1$ 是正确的选择**。$k_3$ 虽然数值无偏且方差更低，但作为 reward 惩罚会导致梯度有偏，可能引发训练崩溃。
+
+> **注**：上述分析假设 on-policy 采样。Off-policy 场景的分析见前文「Off-policy 场景下的 KL 梯度估计」一节。
+
 ## RL 实践指南
 
 有了前面的理论分析，本节给出具体场景下的选型建议，方便直接查阅。
-
-### KL 作为 Reward 惩罚（不需要梯度）
-
-当 KL 仅作为标量惩罚加入 reward shaping 时，我们只需要准确的**数值估计**，不需要反传梯度。此时应参考前文「估计 KL 数值时的偏差与方差」中的分析。
-
-**推荐**：
-- 使用 **$k_1$** 或 **$k_3$**（两者对反向 KL 数值均无偏）
-- 当策略已接近参考策略时，$k_3$ 往往更低方差
-- 覆盖不足或尾部错配明显时，$k_1$ 更稳健
-- Off-policy 时加重要性权重 $\frac{q_\theta}{\mu}$ 即可
-
-> **注**：若想施加**正向 KL 惩罚**（偏向覆盖行为分布），数值上可用 $\mathbb{E}_q[r \log r]$ 或（若可从 $p$ 采样）$\mathbb{E}_p[\log r]$。
 
 ### KL 作为 Loss（需要梯度回传）
 
@@ -825,15 +930,28 @@ $$
 
 **避免**：使用 $\dfrac{q_\theta}{\mu} k_2$（权重参与梯度计算）——梯度有偏，不是反向 KL 的正确方向
 
+### KL 作为 Reward 惩罚（stop-gradient）
+
+当 KL 作为标量惩罚加入 reward shaping 时，虽然 KL 项本身不反传梯度，但它会通过 advantage 间接影响策略梯度。根据前文「作为 Reward：数值无偏 ≠ 梯度正确」的分析：
+
+**推荐**：
+- 使用 **$k_1$**（数值无偏，且诱导的策略梯度也无偏）
+- Off-policy 时加重要性权重 $\frac{q_\theta}{\mu}$ 即可
+
+**避免**：
+- 使用 $k_3$（虽然数值无偏且方差更低，但诱导的策略梯度有偏，可能导致训练崩溃）
+
+> **注**：若想施加**正向 KL 惩罚**（偏向覆盖行为分布），数值上可用 $\mathbb{E}_q[r \log r]$ 或（若可从 $p$ 采样）$\mathbb{E}_p[\log r]$。
+
 ## 一份「拿来就用」的对照表
 
-下表按「目标 KL 方向」×「采样来源」×「使用方式」三个维度给出推荐的估计器选择。其中「用于**数值**」对应 KL 作为 reward 惩罚（不需要梯度），「用于**梯度**」对应 KL 作为 loss（需要反传梯度）。
+下表按「目标 KL 方向」×「采样来源」×「使用方式」三个维度给出推荐的估计器选择。其中「用于 **Loss**」对应 KL 作为 loss（需要反传梯度），「用于 **Reward**」对应 KL 作为 reward 惩罚（stop-gradient）。
 
-|               目标                |      采样来源       |             用于数值（KL 作为 Reward）             |                        用于梯度（KL 作为 Loss）                         |
-| :-------------------------------: | :-----------------: | :------------------------------------------------: | :---------------------------------------------------------------------: |
-| 反向 KL $D_{\mathrm{KL}}(q \| p)$ |  $q$（on-policy）   |               $k_1$ 或 $k_3$（无偏）               |                                  $k_2$                                  |
-| 反向 KL $D_{\mathrm{KL}}(q \| p)$ | $\mu$（off-policy） | $\frac{q}{\mu} k_1$ 或 $\frac{q}{\mu} k_3$（无偏） | $\frac{q}{\mu} k_3$（推荐）或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$ |
-| 正向 KL $D_{\mathrm{KL}}(p \| q)$ |         $q$         |              $\mathbb{E}_q[r\log r]$               |                                  $k_3$                                  |
+|               目标                |      采样来源       |                        用于 Loss（backprop）                        |           用于 Reward（stop-grad）           |
+| :-------------------------------: | :-----------------: | :-----------------------------------------------------------------: | :------------------------------------------: |
+| 反向 KL $D_{\mathrm{KL}}(q \| p)$ |  $q$（on-policy）   |                                $k_2$                                |            $k_1$（$k_3$ 会崩溃）             |
+| 反向 KL $D_{\mathrm{KL}}(q \| p)$ | $\mu$（off-policy） | $\frac{q}{\mu} k_3$ 或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$ |             $\frac{q}{\mu} k_1$              |
+| 正向 KL $D_{\mathrm{KL}}(p \| q)$ |         $q$         |                                $k_3$                                |            $\mathbb{E}_q[r\log r]$           |
 
 ## 常见实现陷阱
 
@@ -841,21 +959,27 @@ $$
 
 当 KL 作为 loss 使用时，$k_1$ 的梯度期望恒为零（$\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$），作为 loss 完全无效。
 
-> **解决**：首先明确 KL 的使用方式。如果是 reward shaping（不需要梯度），用 $k_1$ 或 $k_3$ 均可；如果是 loss（需要梯度），on-policy 下用 $k_2$（反向 KL）或 $k_3$（正向 KL）。
+> **解决**：首先明确 KL 的使用方式。如果是 reward shaping，只用 $k_1$（$k_3$ 虽然数值无偏但会导致策略梯度有偏）；如果是 loss（需要梯度），on-policy 下用 $k_2$（反向 KL）或 $k_3$（正向 KL）。
 
-**陷阱 2：混淆 $k_3$ 的「数值无偏性」与「梯度所对应的目标」**
+**陷阱 2：用 $k_3$ 作为 Reward 惩罚**
+
+$k_3$ 对反向 KL **数值**无偏，但作为 reward 惩罚时会诱导出**有偏的策略梯度**，偏差项为 $-\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)$。实验表明这会导致训练崩溃。
+
+> **解决**：reward shaping 场景下只用 $k_1$，不要用 $k_3$。
+
+**陷阱 3：混淆 $k_3$ 的「数值无偏性」与「梯度所对应的目标」**
 
 $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的是**正向 KL**。如果你的目标是优化反向 KL，却用 $k_3$ 作为 loss，实际上在优化正向 KL。
 
 > **解决**：明确你的优化目标。优化反向 KL 用 $k_2$；优化正向 KL 才用 $k_3$。
 
-**陷阱 3：$r$ 重尾分布导致方差爆炸**
+**陷阱 4：$r$ 重尾分布导致方差爆炸**
 
 当策略与参考分布差异过大时，$r = p/q$ 可能出现极端值，导致 $k_3$ 的方差爆炸。
 
 > **解决**：控制 KL 约束，或对 $r$ 进行 clipping。
 
-**陷阱 4：离策略场景下仍使用 $k_2$ 或 $\frac{q_\theta}{\mu} k_2$（权重参与梯度）**
+**陷阱 5：离策略场景下仍使用 $k_2$ 或 $\frac{q_\theta}{\mu} k_2$（权重参与梯度）**
 
 在 on-policy 下，$k_2$ 是优化反向 KL 的正确选择。但如果数据来自 $\mu \neq q_\theta$：
 - 直接用 $k_2$（不加权）：期望不是在 $q_\theta$ 下取的，估计器完全失效
@@ -863,7 +987,7 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 
 > **解决**：离策略场景下，改用 $\frac{q_\theta}{\mu} k_3$（推荐）、$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$（将权重 detach）或 $\frac{q_\theta}{\mu} k_1$。
 
-**陷阱 5：对重要性权重的 detach 处理不当**
+**陷阱 6：对重要性权重的 detach 处理不当**
 
 代码实现中，$w = q_\theta / \mu$ 通常通过 `log_prob_q - log_prob_mu` 再取 `exp` 计算得到。是否对 $w$ 进行 detach 会导致完全不同的结果：
 
@@ -878,10 +1002,11 @@ $k_3$ 对**反向 KL 的数值**是无偏估计，但它的**梯度**对应的�
 
 **核心要点**：
 
-1. **先明确使用方式**：KL 作为 Reward（只需数值）还是作为 Loss（需要梯度）？
-2. **On-policy 优化反向 KL**：数值用 $k_1$ 或 $k_3$；梯度**只能用 $k_2$**
-3. **Off-policy 优化反向 KL**：梯度用 $\frac{q}{\mu} k_3$ 或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$（两者等价，均为推荐）
-4. **警惕 on/off-policy 的差异**：on-policy 下 $k_2$ 正确，off-policy 下 $\frac{q}{\mu} k_2$（权重参与梯度）反而错误
+1. **先明确使用方式**：KL 作为 Loss（backprop）还是作为 Reward（stop-grad）？
+2. **KL 作为 Loss（on-policy）**：优化反向 KL 用 $k_2$；优化正向 KL 用 $k_3$
+3. **KL 作为 Loss（off-policy）**：用 $\frac{q}{\mu} k_3$ 或 $\text{sg}\left(\frac{q}{\mu}\right) k_2$（两者等价）
+4. **KL 作为 Reward**：只用 $k_1$（$k_3$ 虽然数值无偏但会导致策略梯度有偏）
+5. **警惕 on/off-policy 的差异**：on-policy 下 $k_2$ 正确，off-policy 下 $\frac{q}{\mu} k_2$（权重参与梯度）反而错误
 
 把这几点梳理清楚，三种估计器就不再让人混淆了。
 
