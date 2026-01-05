@@ -217,17 +217,17 @@
     
 
       <article class="post-content">
-        <p><img src="/assets/img/kl-estimators/kl-estimator-en.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+        <p><img src="/assets/img/kl-estimators/kl-estimator.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>How we approximate KL divergence directly affects training stability. This post systematically analyzes three estimators $k_1, k_2, k_3$ in both on-policy and off-policy scenarios, and gives practical guidelines for choosing them when KL is used as a reward penalty versus when it is used as a loss for backpropagation.</p>
 </blockquote>
 
-<h2 id="introduction-what-kl-does-in-rl">Introduction: What KL Does in RL</h2>
+<h2 id="introduction-the-role-of-kl-divergence-in-reinforcement-learning">Introduction: The Role of KL Divergence in Reinforcement Learning</h2>
 
-<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> keeps the new policy from drifting too far from a reference policy, preventing instability or collapse. However, implementing KL penalty involves multiple layers of choices: <strong>which estimator</strong> ($k_1$, $k_2$, $k_3$), <strong>who to sample from</strong> (on-policy vs off-policy), and <strong>how to use it</strong> (as reward shaping or as a loss for backpropagation). This post systematically dissects these choices and their interrelationships.</p>
+<p>In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), <strong>KL penalty</strong> is the core mechanism to constrain the new policy from deviating too far from the reference policy, preventing training instability or policy collapse. However, implementing KL penalty involves multiple layers of choices: <strong>which estimator</strong> ($k_1$, $k_2$, $k_3$), <strong>who to sample from</strong> (on-policy vs off-policy), and <strong>how to use it</strong> (as a loss for gradient backpropagation or as a reward penalty). This post systematically dissects these choices and their interrelationships, helping readers clarify the relevant concepts.</p>
 
-<h3 id="forward-vs-reverse-kl">Forward vs. reverse KL</h3>
+<h3 id="the-distinction-between-forward-kl-and-reverse-kl">The Distinction Between Forward KL and Reverse KL</h3>
 
 <p>Let $q_\theta$ be the current actor, $p$ the reference policy. The two directions are:</p>
 
@@ -259,11 +259,94 @@ $$</p>
 
 <p>RLHF typically uses <strong>reverse KL</strong> because we want the actor not to move too far from the reference, not necessarily to cover every mode.</p>
 
-<h2 id="three-estimators-definitions-and-design">Three estimators: definitions and design</h2>
+<h3 id="the-three-core-questions-who-to-sample-from-what-to-estimate-how-to-use">The Three Core Questions: Who to Sample From, What to Estimate, How to Use</h3>
+
+<p>When implementing KL penalty in practice, we need to answer three interrelated questions:</p>
+
+<ol>
+  <li><strong>Who to sample from?</strong> Do samples come from the current policy $q_\theta$ (on-policy), or from a behavior policy $\mu$ (off-policy)?</li>
+  <li><strong>What to estimate?</strong> Are we trying to estimate reverse KL $D_{\mathrm{KL}}(q_\theta \| p)$ or forward KL $D_{\mathrm{KL}}(p \| q_\theta)$?</li>
+  <li><strong>How to use it?</strong> Is the KL term used as a loss for gradient backpropagation, or as a reward penalty (stop-gradient)?</li>
+</ol>
+
+<p>These three questions’ different combinations determine which estimator should be used. The goal of this post is to systematically clarify these choices and their interrelationships.</p>
+
+<h2 id="preliminaries-notation-and-basic-concepts">Preliminaries: Notation and Basic Concepts</h2>
+
+<p>Before diving into the analysis, let’s unify our notation and derive two fundamental results that will be used repeatedly.</p>
+
+<h3 id="notation">Notation</h3>
+
+<ul>
+  <li>$q_\theta$: Current actor policy (parameterized by $\theta$)</li>
+  <li>$p$: Reference policy (independent of $\theta$)</li>
+  <li>$\mu$: Behavior policy for off-policy sampling (independent of $\theta$)</li>
+  <li>$s_\theta(x) = \nabla_\theta \log q_\theta(x)$: Score function</li>
+  <li>$w(x) = \frac{q_\theta(x)}{\mu(x)}$: Importance weight</li>
+  <li>$\text{sg}(\cdot)$: Stop-gradient operation (<code class="language-plaintext highlighter-rouge">.detach()</code> in code)</li>
+</ul>
+
+<h3 id="score-function-and-true-kl-gradients">Score Function and True KL Gradients</h3>
+
+<p>The score function has an important property: $\mathbb{E}_{q_\theta}[s_\theta] = 0$ (since $\int \nabla_\theta q_\theta dx = \nabla_\theta \int q_\theta dx = \nabla_\theta 1 = 0$).</p>
+
+<p>Using this property, we can derive the <strong>true gradients</strong> of forward and reverse KL divergences.</p>
+
+<p><strong>Reverse KL Gradient:</strong></p>
+
+<p>$$
+D_{\mathrm{KL}}(q_\theta \| p) = \int q_\theta(x) \log \frac{q_\theta(x)}{p(x)} dx
+$$</p>
+
+<p>Differentiating with respect to $\theta$ (using product rule):</p>
+
+<p>$$
+\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \int \nabla_\theta q_\theta \cdot \log \frac{q_\theta}{p} dx + \int q_\theta \cdot \nabla_\theta \log \frac{q_\theta}{p} dx
+$$</p>
+
+<p>Using $\nabla_\theta q_\theta = q_\theta \cdot s_\theta$, $\nabla_\theta \log q_\theta = s_\theta$, and $\nabla_\theta \log p = 0$:</p>
+
+<p>$$
+= \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] + \mathbb{E}_q[s_\theta] = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right]
+$$</p>
+
+<p>Thus:</p>
+
+<p>$$
+\boxed{\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] = -\mathbb{E}_q\left[s_\theta \cdot \log \frac{p}{q}\right]}
+$$</p>
+
+<p><strong>Forward KL Gradient:</strong></p>
+
+<p>$$
+D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \log \frac{p(x)}{q_\theta(x)} dx
+$$</p>
+
+<p>Since $p(x)$ is independent of $\theta$:</p>
+
+<p>$$
+\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \cdot \nabla_\theta \left(-\log q_\theta(x)\right) dx = -\mathbb{E}_p[s_\theta]
+$$</p>
+
+<p>To estimate this using samples from $q$, apply importance sampling:</p>
+
+<p>$$
+-\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} \cdot s_\theta\right] = -\mathbb{E}_q\left[\frac{p}{q} \cdot s_\theta\right]
+$$</p>
+
+<p>Using $\mathbb{E}_q[s_\theta] = 0$, this can be rewritten as:</p>
+
+<p>$$
+\boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q\left[\left(1-\frac{p}{q}\right) \cdot s_\theta\right]}
+$$</p>
+
+<p>With these two results, we can later determine which KL’s true gradient each estimator’s gradient expectation corresponds to.</p>
+
+<h2 id="three-estimators-definitions-and-design-principles">Three Estimators: Definitions and Design Principles</h2>
 
 <p>Let $r(x) = \dfrac{p(x)}{q_\theta(x)}$. John Schulman defined three single-sample estimators:</p>
 
-<h3 id="inlmath46mathend-the-naive-estimator">$k_1$: the naive estimator</h3>
+<h3 id="inlmath87mathend-the-naive-estimator">$k_1$: the naive estimator</h3>
 
 <p>$$
 k_1(x) = -\log r = \log q_\theta(x) - \log p(x)
@@ -271,7 +354,7 @@ $$</p>
 
 <p>Direct log-ratio. It is unbiased for reverse KL, but <strong>can be negative</strong> while KL is always nonnegative, giving huge variance because positive and negative samples cancel.</p>
 
-<h3 id="inlmath47mathend-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</h3>
+<h3 id="inlmath88mathend-an-f-divergence-lower-variance">$k_2$: an f-divergence, lower variance</h3>
 
 <p>$$
 k_2(x) = \frac{1}{2}(\log r)^2
@@ -287,7 +370,7 @@ $$</p>
 
 <p>KL corresponds to $f(x) = -\log x$, so $f^{\prime\prime}(1) = 1$. For $k_2$, $f^{\prime\prime}(1) = 1$ as well. <strong>When policies are close, $k_2$ tracks true KL almost identically</strong>, bias only appears in higher-order terms.</p>
 
-<h3 id="inlmath60mathend-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</h3>
+<h3 id="inlmath101mathend-control-variate-optimal-shape">$k_3$: control variate, “optimal” shape</h3>
 
 <p>$$
 k_3(x) = r - 1 - \log r
@@ -323,7 +406,7 @@ $$</p>
 
 <p>Convexity keeps $\phi$ above its tangent, so this gap is <strong>nonnegative</strong>. As $r \to 1$, the gap shrinks quadratically $(r-1)^2$, explaining the low variance when policies are close.</p>
 
-<h3 id="quick-comparison">Quick comparison</h3>
+<h3 id="quick-comparison">Quick Comparison</h3>
 
 <table>
   <thead>
@@ -331,8 +414,6 @@ $$</p>
       <th style="text-align: center">Estimator</th>
       <th style="text-align: center">Definition</th>
       <th style="text-align: center">Design idea</th>
-      <th style="text-align: center">Bias (value)</th>
-      <th style="text-align: center">Variance</th>
     </tr>
   </thead>
   <tbody>
@@ -340,45 +421,43 @@ $$</p>
       <td style="text-align: center">$k_1$</td>
       <td style="text-align: center">$-\log r$</td>
       <td style="text-align: center">Naive log-ratio</td>
-      <td style="text-align: center">Unbiased</td>
-      <td style="text-align: center">High (can be negative)</td>
     </tr>
     <tr>
       <td style="text-align: center">$k_2$</td>
       <td style="text-align: center">$\tfrac{1}{2}(\log r)^2$</td>
       <td style="text-align: center">f-divergence, KL-matching 2nd order</td>
-      <td style="text-align: center">Biased (very small)</td>
-      <td style="text-align: center">Low (always positive)</td>
     </tr>
     <tr>
       <td style="text-align: center">$k_3$</td>
       <td style="text-align: center">$r - 1 - \log r$</td>
       <td style="text-align: center">Control variate + Bregman</td>
-      <td style="text-align: center">Unbiased</td>
-      <td style="text-align: center">Low (always positive)</td>
     </tr>
   </tbody>
 </table>
 
-<p>For estimating the KL <strong>value</strong>, $k_3$ is “unbiased + low variance”; but as we’ll analyze, <strong>the gradient story is completely different</strong> — different estimators’ gradients may correspond to different optimization objectives. Moreover, whether KL is added to the reward for shaping or used as a loss for direct gradient backpropagation will fundamentally affect training behavior.</p>
+<p>These three estimators arise from different design philosophies. Next, we analyze their properties when <strong>estimating KL values</strong> — specifically, their bias and variance characteristics.</p>
 
-<h2 id="core-analysis">Core analysis</h2>
+<p>After understanding the definitions and design principles of the three estimators, we first analyze their properties in <strong>estimating KL values</strong> — that is, bias and variance.</p>
 
-<h3 id="bias-and-variance-for-kl-values">Bias and variance for KL values</h3>
+<h2 id="value-estimation-bias-and-variance">Value Estimation: Bias and Variance</h2>
+
+<p>This section analyzes the properties of the three estimators when <strong>estimating KL values</strong>. These properties are fundamental in any usage scenario.</p>
 
 <p>Assume samples from $q_\theta$ to estimate reverse KL $D_{\mathrm{KL}}(q_\theta \| p)$.</p>
 
-<p><strong>Unbiasedness:</strong></p>
+<h3 id="unbiasedness-analysis">Unbiasedness Analysis</h3>
 
 <p>$$
 \begin{aligned}
 \mathbb{E}_{q}[k_1] &= \mathbb{E}_{q}\left[\log \tfrac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\\
-\mathbb{E}_{q}[k_3] &= \mathbb{E}_{q}[r - 1 - \log r] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\\
-\mathbb{E}_{q}[k_2] &= \tfrac{1}{2}\mathbb{E}_{q}[(\log r)^2] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(biased)}
+\mathbb{E}_{q}[k_3] &= \mathbb{E}_{q}\left[\frac{p}{q} - 1 - \log \frac{p}{q}\right] = 1 - 1 + D_{\mathrm{KL}}(q \| p) = D_{\mathrm{KL}}(q \| p) \quad \textbf{(unbiased)}\\
+\mathbb{E}_{q}[k_2] &= \tfrac{1}{2}\mathbb{E}_{q}\left[\left(\log \frac{p}{q}\right)^2\right] \neq D_{\mathrm{KL}}(q \| p) \quad \textbf{(biased)}
 \end{aligned}
 $$</p>
 
-<p><strong>Variance trade-off:</strong></p>
+<p><strong>Conclusion</strong>: For estimating reverse KL <strong>values</strong>, $k_1$ and $k_3$ are unbiased estimators, while $k_2$ is biased.</p>
+
+<h3 id="variance-characteristics">Variance Characteristics</h3>
 
 <p>John Schulman’s toy experiments ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005):</p>
 
@@ -438,80 +517,273 @@ $$</p>
   </tbody>
 </table>
 
-<p><strong>Intuition:</strong></p>
+<p><strong>Core intuitive understanding</strong>:</p>
 <ul>
-  <li>$k_1 = -\log r$ is first-order around $r=1$, can be negative, so variance explodes when close.</li>
-  <li>$k_3 = r - 1 - \log r$ is second-order near $r=1$ and always positive, so lower variance when close.</li>
-  <li>When coverage is poor (heavy tails in $r$), $k_3$ can explode; then $k_1$ can be more stable.</li>
+  <li>$k_1 = -\log \frac{p}{q}$ starts with a first-order term and when $\frac{p}{q}$ is close to 1, it fluctuates greatly and can be negative</li>
+  <li>$k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}$ is a second-order quantity near $\frac{p}{q}=1$ and always non-negative, thus having lower variance when policies are close</li>
+  <li>But when coverage is severely insufficient ($\frac{p}{q}$ can explode), $k_3$’s variance can increase due to weight explosion; in this case, $k_1$ is actually more stable</li>
 </ul>
 
+<h3 id="summary-of-value-estimation">Summary of Value Estimation</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">Bias for value</th>
+      <th style="text-align: center">Variance characteristics</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">Unbiased</td>
+      <td style="text-align: center">High (can be +/-)</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">Biased (minimal)</td>
+      <td style="text-align: center">Low (always positive)</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">Unbiased</td>
+      <td style="text-align: center">Low (always positive)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>From the perspective of value estimation, $k_3$ is the optimal choice as “unbiased + low variance”.</p>
+
 <blockquote>
-  <p><strong>Note:</strong> To estimate <strong>forward KL value</strong> $D_{\mathrm{KL}}(p \| q) = \mathbb{E}_p[\log r]$ but only sample from $q$, use importance sampling $\mathbb{E}_q[r \log r]$.</p>
+  <p><strong>Note</strong>: To estimate the <strong>forward KL value</strong> $D_{\mathrm{KL}}(p \| q) = \mathbb{E}_p\left[\log \frac{p}{q}\right]$, but only sample from $q$, use importance sampling $\mathbb{E}_q\left[\frac{p}{q} \log \frac{p}{q}\right]$.</p>
 </blockquote>
 
-<h3 id="gradient-estimation-the-crucial-distinction">Gradient estimation: the crucial distinction</h3>
+<p>However, before choosing an estimator, there’s a more fundamental question to answer: <strong>should KL be added to rewards, or be part of the loss?</strong> This choice fundamentally affects optimization behavior and credit assignment.</p>
 
-<p>This is the easiest part to get wrong. First analyze <strong>on-policy</strong> (samples from $q_\theta$), then extend to <strong>off-policy</strong> (samples from behavior $\mu$).</p>
+<h2 id="two-ways-to-use-kl-penalty">Two Ways to Use KL Penalty</h2>
 
-<h4 id="true-gradients-for-reference">True gradients for reference</h4>
+<p>Having understood the value properties of these estimators, we must address a more fundamental question: <strong>How should the KL penalty be integrated into the RL algorithm?</strong> This implementation choice determines whether we need only consider the estimator’s value properties, or must also account for its gradient behavior.</p>
 
-<p>Let score function $s_\theta(x) = \nabla_\theta \log q_\theta(x)$, with key property $\mathbb{E}_{q_\theta}[s_\theta] = 0$.</p>
-
-<p><strong>Reverse KL gradient:</strong></p>
+<p>Recall the objective function for KL-regularized reinforcement learning:</p>
 
 <p>$$
-D_{\mathrm{KL}}(q_\theta \| p) = \int q_\theta(x) \log \frac{q_\theta(x)}{p(x)} dx
+J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ \sum_{t=0}^T \gamma^t r(s_t, a_t) \right] - \beta \cdot D_{\mathrm{KL}}(\pi_\theta \| \pi_{\text{ref}})
 $$</p>
 
-<p>Product rule and $\nabla_\theta q_\theta = q_\theta s_\theta$, $\nabla_\theta \log p = 0$ give</p>
+<p>This mathematical form looks unified, but when implementing it in Actor-Critic based algorithms (like PPO), it gives rise to two fundamentally different implementation paradigms — they may differ by only a few lines of code, but correspond to completely different optimization semantics.</p>
+
+<blockquote>
+  <p><strong>Notation</strong>: In this section, we use $\text{KL}_t$ or $\text{KL}(s)$ to generically refer to a token/state-level KL estimator (such as $k_1, k_2, k_3$), with specific definitions from the earlier section “Three Estimators: Definitions and Design Principles”.</p>
+</blockquote>
+
+<h3 id="as-loss-kl-participates-in-gradient-backpropagation">As Loss: KL Participates in Gradient Backpropagation</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actor_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantage</span> <span class="o">*</span> <span class="n">log_prob</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>  <span class="c1"># kl participates in gradient
+</span></code></pre></div></div>
+
+<p>The critic only learns environment value; KL as a regularization term for the actor directly participates in loss gradient backpropagation.</p>
+
+<h3 id="as-reward-kl-added-to-reward-shaping">As Reward: KL Added to Reward Shaping</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kl</span> <span class="o">=</span> <span class="nf">compute_kl</span><span class="p">(</span><span class="n">log_prob_q</span><span class="p">,</span> <span class="n">log_prob_p</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+<span class="n">shaped_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
+</code></pre></div></div>
+
+<p>KL is treated as part of the environment reward, using shaped reward for standard actor-critic updates. The KL term does not participate in loss gradient backpropagation.</p>
+
+<p>These two approaches may seem like just a <code class="language-plaintext highlighter-rouge">.detach()</code> difference in code, but in reality they correspond to fundamentally different optimization semantics.</p>
+
+<h3 id="core-differences-between-the-two-approaches">Core Differences Between the Two Approaches</h3>
+
+<h4 id="different-optimization-targets">Different Optimization Targets</h4>
+
+<p><strong>KL as Loss</strong>: Optimizes <strong>original task + supervised regularization</strong>. KL doesn’t change the MDP definition, it’s just an external constraint term.</p>
+
+<p><strong>KL as Reward</strong>: Optimizes a <strong>regularized new MDP</strong> where the reward function becomes $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$.</p>
+
+<p><strong>Intuition</strong>: The former is “adding constraints under the original rules”; the latter is “changing the game rules”.</p>
+
+<h4 id="different-gradient-paths">Different Gradient Paths</h4>
+
+<p><strong>KL as Loss</strong>: The gradient splits into two independent paths:</p>
 
 <p>$$
-\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q\left[s_\theta \log \tfrac{q_\theta}{p}\right] = -\mathbb{E}_q[s_\theta \log r].
+g_{\text{loss}} = \underbrace{\mathbb{E}\left[\nabla_\theta \log \pi_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL gradient}} + \underbrace{\beta \cdot \nabla_\theta \text{KL}}_{\text{KL explicit gradient}}
 $$</p>
 
-<p><strong>Forward KL gradient:</strong></p>
+<p><strong>KL as Reward</strong>: Single policy gradient, KL influence is <strong>reflected indirectly through advantage</strong>:</p>
 
 <p>$$
-D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \log \frac{p(x)}{q_\theta(x)} dx
+g_{\text{reward}} = \mathbb{E}\left[\nabla_\theta \log \pi_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ based on } (r_t - \beta \cdot \text{KL}_t)
 $$</p>
 
-<p>Since $p$ is $\theta$-independent,</p>
+<p><strong>Key distinction</strong>: Is KL’s force “a separate force” or “multiplied on advantage”? The former’s KL gradient is deterministic, unaffected by critic quality.</p>
+
+<h4 id="different-value-functions-and-credit-assignment">Different Value Functions and Credit Assignment</h4>
+
+<p><strong>Value Function</strong>:</p>
+
+<p><strong>KL as Loss</strong>: Critic only learns environment value</p>
 
 <p>$$
-\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = -\mathbb{E}_p[s_\theta] = -\mathbb{E}_q[r s_\theta] = \mathbb{E}_q[(1-r) s_\theta].
+V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]
 $$</p>
 
-<p>These baselines tell us what each estimator’s expected gradient really targets.</p>
+<p>Cleaner separation of concerns, making it easier to monitor task return and KL divergence separately.</p>
 
-<h4 id="two-differentiation-orders">Two differentiation orders</h4>
-
-<p>1) <strong>Grad then expectation:</strong> autograd on each sample, then batch average (what DL code actually does).
-2) <strong>Expectation then grad:</strong> treat $\mathbb{E}_q[k_i]$ as a function of $\theta$ and differentiate analytically.</p>
-
-<p>Typical code does (1).</p>
-
-<h4 id="gradients-of-the-three-estimators-on-policy">Gradients of the three estimators (on-policy)</h4>
+<p><strong>KL as Reward</strong>: Critic learns mixed value</p>
 
 <p>$$
-\nabla_\theta k_1 = s_\theta
+V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]
+$$</p>
+
+<p><strong>Credit Assignment</strong>:</p>
+
+<p>Consider a scenario: first few steps are routing behavior, final step has high reward but also high KL.</p>
+
+<p><strong>KL as Loss</strong>: The terminal state’s KL only appears in that state’s gradient term; the policy is still willing to <strong>visit high-reward regions but locally correct</strong> behavior.</p>
+
+<p><strong>KL as Reward</strong>: The terminal state’s large KL is <strong>propagated back to all previous steps</strong> through TD, so the policy tends to <strong>fundamentally avoid</strong> high-KL regions — this is “planning-based KL budget allocation”.</p>
+
+<h3 id="why-this-distinction-matters">Why This Distinction Matters</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Dimension</th>
+      <th style="text-align: center">KL as Loss (gradient backprop)</th>
+      <th style="text-align: center">KL as Reward (stop-grad)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Optimization target</td>
+      <td style="text-align: center">Original task + supervised regularization</td>
+      <td style="text-align: center">Regularized new MDP</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Actor gradient</td>
+      <td style="text-align: center">RL gradient + explicit KL gradient</td>
+      <td style="text-align: center">Single PG, based on shaped advantage</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Critic</td>
+      <td style="text-align: center">Learns $V^{\text{env}}$: only environment reward</td>
+      <td style="text-align: center">Learns $V^{\text{reg}}$: reward + KL mixed</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Credit Assignment</td>
+      <td style="text-align: center">Local per-state, no planning</td>
+      <td style="text-align: center">Multi-step backprop, planning-capable</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Focus on</td>
+      <td style="text-align: center">Estimator’s <strong>explicit gradient</strong> (corresponds to which optimization objective)</td>
+      <td style="text-align: center">KL <strong>value</strong> + whether induced <strong>policy gradient</strong> is correct</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>One-liner</strong>: KL as loss makes the agent “visit but locally correct” — constraints are more local and flexible; KL as reward makes the agent “plan to avoid high-KL paths” — constraints are more global and thorough.</p>
+
+<p><strong>Selection Guidelines</strong>:</p>
+<ul>
+  <li>If you want constraints to be “<strong>corrective</strong>”, allowing the agent to explore but locally correct behavior, choose <strong>KL as Loss</strong></li>
+  <li>If you want constraints to be “<strong>preventive</strong>”, making the agent fundamentally avoid high-KL regions, choose <strong>KL as Reward</strong></li>
+</ul>
+
+<p>After understanding the difference between these two paradigms, we can clarify:</p>
+<ul>
+  <li><strong>KL as Loss</strong>: Needs correct explicit gradients of the KL estimator, caring about which optimization objective the gradient corresponds to</li>
+  <li><strong>KL as Reward</strong>: Needs accurate value estimation of KL, while also caring about whether the induced policy gradient is correct</li>
+</ul>
+
+<p>Below we deeply analyze the gradient properties of estimators according to the two usage modes of “as Loss” and “as Reward”.</p>
+
+<h2 id="gradient-analysis-when-used-as-loss">Gradient Analysis When Used as Loss</h2>
+
+<p>When KL serves as a loss term participating in gradient backpropagation, we must understand the optimization objective each estimator corresponds to. This is the most subtle yet critical aspect in practical implementations.</p>
+
+<h3 id="on-policy-scenario">On-policy Scenario</h3>
+
+<p>We start the analysis from the on-policy scenario, i.e., samples come from the current policy $q_\theta$.</p>
+
+<h4 id="two-differentiation-orders-grad-then-expectation-vs-expectation-then-grad">Two Differentiation Orders: Grad-then-Expectation vs. Expectation-then-Grad</h4>
+
+<p>In code implementation, there are two paths:</p>
+
+<ol>
+  <li><strong>Grad-then-expectation</strong>: Compute gradient for each sample’s $k_i(x)$, then take expectation of gradients (Monte Carlo estimation)</li>
+  <li><strong>Expectation-then-grad</strong>: Treat $\mathbb{E}_q[k_i]$ as a loss function, then differentiate the analytical expression</li>
+</ol>
+
+<p><strong>In typical deep learning code, we actually execute “grad-then-expectation”</strong> — autograd computes gradients for each sample, then averages over the batch.</p>
+
+<h4 id="gradient-derivations-for-the-three-estimators">Gradient Derivations for the Three Estimators</h4>
+
+<p>Now we compute the gradients of the three estimators to see which KL’s true gradient their expectations correspond to (refer to the “Preliminaries” section).</p>
+
+<p><strong>Deriving $\nabla_\theta k_1$</strong>:</p>
+
+<p>$$
+k_1 = -\log \frac{p(x)}{q_\theta(x)} = \log q_\theta(x) - \log p(x)
 $$</p>
 
 <p>$$
-\nabla_\theta k_2 = (\log r) \nabla_\theta(\log r) = (\log r)(-s_\theta) = - (\log r) s_\theta
+\nabla_\theta k_1 = \nabla_\theta \log q_\theta(x) - \nabla_\theta \log p(x) = s_\theta - 0 = s_\theta
 $$</p>
+
+<p><strong>Deriving $\nabla_\theta k_2$</strong>:</p>
 
 <p>$$
-\nabla_\theta k_3 = (1 - r) s_\theta
+k_2 = \frac{1}{2}\left(\log \frac{p}{q}\right)^2
 $$</p>
 
-<p>Taking expectation under $q_\theta$:</p>
+<p>By the chain rule:</p>
+
+<p>$$
+\begin{aligned}
+\nabla_\theta k_2 
+&= \left(\log \frac{p}{q}\right) \cdot \nabla_\theta\left(\log \frac{p}{q}\right) \\
+&= \left(\log \frac{p}{q}\right) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
+&= \left(\log \frac{p}{q}\right)(-s_\theta) \\
+&= - \left(\log \frac{p}{q}\right) s_\theta.
+\end{aligned}
+$$</p>
+
+<p><strong>Deriving $\nabla_\theta k_3$</strong>:</p>
+
+<p>$$
+k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}
+$$</p>
+
+<p>First, compute $\nabla_\theta \frac{p}{q}$. Since $\frac{p}{q} = p(x) \cdot q_\theta(x)^{-1}$:</p>
+
+<p>$$
+\nabla_\theta \frac{p}{q} = p(x) \cdot (-1) \cdot q_\theta(x)^{-2} \cdot \nabla_\theta q_\theta(x) = -\frac{p(x)}{q_\theta(x)} \cdot \frac{\nabla_\theta q_\theta(x)}{q_\theta(x)} = -\frac{p}{q} \cdot s_\theta
+$$</p>
+
+<p>Then compute $\nabla_\theta \log \frac{p}{q}$:</p>
+
+<p>$$
+\nabla_\theta \log \frac{p}{q} = \frac{q}{p} \nabla_\theta \frac{p}{q} = \frac{q}{p} \cdot \left(-\frac{p}{q} \cdot s_\theta\right) = -s_\theta
+$$</p>
+
+<p>Therefore:</p>
+
+<p>$$
+\nabla_\theta k_3 = \nabla_\theta \frac{p}{q} - 0 - \nabla_\theta \log \frac{p}{q} = -\frac{p}{q} \cdot s_\theta - (-s_\theta) = \left(1 - \frac{p}{q}\right) \cdot s_\theta
+$$</p>
+
+<p>Taking expectations under $q_\theta$:</p>
 
 <table>
   <thead>
     <tr>
       <th style="text-align: center">Estimator</th>
       <th style="text-align: center">$\mathbb{E}_{q}[\nabla_\theta k_i]$</th>
-      <th style="text-align: center">Equals</th>
+      <th style="text-align: center">Equivalent to</th>
     </tr>
   </thead>
   <tbody>
@@ -522,541 +794,601 @@ $$</p>
     </tr>
     <tr>
       <td style="text-align: center">$k_2$</td>
-      <td style="text-align: center">$-\mathbb{E}_{q}[(\log r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
-      <td style="text-align: center">Gradient of reverse KL</td>
+      <td style="text-align: center">$-\mathbb{E}_{q}\left[\left(\log \frac{p}{q}\right) \cdot s_\theta\right] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center">Reverse KL gradient</td>
     </tr>
     <tr>
       <td style="text-align: center">$k_3$</td>
-      <td style="text-align: center">$\mathbb{E}_{q}[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
-      <td style="text-align: center">Gradient of forward KL</td>
+      <td style="text-align: center">$\mathbb{E}_{q}\left[\left(1-\frac{p}{q}\right) \cdot s_\theta\right] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+      <td style="text-align: center">Forward KL gradient</td>
     </tr>
   </tbody>
 </table>
 
-<p><strong>Key takeaways:</strong></p>
+<p><strong>Key insights</strong>:</p>
 <ul>
-  <li><strong>$k_2$ gradient</strong> matches reverse KL gradient (the usual “stay near ref” objective).</li>
-  <li><strong>$k_3$ gradient</strong> matches forward KL gradient (coverage objective).</li>
-  <li><strong>$k_1$ gradient expectation is zero</strong> — useless as a loss.</li>
+  <li><strong>$k_2$’s gradient</strong> equals the true reverse KL gradient — the correct choice for optimizing “constraining policy not to deviate from reference”</li>
+  <li><strong>$k_3$’s gradient</strong> equals the true forward KL gradient — corresponding to a “coverage” objective</li>
+  <li><strong>$k_1$’s gradient expectation is always zero</strong> — backpropagating as loss is meaningless!</li>
 </ul>
 
-<h4 id="expectation-then-grad-vs-grad-then-expectation">Expectation-then-grad vs. grad-then-expectation</h4>
+<h4 id="key-finding-inlmath175mathend-ineffective-inlmath176mathend-for-reverse-kl-inlmath177mathend-for-forward-kl">Key Finding: $k_1$ Ineffective, $k_2$ for Reverse KL, $k_3$ for Forward KL</h4>
 
-<p>If you first form $\mathbb{E}_q[k_i]$ and then differentiate (expectation-then-grad):</p>
+<p><strong>“Expectation-then-grad” vs. “Grad-then-expectation”</strong>:</p>
 
-<p>$$
-\nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p), \quad \nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p).
-$$</p>
-
-<p>Both give reverse KL. But autograd on per-sample $k_3$ averages (grad-then-expectation) yields <strong>forward KL gradient</strong>. Same estimator, different order, different result.</p>
-
-<h3 id="off-policy-gradients-with-importance-sampling">Off-policy gradients with importance sampling</h3>
-
-<p>Real RL often samples from a behavior policy $\mu$ (old or mixed policy, replay buffer). To optimize <strong>reverse KL</strong> you need <strong>importance weights</strong>.</p>
-
-<p>See also my earlier post: <a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">Three-policy TRPO extension for LLM RL</a>.</p>
-
-<h4 id="setup">Setup</h4>
-
-<p>Define importance weight</p>
+<p>If we analytically treat $\mathbb{E}_q[k_i]$ as a function of $\theta$ and then differentiate (i.e., “expectation-then-grad”), then:</p>
 
 <p>$$
-w(x) = \frac{q_\theta(x)}{\mu(x)}.
+\nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
 $$</p>
 
-<p>Using batch loss $w(x) k_i(x)$ with autograd, what gradients do we get?</p>
+<p>$$
+\nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
+$$</p>
 
-<p>A key difference:</p>
+<p>Both give reverse KL’s gradient. However, when directly calling backpropagation on sample means of $k_3$ in code, autograd executes “grad-then-expectation”, yielding $\mathbb{E}_q[\nabla_\theta k_3]$, i.e., <strong>the forward KL gradient</strong>.</p>
+
+<p><strong>Key conclusion for on-policy scenario</strong>: For the same estimator, the two differentiation orders can give completely different results. Specifically:</p>
 <ul>
-  <li>Previously expectations were under $q_\theta$ (depends on $\theta$).</li>
-  <li>Now expectations are under $\mu$ (independent of $\theta$).</li>
+  <li>To optimize <strong>reverse KL</strong>: must use $k_2$</li>
+  <li>To optimize <strong>forward KL</strong>: use $k_3$</li>
+  <li>$k_1$’s gradient expectation is always zero, useless as loss</li>
 </ul>
 
-<h4 id="crucial-observation-the-two-orders-coincide">Crucial observation: the two orders coincide</h4>
+<h3 id="off-policy-scenario">Off-policy Scenario</h3>
 
-<p>Because $\mu$ is $\theta$-independent,</p>
+<p>Now consider the off-policy scenario where samples come from a behavior policy $\mu \neq q_\theta$. This situation is very common in practical RL training when using old/mixed policies to generate data or in offline RL with fixed sample distributions.</p>
 
-<p>$$
-\nabla_\theta \mathbb{E}_{\mu}[f_\theta] = \mathbb{E}_{\mu}[\nabla_\theta f_\theta].
-$$</p>
+<p>For an in-depth analysis of off-policy scenarios in large language models, refer to: <a href="/reinforcement-learning/2025/11/15/three-policy-en.html">From Two-Policy to Three-Policy: TRPO Extension Under Behavior-Reference Mismatch in LLM RL</a>.</p>
 
-<p>So autograd on sample means (grad-then-expectation) equals expectation-then-grad. For $k_1$ and $k_3$, both value-unbiased for reverse KL, their gradient expectations also match reverse KL.</p>
+<h4 id="importance-weighting-and-gradient-equivalence">Importance Weighting and Gradient Equivalence</h4>
 
-<h4 id="value-unbiasedness-remains">Value unbiasedness remains</h4>
+<p>When sampling from $\mu$ independent of $\theta$, we use importance weight $w(x) = \frac{q_\theta(x)}{\mu(x)}$ in the loss. A key difference emerges:</p>
 
-<p>By $\mathbb{E}_\mu[w f] = \mathbb{E}_q[f]$:</p>
+<blockquote>
+  <p><strong>Before</strong> (on-policy): expectation $\mathbb{E}_{q_{\theta}}[\cdot]$ depends on $\theta$<br />
+<strong>Now</strong> (off-policy): expectation $\mathbb{E}_{\mu}[\cdot]$ is independent of $\theta$</p>
+</blockquote>
 
-<p>$$
-\mathbb{E}_\mu[w k_1] = D_{\mathrm{KL}}(q_\theta \| p), \quad \mathbb{E}_\mu[w k_3] = D_{\mathrm{KL}}(q_\theta \| p) \quad \textbf{(unbiased)}
-$$</p>
-
-<p>$$
-\mathbb{E}_\mu[w k_2] = \mathbb{E}_{q_\theta}[k_2] \neq D_{\mathrm{KL}}(q_\theta \| p) \quad \textbf{(biased)}
-$$</p>
-
-<h4 id="gradients-with-weights">Gradients with weights</h4>
-
-<p>Gradient of weight: $\nabla_\theta w = w s_\theta$. Using product rule:</p>
+<p>This makes “expectation-then-grad” and “grad-then-expectation” <strong>equivalent</strong>:</p>
 
 <p>$$
-\nabla_\theta(w k_1) = w s_\theta (k_1 + 1)
-$$
-$$
-\nabla_\theta(w k_2) = w s_\theta (k_2 - \log r)
-$$
-$$
-\nabla_\theta(w k_3) = w s_\theta (k_3 + 1 - r) = w s_\theta k_1
+\nabla_\theta \mathbb{E}_{\mu}[f_\theta(x)] = \mathbb{E}_{\mu}[\nabla_\theta f_\theta(x)]
 $$</p>
 
-<p>Which give expected gradients:</p>
+<h4 id="gradient-derivations-with-importance-weights">Gradient Derivations with Importance Weights</h4>
+
+<p>Since $\nabla_\theta w = w s_\theta$ and using product rule with previously derived $\nabla_\theta k_i$:</p>
+
+<p>$$
+\nabla_\theta(w k_1) = w s_\theta (k_1 + 1), \quad
+\nabla_\theta(w k_2) = w s_\theta (k_2 - k_1), \quad
+\nabla_\theta(w k_3) = w s_\theta k_1
+$$</p>
+
+<p>Note that $\nabla_\theta(w k_3) = w s_\theta k_1 = \nabla_\theta(\text{sg}(w) k_2)$  — these two are <strong>gradient-identical</strong>.</p>
+
+<p>Taking expectations and using $\mathbb{E}_\mu[w \cdot f] = \mathbb{E}_{q}[f]$ and $\mathbb{E}_{q}[s_\theta]=0$:</p>
 
 <table>
   <thead>
     <tr>
       <th style="text-align: center">Weighted estimator</th>
       <th style="text-align: center">Value target</th>
-      <th style="text-align: center">Expected gradient</th>
+      <th style="text-align: center">Gradient target</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">$\tfrac{q_\theta}{\mu} k_1$</td>
-      <td style="text-align: center">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
+      <td style="text-align: center">$\frac{q_\theta}{\mu} k_1$</td>
+      <td style="text-align: center">$D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(q \| p)$ ✓ (higher var)</td>
     </tr>
     <tr>
-      <td style="text-align: center">$\tfrac{q_\theta}{\mu} k_2$</td>
-      <td style="text-align: center">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-      <td style="text-align: center">$\nabla_\theta \mathbb{E}_q[k_2]$, not reverse KL ✗</td>
+      <td style="text-align: center">$\frac{q_\theta}{\mu} k_2$</td>
+      <td style="text-align: center">$\mathbb{E}_q[k_2]$ (f-div)</td>
+      <td style="text-align: center">$\nabla \mathbb{E}_q[k_2]$ ✗ (not reverse KL)</td>
     </tr>
     <tr>
-      <td style="text-align: center">$\text{sg}\left(\tfrac{q_\theta}{\mu}\right) k_2$</td>
-      <td style="text-align: center">$\mathbb{E}_q[k_2]$ (f-divergence)</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
+      <td style="text-align: center">$\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$</td>
+      <td style="text-align: center">$\mathbb{E}_q[k_2]$ (f-div)</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(q \| p)$ ✓ (low var)</td>
     </tr>
     <tr>
-      <td style="text-align: center">$\tfrac{q_\theta}{\mu} k_3$</td>
-      <td style="text-align: center">$D_{\mathrm{KL}}(q_\theta \| p)$</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL) ✓</td>
+      <td style="text-align: center">$\frac{q_\theta}{\mu} k_3$</td>
+      <td style="text-align: center">$D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(q \| p)$ ✓ (low var)</td>
     </tr>
   </tbody>
 </table>
 
-<p><strong>Interesting reversal vs. on-policy:</strong></p>
+<p><strong>Key finding</strong>: $\frac{q}{\mu} k_3$ and $\text{sg}\left(\frac{q}{\mu}\right) k_2$ have <strong>identical gradients</strong> $w s_\theta k_1$ and are statistically equivalent.</p>
+
+<h4 id="variance-analysis">Variance Analysis</h4>
+
+<p>In the typical regime where $q_\theta \approx p \approx \mu$, setting $\frac{p}{q}=1+\varepsilon$ with $|\varepsilon|\ll1$:</p>
+
 <ul>
-  <li>On-policy: $k_2$ as loss gives reverse KL gradient; $k_1$ gradient is zero.</li>
-  <li>Off-policy + weights: $\tfrac{q}{\mu}k_1$ and $\tfrac{q}{\mu}k_3$ give reverse KL gradients; $\tfrac{q}{\mu}k_2$ (with weight in grad) fails.</li>
-  <li>Detaching the weight makes $\text{sg}(\tfrac{q}{\mu}) k_2$ also give reverse KL gradient.</li>
+  <li>$\nabla_\theta(w k_1) \approx w s_\theta(1-\varepsilon)$ — contains $O(1)$ noise term $w s_\theta$</li>
+  <li>$\nabla_\theta(w k_3) = \nabla_\theta(\text{sg}(w) k_2) \approx w s_\theta(-\varepsilon)$ — only $O(\varepsilon)$ terms</li>
 </ul>
 
-<h4 id="variance-of-the-three-unbiased-off-policy-gradient-estimators">Variance of the three unbiased off-policy gradient estimators</h4>
-
-<p>Unbiased reverse-KL gradient estimators (off-policy + IS):</p>
+<p>The variance difference is:</p>
 
 <p>$$
-L_1 = w k_1, \quad L_2 = \bar w k_2, \quad L_3 = w k_3,
+\mathrm{Var}_\mu(g_1) - \mathrm{Var}_\mu(g_\star) = \mathbb{E}_\mu\big[w^2 s_\theta^2 (2k_1+1)\big] \approx \mathbb{E}_\mu[w^2 s_\theta^2] > 0
 $$</p>
 
-<p>With $w = \tfrac{q_\theta}{\mu}$, $\bar w = \mathrm{sg}(w)$. Using $\nabla_\theta w = w s_\theta$, $\nabla_\theta k_1 = s_\theta$, $\nabla_\theta k_2 = k_1 s_\theta$, $\nabla_\theta k_3 = (1-r) s_\theta$:</p>
+<p>Therefore, $w k_1$ has roughly one order of magnitude higher variance than $w k_3$ or $\text{sg}(w) k_2$.</p>
 
-<p>$$
-\begin{aligned}
-g_1 &= w s_\theta (k_1+1),\\
-g_2 &= w s_\theta k_1,\\
-g_3 &= w s_\theta k_1.
-\end{aligned}
-$$</p>
+<p>This is why DeepSeek v3.2 uses $\frac{q_\theta}{\mu} k_3$ for off-policy KL penalty:</p>
 
-<p>So <strong>$g_2 \equiv g_3$</strong>. Only two distinct variance behaviors: $g_1$ vs. $g_\star := g_2 = g_3$.</p>
+<figure style="text-align:center;">
+<img src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;" />
+<figcaption style="font-size:0.9em;color:gray;">Source: <a href="https://arxiv.org/pdf/2512.02556v1">DeepSeek v3.2 Technical Report Section 3.1</a></figcaption>
+</figure>
 
-<p>Let $A = w s_\theta, B = k_1$. Then</p>
+<h4 id="practical-recommendations">Practical Recommendations</h4>
 
-<p>$$
-g_1 = A(B+1), \quad g_\star = A B.
-$$</p>
-
-<p>Variance difference:</p>
-
-<p>$$
-\boxed{\mathrm{Var}_\mu(g_1) - \mathrm{Var}_\mu(g_\star) = \mathbb{E}_\mu[A^2(2B+1)]} = \mathbb{E}_\mu\big[w^2 s_\theta^2 (2k_1+1)\big].
-$$</p>
-
-<p>In the typical KL-penalty regime $q_\theta \approx p \approx \mu$, write $r = 1 + \varepsilon$, $\lvert\varepsilon\rvert \ll 1$, so $k_1 \approx -\varepsilon$, $2k_1+1 \approx 1 - 2\varepsilon > 0$. Thus $\mathrm{Var}(g_1) > \mathrm{Var}(g_\star)$.</p>
-
-<p>Intuition:</p>
+<p><strong>For on-policy reverse KL optimization:</strong></p>
 <ul>
-  <li>$g_1$ includes an $O(1)$ zero-mean noise term $w s_\theta$.</li>
-  <li>$g_\star$ cancels that term; remaining magnitude is $O(\varepsilon)$, giving much lower variance.</li>
+  <li><strong>Use $k_2$ as loss</strong>: $\mathcal{L} = \tfrac{1}{2}(\log r)^2$</li>
+  <li>Gradient: $\mathbb{E}_q[\nabla k_2] = \nabla D_{\mathrm{KL}}(q \| p)$</li>
 </ul>
 
-<p>Table summary:</p>
+<p><strong>For on-policy forward KL optimization</strong> (coverage objectives):</p>
+<ul>
+  <li><strong>Use $k_3$ as loss</strong>: Autograd gives $\mathbb{E}_q[(1-r) s_\theta] = \nabla D_{\mathrm{KL}}(p \| q)$</li>
+</ul>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">Estimator</th>
-      <th style="text-align: center">Gradient rv</th>
-      <th style="text-align: center">Scale ($r\approx1$)</th>
-      <th style="text-align: center">Variance</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">$w k_1$</td>
-      <td style="text-align: center">$w s_\theta (k_1+1)$</td>
-      <td style="text-align: center">$O(1)$</td>
-      <td style="text-align: center">High</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">$\mathrm{sg}(w) k_2$</td>
-      <td style="text-align: center">$w s_\theta k_1$</td>
-      <td style="text-align: center">$O(\varepsilon)$</td>
-      <td style="text-align: center">Low</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">$w k_3$</td>
-      <td style="text-align: center">$w s_\theta k_1$</td>
-      <td style="text-align: center">$O(\varepsilon)$</td>
-      <td style="text-align: center">Low</td>
-    </tr>
-  </tbody>
-</table>
+<p><strong>For off-policy reverse KL optimization</strong> (samples from $\mu$):</p>
+<ul>
+  <li><strong>Recommended</strong>: $\dfrac{q_\theta}{\mu} k_3$ or $\text{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$ (identical, low variance)</li>
+  <li><strong>Fallback</strong>: $\dfrac{q_\theta}{\mu} k_1$ (unbiased but ~10× higher variance)</li>
+  <li><strong>Avoid</strong>: $\dfrac{q_\theta}{\mu} k_2$ with weight in gradient (biased for reverse KL)</li>
+</ul>
 
-<p>Conclusion: off-policy IS with reverse-KL gradients has three unbiased options: $w k_1$, $\bar w k_2$, $w k_3$. The latter two are identical in gradient and variance and are preferred; $w k_1$ is unbiased but noisier.</p>
-
-<p><strong>When far off-policy:</strong> If $w$ explodes (little overlap), any $\tfrac{q}{\mu}$ method suffers. Then the variance advantage of $k_3$ over $k_1$ is not guaranteed; clipping/regularization becomes necessary.</p>
-
-<h3 id="gradient-cheat-sheet">Gradient cheat sheet</h3>
+<h3 id="comprehensive-gradient-analysis-summary">Comprehensive Gradient Analysis Summary</h3>
 
 <table>
   <thead>
     <tr>
       <th style="text-align: center">Sampling</th>
       <th style="text-align: center">Loss</th>
-      <th style="text-align: center">$\mathbb{E}[\nabla_\theta \text{Loss}]$</th>
+      <th style="text-align: center">Gradient expectation</th>
       <th style="text-align: center">Optimizes</th>
-      <th style="text-align: center">Right for reverse KL?</th>
+      <th style="text-align: center">Usable for reverse KL?</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td style="text-align: center">$q$ (on)</td>
       <td style="text-align: center">$k_1$</td>
-      <td style="text-align: center">$\mathbb{E}_q[s_\theta] = 0$</td>
-      <td style="text-align: center">None (zero grad)</td>
+      <td style="text-align: center">$\mathbb{E}_q[s_\theta]=0$</td>
+      <td style="text-align: center">None (zero)</td>
       <td style="text-align: center">✗</td>
     </tr>
     <tr>
       <td style="text-align: center">$q$ (on)</td>
       <td style="text-align: center">$k_2$</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center">Reverse KL</td>
       <td style="text-align: center">✓</td>
     </tr>
     <tr>
       <td style="text-align: center">$q$ (on)</td>
       <td style="text-align: center">$k_3$</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(p \| q)$</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(p \| q)$</td>
       <td style="text-align: center">Forward KL</td>
       <td style="text-align: center">✗</td>
     </tr>
     <tr>
       <td style="text-align: center">$\mu$ (off)</td>
-      <td style="text-align: center">$\tfrac{q}{\mu} k_1$</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_1$</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center">Reverse KL</td>
-      <td style="text-align: center">✓ (higher var)</td>
+      <td style="text-align: center">✓ (high variance)</td>
     </tr>
     <tr>
       <td style="text-align: center">$\mu$ (off)</td>
-      <td style="text-align: center">$\tfrac{q}{\mu} k_2$</td>
-      <td style="text-align: center">$\nabla_\theta \mathbb{E}_q[k_2]$</td>
-      <td style="text-align: center">f-divergence (not KL)</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_2$</td>
+      <td style="text-align: center">$\nabla \mathbb{E}_q[k_2]$</td>
+      <td style="text-align: center">f-div (wrong)</td>
       <td style="text-align: center">✗</td>
     </tr>
     <tr>
       <td style="text-align: center">$\mu$ (off)</td>
-      <td style="text-align: center">$\text{sg}\left(\tfrac{q}{\mu}\right) k_2$</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center">$\text{sg}(\frac{q}{\mu}) k_2$</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center">Reverse KL</td>
-      <td style="text-align: center">✓</td>
+      <td style="text-align: center">✓ (low variance)</td>
     </tr>
     <tr>
       <td style="text-align: center">$\mu$ (off)</td>
-      <td style="text-align: center">$\tfrac{q}{\mu} k_3$</td>
-      <td style="text-align: center">$\nabla_\theta D_{\mathrm{KL}}(q \| p)$</td>
+      <td style="text-align: center">$\frac{q}{\mu} k_3$</td>
+      <td style="text-align: center">$\nabla D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center">Reverse KL</td>
-      <td style="text-align: center">✓ (recommended, low var)</td>
+      <td style="text-align: center">✓ (low variance, recommended)</td>
     </tr>
   </tbody>
 </table>
 
-<p><strong>Key conclusions:</strong>
-1) <strong>On-policy reverse KL:</strong> use $k_2$ (only correct choice).
-2) <strong>Off-policy reverse KL:</strong> three correct options: $\tfrac{q}{\mu} k_1$ (unbiased, higher var); $\text{sg}(\tfrac{q}{\mu}) k_2$ (unbiased, equals next); $\tfrac{q}{\mu} k_3$ (unbiased, lower var; equals previous).
-3) <strong>$\tfrac{q}{\mu} k_2$ with weight in grad is wrong</strong> for reverse KL.</p>
+<h2 id="gradient-analysis-when-used-as-reward">Gradient Analysis When Used as Reward</h2>
 
-<p>However, before choosing an estimator, there’s a more fundamental question to answer: <strong>should KL be added to rewards, or be part of the loss?</strong> This choice fundamentally affects optimization behavior and credit assignment.</p>
+<p>Having analyzed the value estimation properties of the three estimators in the previous section, one might naturally assume: since $k_1$ and $k_3$ are both unbiased for reverse KL value, incorporating them (with stop-gradient) as reward penalties should be equally valid.</p>
 
-<h2 id="two-ways-to-use-kl-as-reward-vs-as-loss">Two Ways to Use KL: As Reward vs. As Loss</h2>
+<p><strong>This intuition, however, is incorrect.</strong></p>
 
-<p>In practice, KL penalty can be used in two fundamentally different ways: added to rewards for shaping (no gradient backpropagation needed), or as part of the loss for backpropagation (gradient needed).</p>
+<p>The issue is: when KL is used as a reward penalty, although the KL term itself doesn’t backpropagate gradients, it will indirectly affect the policy gradient through advantage. Therefore, to evaluate whether an estimator “can be used for reward penalty”, we shouldn’t just look at value bias, but whether <strong>the policy gradient it induces is correct</strong>.</p>
 
-<p>These two approaches may seem like just a <code class="language-plaintext highlighter-rouge">detach</code> difference in code, but they correspond to completely different optimization behaviors.</p>
+<h3 id="the-true-kl-regularized-policy-gradient">The True KL-Regularized Policy Gradient</h3>
 
-<h3 id="definitions">Definitions</h3>
-
-<p><strong>KL as Reward (stop-gradient):</strong></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kl</span> <span class="o">=</span> <span class="nf">compute_kl</span><span class="p">(</span><span class="n">log_prob_q</span><span class="p">,</span> <span class="n">log_prob_p</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
-<span class="n">shaped_reward</span> <span class="o">=</span> <span class="n">reward</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>
-</code></pre></div></div>
-
-<p>Use shaped reward for standard actor-critic updates.</p>
-
-<p><strong>KL as Loss (backprop):</strong></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">actor_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantage</span> <span class="o">*</span> <span class="n">log_prob</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">kl</span>  <span class="c1"># kl participates in gradient
-</span></code></pre></div></div>
-
-<p>Critic only learns environment value; KL is a regularization term for the actor that backpropagates gradients.</p>
-
-<h3 id="key-difference-1-optimization-target">Key Difference 1: Optimization Target</h3>
-
-<p><strong>KL as Reward:</strong> Optimizes a <strong>regularized new MDP</strong> where the reward function becomes $\tilde{r}(s,a) = r(s,a) - \beta \cdot \text{KL}(s)$.</p>
-
-<p><strong>KL as Loss:</strong> Optimizes the <strong>original task + supervised regularization</strong>; KL doesn’t change the MDP definition, it’s just an external constraint term.</p>
-
-<p><strong>Intuition:</strong> The former “changes the game rules”; the latter “adds constraints under the original rules”.</p>
-
-<h3 id="key-difference-2-actor-gradient">Key Difference 2: Actor Gradient</h3>
-
-<p><strong>KL as Reward:</strong> Single policy gradient, KL influence is <strong>reflected indirectly through advantage</strong>:</p>
+<p>Consider the KL-regularized reinforcement learning objective:</p>
 
 <p>$$
-g_{\text{reward}} = \mathbb{E}\left[s_\theta \cdot \tilde{A}_t\right], \quad \tilde{A}_t \text{ based on } (r_t - \beta \cdot \text{KL}_t)
+J(\theta) = \mathbb{E}_{q_\theta}[R] - \beta \cdot D_{\mathrm{KL}}(q_\theta \| p)
 $$</p>
 
-<p><strong>KL as Loss:</strong> Gradient splits into two independent paths:</p>
+<p>Its true gradient is:</p>
 
 <p>$$
-g_{\text{loss}} = \underbrace{\mathbb{E}\left[s_\theta \cdot A_t^{\text{env}}\right]}_{\text{RL gradient}} + \underbrace{\beta \cdot \mathbb{E}\left[\nabla_\theta \text{KL}_t\right]}_{\text{KL explicit gradient}}
+\nabla_\theta J = \mathbb{E}_{q_\theta}[s_\theta \cdot R] - \beta \cdot \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)
 $$</p>
 
-<p><strong>Key distinction:</strong> Is KL’s force “multiplied on advantage” or “a separate force”? The latter’s KL gradient is deterministic, unaffected by critic quality.</p>
-
-<h3 id="key-difference-3-critic-learning-target">Key Difference 3: Critic Learning Target</h3>
-
-<p><strong>KL as Reward:</strong> Critic learns mixed value</p>
+<p>Using the result from the “Preliminaries” section, the reverse KL gradient is:</p>
 
 <p>$$
-V^{\text{reg}}(s) = \mathbb{E}\left[\sum_t \gamma^t (r_t - \beta \cdot \text{KL}_t)\right]
+\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(-\log \frac{p}{q}\right)\right] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
 $$</p>
 
-<p><strong>KL as Loss:</strong> Critic only learns environment value</p>
+<p>Therefore, the true KL-regularized policy gradient is:</p>
 
 <p>$$
-V^{\text{env}}(s) = \mathbb{E}\left[\sum_t \gamma^t r_t\right]
+\nabla_\theta J = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(R - \beta \cdot k_1\right)\right]
 $$</p>
 
-<p>The latter has cleaner separation, making it easier to monitor task return and KL divergence separately.</p>
+<h3 id="gradient-form-when-using-estimator-inlmath258mathend">Gradient Form When Using Estimator $\hat{k}$</h3>
 
-<h3 id="key-difference-4-credit-assignment">Key Difference 4: Credit Assignment</h3>
+<p>When we use some estimator $\hat{k}$ (with stop-gradient) as a reward penalty, the shaped reward is $\tilde{R} = R - \beta \cdot \text{sg}(\hat{k})$, and the policy gradient becomes:</p>
 
-<p>Consider a scenario: first few steps are routing behavior, final step has high reward but also high KL.</p>
+<p>$$
+\nabla_\theta \tilde{J} = \mathbb{E}_{q_\theta}\left[s_\theta \cdot (R - \beta \cdot \hat{k})\right]
+$$</p>
 
-<p><strong>KL as Reward:</strong> The large KL at the terminal state is <strong>propagated back to all previous steps</strong> through TD, so the policy tends to <strong>fundamentally avoid</strong> high-KL regions — this is “planning-based KL budget allocation”.</p>
+<p><strong>Unbiasedness condition</strong>: $\nabla_\theta \tilde{J} = \nabla_\theta J$ if and only if</p>
 
-<p><strong>KL as Loss:</strong> The terminal state’s KL only appears in that state’s gradient term; the policy is still willing to <strong>visit high-reward regions but locally correct</strong> behavior.</p>
+<p>$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot \hat{k}] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
+$$</p>
 
-<h3 id="summary">Summary</h3>
+<h3 id="using-inlmath262mathend-as-penalty-gradient-unbiased">Using $k_1$ as Penalty: Gradient Unbiased</h3>
+
+<p>When $\hat{k} = k_1$, the condition is automatically satisfied:</p>
+
+<p>$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot k_1] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1] \quad \checkmark
+$$</p>
+
+<p>Therefore, <strong>when $k_1$ is used as a reward penalty, the induced policy gradient is unbiased</strong>.</p>
+
+<h3 id="using-inlmath265mathend-as-penalty-gradient-biased">Using $k_3$ as Penalty: Gradient Biased</h3>
+
+<p>When $\hat{k} = k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}$:</p>
+
+<p>$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot k_3] = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(\frac{p}{q} - 1\right)\right] + \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(-\log \frac{p}{q}\right)\right]
+$$</p>
+
+<p>The second term is exactly $\mathbb{E}_{q_\theta}[s_\theta \cdot k_1]$. The problem lies in the first term:</p>
+
+<p>$$
+\mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(\frac{p}{q} - 1\right)\right] = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right] - \underbrace{\mathbb{E}_{q_\theta}[s_\theta]}_{=0} = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right]
+$$</p>
+
+<p>This can be rewritten as:</p>
+
+<p>$$
+\mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right] = \int q_\theta(x) \cdot \nabla_\theta \log q_\theta(x) \cdot \frac{p(x)}{q_\theta(x)} dx = \int p(x) \cdot \nabla_\theta \log q_\theta(x) dx = \mathbb{E}_p[s_\theta]
+$$</p>
+
+<p>Using the forward KL gradient formula $\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = -\mathbb{E}_p[s_\theta]$, we have:</p>
+
+<p>$$
+\mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right] = -\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)
+$$</p>
+
+<p>Therefore:</p>
+
+<p>$$
+\mathbb{E}_{q_\theta}[s_\theta \cdot k_3] = \underbrace{-\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)}_{\text{bias term}} + \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)
+$$</p>
+
+<p><strong>When $k_3$ is used as a reward penalty, the gradient is biased</strong>, with the bias term equal to the negative of the forward KL gradient.</p>
+
+<p><strong>Geometric meaning of the bias</strong>: Using $k_3$ as a reward penalty is equivalent to optimizing a “wrong mixed objective”:</p>
+<ul>
+  <li>Penalizing reverse KL (hoping policy doesn’t deviate from reference)</li>
+  <li>But also <strong>wrongly encouraging forward KL to increase</strong> (hoping reference doesn’t cover policy)</li>
+</ul>
+
+<p>These two directions conflict, potentially causing optimization instability.</p>
+
+<p><strong>Experimental verification</strong>: Shah et al. (2025)’s experiments show that in on-policy RL fine-tuning of LLMs:</p>
+<ul>
+  <li><strong>$k_1$ in reward</strong>: Training is stable</li>
+  <li><strong>$k_3$ in reward</strong>: <strong>Training collapses</strong></li>
+</ul>
+
+<p>This is completely consistent with our theoretical analysis.</p>
+
+<h3 id="off-policy-scenario-1">Off-policy Scenario</h3>
+
+<p>The above analysis assumes on-policy sampling. Does the conclusion change in off-policy scenarios?</p>
+
+<p>Let samples come from behavior policy $\mu$, using importance-weighted policy gradient:</p>
+
+<p>$$
+\nabla_\theta \tilde{J} = \mathbb{E}_\mu\left[\frac{q_\theta}{\mu} \cdot s_\theta \cdot (R - \beta \cdot k)\right]
+$$</p>
+
+<p>Using $\mathbb{E}_\mu[\frac{q_\theta}{\mu} \cdot f] = \mathbb{E}_{q_\theta}[f]$, this equals:</p>
+
+<p>$$
+= \mathbb{E}_{q_\theta}[s_\theta \cdot R] - \beta \cdot \mathbb{E}_{q_\theta}[s_\theta \cdot k]
+$$</p>
+
+<p><strong>The unbiasedness condition</strong> remains $\mathbb{E}_{q_\theta}[s_\theta \cdot k] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]$, exactly the same as on-policy.</p>
+
+<p><strong>Key insight</strong>: In the off-policy policy gradient framework, the importance weight $\frac{q_\theta}{\mu}$ acts on the entire policy gradient estimator, <strong>no need to separately weight the KL estimator in shaped reward</strong>. Therefore:</p>
+
+<ul>
+  <li>Shaped reward keeps its original form: $\tilde{R} = R - \beta \cdot k_1$ (not $R - \beta \cdot \frac{q_\theta}{\mu} k_1$)</li>
+  <li>Conclusion same as on-policy: <strong>only use $k_1$, not $k_3$</strong></li>
+</ul>
+
+<h3 id="key-finding-only-inlmath281mathend-can-be-used-for-reward-penalty">Key Finding: Only $k_1$ Can Be Used for Reward Penalty</h3>
 
 <table>
   <thead>
     <tr>
-      <th style="text-align: center">Dimension</th>
-      <th style="text-align: center">KL as Reward (stop-grad)</th>
-      <th style="text-align: center">KL as Loss (backprop)</th>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">Value unbiased?</th>
+      <th style="text-align: center">Gradient unbiased when used as reward penalty?</th>
+      <th style="text-align: center">Actual performance</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">Optimization target</td>
-      <td style="text-align: center">Regularized new MDP</td>
-      <td style="text-align: center">Original task + supervised regularization</td>
+      <td style="text-align: center">$k_1$</td>
+      <td style="text-align: center">✓</td>
+      <td style="text-align: center">✓</td>
+      <td style="text-align: center">Stable</td>
     </tr>
     <tr>
-      <td style="text-align: center">Actor gradient</td>
-      <td style="text-align: center">Single PG, based on shaped advantage</td>
-      <td style="text-align: center">RL gradient + explicit KL gradient</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Critic</td>
-      <td style="text-align: center">Learns $V^{\text{reg}}$: reward + KL mixed</td>
-      <td style="text-align: center">Learns $V^{\text{env}}$: only environment reward</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Credit Assignment</td>
-      <td style="text-align: center">Multi-step backprop, planning-capable</td>
-      <td style="text-align: center">Local per-state, no planning</td>
+      <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">✓</td>
+      <td style="text-align: center">✗</td>
+      <td style="text-align: center">Collapses</td>
     </tr>
   </tbody>
 </table>
 
-<p><strong>One-liner:</strong> KL as reward makes the agent “plan to avoid high-KL paths” — constraints are more global and thorough; KL as loss makes the agent “visit but locally correct” — constraints are more local and flexible. The choice depends on whether you need cross-timestep KL budget allocation capability, and whether you want constraints to be “preventive” or “corrective”.</p>
+<p><strong>Core lesson</strong>: When evaluating KL estimators, “value unbiasedness” and “gradient correctness” are two independent dimensions. For reward penalty scenarios (whether on-policy or off-policy), <strong>only $k_1$ is the correct choice</strong>. Although $k_3$ is value-unbiased and has lower variance, using it as a reward penalty causes biased gradients and may lead to training collapse.</p>
 
-<h2 id="rl-practice-guide">RL practice guide</h2>
+<h2 id="practical-guide-and-common-pitfalls">Practical Guide and Common Pitfalls</h2>
 
-<p>Combining the preceding analysis of “estimator mathematical properties” and “usage modes”, this section provides practical recommendations for specific scenarios.</p>
+<p>With the preceding theoretical analysis, this section provides selection recommendations for specific scenarios, convenient for direct reference.</p>
 
-<h3 id="kl-as-reward-penalty-no-gradient-needed">KL as reward penalty (no gradient needed)</h3>
+<h3 id="quick-reference-table">Quick Reference Table</h3>
 
-<p>When KL is a scalar penalty in rewards, we only need accurate <strong>values</strong>, no backprop. Refer to the earlier section on “Bias and variance for KL values”.</p>
-
-<p><strong>Recommend:</strong></p>
-<ul>
-  <li>Use <strong>$k_1$</strong> or <strong>$k_3$</strong> (both unbiased for reverse KL value).</li>
-  <li>When policies are close, $k_3$ is typically lower variance.</li>
-  <li>With poor coverage or heavy tails, $k_1$ is more robust.</li>
-  <li>Off-policy: multiply by $\tfrac{q_\theta}{\mu}$.</li>
-</ul>
-
-<blockquote>
-  <p>For a <strong>forward KL penalty</strong>, use $\mathbb{E}_q[r \log r]$ or (if sampling from $p$) $\mathbb{E}_p[\log r]$.</p>
-</blockquote>
-
-<h3 id="kl-as-loss-needs-gradients">KL as loss (needs gradients)</h3>
-
-<h4 id="on-policy-optimize-reverse-kl-most-common">On-policy: optimize reverse KL (most common)</h4>
-
-<p>Goal: keep actor near reference.</p>
-
-<p><strong>Use $k_2$ as loss.</strong></p>
-
-<p>$$
-\mathcal{L}_{k_2} = \tfrac{1}{2}(\log r)^2
-$$</p>
-
-<p>Then $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$.</p>
-
-<h4 id="on-policy-optimize-forward-kl-coverage">On-policy: optimize forward KL (coverage)</h4>
-
-<p>Goal: cover the reference distribution (offline RL, imitation, etc.).</p>
-
-<p><strong>Use $k_3$ as loss.</strong> Autograd on sample means gives $\mathbb{E}_q[(1-r) s_\theta] = \nabla_\theta D_{\mathrm{KL}}(p \| q)$.</p>
-
-<h4 id="off-policy-optimize-reverse-kl">Off-policy: optimize reverse KL</h4>
-
-<p>Goal: samples from behavior $\mu$, still optimize reverse KL.</p>
-
-<p><strong>Recommended:</strong> $\dfrac{q_\theta}{\mu} k_3$ or $\mathrm{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$ (identical gradients).</p>
-
-<p>$$
-\mathcal{L} = \dfrac{q_\theta(x)}{\mu(x)} \Big( \dfrac{p(x)}{q_\theta(x)} - 1 - \log \dfrac{p(x)}{q_\theta(x)} \Big)
-$$</p>
-
-<p>or</p>
-
-<p>$$
-\mathcal{L} = \mathrm{sg}\left(\dfrac{q_\theta(x)}{\mu(x)}\right) \cdot \tfrac{1}{2}\left(\log \dfrac{p(x)}{q_\theta(x)}\right)^2.
-$$</p>
-
-<ul>
-  <li>Gradients are unbiased.</li>
-  <li>When $q_\theta \approx p$, both have much lower variance.</li>
-</ul>
-
-<p><strong>Fallback:</strong> $\dfrac{q_\theta}{\mu} k_1$ (unbiased but higher variance).</p>
-
-<p><strong>Avoid:</strong> $\dfrac{q_\theta}{\mu} k_2$ with weight in gradient — biased for reverse KL.</p>
-
-<h2 id="grab-and-use-crib-sheet">“Grab-and-use” crib sheet</h2>
-
-<p>The table below provides recommended estimator choices along three dimensions: “target KL direction” × “sampling source” × “usage mode”. “For <strong>value</strong>” corresponds to KL as reward penalty (no gradient needed); “For <strong>gradient</strong>” corresponds to KL as loss (gradient backpropagation needed).</p>
+<p>The table below provides recommended estimator choices along three dimensions: “target KL direction” × “sampling source” × “usage mode”. “For <strong>Loss</strong>” corresponds to KL as loss (gradient backpropagation needed); “For <strong>Reward</strong>” corresponds to KL as reward penalty (stop-gradient).</p>
 
 <table>
   <thead>
     <tr>
       <th style="text-align: center">Target</th>
       <th style="text-align: center">Sampling</th>
-      <th style="text-align: center">For value (KL as Reward)</th>
-      <th style="text-align: center">For gradient (KL as Loss)</th>
+      <th style="text-align: center">For Loss (gradient backprop)</th>
+      <th style="text-align: center">For Reward (stop-grad)</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td style="text-align: center">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center">$q$ (on-policy)</td>
-      <td style="text-align: center">$k_1$ or $k_3$ (unbiased)</td>
       <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">$k_1$</td>
     </tr>
     <tr>
       <td style="text-align: center">Reverse KL $D_{\mathrm{KL}}(q \| p)$</td>
       <td style="text-align: center">$\mu$ (off-policy)</td>
-      <td style="text-align: center">$\tfrac{q}{\mu} k_1$ or $\tfrac{q}{\mu} k_3$ (unbiased)</td>
-      <td style="text-align: center">$\tfrac{q}{\mu} k_3$ (recommended) or $\text{sg}(\tfrac{q}{\mu}) k_2$</td>
+      <td style="text-align: center">$\tfrac{q}{\mu} k_3$ or $\text{sg}\left(\tfrac{q}{\mu}\right) k_2$</td>
+      <td style="text-align: center">$k_1$</td>
     </tr>
     <tr>
       <td style="text-align: center">Forward KL $D_{\mathrm{KL}}(p \| q)$</td>
       <td style="text-align: center">$q$</td>
-      <td style="text-align: center">$\mathbb{E}_q[r\log r]$</td>
       <td style="text-align: center">$k_3$</td>
+      <td style="text-align: center">$\mathbb{E}_q\left[\frac{p}{q} \log \frac{p}{q}\right]$</td>
     </tr>
   </tbody>
 </table>
 
-<h2 id="common-implementation-traps">Common implementation traps</h2>
+<h3 id="kl-as-loss-needs-gradient-backpropagation">KL as Loss (Needs Gradient Backpropagation)</h3>
 
-<p><strong>Trap 1: Using $k_1$ directly as loss (on-policy)</strong></p>
+<p>When KL is used as part of a loss for backpropagation, we must consider gradient correctness.</p>
 
-<p>When KL is used as a loss, $k_1$ gradient expectation is zero ($\mathbb{E}_q[s_\theta]=0$); as a loss it does nothing.</p>
+<h4 id="on-policy-optimize-reverse-kl-most-common">On-policy: Optimize Reverse KL (Most Common)</h4>
 
-<blockquote>
-  <p><strong>Fix:</strong> First clarify the KL usage mode. For reward shaping (no gradient needed), both $k_1$ and $k_3$ work; for losses (gradient needed), use $k_2$ (reverse KL) or $k_3$ (forward KL) on-policy.</p>
-</blockquote>
+<p>Goal: Control actor to not deviate from reference policy.</p>
 
-<p><strong>Trap 2: Mixing up $k_3$ value-unbiasedness vs. gradient target</strong></p>
+<p><strong>Correct approach</strong>: Use <strong>$k_2$</strong> as loss.</p>
 
-<p>$k_3$ is value-unbiased for reverse KL, but its <strong>gradient</strong> is <strong>forward KL</strong>. If you want reverse KL and backprop $k_3$, you are actually optimizing forward KL.</p>
+<p>$$
+\mathcal{L}_{k_2} = \frac{1}{2}\left(\log \frac{p}{q}\right)^2
+$$</p>
 
-<blockquote>
-  <p><strong>Fix:</strong> be explicit: reverse KL -&gt; $k_2$; forward KL -&gt; $k_3$.</p>
-</blockquote>
+<p>Its gradient expectation $\mathbb{E}_q[\nabla k_2] = \nabla_\theta D_{\mathrm{KL}}(q \| p)$ is exactly the true gradient of reverse KL.</p>
 
-<p><strong>Trap 3: Heavy-tailed $r$ blows up variance</strong></p>
+<h4 id="on-policy-optimize-forward-kl-coverage-scenario">On-policy: Optimize Forward KL (Coverage Scenario)</h4>
 
-<p>If $r = p/q$ has extreme values, $k_3$ variance can explode.</p>
+<p>Goal: Make policy cover the support of the reference distribution (offline RL, imitation learning, etc.).</p>
 
-<blockquote>
-  <p><strong>Fix:</strong> enforce KL constraint or clip $r$.</p>
-</blockquote>
+<p><strong>Correct approach</strong>: Use <strong>$k_3$</strong> as loss.</p>
 
-<p><strong>Trap 4: Off-policy but still using $k_2$ or $\tfrac{q_\theta}{\mu} k_2$ (with grad on weight)</strong></p>
+<p>$$
+\mathbb{E}_q[\nabla k_3] = \mathbb{E}_q\left[\left(1-\frac{p}{q}\right) \cdot s_\theta\right] = \nabla_\theta D_{\mathrm{KL}}(p \| q)
+$$</p>
 
-<p>If $\mu \neq q_\theta$:</p>
+<p>Directly calling loss gradient backprop on the sample mean of $k_3$, autograd computes $\mathbb{E}_q[\nabla_\theta k_3]$, which is the forward KL gradient, no additional processing needed.</p>
+
+<h4 id="off-policy-optimize-reverse-kl">Off-policy: Optimize Reverse KL</h4>
+
+<p>Goal: Data comes from behavior policy $\mu$, still want to optimize reverse KL.</p>
+
+<p><strong>Recommended approach</strong>: Use <strong>$\dfrac{q_\theta}{\mu} k_3$</strong> or <strong>$\text{sg}\left(\dfrac{q_\theta}{\mu}\right) k_2$</strong> as loss (both have identical gradients).</p>
+
+<p>$$
+\mathcal{L} = \dfrac{q_\theta(x)}{\mu(x)} \cdot \left(\dfrac{p(x)}{q_\theta(x)} - 1 - \log \dfrac{p(x)}{q_\theta(x)}\right)
+$$</p>
+
+<p>or</p>
+
+<p>$$
+\mathcal{L} = \text{sg}\left(\dfrac{q_\theta(x)}{\mu(x)}\right) \cdot \dfrac{1}{2}\left(\log \dfrac{p(x)}{q_\theta(x)}\right)^2
+$$</p>
+
 <ul>
-  <li>Plain $k_2$ (no weight): expectation is under $\mu$, estimator fails.</li>
-  <li>$\tfrac{q_\theta}{\mu} k_2$ with weight in grad: gradient is biased (f-divergence), not reverse KL.</li>
+  <li>Gradients are unbiased</li>
+  <li>When $q_\theta \approx p$, both have much lower variance</li>
+</ul>
+
+<p><strong>Fallback</strong>: Use $\dfrac{q_\theta}{\mu} k_1$ (gradient also unbiased but higher variance)</p>
+
+<p><strong>Avoid</strong>: Using $\dfrac{q_\theta}{\mu} k_2$ (with weight in gradient) — gradient is biased, not the correct direction for reverse KL</p>
+
+<h3 id="kl-as-reward-penalty-stop-gradient">KL as Reward Penalty (Stop-gradient)</h3>
+
+<p>When KL is used as a scalar penalty added to reward, although the KL term itself doesn’t backpropagate gradients, it will indirectly affect the policy gradient through advantage. Based on the earlier section “Gradient Analysis When Used as Reward”:</p>
+
+<p><strong>Recommend</strong>:</p>
+<ul>
+  <li>Use <strong>$k_1$</strong> (value-unbiased and induced policy gradient is also unbiased)</li>
+  <li>Conclusion is the same whether on-policy or off-policy</li>
+</ul>
+
+<p><strong>Avoid</strong>:</p>
+<ul>
+  <li>Using $k_3$ (although value-unbiased and lower variance, the induced policy gradient is biased and may cause training collapse)</li>
 </ul>
 
 <blockquote>
-  <p><strong>Fix:</strong> off-policy reverse KL -&gt; use $\tfrac{q_\theta}{\mu} k_3$ (recommended), $\text{sg}(\tfrac{q_\theta}{\mu}) k_2$, or $\tfrac{q_\theta}{\mu} k_1$.</p>
+  <p><strong>Note</strong>: In off-policy policy gradient, the importance weight $\frac{q_\theta}{\mu}$ acts on the entire $s_\theta \cdot \tilde{R}$; the shaped reward itself can keep the form $\tilde{R} = R - \beta \cdot k_1$.</p>
 </blockquote>
 
-<p><strong>Trap 5: Wrong detach on importance weights</strong></p>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
 
-<p>$w = q_\theta / \mu$ often comes from <code class="language-plaintext highlighter-rouge">log_prob_q - log_prob_mu</code> then <code class="language-plaintext highlighter-rouge">exp</code>. Detaching $w$ matters:</p>
+<h4 id="pitfall-1-using-inlmath315mathend-directly-as-loss-on-policy">Pitfall 1: Using $k_1$ Directly as Loss (On-policy)</h4>
 
-<ul>
-  <li><strong>Using $k_1$ or $k_3$:</strong> $w$ <strong>must participate in gradient</strong> (do not detach), otherwise you drop $\nabla_\theta w = w s_\theta$ and get wrong gradients.</li>
-  <li><strong>Using $k_2$:</strong> <strong>detach $w$</strong> to get reverse KL gradient. If $w$ stays in the graph, you get f-divergence gradient instead.</li>
-</ul>
+<p>The gradient expectation of $k_1$ is always zero ($\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$); using it as a loss is completely ineffective.</p>
 
 <blockquote>
-  <p><strong>Summary:</strong> match estimator with the right detach strategy.</p>
+  <p><strong>Solution</strong>: Use $k_2$ for on-policy reverse KL optimization; use $k_3$ for forward KL optimization.</p>
 </blockquote>
 
-<h2 id="summary-1">Summary</h2>
+<h4 id="pitfall-2-confusing-inlmath320mathends-value-unbiasedness-with-gradient-behavior">Pitfall 2: Confusing $k_3$’s Value Unbiasedness with Gradient Behavior</h4>
+
+<p>$k_3$ is value-unbiased for <strong>reverse KL value</strong>, but its <strong>gradient</strong> corresponds to <strong>forward KL</strong> — these are completely different.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Scenario</th>
+      <th style="text-align: center">Problem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Using $k_3$ as Loss (targeting reverse KL)</td>
+      <td style="text-align: center">$\nabla k_3$ corresponds to forward KL, optimizing wrong direction</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Using $k_3$ as Reward penalty (targeting reverse KL)</td>
+      <td style="text-align: center">Induces biased policy gradient (bias term $-\nabla D_{\mathrm{KL}}(p\|q)$), may cause training collapse</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Solution</strong>:</p>
+  <ul>
+    <li>Use as <strong>Loss</strong> to optimize reverse KL → use $k_2$; use $k_3$ only for forward KL</li>
+    <li>Use as <strong>Reward</strong> penalty → only use $k_1$ (whether on-policy or off-policy)</li>
+  </ul>
+</blockquote>
+
+<h4 id="pitfall-3-off-policy-detach-handling-of-importance-weights">Pitfall 3: Off-policy Detach Handling of Importance Weights</h4>
+
+<p>In off-policy scenarios, whether to detach the importance weight $w = q_\theta / \mu$ leads to completely different results. The following table summarizes the correct detach strategies:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Estimator</th>
+      <th style="text-align: center">Detach $w$?</th>
+      <th style="text-align: center">Gradient corresponds to</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">$w k_1$</td>
+      <td style="text-align: center">No detach</td>
+      <td style="text-align: center">Reverse KL ✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$w k_3$</td>
+      <td style="text-align: center">No detach</td>
+      <td style="text-align: center">Reverse KL ✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$w k_2$</td>
+      <td style="text-align: center">No detach</td>
+      <td style="text-align: center">f-divergence ✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">$\text{sg}(w) k_2$</td>
+      <td style="text-align: center">Detach</td>
+      <td style="text-align: center">Reverse KL ✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Solution</strong>: For off-policy reverse KL optimization, recommend using $w k_3$ or $\text{sg}(w) k_2$ (both have identical gradients). If using $w k_1$, gradient is unbiased but variance is higher.</p>
+</blockquote>
+
+<h4 id="pitfall-4-using-inlmath338mathend-in-reward-penalty">Pitfall 4: Using $k_3$ in Reward Penalty</h4>
+
+<p>Although $k_3$ is value-unbiased for reverse KL and has lower variance, using it as a reward penalty causes biased policy gradient (bias term $-\nabla D_{\mathrm{KL}}(p\|q)$), potentially leading to training collapse.</p>
+
+<blockquote>
+  <p><strong>Solution</strong>: Whether on-policy or off-policy, reward penalty should only use $k_1$.</p>
+</blockquote>
+
+<h2 id="summary">Summary</h2>
+
+<p>This post systematically analyzes the three KL estimators $k_1, k_2, k_3$ around three core questions: <strong>who to sample from</strong>, <strong>whose value to estimate</strong>, <strong>whose gradient is needed</strong>.</p>
+
+<p><strong>Core takeaways</strong>:</p>
+
+<ol>
+  <li><strong>First clarify usage mode</strong>: KL as Loss (gradient backprop) or as Reward (stop-grad)?</li>
+  <li><strong>KL as Loss (on-policy)</strong>: Use $k_2$ for reverse KL; use $k_3$ for forward KL</li>
+  <li><strong>KL as Loss (off-policy)</strong>: Use $\frac{q}{\mu} k_3$ or $\text{sg}\left(\frac{q}{\mu}\right) k_2$ (note detach strategy!)</li>
+  <li><strong>KL as Reward</strong>: Only use $k_1$ ($k_3$ although value-unbiased causes biased policy gradient)</li>
+</ol>
+
+<p>Clarify these points, and the three estimators will no longer be confusing.</p>
 
 <p><strong>One-liners:</strong></p>
 
@@ -1083,21 +1415,36 @@ $$</p>
 <h2 id="references">References</h2>
 
 <ol>
-  <li>Dibya Ghosh. “KL Divergence for Machine Learning”. <a href="https://dibyaghosh.com/blog/probability/kldivergence">https://dibyaghosh.com/blog/probability/kldivergence</a></li>
-  <li>John Schulman. “Approximating KL Divergence”. <a href="https://joschu.net/blog/kl-approx.html">https://joschu.net/blog/kl-approx.html</a></li>
-  <li>Verl Documentation. “Proximal Policy Optimization (PPO)”. <a href="https://verl.readthedocs.io/en/latest/algo/ppo.html">https://verl.readthedocs.io/en/latest/algo/ppo.html</a></li>
-  <li>初七123334. “RLHF/RLVR 训练中的 KL 近似方法浅析（k1 / k2 / k3)”. <a href="https://zhuanlan.zhihu.com/p/1966872846212010437">https://zhuanlan.zhihu.com/p/1966872846212010437</a></li>
-  <li>Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. “Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization”. <a href="https://arxiv.org/abs/2510.01555">https://arxiv.org/abs/2510.01555</a></li>
-  <li>Yifan Zhang, Yiping Ji, Gavin Brown, et al. “On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning”. <a href="https://arxiv.org/abs/2505.17508">https://arxiv.org/abs/2505.17508</a></li>
+  <li>
+    <p>Dibya Ghosh. “KL Divergence for Machine Learning”. <a href="https://dibyaghosh.com/blog/probability/kldivergence">https://dibyaghosh.com/blog/probability/kldivergence</a></p>
+  </li>
+  <li>
+    <p>John Schulman. “Approximating KL Divergence”. <a href="https://joschu.net/blog/kl-approx.html">https://joschu.net/blog/kl-approx.html</a></p>
+  </li>
+  <li>
+    <p>Verl Documentation. “Proximal Policy Optimization (PPO)”. <a href="https://verl.readthedocs.io/en/latest/algo/ppo.html">https://verl.readthedocs.io/en/latest/algo/ppo.html</a></p>
+  </li>
+  <li>
+    <p>初七123334. RLHF/RLVR 训练中的 KL 近似方法浅析（k1 / k2 / k3）. <a href="https://zhuanlan.zhihu.com/p/1966872846212010437">https://zhuanlan.zhihu.com/p/1966872846212010437</a></p>
+  </li>
+  <li>
+    <p>Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. “Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization”. <a href="https://arxiv.org/abs/2510.01555">https://arxiv.org/abs/2510.01555</a></p>
+  </li>
+  <li>
+    <p>Yifan Zhang, Yiping Ji, Gavin Brown, et al. “On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning”. <a href="https://arxiv.org/abs/2505.17508">https://arxiv.org/abs/2505.17508</a></p>
+  </li>
+  <li>
+    <p>Vedant Shah, Johan Obando-Ceron, Vineet Jain, Brian Bartoldson, Bhavya Kailkhura, Sarthak Mittal, Glen Berseth, Pablo Samuel Castro. “A Comedy of Estimators: On KL Regularization in RL Training of LLMs”. <a href="https://arxiv.org/abs/2512.21852">https://arxiv.org/abs/2512.21852</a></p>
+  </li>
 </ol>
 
 <div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
-	<span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
-	<span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation}</span><span class="p">,</span>
-	<span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
-	<span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
-	<span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
-	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
+  <span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
+  <span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation}</span><span class="p">,</span>
+  <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+  <span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
+  <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
+  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
