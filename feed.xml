@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-07T14:25:57+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-07T19:37:37+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="en"><title type="html">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html" rel="alternate" type="text/html" title="Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"><![CDATA[<h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
 
 <p>Consider the following scenario: you are training a large language model with reinforcement learning to improve its question-answering capabilities. Ideally, each time the model generates a batch of responses, you would immediately update the model with this data, then use the updated model to generate new data, and so on. This approach of “updating with data from the same policy that generated it” is called <strong>on-policy</strong> training.</p>
@@ -2627,16 +2627,16 @@
 </code></pre></div></div>]]></content><author><name></name></author><category term="reinforcement-learning" /><summary type="html"><![CDATA[How we approximate KL directly affects stability. This post dissects three classic estimators k1, k2, k3, covering on-policy and off-policy, and gives practical rules for using them for reward penalties vs. losses that backpropagate.]]></summary></entry><entry xml:lang="zh"><title type="html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html" rel="alternate" type="text/html" title="简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><published>2025-12-01T00:00:00+00:00</published><updated>2025-12-01T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html"><![CDATA[<p><img src="/assets/img/kl-estimators/kl-estimator.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
-  <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 ⟦INLMATH75MATHEND⟧ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 loss 梯度回传」与「用于 reward 惩罚」时的选型指南。</p>
+  <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 ⟦INLMATH69MATHEND⟧ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 loss 梯度回传」与「用于 reward 惩罚」时的选型指南。</p>
 </blockquote>
 
 <h2 id="引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</h2>
 
-<p>在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，用于防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：<strong>使用哪个估计器</strong>（⟦INLMATH76MATHEND⟧, ⟦INLMATH77MATHEND⟧, ⟦INLMATH78MATHEND⟧）、<strong>从哪个策略采样</strong>（on-policy 与 off-policy）、以及<strong>如何使用</strong>（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统地梳理这些选择及其相互关系，帮助读者厘清相关概念。</p>
+<p>在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，旨在防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：<strong>使用哪个估计器</strong>（⟦INLMATH70MATHEND⟧, ⟦INLMATH71MATHEND⟧, ⟦INLMATH72MATHEND⟧）、<strong>从哪个策略采样</strong>（on-policy 与 off-policy）、以及<strong>如何使用</strong>（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统地梳理这些选择及其相互关系，帮助读者厘清其中的关键概念。</p>
 
 <h3 id="正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</h3>
 
-<p>设 ⟦INLMATH79MATHEND⟧ 为当前 actor 策略，⟦INLMATH80MATHEND⟧ 为参考策略，两种方向的 KL 散度分别为：</p>
+<p>设 ⟦INLMATH73MATHEND⟧ 为当前 actor 策略，⟦INLMATH74MATHEND⟧ 为参考策略，两种方向的 KL 散度分别为：</p>
 
 <p><strong>反向 KL（Reverse KL）</strong>：
 ⟦DISPMATH1MATHEND⟧</p>
@@ -2656,126 +2656,159 @@
 
 <p><strong>直观理解</strong>：</p>
 <ul>
-  <li><strong>反向 KL</strong> 倾向于「模式寻找」（mode-seeking）——策略会集中在参考分布的高概率区域，可能牺牲多样性</li>
-  <li><strong>正向 KL</strong> 倾向于「全覆盖」（mass-covering）——策略会尽量覆盖参考分布的支撑集</li>
+  <li><strong>反向 KL</strong> 倾向于「模式寻找」（mode-seeking）——策略会集中在参考分布的高概率区域，可能牺牲多样性。</li>
+  <li><strong>正向 KL</strong> 倾向于「全覆盖」（mass-covering）——策略会尽量覆盖参考分布的支撑集。</li>
 </ul>
 
-<p>在 RLHF 的主流实现中，<strong>反向 KL</strong> 更为常见，因为我们希望 actor 不要偏离 reference policy 太远，而非要求完全覆盖所有模式。</p>
+<p>在 RLHF 的主流实现中，<strong>反向 KL</strong> 更为常见，因为我们希望 actor 策略不要偏离参考策略太远，而非要求完全覆盖其所有模式。</p>
 
 <h3 id="本文的核心问题从谁采样估计什么怎么用">本文的核心问题：从谁采样、估计什么、怎么用</h3>
 
-<p>在实际实现 KL 惩罚时，我们需要回答三个相互关联的问题：</p>
+<p>在实际实现 KL 惩罚时，我们需要明确三个相互关联的问题：</p>
 
 <ol>
-  <li><strong>从谁采样？</strong> 样本来自当前策略 ⟦INLMATH81MATHEND⟧（on-policy），还是来自行为策略 ⟦INLMATH82MATHEND⟧（off-policy）？</li>
-  <li><strong>估计什么？</strong> 我们想要估计的是反向 KL ⟦INLMATH83MATHEND⟧ 还是正向 KL ⟦INLMATH84MATHEND⟧？</li>
+  <li><strong>从谁采样？</strong> 样本来自当前策略 ⟦INLMATH75MATHEND⟧（on-policy），还是来自行为策略 ⟦INLMATH76MATHEND⟧（off-policy）？</li>
+  <li><strong>估计什么？</strong> 我们想要估计的是反向 KL ⟦INLMATH77MATHEND⟧ 还是正向 KL ⟦INLMATH78MATHEND⟧？</li>
   <li><strong>怎么用？</strong> KL 项是作为 loss 参与梯度回传，还是作为 reward 惩罚（stop-gradient）？</li>
 </ol>
 
-<p>这三个问题的不同组合，决定了应该选用哪个估计器。本文的目标就是系统地厘清这些选择及其相互关系。</p>
+<p>这三个问题的不同组合，决定了应该选用哪个估计器。本文的目标是系统地梳理这些选择及其相互关系。</p>
 
 <h2 id="准备工作符号与基本概念">准备工作：符号与基本概念</h2>
 
 <p>在深入分析之前，我们先统一符号约定，并推导两个在后文反复用到的基础结论。</p>
 
-<h3 id="符号约定">符号约定</h3>
+<h3 id="符号采样分布与真梯度">符号、采样分布与真梯度</h3>
+
+<p><strong>符号约定</strong></p>
 
 <ul>
-  <li>⟦INLMATH85MATHEND⟧：当前 actor 策略（参数为 ⟦INLMATH86MATHEND⟧）</li>
-  <li>⟦INLMATH87MATHEND⟧：参考策略（reference policy），不依赖于 ⟦INLMATH88MATHEND⟧</li>
-  <li>⟦INLMATH89MATHEND⟧：行为策略（behavior policy），用于 off-policy 采样，不依赖于 ⟦INLMATH90MATHEND⟧</li>
-  <li>⟦INLMATH91MATHEND⟧：score function</li>
-  <li>⟦INLMATH92MATHEND⟧：重要性权重</li>
-  <li>⟦INLMATH93MATHEND⟧：stop-gradient 操作（在代码中对应 <code class="language-plaintext highlighter-rouge">.detach()</code>）</li>
+  <li>⟦INLMATH79MATHEND⟧：当前 actor 策略（参数为 ⟦INLMATH80MATHEND⟧）</li>
+  <li>⟦INLMATH81MATHEND⟧：若无歧义，后文简写 ⟦INLMATH82MATHEND⟧</li>
+  <li>⟦INLMATH83MATHEND⟧：参考策略（reference policy），不依赖于 ⟦INLMATH84MATHEND⟧</li>
+  <li>⟦INLMATH85MATHEND⟧：行为策略（behavior policy），用于 off-policy 采样，不依赖于 ⟦INLMATH86MATHEND⟧</li>
+  <li>⟦INLMATH87MATHEND⟧：score function</li>
+  <li>⟦INLMATH88MATHEND⟧：stop-gradient 操作（在代码中对应 <code class="language-plaintext highlighter-rouge">.detach()</code>）</li>
 </ul>
 
-<h3 id="score-function-与-kl-真梯度">Score Function 与 KL 真梯度</h3>
+<h4 id="统一的采样策略视角引入-inlmath89mathend-记号">统一的采样策略视角：引入 ⟦INLMATH89MATHEND⟧ 记号</h4>
 
-<p>Score function 有一个重要性质：⟦INLMATH94MATHEND⟧（因为 ⟦INLMATH95MATHEND⟧）。</p>
+<p>在分析 KL 估计器的梯度性质时，on-policy 和 off-policy 场景看似需要分开处理，但我们实际上可以用一个统一的框架来描述。</p>
 
-<p>利用这一性质，我们可以推导正向和反向 KL 散度对 ⟦INLMATH96MATHEND⟧ 的<strong>真梯度</strong>。</p>
-
-<p><strong>反向 KL 的梯度</strong>：</p>
+<p>引入<strong>采样策略</strong> ⟦INLMATH90MATHEND⟧：数据来自 ⟦INLMATH91MATHEND⟧。定义<strong>统一的比率</strong>：</p>
 
 <p>⟦DISPMATH3MATHEND⟧</p>
 
-<p>对 ⟦INLMATH97MATHEND⟧ 求梯度（使用乘积法则）：</p>
+<p>这里的关键是：<strong>无论 on-policy 还是 off-policy，我们都把采样策略 ⟦INLMATH92MATHEND⟧ 视为梯度常量</strong>（即对 ⟦INLMATH93MATHEND⟧ 做 stop-gradient）。</p>
+
+<ul>
+  <li><strong>Off-policy</strong>（⟦INLMATH94MATHEND⟧）：⟦INLMATH95MATHEND⟧ 本来就不依赖 ⟦INLMATH96MATHEND⟧，所以 ⟦INLMATH97MATHEND⟧，有 ⟦INLMATH98MATHEND⟧</li>
+  <li><strong>On-policy</strong>（⟦INLMATH99MATHEND⟧）：令 ⟦INLMATH100MATHEND⟧ 但 stop-gradient，于是 ⟦INLMATH101MATHEND⟧（数值恒为 1），但 ⟦INLMATH102MATHEND⟧</li>
+</ul>
+
+<p><strong>实现提示</strong>：on-policy 时虽然数值上 ⟦INLMATH103MATHEND⟧，但必须在计算图中显式构造 ⟦INLMATH104MATHEND⟧（或写成 ⟦INLMATH105MATHEND⟧）。如果直接把 ⟦INLMATH106MATHEND⟧ 写成常数 1，会丢失这条 score-function 梯度路径，导致推导退化为后文所说的“朴素 on-policy 写法”。</p>
+
+<p><strong>直观理解</strong>：⟦INLMATH107MATHEND⟧ 的作用是把「采样分布对 ⟦INLMATH108MATHEND⟧ 的依赖」那条梯度路径补回来。在 on-policy 时，这正是「先期望后梯度」与「先梯度后期望」分裂的根源与修复方式。</p>
+
+<p>有了这个统一记号，我们可以把 on-policy 和 off-policy 的分析合并成一套框架，大大简化后文的推导。</p>
+
+<h4 id="score-function-与-kl-真梯度">Score Function 与 KL 真梯度</h4>
+
+<p>Score function 有一个重要性质：⟦INLMATH109MATHEND⟧（因为 ⟦INLMATH110MATHEND⟧）。</p>
+
+<p>利用这一性质，我们可以推导正向和反向 KL 散度对 ⟦INLMATH111MATHEND⟧ 的<strong>真梯度</strong>。</p>
+
+<p><strong>反向 KL 的梯度</strong>：</p>
 
 <p>⟦DISPMATH4MATHEND⟧</p>
 
-<p>利用 ⟦INLMATH98MATHEND⟧ 以及 ⟦INLMATH99MATHEND⟧、⟦INLMATH100MATHEND⟧：</p>
+<p>对 ⟦INLMATH112MATHEND⟧ 求梯度（使用乘积法则）：</p>
 
 <p>⟦DISPMATH5MATHEND⟧</p>
 
-<p>即：</p>
+<p>利用 ⟦INLMATH113MATHEND⟧ 以及 ⟦INLMATH114MATHEND⟧、⟦INLMATH115MATHEND⟧：</p>
 
 <p>⟦DISPMATH6MATHEND⟧</p>
 
-<p><strong>正向 KL 的梯度</strong>：</p>
+<p>即：</p>
 
 <p>⟦DISPMATH7MATHEND⟧</p>
 
-<p>由于 ⟦INLMATH101MATHEND⟧ 不依赖于 ⟦INLMATH102MATHEND⟧：</p>
+<blockquote>
+  <p><strong>预告</strong>：后文将定义 ⟦INLMATH116MATHEND⟧，因此上式可简写为 ⟦INLMATH117MATHEND⟧——这个形式在梯度分析中反复出现。</p>
+</blockquote>
+
+<p><strong>正向 KL 的梯度</strong>：</p>
 
 <p>⟦DISPMATH8MATHEND⟧</p>
 
-<p>为了用 ⟦INLMATH103MATHEND⟧ 的样本估计这个量，进行重要性采样：</p>
+<p>由于 ⟦INLMATH118MATHEND⟧ 不依赖于 ⟦INLMATH119MATHEND⟧：</p>
 
 <p>⟦DISPMATH9MATHEND⟧</p>
 
-<p>利用 ⟦INLMATH104MATHEND⟧，可改写为：</p>
+<p>为了用 ⟦INLMATH120MATHEND⟧ 的样本估计这个量，进行重要性采样：</p>
 
 <p>⟦DISPMATH10MATHEND⟧</p>
+
+<p>利用 ⟦INLMATH121MATHEND⟧，可改写为：</p>
+
+<p>⟦DISPMATH11MATHEND⟧</p>
+
+<blockquote>
+  <p><strong>预告</strong>：后文将推导 ⟦INLMATH122MATHEND⟧，因此 ⟦INLMATH123MATHEND⟧（正向 KL）——这解释了为什么直接对 ⟦INLMATH124MATHEND⟧ 反传会给出「错误」的梯度方向。</p>
+</blockquote>
 
 <p>有了这两个结果，我们就能在后文判断各估计器的梯度期望究竟对应哪个 KL 的真梯度。</p>
 
 <h2 id="三种估计器的定义与设计原理">三种估计器的定义与设计原理</h2>
 
-<p>记比值 ⟦INLMATH105MATHEND⟧，John Schulman 提出的三种单样本估计器定义如下：</p>
+<p>记比值 ⟦INLMATH125MATHEND⟧，John Schulman 提出的三种单样本估计器定义如下：</p>
 
-<h3 id="inlmath106mathend最朴素的-log-ratio-估计器">⟦INLMATH106MATHEND⟧：最朴素的 log-ratio 估计器</h3>
+<h3 id="三种估计器定义与直觉">三种估计器：定义与直觉</h3>
 
-<p>⟦DISPMATH11MATHEND⟧</p>
-
-<p>这是最直接的定义——直接取 log-ratio 的负值。它对反向 KL 无偏，但有一个致命缺陷：<strong>可能取负值</strong>，而 KL 散度始终非负。这导致其方差极高，因为正负估计值会相互抵消。</p>
-
-<h3 id="inlmath107mathend基于-f-散度的平方估计器">⟦INLMATH107MATHEND⟧：基于 f-散度的平方估计器</h3>
+<p><strong>⟦INLMATH126MATHEND⟧：最朴素的 log-ratio 估计器</strong></p>
 
 <p>⟦DISPMATH12MATHEND⟧</p>
 
-<p><strong>设计动机</strong>：⟦INLMATH108MATHEND⟧ 的问题在于可正可负，而 ⟦INLMATH109MATHEND⟧ 通过取平方保证<strong>每个样本都是正的</strong>，直观上每个样本都在衡量 ⟦INLMATH110MATHEND⟧ 和 ⟦INLMATH111MATHEND⟧ 的差异程度。</p>
+<p>这是最直接的定义——直接取 log-ratio 的负值。它对反向 KL 无偏，但有一个致命缺陷：<strong>可能取负值</strong>，而 KL 散度始终非负。这导致其方差极高，因为正负估计值会相互抵消。</p>
 
-<p><strong>为什么偏差很小？</strong> ⟦INLMATH112MATHEND⟧ 本质上是一个 <strong>f-散度</strong>（f-divergence），其中 ⟦INLMATH113MATHEND⟧。f-散度有一个重要性质：<strong>所有可微的 f-散度在 ⟦INLMATH114MATHEND⟧ 时，二阶展开都形如</strong></p>
+<p><strong>⟦INLMATH127MATHEND⟧：基于 f-散度的平方估计器</strong></p>
 
 <p>⟦DISPMATH13MATHEND⟧</p>
 
-<p>其中 ⟦INLMATH115MATHEND⟧ 是 Fisher 信息矩阵。KL 散度对应 ⟦INLMATH116MATHEND⟧，有 ⟦INLMATH117MATHEND⟧；而 ⟦INLMATH118MATHEND⟧ 对应的 ⟦INLMATH119MATHEND⟧，同样有 ⟦INLMATH120MATHEND⟧。这意味着<strong>当策略接近时，⟦INLMATH121MATHEND⟧ 与真实 KL 的行为几乎相同</strong>，偏差仅体现在高阶项。</p>
+<p><strong>设计动机</strong>：⟦INLMATH128MATHEND⟧ 的问题在于可正可负，而 ⟦INLMATH129MATHEND⟧ 通过取平方保证<strong>每个样本都是正的</strong>，直观上每个样本都在衡量 ⟦INLMATH130MATHEND⟧ 和 ⟦INLMATH131MATHEND⟧ 之间的差异程度。</p>
 
-<h3 id="inlmath122mathend控制变量法构造的-bregman-散度估计器">⟦INLMATH122MATHEND⟧：控制变量法构造的 Bregman 散度估计器</h3>
+<p><strong>为什么偏差很小？</strong> ⟦INLMATH132MATHEND⟧ 本质上是一个 <strong>f-散度</strong>（f-divergence），其中 ⟦INLMATH133MATHEND⟧。f-散度有一个重要性质：<strong>所有可微的 f-散度在 ⟦INLMATH134MATHEND⟧ 时，二阶展开都形如</strong></p>
 
 <p>⟦DISPMATH14MATHEND⟧</p>
 
-<p><strong>设计动机</strong>：我们想要一个<strong>既无偏又低方差</strong>的估计器。标准做法是给 ⟦INLMATH123MATHEND⟧ 加一个<strong>控制变量</strong>（control variate）——一个期望为零但与 ⟦INLMATH124MATHEND⟧ 负相关的量。</p>
+<p>其中 ⟦INLMATH135MATHEND⟧ 是在 ⟦INLMATH136MATHEND⟧ 处的 Fisher 信息矩阵。KL 散度对应 ⟦INLMATH137MATHEND⟧，有 ⟦INLMATH138MATHEND⟧；而 ⟦INLMATH139MATHEND⟧ 对应的 ⟦INLMATH140MATHEND⟧，同样有 ⟦INLMATH141MATHEND⟧。这意味着<strong>当策略接近时，⟦INLMATH142MATHEND⟧ 与真实 KL 在二阶近似上具有相同的局部曲率</strong>，偏差主要体现在更高阶项。</p>
 
-<p>注意到 ⟦INLMATH125MATHEND⟧，所以对于任意 ⟦INLMATH126MATHEND⟧，</p>
+<p><strong>⟦INLMATH143MATHEND⟧：控制变量法构造的 Bregman 散度估计器</strong></p>
 
 <p>⟦DISPMATH15MATHEND⟧</p>
 
-<p>仍然是无偏估计。</p>
+<p><strong>设计动机</strong>：我们想要一个<strong>既无偏又低方差</strong>的估计器。标准做法是给 ⟦INLMATH144MATHEND⟧ 加一个<strong>控制变量</strong>（control variate）——一个期望为零但与 ⟦INLMATH145MATHEND⟧ 负相关的量。</p>
 
-<p><strong>为什么选 ⟦INLMATH127MATHEND⟧？</strong> 由于 ⟦INLMATH128MATHEND⟧ 是凹函数，有 ⟦INLMATH129MATHEND⟧，因此</p>
+<p>注意到 ⟦INLMATH146MATHEND⟧，所以对于任意 ⟦INLMATH147MATHEND⟧，</p>
 
 <p>⟦DISPMATH16MATHEND⟧</p>
 
-<p><strong>始终非负</strong>！这保证了每个样本都在「正向」贡献信息，消除了 ⟦INLMATH130MATHEND⟧ 正负抵消的问题。</p>
+<p>仍然是无偏估计。</p>
 
-<p><strong>几何直观</strong>：⟦INLMATH131MATHEND⟧ 实际上是一个 <strong>Bregman 散度</strong>。考虑凸函数 ⟦INLMATH132MATHEND⟧，它在 ⟦INLMATH133MATHEND⟧ 处的切线为 ⟦INLMATH134MATHEND⟧。Bregman 散度定义为「函数值与切线值之差」：</p>
+<p><strong>为什么选 ⟦INLMATH148MATHEND⟧？</strong> 由于 ⟦INLMATH149MATHEND⟧ 是凹函数，有 ⟦INLMATH150MATHEND⟧，因此</p>
 
 <p>⟦DISPMATH17MATHEND⟧</p>
 
-<p>由于凸函数始终位于其切线上方，这个差值<strong>自然非负</strong>。更重要的是，在 ⟦INLMATH135MATHEND⟧ 时，函数与切线「贴合」得越来越紧密，差值以 ⟦INLMATH136MATHEND⟧ 的二阶速度趋近于零——这正是 ⟦INLMATH137MATHEND⟧ 在策略接近时方差小的根本原因。</p>
+<p><strong>始终非负</strong>！这保证了每个样本都在「正向」贡献信息，消除了 ⟦INLMATH151MATHEND⟧ 正负抵消的问题。</p>
 
-<h3 id="小结三者的设计逻辑对比">小结：三者的设计逻辑对比</h3>
+<p><strong>几何直观</strong>：⟦INLMATH152MATHEND⟧ 实际上是一个 <strong>Bregman 散度</strong>。考虑凸函数 ⟦INLMATH153MATHEND⟧，它在 ⟦INLMATH154MATHEND⟧ 处的切线为 ⟦INLMATH155MATHEND⟧。Bregman 散度定义为「函数值与切线值之差」：</p>
+
+<p>⟦DISPMATH18MATHEND⟧</p>
+
+<p>由于凸函数始终位于其切线上方，这个差值<strong>自然非负</strong>。更重要的是，当 ⟦INLMATH156MATHEND⟧ 时，函数与切线「贴合」得越来越紧密，差值以 ⟦INLMATH157MATHEND⟧ 的二阶速度趋近于零——这正是 ⟦INLMATH158MATHEND⟧ 在策略接近时方差小的根本原因。</p>
+
+<p><strong>小结：三者的设计逻辑对比</strong></p>
 
 <table>
   <thead>
@@ -2787,18 +2820,18 @@
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH138MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH139MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH159MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH160MATHEND⟧</td>
       <td style="text-align: center">最朴素定义</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH140MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH141MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH161MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH162MATHEND⟧</td>
       <td style="text-align: center">f-散度，二阶行为与 KL 一致</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH142MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH143MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH163MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH164MATHEND⟧</td>
       <td style="text-align: center">控制变量 + Bregman 散度</td>
     </tr>
   </tbody>
@@ -2810,17 +2843,17 @@
 
 <p>本节分析三种估计器在<strong>估计 KL 数值</strong>时的性质。这些性质在任何使用场景下都是基础。</p>
 
-<p>假设从 ⟦INLMATH144MATHEND⟧ 采样来估计反向 KL ⟦INLMATH145MATHEND⟧：</p>
+<p>假设从 ⟦INLMATH165MATHEND⟧ 采样来估计反向 KL ⟦INLMATH166MATHEND⟧：</p>
 
 <h3 id="无偏性分析">无偏性分析</h3>
 
-<p>⟦DISPMATH18MATHEND⟧</p>
+<p>⟦DISPMATH19MATHEND⟧</p>
 
-<p><strong>结论</strong>：对于估计反向 KL 的<strong>数值</strong>，⟦INLMATH146MATHEND⟧ 和 ⟦INLMATH147MATHEND⟧ 是无偏估计，而 ⟦INLMATH148MATHEND⟧ 是有偏的。</p>
+<p><strong>结论</strong>：对于估计反向 KL 的<strong>数值</strong>，⟦INLMATH167MATHEND⟧ 和 ⟦INLMATH168MATHEND⟧ 是无偏估计，而 ⟦INLMATH169MATHEND⟧ 是有偏的。</p>
 
 <h3 id="方差特性分析">方差特性分析</h3>
 
-<p>John Schulman 的实验（⟦INLMATH149MATHEND⟧，⟦INLMATH150MATHEND⟧，真实 KL = 0.005）表明：</p>
+<p>John Schulman 的实验（⟦INLMATH170MATHEND⟧，⟦INLMATH171MATHEND⟧，真实 KL = 0.005）表明：</p>
 
 <table>
   <thead>
@@ -2832,24 +2865,24 @@
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH151MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH172MATHEND⟧</td>
       <td style="text-align: center">0</td>
       <td style="text-align: center">20</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH152MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH173MATHEND⟧</td>
       <td style="text-align: center">0.002</td>
       <td style="text-align: center">1.42</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH153MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH174MATHEND⟧</td>
       <td style="text-align: center">0</td>
       <td style="text-align: center">1.42</td>
     </tr>
   </tbody>
 </table>
 
-<p>当 KL 较大时（⟦INLMATH154MATHEND⟧，真实 KL = 0.5）：</p>
+<p>当 KL 较大时（⟦INLMATH175MATHEND⟧，真实 KL = 0.5）：</p>
 
 <table>
   <thead>
@@ -2861,17 +2894,17 @@
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH155MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH176MATHEND⟧</td>
       <td style="text-align: center">0</td>
       <td style="text-align: center">2</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH156MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH177MATHEND⟧</td>
       <td style="text-align: center">0.25</td>
       <td style="text-align: center">1.73</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH157MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH178MATHEND⟧</td>
       <td style="text-align: center">0</td>
       <td style="text-align: center">1.7</td>
     </tr>
@@ -2880,12 +2913,12 @@
 
 <p><strong>核心直观理解</strong>：</p>
 <ul>
-  <li>⟦INLMATH158MATHEND⟧ 以一阶项起步，当 ⟦INLMATH159MATHEND⟧ 接近 1 时波动较大，且可能取负值</li>
-  <li>⟦INLMATH160MATHEND⟧ 在 ⟦INLMATH161MATHEND⟧ 处是二阶小量，始终非负，因此在策略接近时方差更小</li>
-  <li>但当覆盖严重不足（⟦INLMATH162MATHEND⟧ 可能爆炸）时，⟦INLMATH163MATHEND⟧ 的方差会因权重爆炸而增大；此时 ⟦INLMATH164MATHEND⟧ 反而更稳定</li>
+  <li>⟦INLMATH179MATHEND⟧ 以一阶项起步，当 ⟦INLMATH180MATHEND⟧ 接近 1 时波动较大，且可能取负值</li>
+  <li>⟦INLMATH181MATHEND⟧ 在 ⟦INLMATH182MATHEND⟧ 处是二阶小量，始终非负，因此在策略接近时方差更小</li>
+  <li>但当覆盖严重不足（⟦INLMATH183MATHEND⟧ 可能爆炸）时，⟦INLMATH184MATHEND⟧ 的方差会因权重爆炸而增大；此时 ⟦INLMATH185MATHEND⟧ 反而更稳定</li>
 </ul>
 
-<h3 id="数值估计小结">数值估计小结</h3>
+<p><strong>数值估计小结</strong></p>
 
 <table>
   <thead>
@@ -2897,41 +2930,41 @@
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH165MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH186MATHEND⟧</td>
       <td style="text-align: center">无偏</td>
       <td style="text-align: center">高（可正可负）</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH166MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH187MATHEND⟧</td>
       <td style="text-align: center">有偏（但极小）</td>
       <td style="text-align: center">低（恒正）</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH167MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH188MATHEND⟧</td>
       <td style="text-align: center">无偏</td>
       <td style="text-align: center">低（恒正）</td>
     </tr>
   </tbody>
 </table>
 
-<p>从数值估计的角度看，⟦INLMATH168MATHEND⟧ 是「无偏 + 低方差」的最优选择。</p>
+<p>从数值估计的角度看，⟦INLMATH189MATHEND⟧ 是「无偏 + 低方差」的最优选择。</p>
 
 <blockquote>
-  <p><strong>注</strong>：若要估计<strong>正向 KL 的数值</strong> ⟦INLMATH169MATHEND⟧，而只能从 ⟦INLMATH170MATHEND⟧ 采样，可用重要性采样 ⟦INLMATH171MATHEND⟧。</p>
+  <p><strong>注</strong>：若要估计<strong>正向 KL 的数值</strong> ⟦INLMATH190MATHEND⟧，而只能从 ⟦INLMATH191MATHEND⟧ 采样，可用重要性采样 ⟦INLMATH192MATHEND⟧。</p>
 </blockquote>
 
 <h2 id="kl-惩罚的两种使用方式">KL 惩罚的两种使用方式</h2>
 
 <p>了解了估计器的数值性质后，我们需要进一步明确：<strong>KL 惩罚在强化学习中到底怎么用？</strong> 这一选择决定了我们是只关心估计器的数值性质，还是必须同时关心其梯度性质。</p>
 
-<p>回顾 KL 正则化强化学习的目标函数：</p>
+<p>回顾 KL 正则化强化学习的目标函数（下式中用 ⟦INLMATH193MATHEND⟧ 表示“由策略 ⟦INLMATH194MATHEND⟧ 诱导的轨迹分布”）：</p>
 
-<p>⟦DISPMATH19MATHEND⟧</p>
+<p>⟦DISPMATH20MATHEND⟧</p>
 
 <p>这个数学形式看起来很统一，但在基于 Actor-Critic 的算法（如 PPO）中实现时，却衍生出了两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。</p>
 
 <blockquote>
-  <p><strong>符号说明</strong>：本节用 ⟦INLMATH172MATHEND⟧ 或 ⟦INLMATH173MATHEND⟧ 泛指某个 token/state 级的 KL 估计器（如 ⟦INLMATH174MATHEND⟧），具体定义见前文「三种估计器的定义与设计原理」一节。</p>
+  <p><strong>符号说明</strong>：本节用 ⟦INLMATH195MATHEND⟧ 或 ⟦INLMATH196MATHEND⟧ 泛指某个 token/state 级的 KL 估计器（如 ⟦INLMATH197MATHEND⟧），具体定义见前文「三种估计器的定义与设计原理」一节。</p>
 </blockquote>
 
 <h3 id="作为-losskl-参与梯度反传">作为 Loss：KL 参与梯度反传</h3>
@@ -2949,100 +2982,8 @@
 
 <p>KL 被视为环境奖励的一部分，用 shaped reward 做标准 actor-critic 更新。KL 项不参与 loss 梯度回传。</p>
 
-<p>这两种做法看似只是代码里一个 <code class="language-plaintext highlighter-rouge">.detach()</code> 的区别，实际上对应着截然不同的优化语义。</p>
+<p>这两种做法看似只是代码里一个 <code class="language-plaintext highlighter-rouge">.detach()</code> 的区别，实际上对应着截然不同的优化语义。两种方式的深入对比将在后文「⟦INLMATH198MATHEND⟧ in Reward 与低方差 KL in Loss 的等价性与差异」一节详细展开。这里先给出核心区分：</p>
 
-<h3 id="两种方式的核心差异">两种方式的核心差异</h3>
-
-<h4 id="优化目标的不同">优化目标的不同</h4>
-
-<p><strong>KL 作为 Loss</strong>：优化<strong>原任务 + 监督正则</strong>，KL 不改变 MDP 定义，只是外挂的约束项。</p>
-
-<p><strong>KL 作为 Reward</strong>：优化一个<strong>正则化后的新 MDP</strong>，奖励函数变为 ⟦INLMATH175MATHEND⟧。</p>
-
-<p><strong>直觉</strong>：前者是「在原规则下加约束」，后者是「改变游戏规则」。</p>
-
-<h4 id="梯度路径的不同">梯度路径的不同</h4>
-
-<p><strong>KL 作为 Loss</strong>：梯度分成两条独立路径：</p>
-
-<p>⟦DISPMATH20MATHEND⟧</p>
-
-<p><strong>KL 作为 Reward</strong>：单一 policy gradient，KL 的影响<strong>通过 advantage 间接体现</strong>：</p>
-
-<p>⟦DISPMATH21MATHEND⟧</p>
-
-<p><strong>关键区别</strong>：KL 的力量是「单独一股力」还是「乘在 advantage 上」。前者的 KL 梯度是确定性的，不受 critic 质量影响。</p>
-
-<h4 id="价值函数与信度分配的不同">价值函数与信度分配的不同</h4>
-
-<p><strong>价值函数</strong>：</p>
-
-<p><strong>KL 作为 Loss</strong>：Critic 只学环境价值</p>
-
-<p>⟦DISPMATH22MATHEND⟧</p>
-
-<p>分工更清晰，便于分别监控任务回报和 KL 散度。</p>
-
-<p><strong>KL 作为 Reward</strong>：Critic 学混合价值</p>
-
-<p>⟦DISPMATH23MATHEND⟧</p>
-
-<p><strong>信度分配</strong>：</p>
-
-<p>考虑场景：前几步是路由行为，最后一步 reward 高但 KL 也大。</p>
-
-<p><strong>KL 作为 Loss</strong>：末状态的 KL 只在该状态的梯度项里体现，策略仍愿意<strong>访问高回报区域，但局部修正</strong>行为。</p>
-
-<p><strong>KL 作为 Reward</strong>：末状态的大 KL 通过 TD <strong>回传到前面所有步骤</strong>，策略倾向于<strong>从根本上避开</strong>高 KL 区域——这是「规划性的 KL 预算分配」。</p>
-
-<h3 id="为什么这个区分至关重要">为什么这个区分至关重要</h3>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">维度</th>
-      <th style="text-align: center">KL 作为 Loss（loss 梯度回传）</th>
-      <th style="text-align: center">KL 作为 Reward（stop-grad）</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">更新目标</td>
-      <td style="text-align: center">原任务 + 监督正则</td>
-      <td style="text-align: center">正则化后的新 MDP</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Actor 梯度</td>
-      <td style="text-align: center">RL 梯度 + 显式 KL 梯度</td>
-      <td style="text-align: center">单一 PG，基于 shaped advantage</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Critic</td>
-      <td style="text-align: center">学 ⟦INLMATH176MATHEND⟧：只看环境 reward</td>
-      <td style="text-align: center">学 ⟦INLMATH177MATHEND⟧：reward + KL 混合</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Credit Assignment</td>
-      <td style="text-align: center">局部 per-state，无规划性</td>
-      <td style="text-align: center">多步回传，有规划性</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">关心什么</td>
-      <td style="text-align: center">KL 估计器的<strong>显式梯度</strong>（对应哪个优化目标）</td>
-      <td style="text-align: center">KL 的<strong>数值</strong> + 诱导的<strong>策略梯度</strong>是否正确</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><strong>一句话总结</strong>：KL 作为 loss 让 agent「访问但局部修正」，约束更局部、更灵活；KL 作为 reward 让 agent「规划性地避开高 KL 路径」，约束更全局、更彻底。</p>
-
-<p><strong>选型建议</strong>：</p>
-<ul>
-  <li>如果你希望约束是「<strong>修正性</strong>」的，允许 agent 探索但在局部修正行为，选择<strong>KL 作为 Loss</strong></li>
-  <li>如果你希望约束是「<strong>预防性</strong>」的，让 agent 从根源上避开高 KL 区域，选择<strong>KL 作为 Reward</strong></li>
-</ul>
-
-<p>理解了这两种范式的区别后，我们就能明确：</p>
 <ul>
   <li><strong>KL 作为 Loss</strong>：需要 KL 估计器的正确显式梯度，关心梯度对应哪个优化目标</li>
   <li><strong>KL 作为 Reward</strong>：需要 KL 的准确数值估计，同时还要关心它诱导的策略梯度是否正确</li>
@@ -3054,482 +2995,387 @@
 
 <p>当 KL 作为 loss 参与梯度回传时，我们需要关心估计器对应的优化目标。这是实践中最容易混淆也最关键的部分。</p>
 
-<h3 id="on-policy-场景">On-policy 场景</h3>
+<p>利用前文引入的统一框架，我们可以把 on-policy 和 off-policy 的分析合并成一套推导。回顾统一的比率定义：</p>
 
-<p>我们从 on-policy 场景开始分析，即样本来自当前策略 ⟦INLMATH178MATHEND⟧。</p>
+<p>⟦DISPMATH21MATHEND⟧</p>
 
-<h4 id="两种求导顺序先梯度后期望-vs-先期望后梯度">两种求导顺序：先梯度后期望 vs 先期望后梯度</h4>
+<p>其中 ⟦INLMATH199MATHEND⟧ 是采样策略。在这个框架下：</p>
+<ul>
+  <li><strong>On-policy</strong>（⟦INLMATH200MATHEND⟧）：⟦INLMATH201MATHEND⟧，但 ⟦INLMATH202MATHEND⟧</li>
+  <li><strong>Off-policy</strong>（⟦INLMATH203MATHEND⟧）：⟦INLMATH204MATHEND⟧，且 ⟦INLMATH205MATHEND⟧</li>
+</ul>
 
-<p>在代码实现中，存在两条路径：</p>
+<h3 id="三种估计器的基本梯度">三种估计器的基本梯度</h3>
 
-<ol>
-  <li><strong>先梯度、后期望</strong>：对每个样本的 ⟦INLMATH179MATHEND⟧ 求梯度，再对梯度求期望（Monte Carlo 估计）</li>
-  <li><strong>先期望、后梯度</strong>：把 ⟦INLMATH180MATHEND⟧ 当作损失函数，对解析表达式求梯度</li>
-</ol>
+<p>首先计算三种估计器本身的梯度（不含 ⟦INLMATH206MATHEND⟧），这些结果在后续分析中会反复用到。</p>
 
-<p><strong>在典型的深度学习代码中，我们实际执行的是「先梯度、后期望」</strong>——自动微分对每个样本计算梯度，然后在 batch 上取平均。</p>
+<p><strong>推导 ⟦INLMATH207MATHEND⟧</strong>：</p>
 
-<h4 id="三种估计器的梯度推导">三种估计器的梯度推导</h4>
+<p>⟦DISPMATH22MATHEND⟧</p>
 
-<p>现在我们计算三种估计器的梯度，看它们的期望分别对应哪个 KL 的真梯度（参见「准备工作」章节）。</p>
+<p>⟦DISPMATH23MATHEND⟧</p>
 
-<p><strong>推导 ⟦INLMATH181MATHEND⟧</strong>：</p>
+<p><strong>推导 ⟦INLMATH208MATHEND⟧</strong>：</p>
 
 <p>⟦DISPMATH24MATHEND⟧</p>
 
+<p>由链式法则：</p>
+
 <p>⟦DISPMATH25MATHEND⟧</p>
 
-<p><strong>推导 ⟦INLMATH182MATHEND⟧</strong>：</p>
+<p><strong>推导 ⟦INLMATH209MATHEND⟧</strong>：</p>
 
 <p>⟦DISPMATH26MATHEND⟧</p>
 
-<p>由链式法则：</p>
+<p>首先计算 ⟦INLMATH210MATHEND⟧。由于 ⟦INLMATH211MATHEND⟧：</p>
 
 <p>⟦DISPMATH27MATHEND⟧</p>
 
-<p><strong>推导 ⟦INLMATH183MATHEND⟧</strong>：</p>
+<p>再计算 ⟦INLMATH212MATHEND⟧：</p>
 
 <p>⟦DISPMATH28MATHEND⟧</p>
 
-<p>首先计算 ⟦INLMATH184MATHEND⟧。由于 ⟦INLMATH185MATHEND⟧：</p>
+<p>因此：</p>
 
 <p>⟦DISPMATH29MATHEND⟧</p>
 
-<p>再计算 ⟦INLMATH186MATHEND⟧：</p>
+<p><strong>小结</strong>：三种估计器的梯度分别为：</p>
+<ul>
+  <li>⟦INLMATH213MATHEND⟧</li>
+  <li>⟦INLMATH214MATHEND⟧</li>
+  <li>⟦INLMATH215MATHEND⟧</li>
+</ul>
+
+<p>这些基本梯度将在后续的统一框架分析中反复用到。</p>
+
+<h4 id="先期望后梯度vs先梯度后期望一个重要警示">「先期望后梯度」vs「先梯度后期望」：一个重要警示</h4>
+
+<p>在分析 KL 估计器的梯度时，有一个容易混淆的陷阱：<strong>「先期望后梯度」与「先梯度后期望」可能给出不同的结果</strong>。</p>
+
+<p>如果从解析角度把 ⟦INLMATH216MATHEND⟧ 当作一个关于 ⟦INLMATH217MATHEND⟧ 的函数再求梯度（即「先期望后梯度」），由「数值估计」一节的结论 ⟦INLMATH218MATHEND⟧，我们有：</p>
 
 <p>⟦DISPMATH30MATHEND⟧</p>
 
-<p>因此：</p>
-
 <p>⟦DISPMATH31MATHEND⟧</p>
 
-<p>对它们在 ⟦INLMATH187MATHEND⟧ 下取期望：</p>
+<p>两者都给出反向 KL 的梯度。但在代码中直接对 ⟦INLMATH219MATHEND⟧ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 ⟦INLMATH220MATHEND⟧——这与「先期望后梯度」的结果<strong>可能不同</strong>。</p>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">估计器</th>
-      <th style="text-align: center">⟦INLMATH188MATHEND⟧</th>
-      <th style="text-align: center">等价于</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">⟦INLMATH189MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH190MATHEND⟧</td>
-      <td style="text-align: center">零（作为损失无用）</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">⟦INLMATH191MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH192MATHEND⟧</td>
-      <td style="text-align: center">反向 KL 的梯度</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">⟦INLMATH193MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH194MATHEND⟧</td>
-      <td style="text-align: center">正向 KL 的梯度</td>
-    </tr>
-  </tbody>
-</table>
+<p>这种分裂的根源在于：当采样分布 ⟦INLMATH221MATHEND⟧ 本身依赖于 ⟦INLMATH222MATHEND⟧ 时，期望与梯度不能随意交换。这正是 on-policy 场景的核心困难，也是我们需要引入统一 ⟦INLMATH223MATHEND⟧ 框架的原因。</p>
 
-<p><strong>关键洞察</strong>：</p>
-<ul>
-  <li><strong>⟦INLMATH195MATHEND⟧ 的梯度</strong>等价于反向 KL 的真梯度——这是优化「约束策略不偏离 ref」的正确选择</li>
-  <li><strong>⟦INLMATH196MATHEND⟧ 的梯度</strong>等价于正向 KL 的真梯度——这对应「覆盖型」目标</li>
-  <li><strong>⟦INLMATH197MATHEND⟧ 的梯度期望恒为零</strong>——作为 loss 反传毫无意义！</li>
-</ul>
+<h3 id="统一框架下的梯度分析">统一框架下的梯度分析</h3>
 
-<h4 id="关键发现inlmath198mathend-无效inlmath199mathend-对应反向-klinlmath200mathend-对应正向-kl">关键发现：⟦INLMATH198MATHEND⟧ 无效、⟦INLMATH199MATHEND⟧ 对应反向 KL、⟦INLMATH200MATHEND⟧ 对应正向 KL</h4>
+<p>现在我们用 ⟦INLMATH224MATHEND⟧ 框架统一处理 on-policy 和 off-policy 场景。考虑 loss 形式 ⟦INLMATH225MATHEND⟧，其中 ⟦INLMATH226MATHEND⟧。</p>
 
-<p>「先期望后梯度」vs「先梯度后期望」：</p>
-
-<p>如果从解析角度把 ⟦INLMATH201MATHEND⟧ 当作一个关于 ⟦INLMATH202MATHEND⟧ 的函数再求梯度（即「先期望后梯度」），那么：</p>
+<p><strong>关键观察</strong>：因为 ⟦INLMATH227MATHEND⟧ 不依赖 ⟦INLMATH228MATHEND⟧，对任何关于 ⟦INLMATH229MATHEND⟧ 可微的函数 ⟦INLMATH230MATHEND⟧，有</p>
 
 <p>⟦DISPMATH32MATHEND⟧</p>
 
-<p>⟦DISPMATH33MATHEND⟧</p>
-
-<p>两者都给出反向 KL 的梯度。但在代码中直接对 ⟦INLMATH203MATHEND⟧ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 ⟦INLMATH204MATHEND⟧，即<strong>正向 KL 的梯度</strong>。</p>
-
-<p><strong>on-policy 场景的关键结论</strong>：同一个估计器，两种求导顺序可能给出完全不同的结果。具体来说：</p>
-<ul>
-  <li>优化<strong>反向 KL</strong>：只能用 ⟦INLMATH205MATHEND⟧</li>
-  <li>优化<strong>正向 KL</strong>：用 ⟦INLMATH206MATHEND⟧</li>
-  <li>⟦INLMATH207MATHEND⟧ 的梯度期望恒为零，作为 loss 毫无作用</li>
-</ul>
-
-<h3 id="off-policy-场景">Off-policy 场景</h3>
-
-<p>现在考虑 off-policy 场景，即样本来自行为策略 ⟦INLMATH208MATHEND⟧。在实际 RL 训练中，这种情况非常常见：</p>
-
-<ul>
-  <li>用旧策略或混合策略生成数据，再更新当前 actor ⟦INLMATH209MATHEND⟧</li>
-  <li>离线 RL / 经验回放中，样本分布固定为 ⟦INLMATH210MATHEND⟧，而不是当前的 ⟦INLMATH211MATHEND⟧</li>
-</ul>
-
-<p>这时，如果我们仍然希望优化<strong>反向 KL</strong> ⟦INLMATH212MATHEND⟧，就必须引入<strong>重要性权重</strong>。</p>
-
-<p>关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：<a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>。</p>
-
-<h4 id="重要性加权的引入">重要性加权的引入</h4>
-
-<p>仍然沿用前文的记号，现在加入采样分布 ⟦INLMATH213MATHEND⟧，并使用重要性权重 ⟦INLMATH214MATHEND⟧。</p>
-
-<p>当从 ⟦INLMATH215MATHEND⟧ 采样时，用 ⟦INLMATH216MATHEND⟧ 的 batch 均值作为 loss，然后调用自动微分。那么三种估计器分别给出什么梯度？</p>
-
-<p>一个关键差异是：</p>
+<p>这意味着在 ⟦INLMATH231MATHEND⟧ 框架下，「先期望后梯度」与「先梯度后期望」<strong>总是等价的</strong>——无论 on-policy 还是 off-policy。</p>
 
 <blockquote>
-  <p><strong>以前</strong>的期望是 ⟦INLMATH217MATHEND⟧，分布本身依赖 ⟦INLMATH218MATHEND⟧；
-<strong>现在</strong>的期望是 ⟦INLMATH219MATHEND⟧，而 ⟦INLMATH220MATHEND⟧ 与 ⟦INLMATH221MATHEND⟧ 无关。</p>
+  <p><strong>注意</strong>：这里的“期望”指的是对<strong>固定的采样分布</strong> ⟦INLMATH232MATHEND⟧ 的 ⟦INLMATH233MATHEND⟧。我们把“分布对 ⟦INLMATH234MATHEND⟧ 的依赖”统一塞进了 ⟦INLMATH235MATHEND⟧ 这条路径里；因此不要把这句话误读成对 ⟦INLMATH236MATHEND⟧ 也能不加条件地交换微分与期望。</p>
 </blockquote>
 
-<p>这会让「先期望后梯度」与「先梯度后期望」的关系发生根本变化。</p>
+<h4 id="统一框架下三种估计器的梯度推导">统一框架下三种估计器的梯度推导</h4>
 
-<h4 id="两种求导顺序的等价性">两种求导顺序的等价性</h4>
-
-<p>因为 ⟦INLMATH222MATHEND⟧ 与 ⟦INLMATH223MATHEND⟧ 无关，对任何关于 ⟦INLMATH224MATHEND⟧ 可微的函数 ⟦INLMATH225MATHEND⟧，有</p>
-
-<p>⟦DISPMATH34MATHEND⟧</p>
-
-<p>换句话说，<strong>代码中对样本均值反传（先梯度后期望）就等价于对解析形式求梯度（先期望后梯度）</strong>，不会再像 on-policy 时那样分裂成两个不同的结果。</p>
-
-<p><strong>所以在 off-policy + 重要性加权 的情形下，对反向 KL 数值无偏的估计器 ⟦INLMATH226MATHEND⟧ 和 ⟦INLMATH227MATHEND⟧，它们的梯度期望都将对应于反向 KL 的真梯度。</strong></p>
-
-<p>这是与 on-policy 情形的根本区别。</p>
-
-<h4 id="数值层面无偏性仍然保持">数值层面：无偏性仍然保持</h4>
-
-<p>由标准的重要性采样关系 ⟦INLMATH228MATHEND⟧，有</p>
-
-<p>⟦DISPMATH35MATHEND⟧</p>
-
-<p>⟦DISPMATH36MATHEND⟧</p>
-
-<p>这与 on-policy 情形完全一致。</p>
-
-<h4 id="梯度推导与无偏性分析">梯度推导与无偏性分析</h4>
-
-<p>首先计算重要性权重的梯度。由 ⟦INLMATH229MATHEND⟧ 且 ⟦INLMATH230MATHEND⟧ 不依赖 ⟦INLMATH231MATHEND⟧：</p>
-
-<p>⟦DISPMATH37MATHEND⟧</p>
-
-<p>结合前文已推导的 ⟦INLMATH232MATHEND⟧，用乘积法则：</p>
-
-<p><strong>⟦INLMATH233MATHEND⟧</strong>：</p>
-
-<p>⟦DISPMATH38MATHEND⟧</p>
-
-<p><strong>⟦INLMATH234MATHEND⟧</strong>：</p>
-
-<p>⟦DISPMATH39MATHEND⟧</p>
-
-<p><strong>⟦INLMATH235MATHEND⟧</strong>：</p>
-
-<p>⟦DISPMATH40MATHEND⟧</p>
-
-<p>代入 ⟦INLMATH236MATHEND⟧：</p>
-
-<p>⟦DISPMATH41MATHEND⟧</p>
-
-<p>因此有一个简化：</p>
-
-<p>⟦DISPMATH42MATHEND⟧</p>
-
-<h4 id="哪些估计器给出无偏的反向-kl-梯度">哪些估计器给出无偏的反向 KL 梯度？</h4>
-
-<p>利用 ⟦INLMATH237MATHEND⟧ 和 ⟦INLMATH238MATHEND⟧：</p>
-
-<p><strong>⟦INLMATH239MATHEND⟧</strong>：</p>
-
-<p>⟦DISPMATH43MATHEND⟧</p>
+<p>利用 ⟦INLMATH237MATHEND⟧（因为 ⟦INLMATH238MATHEND⟧），结合前文已推导的 ⟦INLMATH239MATHEND⟧，用乘积法则：</p>
 
 <p><strong>⟦INLMATH240MATHEND⟧</strong>：</p>
 
-<p>⟦DISPMATH44MATHEND⟧</p>
+<p>⟦DISPMATH33MATHEND⟧</p>
 
-<p>这是 ⟦INLMATH241MATHEND⟧ 这个 f-散度的真梯度，<strong>不是</strong>反向 KL 的梯度。</p>
+<p><strong>⟦INLMATH241MATHEND⟧</strong>：</p>
 
-<p><strong>⟦INLMATH242MATHEND⟧</strong>：</p>
+<p>⟦DISPMATH34MATHEND⟧</p>
 
-<p>如果把重要性权重视为常数（在代码中 detach 掉），则：</p>
+<p><strong>⟦INLMATH242MATHEND⟧</strong>（对 ⟦INLMATH243MATHEND⟧ 做 stop-gradient）：</p>
 
-<p>⟦DISPMATH45MATHEND⟧</p>
+<p>⟦DISPMATH35MATHEND⟧</p>
 
-<p>取期望：</p>
+<p><strong>⟦INLMATH244MATHEND⟧</strong>：</p>
 
-<p>⟦DISPMATH46MATHEND⟧</p>
+<p>⟦DISPMATH36MATHEND⟧</p>
 
-<p>这正是反向 KL 的真梯度！</p>
+<p>代入 ⟦INLMATH245MATHEND⟧：</p>
 
-<p><strong>⟦INLMATH243MATHEND⟧</strong>：</p>
+<p>⟦DISPMATH37MATHEND⟧</p>
 
-<p>⟦DISPMATH47MATHEND⟧</p>
+<p>因此有一个关键简化：</p>
+
+<p>⟦DISPMATH38MATHEND⟧</p>
+
+<h4 id="梯度期望与优化目标">梯度期望与优化目标</h4>
+
+<p>利用 ⟦INLMATH246MATHEND⟧ 和 ⟦INLMATH247MATHEND⟧：</p>
+
+<p><strong>⟦INLMATH248MATHEND⟧</strong>：</p>
+
+<p>⟦DISPMATH39MATHEND⟧</p>
+
+<p><strong>⟦INLMATH249MATHEND⟧</strong>：</p>
+
+<p>⟦DISPMATH40MATHEND⟧</p>
+
+<p>也就是说，⟦INLMATH250MATHEND⟧ 的梯度期望对应的是“最小化 ⟦INLMATH251MATHEND⟧”（一个与 KL 二阶近似一致的 f-散度），而<strong>不是</strong>反向 KL ⟦INLMATH252MATHEND⟧ 的真梯度；因此当目标是反向 KL 时，⟦INLMATH253MATHEND⟧ 应当避免。</p>
+
+<p><strong>⟦INLMATH254MATHEND⟧</strong>：</p>
+
+<p>⟦DISPMATH41MATHEND⟧</p>
+
+<p><strong>⟦INLMATH255MATHEND⟧</strong>：</p>
+
+<p>⟦DISPMATH42MATHEND⟧</p>
+
+<h4 id="梯度等价性哪些方法产生相同的梯度随机变量">梯度等价性：哪些方法产生相同的梯度随机变量</h4>
+
+<p>从上述推导中，我们发现一个非常关键的事实：</p>
+
+<blockquote>
+  <p><strong>⟦INLMATH256MATHEND⟧ 与 ⟦INLMATH257MATHEND⟧ 的梯度完全相同</strong>：⟦INLMATH258MATHEND⟧</p>
+</blockquote>
+
+<p>这意味着它们不仅期望相同，而且<strong>作为随机变量完全等价</strong>——同均值、同方差、同高阶矩。</p>
 
 <p><strong>总结表格</strong>：</p>
 
 <table>
   <thead>
     <tr>
-      <th style="text-align: center">加权估计器</th>
-      <th style="text-align: center">期望对应的目标</th>
-      <th style="text-align: center">梯度期望对应的真梯度</th>
+      <th style="text-align: center">Loss 形式</th>
+      <th style="text-align: center">梯度随机变量</th>
+      <th style="text-align: center">梯度期望</th>
+      <th style="text-align: center">对应的优化目标</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH244MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH245MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH246MATHEND⟧（反向 KL） ✓</td>
+      <td style="text-align: center">⟦INLMATH259MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH260MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH261MATHEND⟧</td>
+      <td style="text-align: center">反向 KL ✓</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH247MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH248MATHEND⟧（f-散度）</td>
-      <td style="text-align: center">⟦INLMATH249MATHEND⟧，不是反向 KL ✗</td>
+      <td style="text-align: center">⟦INLMATH262MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH263MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH264MATHEND⟧</td>
+      <td style="text-align: center">f-散度（非反向 KL）✗</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH250MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH251MATHEND⟧（f-散度）</td>
-      <td style="text-align: center">⟦INLMATH252MATHEND⟧（反向 KL） ✓</td>
+      <td style="text-align: center">⟦INLMATH265MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH266MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH267MATHEND⟧</td>
+      <td style="text-align: center">反向 KL ✓</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH253MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH254MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH255MATHEND⟧（反向 KL） ✓</td>
+      <td style="text-align: center">⟦INLMATH268MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH269MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH270MATHEND⟧</td>
+      <td style="text-align: center">反向 KL ✓</td>
     </tr>
   </tbody>
 </table>
 
-<p><strong>与 on-policy 情形的对比——一个有趣的反转</strong>：</p>
+<h3 id="on-policy-与-off-policy-的统一视角">On-policy 与 Off-policy 的统一视角</h3>
 
+<p>现在我们可以用统一框架重新审视 on-policy 和 off-policy 的关系。</p>
+
+<p><strong>On-policy</strong>（⟦INLMATH271MATHEND⟧）：</p>
 <ul>
-  <li>On-policy 时，用 ⟦INLMATH256MATHEND⟧ 做 loss 的梯度是反向 KL，而 ⟦INLMATH257MATHEND⟧ 的梯度期望恒为零</li>
-  <li>Off-policy + 重要性加权时，⟦INLMATH258MATHEND⟧ 和 ⟦INLMATH259MATHEND⟧ 给出反向 KL 的真梯度，而 ⟦INLMATH260MATHEND⟧（权重参与梯度计算）<strong>不再适用</strong></li>
-  <li>但如果把重要性权重 <strong>detach</strong> 掉，⟦INLMATH261MATHEND⟧ 的梯度也是反向 KL 的真梯度</li>
+  <li>⟦INLMATH272MATHEND⟧（数值恒为 1）</li>
+  <li>⟦INLMATH273MATHEND⟧，⟦INLMATH274MATHEND⟧，⟦INLMATH275MATHEND⟧</li>
+  <li>但梯度不同！因为 ⟦INLMATH276MATHEND⟧</li>
 </ul>
 
-<h4 id="三个无偏梯度估计器的方差对比">三个无偏梯度估计器的方差对比</h4>
-
-<p>前一小节我们看到，在 off-policy + 重要性采样的设置下，下面三个 loss 都给出<strong>反向 KL</strong> 的无偏梯度估计：</p>
-
-<p>⟦DISPMATH48MATHEND⟧</p>
-
-<p>其中 ⟦INLMATH262MATHEND⟧，⟦INLMATH263MATHEND⟧ 表示 stop-gradient。它们对应的梯度随机变量为：</p>
-
-<p>⟦DISPMATH49MATHEND⟧</p>
-
-<p>利用前文已推导的结果：</p>
-
+<p>这解释了为什么 on-policy 时<strong>朴素直接反传</strong>（不显式构造 ⟦INLMATH277MATHEND⟧）用 ⟦INLMATH278MATHEND⟧ 或 ⟦INLMATH279MATHEND⟧ 作为 loss 会出问题：</p>
 <ul>
-  <li>⟦INLMATH264MATHEND⟧;</li>
-  <li>⟦INLMATH265MATHEND⟧;</li>
-  <li>⟦INLMATH266MATHEND⟧;</li>
-  <li>⟦INLMATH267MATHEND⟧.</li>
+  <li>直接用 ⟦INLMATH280MATHEND⟧：相当于没有 ⟦INLMATH281MATHEND⟧ 的版本，⟦INLMATH282MATHEND⟧，<strong>完全无效</strong></li>
+  <li>直接用 ⟦INLMATH283MATHEND⟧：相当于没有 ⟦INLMATH284MATHEND⟧ 的版本，⟦INLMATH285MATHEND⟧（正向 KL），<strong>方向错误</strong></li>
+  <li>直接用 ⟦INLMATH286MATHEND⟧：⟦INLMATH287MATHEND⟧（反向 KL）✓ <strong>朴素实现下唯一正确选择</strong></li>
 </ul>
 
-<p>有：</p>
-
-<p>⟦DISPMATH50MATHEND⟧</p>
-
-<p>最后一步用到了 ⟦INLMATH268MATHEND⟧。于是出现了一个非常关键的事实：</p>
-
-<blockquote>
-  <p>在 off-policy + detach 权重的情况下，⟦INLMATH269MATHEND⟧ 与 ⟦INLMATH270MATHEND⟧ 的梯度完全一样：⟦INLMATH271MATHEND⟧。</p>
-</blockquote>
-
-<p>换言之，三个 loss 实际上只对应<strong>两种</strong>不同的梯度随机变量：⟦INLMATH272MATHEND⟧ 与 ⟦INLMATH273MATHEND⟧。</p>
-
-<p>下面就比较这两种随机变量的方差。</p>
-
-<p>为简化记号，令</p>
-
-<p>⟦DISPMATH51MATHEND⟧</p>
-
-<p>则</p>
-
-<p>⟦DISPMATH52MATHEND⟧</p>
-
-<p>两者的期望都等于 ⟦INLMATH274MATHEND⟧，因此有相同的均值项。展开方差定义并相减得到：</p>
-
-<p>⟦DISPMATH53MATHEND⟧</p>
-
-<p>也就是</p>
-
-<p>⟦DISPMATH54MATHEND⟧</p>
-
-<p>在常见的 KL 惩罚 regime 下，⟦INLMATH275MATHEND⟧，取 ⟦INLMATH276MATHEND⟧，⟦INLMATH277MATHEND⟧。此时 ⟦INLMATH278MATHEND⟧，因此 ⟦INLMATH279MATHEND⟧，主导项为正的 ⟦INLMATH280MATHEND⟧ 常数。这意味着上式右侧近似为 ⟦INLMATH281MATHEND⟧，从而 ⟦INLMATH282MATHEND⟧。</p>
-
-<p>更具体地，一阶近似</p>
-
-<p>⟦DISPMATH55MATHEND⟧</p>
-
-<p>于是</p>
-
-<p>⟦DISPMATH56MATHEND⟧</p>
-
-<p>核心直观理解：</p>
-
+<p>但如果<strong>显式构造</strong> ⟦INLMATH288MATHEND⟧，则：</p>
 <ul>
-  <li>⟦INLMATH283MATHEND⟧ 包含一个量级为 ⟦INLMATH284MATHEND⟧ 的零均值噪声项 ⟦INLMATH285MATHEND⟧，导致单样本方差较大；</li>
-  <li>⟦INLMATH286MATHEND⟧ 已把该常数噪声项消去，剩下与 ⟦INLMATH287MATHEND⟧ 成正比的一阶小量，方差为 ⟦INLMATH288MATHEND⟧，显著更小。</li>
+  <li><strong>可用</strong>：⟦INLMATH289MATHEND⟧（方差高）、⟦INLMATH290MATHEND⟧（推荐）、⟦INLMATH291MATHEND⟧（推荐）——三者均给出反向 KL 梯度</li>
+  <li><strong>不可用</strong>：⟦INLMATH292MATHEND⟧（⟦INLMATH293MATHEND⟧ 参与梯度）——优化的是 f-散度而非反向 KL</li>
 </ul>
 
-<p>小结表格：</p>
+<p><strong>Off-policy</strong>（⟦INLMATH294MATHEND⟧）：</p>
+<ul>
+  <li>⟦INLMATH295MATHEND⟧（标准重要性权重）</li>
+  <li><strong>可用</strong>：⟦INLMATH296MATHEND⟧（方差高）、⟦INLMATH297MATHEND⟧（推荐）、⟦INLMATH298MATHEND⟧（推荐）——三者均给出反向 KL 梯度</li>
+  <li><strong>不可用</strong>：⟦INLMATH299MATHEND⟧（⟦INLMATH300MATHEND⟧ 参与梯度）——优化的是 f-散度而非反向 KL</li>
+</ul>
+
+<p><strong>关键洞察</strong>：on-policy 时 ⟦INLMATH301MATHEND⟧ 能直接工作，本质上是因为 ⟦INLMATH302MATHEND⟧ 的梯度形式 ⟦INLMATH303MATHEND⟧ 恰好等于 ⟦INLMATH304MATHEND⟧（当 ⟦INLMATH305MATHEND⟧ 时）。这是一个「巧合」，而非一般规律。</p>
+
+<p>关于大模型 off-policy 场景的深入分析，可以参考我之前的博客：<a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>。</p>
+
+<h3 id="方差分析">方差分析</h3>
+
+<p>前面我们看到，给出反向 KL 无偏梯度的有三个选择：⟦INLMATH306MATHEND⟧、⟦INLMATH307MATHEND⟧、⟦INLMATH308MATHEND⟧。它们的梯度随机变量分别是（注意这里的 ⟦INLMATH309MATHEND⟧ 是向量，因此梯度也是向量）：</p>
+
+<p>⟦DISPMATH43MATHEND⟧</p>
+
+<p>其中 ⟦INLMATH310MATHEND⟧ 对应 ⟦INLMATH311MATHEND⟧ 和 ⟦INLMATH312MATHEND⟧（两者完全相同）。</p>
+
+<p>为了避免“向量梯度的方差”这一表述的歧义，我们比较任意方向上的投影方差：取任意单位向量 ⟦INLMATH313MATHEND⟧，定义标量随机变量</p>
+
+<p>⟦DISPMATH44MATHEND⟧</p>
+
+<p>令 ⟦INLMATH314MATHEND⟧，⟦INLMATH315MATHEND⟧，则</p>
+
+<p>⟦DISPMATH45MATHEND⟧</p>
+
+<p>两者期望相同，且任意方向上的方差之差为</p>
+
+<p>⟦DISPMATH46MATHEND⟧</p>
+
+<p>（你也可以把这理解为对每个坐标分量分别比较方差；结论与直观量级判断是一致的。）</p>
+
+<p><strong>在典型的 KL 惩罚 regime 下</strong>（⟦INLMATH316MATHEND⟧），取 ⟦INLMATH317MATHEND⟧，⟦INLMATH318MATHEND⟧：</p>
+<ul>
+  <li>⟦INLMATH319MATHEND⟧</li>
+  <li>⟦INLMATH320MATHEND⟧，主导项为正的 ⟦INLMATH321MATHEND⟧ 常数</li>
+</ul>
+
+<p>因此 ⟦INLMATH322MATHEND⟧。</p>
+
+<p><strong>核心直观理解</strong>：</p>
+<ul>
+  <li>⟦INLMATH323MATHEND⟧ 包含一个量级为 ⟦INLMATH324MATHEND⟧ 的零均值噪声项 ⟦INLMATH325MATHEND⟧</li>
+  <li>⟦INLMATH326MATHEND⟧ 已把该常数噪声项消去，剩下与 ⟦INLMATH327MATHEND⟧ 成正比的一阶小量</li>
+</ul>
+
+<p><strong>方差对比表格</strong>：</p>
 
 <table>
   <thead>
     <tr>
       <th style="text-align: center">估计器</th>
       <th style="text-align: center">梯度随机变量</th>
-      <th style="text-align: center">系数量级（⟦INLMATH289MATHEND⟧）</th>
+      <th style="text-align: center">系数量级（⟦INLMATH328MATHEND⟧）</th>
       <th style="text-align: center">方差</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH290MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH291MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH292MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH329MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH330MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH331MATHEND⟧</td>
       <td style="text-align: center">高</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH293MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH294MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH295MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH332MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH333MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH334MATHEND⟧</td>
       <td style="text-align: center">低</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH296MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH297MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH298MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH335MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH336MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH337MATHEND⟧</td>
       <td style="text-align: center">低</td>
     </tr>
   </tbody>
 </table>
 
-<p>结论：在 off-policy + 重要性采样的设置下，给出反向 KL 真梯度的无偏估计器有三个：⟦INLMATH299MATHEND⟧。其中 ⟦INLMATH300MATHEND⟧ 与 ⟦INLMATH301MATHEND⟧ 在梯度层面完全等价——同均值、同方差、同高阶矩；相比之下，⟦INLMATH302MATHEND⟧ 的梯度多了一个零均值的常数噪声项 ⟦INLMATH303MATHEND⟧，在典型的 KL 惩罚 regime 下其方差大约高一个量级。</p>
+<p><strong>结论</strong>：⟦INLMATH338MATHEND⟧ 与 ⟦INLMATH339MATHEND⟧ 在梯度层面完全等价——同均值、同方差、同高阶矩；相比之下，⟦INLMATH340MATHEND⟧ 的梯度多了一个零均值的常数噪声项，在典型的 KL 惩罚 regime 下其方差大约高一个量级。</p>
 
 <blockquote>
-  <p>实践建议：若在 off-policy 场景下优化反向 KL，首选 ⟦INLMATH304MATHEND⟧ 或 ⟦INLMATH305MATHEND⟧（两者梯度等价且方差低）；⟦INLMATH306MATHEND⟧ 虽无偏但方差高，可作为备选并需配合 clipping/正则化。</p>
+  <p><strong>实践建议</strong>：若优化反向 KL，首选 ⟦INLMATH341MATHEND⟧ 或 ⟦INLMATH342MATHEND⟧（两者梯度等价且方差低）；⟦INLMATH343MATHEND⟧ 虽无偏但方差高，可作为备选并需配合 clipping/正则化。</p>
 </blockquote>
 
 <p><strong>极度 off-policy 时的警示</strong>：</p>
 
-<p>当 ⟦INLMATH307MATHEND⟧ 与 ⟦INLMATH308MATHEND⟧ 差异很大——比如 ⟦INLMATH309MATHEND⟧ 在 ⟦INLMATH310MATHEND⟧ 的高密度区域几乎没有采样，或 ⟦INLMATH311MATHEND⟧ 在尾部爆炸——任何基于 ⟦INLMATH312MATHEND⟧ 的方法都会遭遇严重的方差问题。此时 ⟦INLMATH313MATHEND⟧（或 ⟦INLMATH314MATHEND⟧）相对 ⟦INLMATH315MATHEND⟧ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。</p>
+<p>当 ⟦INLMATH344MATHEND⟧ 与 ⟦INLMATH345MATHEND⟧ 差异很大——比如 ⟦INLMATH346MATHEND⟧ 在 ⟦INLMATH347MATHEND⟧ 的高密度区域几乎没有采样，或 ⟦INLMATH348MATHEND⟧ 在尾部爆炸——任何基于 ⟦INLMATH349MATHEND⟧ 的方法都会遭遇严重的方差问题。此时 ⟦INLMATH350MATHEND⟧（或 ⟦INLMATH351MATHEND⟧）相对 ⟦INLMATH352MATHEND⟧ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。</p>
 
-<p>不过，在 RL 实践中我们通常会控制 KL 约束、限制 off-policy 程度（比如使用近邻策略 ⟦INLMATH316MATHEND⟧），在这个常见的 regime 里，可以相当有信心地说：</p>
+<p>不过，在 RL 实践中我们通常会控制 KL 约束、限制 off-policy 程度（比如使用近邻策略 ⟦INLMATH353MATHEND⟧），在这个常见的 regime 里，可以相当有信心地说：</p>
 
 <blockquote>
-  <p><strong>如果已经决定用 off-policy + 重要性采样来优化反向 KL，推荐使用 ⟦INLMATH317MATHEND⟧ 或 ⟦INLMATH318MATHEND⟧（两者梯度等价且方差低）；相较之下，⟦INLMATH319MATHEND⟧ 方差更高。</strong></p>
+  <p><strong>如果已经决定用重要性采样来优化反向 KL，推荐使用 ⟦INLMATH354MATHEND⟧ 或 ⟦INLMATH355MATHEND⟧（两者梯度等价且方差低）；相较之下，⟦INLMATH356MATHEND⟧ 方差更高。</strong></p>
 </blockquote>
 
-<p>这就是为什么 DeepSeek v3.2 技术报告中使用的是 ⟦INLMATH320MATHEND⟧ 作为 off-policy KL 惩罚的估计器。</p>
+<p>这就是为什么 DeepSeek v3.2 技术报告中使用的是 ⟦INLMATH357MATHEND⟧ 作为 off-policy KL 惩罚的估计器。</p>
 
 <figure style="text-align:center;">
 <img src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;" />
 <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://arxiv.org/pdf/2512.02556v1">DeepSeek v3.2 技术报告 3.1 章节</a></figcaption>
 </figure>
 
-<h4 id="关键发现inlmath321mathend-或-inlmath322mathend-是最优选择">关键发现：⟦INLMATH321MATHEND⟧ 或 ⟦INLMATH322MATHEND⟧ 是最优选择</h4>
+<h4 id="梯度分析总览表">梯度分析总览表</h4>
 
-<p><strong>off-policy 场景的关键结论</strong>：</p>
-<ul>
-  <li>从行为策略 ⟦INLMATH323MATHEND⟧ 采样时，自然的 off-policy KL 估计为 ⟦INLMATH324MATHEND⟧</li>
-  <li><strong>数值上</strong>，⟦INLMATH325MATHEND⟧ 与 ⟦INLMATH326MATHEND⟧ 仍然是反向 KL 的无偏估计</li>
-  <li><strong>梯度上</strong>，因为 ⟦INLMATH327MATHEND⟧ 与 ⟦INLMATH328MATHEND⟧ 无关，「先期望后梯度」与「先梯度后期望」等价：
-    <ul>
-      <li>⟦INLMATH329MATHEND⟧</li>
-      <li>⟦INLMATH330MATHEND⟧</li>
-      <li>⟦INLMATH331MATHEND⟧</li>
-    </ul>
-  </li>
-  <li><strong>方差上</strong>，⟦INLMATH332MATHEND⟧ 与 ⟦INLMATH333MATHEND⟧ 的梯度<strong>完全相同</strong>（两者都是 ⟦INLMATH334MATHEND⟧），在统计性质上等价；相比之下，⟦INLMATH335MATHEND⟧ 的梯度多了一个零均值噪声项 ⟦INLMATH336MATHEND⟧，在 ⟦INLMATH337MATHEND⟧ 的典型场景下方差显著更高</li>
-</ul>
-
-<h3 id="梯度分析总览表">梯度分析总览表</h3>
-
-<p>综合以上分析，下表汇总了 on-policy 与 off-policy 两种场景下，各估计器的梯度期望及其对应的优化目标：</p>
+<p>综合以上分析，下表汇总了统一框架下各估计器的梯度期望及其对应的优化目标：</p>
 
 <table>
   <thead>
     <tr>
-      <th style="text-align: center">采样来源</th>
+      <th style="text-align: center">采样类型</th>
       <th style="text-align: center">Loss</th>
-      <th style="text-align: center">⟦INLMATH338MATHEND⟧ Loss 的期望</th>
+      <th style="text-align: center">⟦INLMATH358MATHEND⟧ Loss 的期望</th>
       <th style="text-align: center">对应的优化目标</th>
       <th style="text-align: center">能否用于优化反向 KL？</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH339MATHEND⟧ (on)</td>
-      <td style="text-align: center">⟦INLMATH340MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH341MATHEND⟧</td>
-      <td style="text-align: center">无（梯度恒为零）</td>
-      <td style="text-align: center">✗</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">⟦INLMATH342MATHEND⟧ (on)</td>
-      <td style="text-align: center">⟦INLMATH343MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH344MATHEND⟧</td>
-      <td style="text-align: center">反向 KL</td>
-      <td style="text-align: center">✓</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">⟦INLMATH345MATHEND⟧ (on)</td>
-      <td style="text-align: center">⟦INLMATH346MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH347MATHEND⟧</td>
-      <td style="text-align: center">正向 KL</td>
-      <td style="text-align: center">✗</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">⟦INLMATH348MATHEND⟧ (off)</td>
-      <td style="text-align: center">⟦INLMATH349MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH350MATHEND⟧</td>
+      <td style="text-align: center">on/off-policy</td>
+      <td style="text-align: center">⟦INLMATH359MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH360MATHEND⟧</td>
       <td style="text-align: center">反向 KL</td>
       <td style="text-align: center">✓（但方差较高）</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH351MATHEND⟧ (off)</td>
-      <td style="text-align: center">⟦INLMATH352MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH353MATHEND⟧</td>
-      <td style="text-align: center">f-散度（非 KL）</td>
+      <td style="text-align: center">on/off-policy</td>
+      <td style="text-align: center">⟦INLMATH361MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH362MATHEND⟧</td>
+      <td style="text-align: center">f-散度（非反向 KL）</td>
       <td style="text-align: center">✗</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH354MATHEND⟧ (off)</td>
-      <td style="text-align: center">⟦INLMATH355MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH356MATHEND⟧</td>
+      <td style="text-align: center">on/off-policy</td>
+      <td style="text-align: center">⟦INLMATH363MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH364MATHEND⟧</td>
       <td style="text-align: center">反向 KL</td>
-      <td style="text-align: center">✓</td>
+      <td style="text-align: center">✓（推荐，低方差）</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH357MATHEND⟧ (off)</td>
-      <td style="text-align: center">⟦INLMATH358MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH359MATHEND⟧</td>
+      <td style="text-align: center">on/off-policy</td>
+      <td style="text-align: center">⟦INLMATH365MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH366MATHEND⟧</td>
       <td style="text-align: center">反向 KL</td>
       <td style="text-align: center">✓（推荐，低方差）</td>
     </tr>
   </tbody>
 </table>
 
+<p>其中 ⟦INLMATH367MATHEND⟧。当 on-policy（⟦INLMATH368MATHEND⟧）时，⟦INLMATH369MATHEND⟧。</p>
+
+<p>需要特别强调：<strong>上表的结论针对的是 “loss 写成 ⟦INLMATH370MATHEND⟧ 且 ⟦INLMATH371MATHEND⟧ 在计算图中保留梯度路径” 的统一框架</strong>。在 on-policy 时虽然数值上 ⟦INLMATH372MATHEND⟧，但由于 ⟦INLMATH373MATHEND⟧，仍然有 ⟦INLMATH374MATHEND⟧，因此 ⟦INLMATH375MATHEND⟧ 与“直接对 ⟦INLMATH376MATHEND⟧ 的样本均值反传”在梯度上并不等价。</p>
+
+<p>如果你采用的是<strong>朴素 on-policy 写法</strong>（即从 ⟦INLMATH377MATHEND⟧ 采样后，把 ⟦INLMATH378MATHEND⟧ 当作普通标量，对其样本均值直接反传；不显式构造 ⟦INLMATH379MATHEND⟧ 来补上 score-function 那条路径），那么会退化为：</p>
+<ul>
+  <li>直接用 ⟦INLMATH380MATHEND⟧：⟦INLMATH381MATHEND⟧（无效）</li>
+  <li>直接用 ⟦INLMATH382MATHEND⟧：⟦INLMATH383MATHEND⟧（反向 KL）✓</li>
+  <li>直接用 ⟦INLMATH384MATHEND⟧：⟦INLMATH385MATHEND⟧（正向 KL）✗</li>
+</ul>
+
 <p><strong>关键结论</strong>：</p>
 
 <ol>
-  <li><strong>On-policy 优化反向 KL</strong>：唯一正确选择是 ⟦INLMATH360MATHEND⟧</li>
+  <li><strong>On-policy 优化反向 KL（朴素直接反传的实现）</strong>：唯一正确选择是 ⟦INLMATH386MATHEND⟧</li>
   <li><strong>Off-policy 优化反向 KL</strong>：有三个正确选项：
     <ul>
-      <li>⟦INLMATH361MATHEND⟧：无偏但方差较高</li>
-      <li>⟦INLMATH362MATHEND⟧：无偏，与 ⟦INLMATH363MATHEND⟧ <strong>梯度完全等价</strong></li>
-      <li>⟦INLMATH364MATHEND⟧：无偏且方差更低（与上一项等价，均为推荐选择）</li>
+      <li>⟦INLMATH387MATHEND⟧：无偏但方差较高</li>
+      <li>⟦INLMATH388MATHEND⟧：无偏，与 ⟦INLMATH389MATHEND⟧ <strong>梯度完全等价</strong></li>
+      <li>⟦INLMATH390MATHEND⟧：无偏且方差更低（与上一项等价，均为推荐选择）</li>
     </ul>
   </li>
-  <li><strong>⟦INLMATH365MATHEND⟧（权重参与梯度）在 off-policy 下失效</strong>：这是一个容易被忽视的陷阱</li>
+  <li><strong>⟦INLMATH391MATHEND⟧（权重参与梯度）失效</strong>：这是一个容易被忽视的陷阱</li>
 </ol>
 
 <h2 id="作为-reward-时的梯度分析">作为 Reward 时的梯度分析</h2>
 
-<p>前文分析了三种估计器在估计 KL <strong>数值</strong>时的偏差与方差。一个自然的想法是：既然 ⟦INLMATH366MATHEND⟧ 和 ⟦INLMATH367MATHEND⟧ 对反向 KL 数值都是无偏的，那么把它们（加 stop-gradient）作为 reward 惩罚应该都没问题。</p>
+<p>前文分析了 KL 作为 Loss 时各估计器的梯度性质。一个自然的想法是：既然 ⟦INLMATH392MATHEND⟧ 和 ⟦INLMATH393MATHEND⟧ 对反向 KL 数值都是无偏的（见「数值估计」章节），那么把它们（加 stop-gradient）作为 reward 惩罚应该都没问题。</p>
 
 <p><strong>但这是错误的。</strong></p>
 
@@ -3539,63 +3385,63 @@
 
 <p>考虑 KL 正则化的强化学习目标：</p>
 
-<p>⟦DISPMATH57MATHEND⟧</p>
+<p>⟦DISPMATH47MATHEND⟧</p>
 
 <p>其真梯度为：</p>
 
-<p>⟦DISPMATH58MATHEND⟧</p>
+<p>⟦DISPMATH48MATHEND⟧</p>
 
 <p>利用前文「准备工作」章节的结论，反向 KL 的梯度为：</p>
 
-<p>⟦DISPMATH59MATHEND⟧</p>
+<p>⟦DISPMATH49MATHEND⟧</p>
 
 <p>因此，真正的 KL 正则化策略梯度是：</p>
 
-<p>⟦DISPMATH60MATHEND⟧</p>
+<p>⟦DISPMATH50MATHEND⟧</p>
 
-<h3 id="使用估计器-inlmath368mathend-时的梯度形式">使用估计器 ⟦INLMATH368MATHEND⟧ 时的梯度形式</h3>
+<h4 id="使用估计器-inlmath394mathend-时的梯度形式">使用估计器 ⟦INLMATH394MATHEND⟧ 时的梯度形式</h4>
 
-<p>当我们用某个估计器 ⟦INLMATH369MATHEND⟧（加 stop-gradient）作为 reward 惩罚时，shaped reward 为 ⟦INLMATH370MATHEND⟧，策略梯度变为：</p>
+<p>当我们用某个估计器 ⟦INLMATH395MATHEND⟧（加 stop-gradient）作为 reward 惩罚时，shaped reward 为 ⟦INLMATH396MATHEND⟧，策略梯度变为：</p>
 
-<p>⟦DISPMATH61MATHEND⟧</p>
+<p>⟦DISPMATH51MATHEND⟧</p>
 
-<p><strong>无偏条件</strong>：⟦INLMATH371MATHEND⟧ 当且仅当</p>
+<p><strong>无偏条件</strong>：⟦INLMATH397MATHEND⟧ 当且仅当</p>
 
-<p>⟦DISPMATH62MATHEND⟧</p>
+<p>⟦DISPMATH52MATHEND⟧</p>
 
-<h3 id="使用-inlmath372mathend-作为惩罚梯度无偏">使用 ⟦INLMATH372MATHEND⟧ 作为惩罚：梯度无偏</h3>
+<h4 id="使用-inlmath398mathend-作为惩罚梯度无偏">使用 ⟦INLMATH398MATHEND⟧ 作为惩罚：梯度无偏</h4>
 
-<p>当 ⟦INLMATH373MATHEND⟧ 时，条件自动满足：</p>
+<p>当 ⟦INLMATH399MATHEND⟧ 时，条件自动满足：</p>
 
-<p>⟦DISPMATH63MATHEND⟧</p>
+<p>⟦DISPMATH53MATHEND⟧</p>
 
-<p>因此，<strong>⟦INLMATH374MATHEND⟧ 作为 reward 惩罚时，诱导的策略梯度是无偏的</strong>。</p>
+<p>因此，<strong>⟦INLMATH400MATHEND⟧ 作为 reward 惩罚时，诱导的策略梯度是无偏的</strong>。</p>
 
-<h3 id="使用-inlmath375mathend-作为惩罚梯度有偏">使用 ⟦INLMATH375MATHEND⟧ 作为惩罚：梯度有偏</h3>
+<h4 id="使用-inlmath401mathend-作为惩罚梯度有偏">使用 ⟦INLMATH401MATHEND⟧ 作为惩罚：梯度有偏</h4>
 
-<p>当 ⟦INLMATH376MATHEND⟧ 时：</p>
+<p>当 ⟦INLMATH402MATHEND⟧ 时：</p>
 
-<p>⟦DISPMATH64MATHEND⟧</p>
+<p>⟦DISPMATH54MATHEND⟧</p>
 
-<p>第二项正是 ⟦INLMATH377MATHEND⟧。问题出在第一项：</p>
+<p>第二项正是 ⟦INLMATH403MATHEND⟧。问题出在第一项：</p>
 
-<p>⟦DISPMATH65MATHEND⟧</p>
+<p>⟦DISPMATH55MATHEND⟧</p>
 
 <p>而这个量可以改写为：</p>
 
-<p>⟦DISPMATH66MATHEND⟧</p>
+<p>⟦DISPMATH56MATHEND⟧</p>
 
-<p>利用正向 KL 的梯度公式 ⟦INLMATH378MATHEND⟧，有：</p>
+<p>利用正向 KL 的梯度公式 ⟦INLMATH404MATHEND⟧，有：</p>
 
-<p>⟦DISPMATH67MATHEND⟧</p>
+<p>⟦DISPMATH57MATHEND⟧</p>
 
 <p>因此：</p>
 
-<p>⟦DISPMATH68MATHEND⟧</p>
+<p>⟦DISPMATH58MATHEND⟧</p>
 
-<p><strong>⟦INLMATH379MATHEND⟧ 作为 reward 惩罚时，梯度是有偏的</strong>，偏差项等于正向 KL 梯度的负值。</p>
+<p><strong>⟦INLMATH405MATHEND⟧ 作为 reward 惩罚时，梯度是有偏的</strong>，偏差项等于正向 KL 梯度的负值。</p>
 
-<p><strong>偏差的几何含义</strong>：使用 ⟦INLMATH380MATHEND⟧ 作为 reward 惩罚，相当于在优化一个「错误的混合目标」：</p>
+<p><strong>偏差的几何含义</strong>：使用 ⟦INLMATH406MATHEND⟧ 作为 reward 惩罚，相当于在优化一个「错误的混合目标」：</p>
 <ul>
   <li>既惩罚反向 KL（希望策略不偏离参考）</li>
   <li>又<strong>错误地鼓励正向 KL 变大</strong>（希望参考不覆盖策略）</li>
@@ -3605,34 +3451,34 @@
 
 <p><strong>实验验证</strong>：Shah et al. (2025) 的实验表明，在 on-policy RL 微调 LLM 时：</p>
 <ul>
-  <li><strong>⟦INLMATH381MATHEND⟧ in reward</strong>：训练稳定</li>
-  <li><strong>⟦INLMATH382MATHEND⟧ in reward</strong>：<strong>训练崩溃</strong></li>
+  <li><strong>⟦INLMATH407MATHEND⟧ in reward</strong>：训练稳定</li>
+  <li><strong>⟦INLMATH408MATHEND⟧ in reward</strong>：<strong>训练崩溃</strong></li>
 </ul>
 
 <p>这与我们的理论分析完全一致。</p>
 
-<h3 id="off-policy-场景下的结论">Off-policy 场景下的结论</h3>
+<h4 id="off-policy-场景下的结论">Off-policy 场景下的结论</h4>
 
 <p>上述分析假设 on-policy 采样。在 off-policy 场景下，结论是否改变？</p>
 
-<p>设样本来自行为策略 ⟦INLMATH383MATHEND⟧，使用重要性加权的策略梯度：</p>
+<p>设样本来自行为策略 ⟦INLMATH409MATHEND⟧，使用重要性加权的策略梯度：</p>
 
-<p>⟦DISPMATH69MATHEND⟧</p>
+<p>⟦DISPMATH59MATHEND⟧</p>
 
-<p>利用 ⟦INLMATH384MATHEND⟧，上式等于：</p>
+<p>利用 ⟦INLMATH410MATHEND⟧，上式等于：</p>
 
-<p>⟦DISPMATH70MATHEND⟧</p>
+<p>⟦DISPMATH60MATHEND⟧</p>
 
-<p><strong>无偏条件</strong>仍然是 ⟦INLMATH385MATHEND⟧，与 on-policy 完全相同。</p>
+<p><strong>无偏条件</strong>仍然是 ⟦INLMATH411MATHEND⟧，与 on-policy 完全相同。</p>
 
-<p><strong>关键洞察</strong>：在 off-policy 策略梯度框架下，重要性权重 ⟦INLMATH386MATHEND⟧ 作用于整个策略梯度估计器，<strong>不需要对 shaped reward 中的 KL 估计器单独加权</strong>。因此：</p>
+<p><strong>关键洞察</strong>：在 off-policy 策略梯度框架下，重要性权重 ⟦INLMATH412MATHEND⟧ 作用于整个策略梯度估计器，<strong>不需要对 shaped reward 中的 KL 估计器单独加权</strong>。因此：</p>
 
 <ul>
-  <li>Shaped reward 保持原形式：⟦INLMATH387MATHEND⟧（不是 ⟦INLMATH388MATHEND⟧）</li>
-  <li>结论与 on-policy 相同：<strong>只能用 ⟦INLMATH389MATHEND⟧，不能用 ⟦INLMATH390MATHEND⟧</strong></li>
+  <li>Shaped reward 保持原形式：⟦INLMATH413MATHEND⟧（不是 ⟦INLMATH414MATHEND⟧）</li>
+  <li>在本文讨论的 <strong>stop-grad reward shaping</strong>（⟦INLMATH415MATHEND⟧）且目标为 <strong>反向 KL 正则</strong> 的设定下：结论与 on-policy 相同，<strong>只能用 ⟦INLMATH416MATHEND⟧，不能用 ⟦INLMATH417MATHEND⟧</strong></li>
 </ul>
 
-<h3 id="关键发现只有-inlmath391mathend-可用于-reward-惩罚">关键发现：只有 ⟦INLMATH391MATHEND⟧ 可用于 Reward 惩罚</h3>
+<h3 id="关键发现只有-inlmath418mathend-可用于-reward-惩罚">关键发现：只有 ⟦INLMATH418MATHEND⟧ 可用于 Reward 惩罚</h3>
 
 <table>
   <thead>
@@ -3645,13 +3491,13 @@
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH392MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH419MATHEND⟧</td>
       <td style="text-align: center">✓</td>
       <td style="text-align: center">✓</td>
       <td style="text-align: center">稳定</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH393MATHEND⟧</td>
+      <td style="text-align: center">⟦INLMATH420MATHEND⟧</td>
       <td style="text-align: center">✓</td>
       <td style="text-align: center">✗</td>
       <td style="text-align: center">崩溃</td>
@@ -3659,212 +3505,364 @@
   </tbody>
 </table>
 
-<p><strong>核心教训</strong>：评价 KL 估计器时，「数值无偏」和「梯度正确」是两个独立的维度。对于 reward 惩罚场景（无论 on-policy 还是 off-policy），<strong>只有 ⟦INLMATH394MATHEND⟧ 是正确的选择</strong>。⟦INLMATH395MATHEND⟧ 虽然数值无偏且方差更低，但作为 reward 惩罚会导致梯度有偏，可能引发训练崩溃。</p>
+<p><strong>核心教训</strong>：评价 KL 估计器时，「数值无偏」和「梯度正确」是两个独立的维度。对于本文讨论的 reward 惩罚用法（stop-grad reward shaping，目标为反向 KL 正则；无论 on-policy 还是 off-policy），<strong>只有 ⟦INLMATH421MATHEND⟧ 是正确的选择</strong>。⟦INLMATH422MATHEND⟧ 虽然数值无偏且方差更低，但作为 reward 惩罚会导致梯度有偏，可能引发训练崩溃。</p>
+
+<p>到这里容易产生一个“表面矛盾”：</p>
+<ul>
+  <li>在 <strong>Reward 惩罚</strong>里我们强调“只能用 ⟦INLMATH423MATHEND⟧”；</li>
+  <li>但在前文 <strong>Loss 反传</strong>（尤其 off-policy）里，我们又推荐用 $
+ho k_3⟦INLMATH424MATHEND⟧	ext{sg}(\rho)k_2$ 来获得更低方差的反向 KL 梯度。</li>
+</ul>
+
+<p>下一节将解释：两者并不冲突——在“KL 正则项对策略更新的那一部分”上，它们甚至可以做到<strong>样本级完全等价</strong>；差异主要来自 KL 是否进入 advantage/baseline、以及信用分配（credit assignment）的路径。</p>
+
+<h2 id="inlmath425mathend-in-reward-与低方差-kl-in-loss-的等价性与差异">⟦INLMATH425MATHEND⟧ in Reward 与低方差 KL in Loss 的等价性与差异</h2>
+
+<p>前面我们分别分析了 KL 作为 Loss 和作为 Reward 两种使用方式。一个自然的问题是：<strong>这两种方式在什么意义上等价，又在什么意义上不同？</strong> 本节将深入探讨这个问题，特别是在大模型 RL 的实践场景下。</p>
+
+<h3 id="kl-梯度项的样本级等价性">KL 梯度项的样本级等价性</h3>
+
+<p>本节只比较“KL 正则化带来的那一项策略梯度”，并统一写成 <strong>policy gradient 的上升方向</strong> ⟦INLMATH426MATHEND⟧（若你在代码里最小化 loss，则整体只差一个全局负号，不影响等价性结论）。同时默认你使用的是本文前文的统一权重记号：样本来自 ⟦INLMATH427MATHEND⟧，重要性权重 ⟦INLMATH428MATHEND⟧ 作用在策略梯度估计器上。</p>
+
+<p>回顾前文的关键结论：</p>
+
+<p><strong>KL 作为 Loss（低方差选择）</strong>：前文已证明，采用 ⟦INLMATH429MATHEND⟧ 或 ⟦INLMATH430MATHEND⟧ 作为正则项时，梯度随机变量都化简为</p>
+
+<p>⟦DISPMATH61MATHEND⟧</p>
+
+<p><strong>KL 作为 Reward（⟦INLMATH431MATHEND⟧ in reward）</strong>：shaped reward 为 ⟦INLMATH432MATHEND⟧（对 ⟦INLMATH433MATHEND⟧ 做 stop-gradient 只是在实现上避免“KL 直接反传”，不改变它作为惩罚的数值）。在“策略梯度项”里，KL 惩罚贡献的是</p>
+
+<p>⟦DISPMATH62MATHEND⟧</p>
+
+<p><strong>关键发现</strong>：两者的 KL 梯度项<strong>样本级完全相同</strong>。</p>
+
+<p>也就是说，在不考虑 baseline/advantage 的具体构造细节时：</p>
+<ul>
+  <li>“把 KL 写进 loss 并用低方差实现（⟦INLMATH434MATHEND⟧ 或 ⟦INLMATH435MATHEND⟧）”</li>
+  <li>与“把 KL 写进 reward 并选 ⟦INLMATH436MATHEND⟧（stop-grad shaped reward）”</li>
+</ul>
+
+<p>对策略更新施加的 KL 正则“力”可以是一模一样的。</p>
+
+<p>具体来说，如果我们只看“最大化 ⟦INLMATH437MATHEND⟧”时 KL 惩罚贡献的那一项梯度（惩罚项在 ⟦INLMATH438MATHEND⟧ 里带负号，因此这项的上升方向自然带 ⟦INLMATH439MATHEND⟧）：</p>
+<ul>
+  <li><strong>KL in Loss（低方差实现）</strong>：⟦INLMATH440MATHEND⟧</li>
+  <li><strong>KL in Reward（⟦INLMATH441MATHEND⟧ in reward）</strong>：⟦INLMATH442MATHEND⟧</li>
+</ul>
+
+<p>它们是<strong>同一个随机变量</strong>，不仅期望相同，方差也完全相同。</p>
+
+<h4 id="整体更新语义的差异">整体更新语义的差异</h4>
+
+<p>尽管 KL 梯度项在样本级等价，<strong>两种方式的整体更新语义仍然不同</strong>。差异主要体现在以下几个方面：</p>
+
+<h4 id="1-kl-是否进入-advantagebaseline">1. KL 是否进入 Advantage/Baseline</h4>
+
+<p><strong>KL 作为 Loss</strong>（等价于最大化 ⟦INLMATH443MATHEND⟧，但把 KL 项作为一个独立的、可控的“显式力”来实现）：</p>
+
+<p>⟦DISPMATH63MATHEND⟧</p>
+
+<p>KL 是一个<strong>独立的正则项</strong>，与 advantage 完全解耦。KL 梯度的大小只取决于 ⟦INLMATH444MATHEND⟧ 本身，不受 critic 质量或 baseline 选择的影响。</p>
+
+<p><strong>KL 作为 Reward</strong>：</p>
+
+<p>⟦DISPMATH64MATHEND⟧</p>
+
+<p>KL 通过 shaped reward 进入 advantage 计算，会被 baseline 处理。这意味着：</p>
+<ul>
+  <li>KL 的影响会被 advantage 的构造方式调制</li>
+  <li>如果使用 value function baseline，KL 的影响会被部分吸收</li>
+</ul>
+
+<p>从实现角度看，这里的差别可以理解为：Loss 方案把“环境回报部分”和“KL 正则部分”分开估计；Reward 方案把 KL 视为回报的一部分，因此它会跟着你对回报做的所有处理（baseline、归一化、截断等）一起走。</p>
+
+<h4 id="2-信度分配独立正则力-vs-混入-shaped-reward">2. 信度分配：独立正则力 vs 混入 Shaped Reward</h4>
+
+<p><strong>KL 作为 Loss</strong>：每个 token/state 的 KL 梯度是「局部」的，只影响该位置的策略更新。</p>
+
+<p><strong>KL 作为 Reward</strong>：KL 惩罚通过 return/advantage 的时间回传，可能影响到更早的决策。</p>
+
+<h4 id="3-reward-中心化-kl对梯度无偏性的影响">3. Reward 中心化 KL：对梯度无偏性的影响</h4>
+
+<p>在大模型 RL（如 GRPO、PPO for LLM）中，常见的 advantage 计算方式是 ⟦INLMATH445MATHEND⟧。当 KL 作为 Reward 时，是否把 KL 也纳入 mean 会影响梯度的无偏性。</p>
+
+<p>设采样 ⟦INLMATH446MATHEND⟧，记 ⟦INLMATH447MATHEND⟧，并用 ⟦INLMATH448MATHEND⟧ 表示第 ⟦INLMATH449MATHEND⟧ 个样本的 KL 惩罚标量，⟦INLMATH450MATHEND⟧。</p>
+
+<p><strong>不中心化（⟦INLMATH451MATHEND⟧）</strong>：KL 梯度项的期望为</p>
+
+<p>⟦DISPMATH65MATHEND⟧</p>
+
+<p>这是对 ⟦INLMATH452MATHEND⟧ 的<strong>无偏梯度</strong>。</p>
+
+<p><strong>同 batch 均值中心化（⟦INLMATH453MATHEND⟧，含自身）</strong>：由于 ⟦INLMATH454MATHEND⟧ 依赖所有样本（包括 ⟦INLMATH455MATHEND⟧ 自身），期望梯度变为</p>
+
+<p>⟦DISPMATH66MATHEND⟧</p>
+
+<p>即 KL 正则梯度被<strong>缩小</strong>了 ⟦INLMATH456MATHEND⟧，等价于有效 ⟦INLMATH457MATHEND⟧ 变小。这不是严格无偏的。</p>
+
+<p><strong>Leave-one-out 中心化（⟦INLMATH458MATHEND⟧）</strong>：若改用 ⟦INLMATH459MATHEND⟧，则 ⟦INLMATH460MATHEND⟧ 与 ⟦INLMATH461MATHEND⟧ 独立，有 ⟦INLMATH462MATHEND⟧，因此</p>
+
+<p>⟦DISPMATH67MATHEND⟧</p>
+
+<p>仍是<strong>无偏梯度</strong>，同时享受中心化带来的方差缩减。</p>
+
+<p><strong>结论</strong>：同 batch 均值中心化引入的偏差为 ⟦INLMATH463MATHEND⟧，在 GRPO 等大 batch 场景下影响很小；若追求严格无偏，可改用 leave-one-out 均值，同时享受方差缩减。</p>
+
+<h3 id="何时选择哪种方式">何时选择哪种方式？</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">维度</th>
+      <th style="text-align: center">KL 作为 Loss</th>
+      <th style="text-align: center">KL 作为 Reward</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">KL 梯度形态</td>
+      <td style="text-align: center">⟦INLMATH464MATHEND⟧（低方差选择）</td>
+      <td style="text-align: center">⟦INLMATH465MATHEND⟧</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">与 Advantage</td>
+      <td style="text-align: center">完全解耦</td>
+      <td style="text-align: center">通过 shaped reward 耦合</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">KL 中心化</td>
+      <td style="text-align: center">无（绝对惩罚）</td>
+      <td style="text-align: center">有（⟦INLMATH466MATHEND⟧）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">信度分配</td>
+      <td style="text-align: center">局部、per-token</td>
+      <td style="text-align: center">可能有时间回传（取决于实现）</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">适用场景</td>
+      <td style="text-align: center">希望 KL 约束更可控、更不依赖 critic</td>
+      <td style="text-align: center">希望 KL 约束更全局、有规划性</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>实践建议</strong>：</p>
+
+<ol>
+  <li>
+    <p><strong>如果你希望 KL 约束是「修正性」的</strong>——允许 agent 探索但在局部修正行为，且希望 KL 压力更可控、更不依赖 critic 质量 → 选择 <strong>KL 作为 Loss</strong>，使用 ⟦INLMATH467MATHEND⟧ 或 ⟦INLMATH468MATHEND⟧（其中 on-policy 时若不想显式构造 ⟦INLMATH469MATHEND⟧，直接用 ⟦INLMATH470MATHEND⟧ 更简单且不易踩坑）</p>
+  </li>
+  <li>
+    <p><strong>如果你希望 KL 约束是「预防性」的</strong>——让 agent 从根源上避开高 KL 区域，且接受 KL 被 baseline 调制 → 选择 <strong>KL 作为 Reward</strong>，使用 ⟦INLMATH471MATHEND⟧</p>
+  </li>
+</ol>
+
+<p>基于上述“数值无偏 vs 梯度正确”“Loss vs Reward 实现差异”的结论，下面进入可直接照抄到代码里的选型速查与常见踩坑点。</p>
 
 <h2 id="实践指南与常见陷阱">实践指南与常见陷阱</h2>
 
-<p>有了前面的理论分析，本节给出具体场景下的选型建议，方便直接查阅。</p>
+<h3 id="三种估计器定义速查">三种估计器定义速查</h3>
 
-<h3 id="选型速查表">选型速查表</h3>
+<p>⟦DISPMATH68MATHEND⟧</p>
 
-<p>下表按「目标 KL 方向」×「采样来源」×「使用方式」三个维度给出推荐的估计器选择。其中「用于 <strong>Loss</strong>」对应 KL 作为 loss（需要反传梯度），「用于 <strong>Reward</strong>」对应 KL 作为 reward 惩罚（stop-gradient）。</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">目标</th>
-      <th style="text-align: center">采样来源</th>
-      <th style="text-align: center">用于 Loss（loss 梯度回传）</th>
-      <th style="text-align: center">用于 Reward（stop-grad）</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">反向 KL ⟦INLMATH396MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH397MATHEND⟧（on-policy）</td>
-      <td style="text-align: center">⟦INLMATH398MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH399MATHEND⟧</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">反向 KL ⟦INLMATH400MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH401MATHEND⟧（off-policy）</td>
-      <td style="text-align: center">⟦INLMATH402MATHEND⟧ 或 ⟦INLMATH403MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH404MATHEND⟧</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">正向 KL ⟦INLMATH405MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH406MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH407MATHEND⟧</td>
-      <td style="text-align: center">⟦INLMATH408MATHEND⟧</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="kl-作为-loss需要-loss-梯度回传">KL 作为 Loss（需要 loss 梯度回传）</h3>
-
-<p>当 KL 作为 loss 的一部分参与反传时，必须考虑梯度的正确性。</p>
-
-<h4 id="on-policy优化反向-kl最常见场景">On-policy：优化反向 KL（最常见场景）</h4>
-
-<p>目标：控制 actor 不偏离 reference policy。</p>
-
-<p><strong>正确做法</strong>：使用 <strong>⟦INLMATH409MATHEND⟧</strong> 作为 loss。</p>
-
-<p>⟦DISPMATH71MATHEND⟧</p>
-
-<p>其梯度期望 ⟦INLMATH410MATHEND⟧ 正是反向 KL 的真梯度。</p>
-
-<h4 id="on-policy优化正向-kl覆盖型场景">On-policy：优化正向 KL（覆盖型场景）</h4>
-
-<p>目标：让策略覆盖参考分布的支撑集（如离线 RL、模仿学习等）。</p>
-
-<p><strong>正确做法</strong>：使用 <strong>⟦INLMATH411MATHEND⟧</strong> 作为 loss。</p>
-
-<p>⟦DISPMATH72MATHEND⟧</p>
-
-<p>直接对 ⟦INLMATH412MATHEND⟧ 的样本均值调用 loss 梯度回传，自动微分计算的就是 ⟦INLMATH413MATHEND⟧，即正向 KL 的梯度，无需额外处理。</p>
-
-<h4 id="off-policy优化反向-kl">Off-policy：优化反向 KL</h4>
-
-<p>目标：数据来自行为策略 ⟦INLMATH414MATHEND⟧，仍希望优化反向 KL。</p>
-
-<p><strong>推荐做法</strong>：使用 <strong>⟦INLMATH415MATHEND⟧</strong> 或 <strong>⟦INLMATH416MATHEND⟧</strong> 作为 loss（两者梯度完全等价）。</p>
-
-<p>⟦DISPMATH73MATHEND⟧</p>
-
-<p>或</p>
-
-<p>⟦DISPMATH74MATHEND⟧</p>
-
-<ul>
-  <li>梯度无偏</li>
-  <li>在 ⟦INLMATH417MATHEND⟧ 时方差都显著更低</li>
-</ul>
-
-<p><strong>备选方案</strong>：使用 ⟦INLMATH418MATHEND⟧（梯度同样无偏，但方差更高）</p>
-
-<p><strong>避免</strong>：使用 ⟦INLMATH419MATHEND⟧（权重参与梯度计算）——梯度有偏，不是反向 KL 的正确方向</p>
-
-<h3 id="kl-作为-reward-惩罚stop-gradient">KL 作为 Reward 惩罚（stop-gradient）</h3>
-
-<p>当 KL 作为标量惩罚加入 reward 惩罚时，虽然 KL 项本身不反传梯度，但它会通过 advantage 间接影响策略梯度。根据前文「作为 Reward：数值无偏 ≠ 梯度正确」的分析：</p>
-
-<p><strong>推荐</strong>：</p>
-<ul>
-  <li>使用 <strong>⟦INLMATH420MATHEND⟧</strong>（数值无偏，且诱导的策略梯度也无偏）</li>
-  <li>无论 on-policy 还是 off-policy，结论相同</li>
-</ul>
-
-<p><strong>避免</strong>：</p>
-<ul>
-  <li>使用 ⟦INLMATH421MATHEND⟧（虽然数值无偏且方差更低，但诱导的策略梯度有偏，可能导致训练崩溃）</li>
-</ul>
-
-<blockquote>
-  <p><strong>注</strong>：Off-policy 策略梯度中，重要性权重 ⟦INLMATH422MATHEND⟧ 作用于整个 ⟦INLMATH423MATHEND⟧，shaped reward 本身保持 ⟦INLMATH424MATHEND⟧ 形式即可。</p>
-</blockquote>
-
-<h3 id="陷阱一on-policy-下用-inlmath425mathend-作为-loss">陷阱一：On-policy 下用 ⟦INLMATH425MATHEND⟧ 作为 Loss</h3>
-
-<p>⟦INLMATH426MATHEND⟧ 的梯度期望恒为零（⟦INLMATH427MATHEND⟧），作为 loss 完全无效。</p>
-
-<blockquote>
-  <p><strong>解决</strong>：on-policy 优化反向 KL 用 ⟦INLMATH428MATHEND⟧；优化正向 KL 用 ⟦INLMATH429MATHEND⟧。</p>
-</blockquote>
-
-<h3 id="陷阱二混淆-inlmath430mathend-的数值无偏与梯度行为">陷阱二：混淆 ⟦INLMATH430MATHEND⟧ 的数值无偏与梯度行为</h3>
-
-<p>⟦INLMATH431MATHEND⟧ 对<strong>反向 KL 的数值</strong>是无偏估计，但它的<strong>梯度</strong>对应的是<strong>正向 KL</strong>——这两者完全不同。</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">场景</th>
-      <th style="text-align: center">问题</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">用 ⟦INLMATH432MATHEND⟧ 作为 Loss（目标是反向 KL）</td>
-      <td style="text-align: center">⟦INLMATH433MATHEND⟧ 对应正向 KL，你在优化错误的方向</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">用 ⟦INLMATH434MATHEND⟧ 作为 Reward 惩罚（目标是反向 KL）</td>
-      <td style="text-align: center">诱导出有偏策略梯度（偏差项 ⟦INLMATH435MATHEND⟧），可能导致训练崩溃</td>
-    </tr>
-  </tbody>
-</table>
-
-<blockquote>
-  <p><strong>解决</strong>：</p>
-  <ul>
-    <li>用作 <strong>Loss</strong> 优化反向 KL → 用 ⟦INLMATH436MATHEND⟧；优化正向 KL 才用 ⟦INLMATH437MATHEND⟧</li>
-    <li>用作 <strong>Reward</strong> 惩罚 → 只用 ⟦INLMATH438MATHEND⟧（无论 on-policy 还是 off-policy）</li>
-  </ul>
-</blockquote>
-
-<h3 id="陷阱三off-policy-下对重要性权重的-detach-处理">陷阱三：Off-policy 下对重要性权重的 detach 处理</h3>
-
-<p>Off-policy 场景下，是否对重要性权重 ⟦INLMATH439MATHEND⟧ 进行 detach 会导致完全不同的结果。下表总结了正确的 detach 策略：</p>
+<h3 id="数值估计性质">数值估计性质</h3>
 
 <table>
   <thead>
     <tr>
       <th style="text-align: center">估计器</th>
-      <th style="text-align: center">是否 detach ⟦INLMATH440MATHEND⟧</th>
-      <th style="text-align: center">梯度对应的目标</th>
+      <th style="text-align: center">对反向 KL ⟦INLMATH472MATHEND⟧ 数值无偏？</th>
+      <th style="text-align: center">方差</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center">⟦INLMATH441MATHEND⟧</td>
-      <td style="text-align: center">不 detach</td>
-      <td style="text-align: center">反向 KL ✓</td>
+      <td style="text-align: center">⟦INLMATH473MATHEND⟧</td>
+      <td style="text-align: center">✓</td>
+      <td style="text-align: center">高（可负）</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH442MATHEND⟧</td>
-      <td style="text-align: center">不 detach</td>
-      <td style="text-align: center">反向 KL ✓</td>
+      <td style="text-align: center">⟦INLMATH474MATHEND⟧</td>
+      <td style="text-align: center">✗（但偏差极小）</td>
+      <td style="text-align: center">低</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH443MATHEND⟧</td>
-      <td style="text-align: center">不 detach</td>
-      <td style="text-align: center">f-散度 ✗</td>
+      <td style="text-align: center">⟦INLMATH475MATHEND⟧</td>
+      <td style="text-align: center">✓</td>
+      <td style="text-align: center">低</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="选型速查表">选型速查表</h3>
+
+<h4 id="on-policy-优化反向-klloss">On-policy 优化反向 KL（Loss）</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Loss 形式</th>
+      <th style="text-align: center">优点</th>
+      <th style="text-align: center">问题</th>
+      <th style="text-align: center">推荐</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">⟦INLMATH476MATHEND⟧</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">梯度期望为零，<strong>完全无效</strong>，不能用于优化</td>
+      <td style="text-align: center">✗✗</td>
     </tr>
     <tr>
-      <td style="text-align: center">⟦INLMATH444MATHEND⟧</td>
-      <td style="text-align: center">detach</td>
-      <td style="text-align: center">反向 KL ✓</td>
+      <td style="text-align: center">⟦INLMATH477MATHEND⟧</td>
+      <td style="text-align: center">梯度正确（反向 KL），低方差，<strong>实现最简单</strong></td>
+      <td style="text-align: center">数值有偏（但偏差极小）</td>
+      <td style="text-align: center">✓✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">⟦INLMATH478MATHEND⟧</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">梯度对应<strong>正向 KL</strong>，方向错误，不能用于优化反向 KL</td>
+      <td style="text-align: center">✗✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">⟦INLMATH479MATHEND⟧</td>
+      <td style="text-align: center">梯度正确（反向 KL），低方差，数值无偏</td>
+      <td style="text-align: center">需显式构造 ⟦INLMATH480MATHEND⟧，实现稍复杂</td>
+      <td style="text-align: center">✓</td>
     </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p><strong>解决</strong>：off-policy 优化反向 KL，推荐使用 ⟦INLMATH445MATHEND⟧ 或 ⟦INLMATH446MATHEND⟧（两者梯度等价）。若使用 ⟦INLMATH447MATHEND⟧，梯度无偏但方差更高。</p>
+  <p><strong>注</strong>：⟦INLMATH481MATHEND⟧ 与 ⟦INLMATH482MATHEND⟧ 的梯度完全相同（样本级等价）。On-policy 时推荐直接用 ⟦INLMATH483MATHEND⟧，实现最简单。</p>
 </blockquote>
 
-<h3 id="陷阱四在-reward-惩罚中使用-inlmath448mathend">陷阱四：在 Reward 惩罚中使用 ⟦INLMATH448MATHEND⟧</h3>
+<h4 id="off-policy-优化反向-klloss">Off-policy 优化反向 KL（Loss）</h4>
 
-<p>⟦INLMATH449MATHEND⟧ 虽然对反向 KL 数值无偏且方差更低，但作为 reward 惩罚会导致策略梯度有偏（偏差项 ⟦INLMATH450MATHEND⟧），可能引发训练崩溃。</p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Loss 形式</th>
+      <th style="text-align: center">优点</th>
+      <th style="text-align: center">问题</th>
+      <th style="text-align: center">推荐</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">⟦INLMATH484MATHEND⟧</td>
+      <td style="text-align: center">梯度正确（反向 KL），数值无偏</td>
+      <td style="text-align: center"><strong>方差较高</strong></td>
+      <td style="text-align: center">△</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">⟦INLMATH485MATHEND⟧</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">梯度对应 <strong>f-散度</strong>（非反向 KL），不能用于优化反向 KL</td>
+      <td style="text-align: center">✗✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">⟦INLMATH486MATHEND⟧</td>
+      <td style="text-align: center">梯度正确（反向 KL），<strong>低方差</strong></td>
+      <td style="text-align: center">数值有偏（但偏差极小）</td>
+      <td style="text-align: center">✓✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">⟦INLMATH487MATHEND⟧</td>
+      <td style="text-align: center">梯度正确（反向 KL），<strong>低方差</strong>，数值无偏</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✓✓</td>
+    </tr>
+  </tbody>
+</table>
 
 <blockquote>
-  <p><strong>解决</strong>：无论 on-policy 还是 off-policy，reward 惩罚只用 ⟦INLMATH451MATHEND⟧。</p>
+  <p><strong>注</strong>：⟦INLMATH488MATHEND⟧ 与 ⟦INLMATH489MATHEND⟧ 的梯度完全相同（样本级等价）。两者均为推荐选择。</p>
 </blockquote>
+
+<h4 id="kl-作为-reward-惩罚stop-grad-shaped-reward">KL 作为 Reward 惩罚（stop-grad shaped reward）</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">估计器</th>
+      <th style="text-align: center">优点</th>
+      <th style="text-align: center">问题</th>
+      <th style="text-align: center">推荐</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">⟦INLMATH490MATHEND⟧</td>
+      <td style="text-align: center">数值无偏，<strong>诱导的策略梯度无偏</strong></td>
+      <td style="text-align: center">方差较高</td>
+      <td style="text-align: center">✓✓</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">⟦INLMATH491MATHEND⟧</td>
+      <td style="text-align: center">数值有偏</td>
+      <td style="text-align: center">诱导的策略梯度有偏</td>
+      <td style="text-align: center">✗✗</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">⟦INLMATH492MATHEND⟧</td>
+      <td style="text-align: center">数值无偏，低方差</td>
+      <td style="text-align: center"><strong>诱导的策略梯度有偏</strong>，偏差项为 ⟦INLMATH493MATHEND⟧，可能导致<strong>训练崩溃</strong></td>
+      <td style="text-align: center">✗✗</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>注</strong>：Reward 惩罚场景下，<strong>只有 ⟦INLMATH494MATHEND⟧ 是正确的选择</strong>。⟦INLMATH495MATHEND⟧ 虽然数值无偏且方差低，但会导致策略梯度有偏，实验中观察到训练崩溃。</p>
+</blockquote>
+
+<h4 id="图例说明">图例说明</h4>
+
+<ul>
+  <li>✓✓：<strong>强烈推荐</strong>，理论正确且实践表现好</li>
+  <li>✓：推荐，理论正确但实现稍复杂或有小缺点</li>
+  <li>△：可用但需谨慎，存在方差高等问题</li>
+  <li>✗✗：<strong>禁止使用</strong>，理论上错误或会导致训练失败</li>
+</ul>
+
+<h3 id="常见陷阱">常见陷阱</h3>
+
+<ol>
+  <li><strong>On-policy 下用 ⟦INLMATH496MATHEND⟧ 作为 Loss</strong>：梯度期望为零，完全无效</li>
+  <li><strong>On-policy 下用 ⟦INLMATH497MATHEND⟧ 作为 Loss 优化反向 KL</strong>：其梯度对应正向 KL ⟦INLMATH498MATHEND⟧，方向错误</li>
+  <li><strong>Off-policy 下用 ⟦INLMATH499MATHEND⟧（重要性权重不 detach）</strong>：梯度对应 f-散度而非反向 KL</li>
+  <li><strong>在 Reward 惩罚中使用 ⟦INLMATH500MATHEND⟧</strong>：虽然数值无偏，但诱导的策略梯度有偏，可能导致训练崩溃</li>
+  <li><strong>On-policy 时把 ⟦INLMATH501MATHEND⟧ 写成常数 1</strong>：必须显式构造 ⟦INLMATH502MATHEND⟧（或 ⟦INLMATH503MATHEND⟧），否则会丢失 score-function 梯度路径，导致 ⟦INLMATH504MATHEND⟧ 和 ⟦INLMATH505MATHEND⟧ 退化为朴素写法而失效</li>
+  <li><strong>混淆「数值无偏」与「梯度正确」</strong>：⟦INLMATH506MATHEND⟧ 对反向 KL 数值无偏，但作为 Reward 惩罚时诱导的策略梯度有偏；选估计器时必须同时考虑两个维度</li>
+</ol>
 
 <h2 id="总结">总结</h2>
 
-<p>本文围绕「<strong>从谁采样</strong>」「<strong>估计谁的值</strong>」「<strong>对谁求梯度</strong>」三个核心问题，系统地剖析了 ⟦INLMATH452MATHEND⟧ 三种 KL 估计器。</p>
+<p>本文围绕「<strong>从谁采样</strong>」「<strong>怎么用</strong>」「<strong>估计什么</strong>」三个核心问题，系统剖析了 ⟦INLMATH507MATHEND⟧ 三种 KL 估计器。</p>
 
-<p><strong>核心要点</strong>：</p>
+<blockquote>
+  <p><strong>核心结论</strong>：<strong>数值无偏 ≠ 梯度正确</strong>。选估计器时，必须同时考虑「估计谁的数值」和「梯度对应哪个优化目标」。</p>
+</blockquote>
+
+<p><strong>核心内容</strong>：</p>
 
 <ol>
-  <li><strong>先明确使用方式</strong>：KL 作为 Loss（loss 梯度回传）还是作为 Reward（stop-grad）？</li>
-  <li><strong>KL 作为 Loss（on-policy）</strong>：优化反向 KL 用 ⟦INLMATH453MATHEND⟧；优化正向 KL 用 ⟦INLMATH454MATHEND⟧</li>
-  <li><strong>KL 作为 Loss（off-policy）</strong>：用 ⟦INLMATH455MATHEND⟧ 或 ⟦INLMATH456MATHEND⟧（注意 detach 策略！）</li>
-  <li><strong>KL 作为 Reward</strong>：只用 ⟦INLMATH457MATHEND⟧（⟦INLMATH458MATHEND⟧ 虽然数值无偏但会导致策略梯度有偏）</li>
+  <li><strong>数值估计</strong>：⟦INLMATH508MATHEND⟧ 和 ⟦INLMATH509MATHEND⟧ 对反向 KL 数值无偏，⟦INLMATH510MATHEND⟧ 兼具低方差</li>
+  <li><strong>作为 Loss 时的梯度</strong>：On-policy 用 ⟦INLMATH511MATHEND⟧ 或 ⟦INLMATH512MATHEND⟧；Off-policy 用 ⟦INLMATH513MATHEND⟧ 或 ⟦INLMATH514MATHEND⟧</li>
+  <li><strong>作为 Reward 惩罚</strong>：只能用 ⟦INLMATH515MATHEND⟧，⟦INLMATH516MATHEND⟧ 会导致策略梯度有偏</li>
+  <li><strong>Loss 与 Reward 两种实现的关系</strong>：
+    <ul>
+      <li><strong>样本级等价性</strong>：当 Loss 使用低方差实现（⟦INLMATH517MATHEND⟧ 或 ⟦INLMATH518MATHEND⟧）、Reward 使用 ⟦INLMATH519MATHEND⟧ 时，两者的 KL 梯度项是<strong>同一个随机变量</strong> ⟦INLMATH520MATHEND⟧，不仅期望相同，方差也完全相同</li>
+      <li><strong>整体语义差异</strong>：Loss 方式中 KL 是独立正则项，与 advantage 完全解耦，不受 critic 质量影响；Reward 方式中 KL 通过 shaped reward 进入 advantage 计算，会被 baseline 处理和调制</li>
+      <li><strong>信度分配差异</strong>：Loss 方式的 KL 梯度是局部的（per-token）；Reward 方式的 KL 惩罚可能通过 return 回传影响更早的决策</li>
+    </ul>
+  </li>
+  <li><strong>统一 ⟦INLMATH521MATHEND⟧ 框架</strong>：本文引入 ⟦INLMATH522MATHEND⟧ 统一处理 on-policy 和 off-policy 场景。该框架的核心洞察是：把「采样分布对 ⟦INLMATH523MATHEND⟧ 的依赖」显式地塞进 ⟦INLMATH524MATHEND⟧ 这条梯度路径，从而使「先期望后梯度」与「先梯度后期望」在 ⟦INLMATH525MATHEND⟧ 下总是等价。On-policy 时 ⟦INLMATH526MATHEND⟧ 但 ⟦INLMATH527MATHEND⟧，这解释了为什么直接对 ⟦INLMATH528MATHEND⟧ 或 ⟦INLMATH529MATHEND⟧ 反传会失效，而 ⟦INLMATH530MATHEND⟧ 能「巧合」地工作</li>
 </ol>
-
-<p>把这几点梳理清楚，三种估计器就不再让人混淆了。</p>
 
 <h2 id="参考文献">参考文献</h2>
 
