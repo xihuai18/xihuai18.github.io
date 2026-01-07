@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-07T14:08:11+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-07T14:25:57+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="en"><title type="html">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html" rel="alternate" type="text/html" title="Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"><![CDATA[<h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
 
 <p>Consider the following scenario: you are training a large language model with reinforcement learning to improve its question-answering capabilities. Ideally, each time the model generates a batch of responses, you would immediately update the model with this data, then use the updated model to generate new data, and so on. This approach of “updating with data from the same policy that generated it” is called <strong>on-policy</strong> training.</p>
@@ -19,15 +19,21 @@
 
 <p>⟦DISPMATH9MATHEND⟧</p>
 
-<p>The <strong>discounted state visitation distribution</strong> represents the weighted frequency of visiting each state during long-term policy execution:</p>
+<h4 id="discounted-state-visitation-distribution">Discounted State Visitation Distribution</h4>
+
+<p>Represents the weighted frequency of visiting each state during long-term policy execution:</p>
 
 <p>⟦DISPMATH10MATHEND⟧</p>
 
-<p>The <strong>advantage function</strong> measures how much better action ⟦INLMATH36MATHEND⟧ is compared to the policy’s average:</p>
+<h4 id="advantage-function">Advantage Function</h4>
+
+<p>Measures how much better action ⟦INLMATH36MATHEND⟧ is compared to the policy’s average:</p>
 
 <p>⟦DISPMATH11MATHEND⟧</p>
 
-<p>The <strong>total variation distance</strong> (TV distance) measures the difference between two policies’ action distributions at state ⟦INLMATH37MATHEND⟧:</p>
+<h4 id="total-variation-distance-tv-distance">Total Variation Distance (TV Distance)</h4>
+
+<p>Measures the difference between two policies’ action distributions at state ⟦INLMATH37MATHEND⟧:</p>
 
 <p>⟦DISPMATH12MATHEND⟧</p>
 
@@ -55,7 +61,7 @@
 
 <p>The solution is to decompose the expectation into “expectation under the old distribution + bias term,” then control the bias. The key question is: <strong>What is the quantitative relationship between the difference in state distributions and the difference in policies?</strong></p>
 
-<p><strong>Controlling state distribution differences</strong></p>
+<h4 id="controlling-state-distribution-differences">Controlling State Distribution Differences</h4>
 
 <blockquote>
   <p><strong>Lemma 1.2 (Relationship Between State Distribution Difference and Policy TV Distance)</strong></p>
@@ -63,9 +69,13 @@
   <p>⟦DISPMATH2MATHEND⟧</p>
 </blockquote>
 
-<p><strong>Physical interpretation</strong>: Small differences in policies in action space are “amplified” through environment dynamics into differences in state visitation distributions. The coefficient ⟦INLMATH45MATHEND⟧ reflects the <strong>temporal accumulation effect</strong>—in long-horizon tasks (⟦INLMATH46MATHEND⟧ close to 1), the amplification is stronger.</p>
+<h4 id="physical-interpretation">Physical Interpretation</h4>
 
-<p><strong>Proof sketch</strong>: By deriving the fixed-point equation for discounted visitation distributions and exploiting the ⟦INLMATH47MATHEND⟧ non-expansiveness of stochastic matrices, one can show that state distribution differences are amplified by policy differences through transition dynamics, with the amplification factor being precisely ⟦INLMATH48MATHEND⟧.</p>
+<p>Small differences in policies in action space are “amplified” through environment dynamics into differences in state visitation distributions. The coefficient ⟦INLMATH45MATHEND⟧ reflects the <strong>temporal accumulation effect</strong>—in long-horizon tasks (⟦INLMATH46MATHEND⟧ close to 1), the amplification is stronger.</p>
+
+<h4 id="proof-sketch">Proof Sketch</h4>
+
+<p>By deriving the fixed-point equation for discounted visitation distributions and exploiting the ⟦INLMATH47MATHEND⟧ non-expansiveness of stochastic matrices, one can show that state distribution differences are amplified by policy differences through transition dynamics, with the amplification factor being precisely ⟦INLMATH48MATHEND⟧.</p>
 
 <h3 id="22-policy-performance-improvement-lower-bound">2.2 Policy Performance Improvement Lower Bound</h3>
 
@@ -148,7 +158,7 @@
 
 <p>⟦DISPMATH13MATHEND⟧</p>
 
-<p><strong>Unified modeling framework</strong></p>
+<h4 id="unified-modeling-framework">Unified Modeling Framework</h4>
 
 <p>Two typical forms of dynamic mixture sampling can be uniformly characterized by the index transition kernel ⟦INLMATH73MATHEND⟧:</p>
 
@@ -168,7 +178,7 @@
 
 <p>⟦DISPMATH15MATHEND⟧</p>
 
-<p><strong>Monotonic improvement bound</strong></p>
+<h4 id="monotonic-improvement-bound">Monotonic Improvement Bound</h4>
 
 <p>Combining the above results yields the core theorem:</p>
 
@@ -202,11 +212,15 @@
   <p>Suppose the mixture sampling includes two old policies ⟦INLMATH89MATHEND⟧ and ⟦INLMATH90MATHEND⟧. If there exists some state ⟦INLMATH91MATHEND⟧ such that ⟦INLMATH92MATHEND⟧, then no policy ⟦INLMATH93MATHEND⟧ can simultaneously satisfy ⟦INLMATH94MATHEND⟧ and ⟦INLMATH95MATHEND⟧.</p>
 </blockquote>
 
-<p><strong>Proof</strong>: By the triangle inequality, if both constraints were satisfied, then ⟦INLMATH96MATHEND⟧, a contradiction.</p>
+<h4 id="proof">Proof</h4>
 
-<p><strong>Root cause</strong>: The update shift penalty directly couples ⟦INLMATH97MATHEND⟧ with the historical policy family ⟦INLMATH98MATHEND⟧, whose internal structure is a product of historical training and not controllable by the current update.</p>
+<p>By the triangle inequality, if both constraints were satisfied, then ⟦INLMATH96MATHEND⟧, a contradiction.</p>
 
-<p><strong>Triangle inequality decomposition</strong></p>
+<h4 id="root-cause">Root Cause</h4>
+
+<p>The update shift penalty directly couples ⟦INLMATH97MATHEND⟧ with the historical policy family ⟦INLMATH98MATHEND⟧, whose internal structure is a product of historical training and not controllable by the current update.</p>
+
+<h4 id="triangle-inequality-decomposition">Triangle Inequality Decomposition</h4>
 
 <p>The solution leverages the triangle inequality of TV distance:</p>
 
@@ -229,7 +243,9 @@
   <p>⟦DISPMATH7MATHEND⟧</p>
 </blockquote>
 
-<p><strong>Why does decomposition solve the problem?</strong> The key is that after decomposition, ⟦INLMATH101MATHEND⟧ only involves the new policy ⟦INLMATH102MATHEND⟧ and the current policy ⟦INLMATH103MATHEND⟧, <strong>completely independent of the structure of the old policy family ⟦INLMATH104MATHEND⟧</strong>. Therefore, regardless of how different the old policies are from each other, constraining ⟦INLMATH105MATHEND⟧ is always feasible—this is precisely the resolution to the infeasibility issue revealed in Observation 3.1.</p>
+<h4 id="why-does-decomposition-solve-the-problem">Why Does Decomposition Solve the Problem?</h4>
+
+<p>The key is that after decomposition, ⟦INLMATH101MATHEND⟧ only involves the new policy ⟦INLMATH102MATHEND⟧ and the current policy ⟦INLMATH103MATHEND⟧, <strong>completely independent of the structure of the old policy family ⟦INLMATH104MATHEND⟧</strong>. Therefore, regardless of how different the old policies are from each other, constraining ⟦INLMATH105MATHEND⟧ is always feasible—this is precisely the resolution to the infeasibility issue revealed in Observation 3.1.</p>
 
 <p>This reveals an important engineering principle—<strong>separation of concerns</strong>:</p>
 
@@ -271,9 +287,11 @@
   <p>⟦DISPMATH8MATHEND⟧</p>
 </blockquote>
 
-<p><strong>Intuitive understanding</strong>: The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under ⟦INLMATH113MATHEND⟧. This enables us to estimate and control TV distance using samples.</p>
+<h4 id="intuitive-understanding">Intuitive Understanding</h4>
 
-<p><strong>Sample representation of ⟦INLMATH114MATHEND⟧</strong></p>
+<p>The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under ⟦INLMATH113MATHEND⟧. This enables us to estimate and control TV distance using samples.</p>
+
+<h4 id="sample-representation-of-inlmath114mathend">Sample Representation of ⟦INLMATH114MATHEND⟧</h4>
 
 <p>Using Lemma 3.3, setting ⟦INLMATH115MATHEND⟧, ⟦INLMATH116MATHEND⟧, ⟦INLMATH117MATHEND⟧ (the sampling source policy), we obtain:</p>
 
@@ -287,7 +305,7 @@
 
 <h3 id="52-constraining-inlmath122mathend-two-clipping-options">5.2 Constraining ⟦INLMATH122MATHEND⟧: Two Clipping Options</h3>
 
-<p><strong>Method 1: Direct Constraint on Ratio Difference</strong></p>
+<h4 id="method-1-direct-constraint-on-ratio-difference">Method 1: Direct Constraint on Ratio Difference</h4>
 
 <p>For each sample ⟦INLMATH123MATHEND⟧, require:</p>
 
@@ -295,7 +313,7 @@
 
 <p>The clipping interval is ⟦INLMATH124MATHEND⟧, with <strong>clipping center at ⟦INLMATH125MATHEND⟧ rather than 1</strong>.</p>
 
-<p><strong>Method 2: Constraint on Incremental Ratio</strong></p>
+<h4 id="method-2-constraint-on-incremental-ratio">Method 2: Constraint on Incremental Ratio</h4>
 
 <p>Noting that ⟦INLMATH126MATHEND⟧, we have:</p>
 
@@ -305,7 +323,7 @@
 
 <p>This method clips ⟦INLMATH130MATHEND⟧ with center at 1, meaning the <strong>clipping constraint itself does not depend on the old policy family ⟦INLMATH131MATHEND⟧</strong>. However, if we use the weighted advantage ⟦INLMATH132MATHEND⟧ below, we still need per-sample behavior probabilities (or recorded logprobs) to compute ⟦INLMATH133MATHEND⟧.</p>
 
-<p><strong>Objective functions (three clipping mechanisms)</strong></p>
+<h4 id="objective-functions-three-clipping-mechanisms">Objective Functions (Three Clipping Mechanisms)</h4>
 
 <p>For comparison, we present the complete objective functions for three clipping mechanisms. Suppose the current sample comes from old policy ⟦INLMATH134MATHEND⟧, and denote:</p>
 <ul>
@@ -316,15 +334,21 @@
 
 <p>Note: under <strong>trajectory-level mixture</strong> (index fixed), ⟦INLMATH138MATHEND⟧, so per-trajectory advantages from the corresponding old policy are consistent; under <strong>step/segment-level mixture</strong>, replacing ⟦INLMATH139MATHEND⟧ with ⟦INLMATH140MATHEND⟧ introduces advantage-substitution bias (discussed in Part VI), so the advantage/value estimator must reflect future index switching.</p>
 
-<p><strong>Standard PPO</strong>: Clip ⟦INLMATH141MATHEND⟧ with center at 1</p>
+<h4 id="standard-ppo">Standard PPO</h4>
+
+<p>Clip ⟦INLMATH141MATHEND⟧ with center at 1</p>
 
 <p>⟦DISPMATH24MATHEND⟧</p>
 
-<p><strong>Method 1</strong>: Clip ⟦INLMATH142MATHEND⟧ with center at ⟦INLMATH143MATHEND⟧</p>
+<h4 id="method-1">Method 1</h4>
+
+<p>Clip ⟦INLMATH142MATHEND⟧ with center at ⟦INLMATH143MATHEND⟧</p>
 
 <p>⟦DISPMATH25MATHEND⟧</p>
 
-<p><strong>Method 2</strong>: Clip incremental ratio ⟦INLMATH144MATHEND⟧ with center at 1</p>
+<h4 id="method-2">Method 2</h4>
+
+<p>Clip incremental ratio ⟦INLMATH144MATHEND⟧ with center at 1</p>
 
 <p>⟦DISPMATH26MATHEND⟧</p>
 
@@ -332,7 +356,7 @@
 
 <h3 id="53-comparison-and-practical-controls">5.3 Comparison and Practical Controls</h3>
 
-<p><strong>Table 5.1　Comparison of Three Clipping Mechanisms</strong></p>
+<h4 id="table-51-comparison-of-three-clipping-mechanisms">Table 5.1 Comparison of Three Clipping Mechanisms</h4>
 
 <table>
   <thead>
@@ -369,15 +393,15 @@
   </tbody>
 </table>
 
-<p><strong>The Fundamental Problem with Standard PPO Under Multi-Policy Mixture</strong></p>
+<h4 id="the-fundamental-problem-with-standard-ppo-under-multi-policy-mixture">The Fundamental Problem with Standard PPO Under Multi-Policy Mixture</h4>
 
 <p>Standard PPO constrains ⟦INLMATH158MATHEND⟧, requiring the new policy to be simultaneously close to all sampling source policies. By Observation 3.1, when the old policies ⟦INLMATH159MATHEND⟧ differ significantly from each other, <strong>no ⟦INLMATH160MATHEND⟧ can simultaneously satisfy all constraints</strong>. This causes the trust region intersection to shrink or even become empty, with updates being limited by the most stale policy.</p>
 
-<p><strong>Common Advantages of Methods 1 and 2</strong></p>
+<h4 id="common-advantages-of-methods-1-and-2">Common Advantages of Methods 1 and 2</h4>
 
 <p>Both methods constrain ⟦INLMATH161MATHEND⟧—the deviation of the new policy from the <strong>current policy</strong> (rather than the sampling policy). Since ⟦INLMATH162MATHEND⟧ is uniquely determined, this constraint is consistent across all sample sources, completely avoiding the infeasibility problem.</p>
 
-<p><strong>Method 1 vs Method 2</strong></p>
+<h4 id="method-1-vs-method-2">Method 1 vs Method 2</h4>
 
 <table>
   <thead>
@@ -411,9 +435,9 @@
   </tbody>
 </table>
 
-<p><strong>Detailed Explanations</strong>:</p>
+<h4 id="detailed-explanations">Detailed Explanations</h4>
 
-<p><strong>(1) Handling Stale Samples</strong></p>
+<h4 id="1-handling-stale-samples">(1) Handling Stale Samples</h4>
 
 <p>When samples come from very old policies, ⟦INLMATH172MATHEND⟧ can be large.</p>
 
@@ -422,7 +446,7 @@
   <li>Method 1 directly constrains ⟦INLMATH176MATHEND⟧; the integrand’s upper bound is always ⟦INLMATH177MATHEND⟧, unaffected by ⟦INLMATH178MATHEND⟧ amplification.</li>
 </ul>
 
-<p><strong>(2) LLM Large Vocabulary Issue</strong></p>
+<h4 id="2-llm-large-vocabulary-issue">(2) LLM Large Vocabulary Issue</h4>
 
 <p>Large language models have many tokens having very small probabilities.</p>
 
@@ -431,19 +455,19 @@
   <li>Method 1 constrains ⟦INLMATH182MATHEND⟧, which is an <strong>additive constraint</strong>: if that token has higher probability under the old policy (e.g., ⟦INLMATH183MATHEND⟧), even if the current probability is very low, faster improvement is allowed.</li>
 </ul>
 
-<p><strong>Controlling sampling staleness</strong></p>
+<h4 id="controlling-sampling-staleness">Controlling Sampling Staleness</h4>
 
 <p>Corollary 3.2 shows that ⟦INLMATH184MATHEND⟧ also affects the monotonic improvement lower bound, but it <strong>cannot be controlled through optimization-side clipping</strong> and must be implemented by the sampling system:</p>
 
-<p><strong>(1) Discarding Stale Data</strong></p>
+<h4 id="1-discarding-stale-data">(1) Discarding Stale Data</h4>
 
 <p>Set a threshold ⟦INLMATH185MATHEND⟧. For each sample, compute ⟦INLMATH186MATHEND⟧, and discard samples exceeding the threshold.</p>
 
-<p><strong>(2) Controlling Policy Version Window</strong></p>
+<h4 id="2-controlling-policy-version-window">(2) Controlling Policy Version Window</h4>
 
 <p>Limit the number of old policy versions in the mixture sampling, e.g., using only data from the most recent ⟦INLMATH187MATHEND⟧ versions.</p>
 
-<p><strong>Operational meaning of clipping</strong></p>
+<h4 id="operational-meaning-of-clipping">Operational Meaning of Clipping</h4>
 
 <p>Finally, we clarify the relationship between clipping and the theoretical lower bound.</p>
 
@@ -455,7 +479,7 @@
 
 <p>The clipping objective function is precisely an implementation of this constrained optimization—clipping <strong>hard limits</strong> the update magnitude to ensure ⟦INLMATH193MATHEND⟧ is controllable; under this premise, gradient ascent improves the surrogate objective, thereby providing guarantees for monotonic policy improvement.</p>
 
-<p><strong>Section summary</strong></p>
+<h4 id="section-summary">Section Summary</h4>
 
 <p>This section established the theoretical foundations of clipping mechanisms:</p>
 
@@ -488,27 +512,29 @@
 
 <p>The key watershed is <strong>whether Lemma 2.1’s structural simplification holds</strong>: trajectory-level mixture satisfies advantage function reduction; step/segment-level mixture generally does not, because future returns are affected by the index transition kernel.</p>
 
-<p><strong>Differences in sampling staleness ⟦INLMATH202MATHEND⟧</strong></p>
+<h4 id="differences-in-sampling-staleness-inlmath202mathend">Differences in Sampling Staleness ⟦INLMATH202MATHEND⟧</h4>
 
 <p><strong>Trajectory-level mixture</strong>’s staleness arises from: mixture weights ⟦INLMATH203MATHEND⟧ retaining probability mass on old policies after new policy release.</p>
 
 <p><strong>Step/segment-level mixture</strong> has an <strong>exponential compression effect</strong>: Consider a simplified model with switching probability ⟦INLMATH204MATHEND⟧ from old to new. The marginal probability mass on old indices under the discounted visitation distribution is ⟦INLMATH205MATHEND⟧. As long as ⟦INLMATH206MATHEND⟧, the old policy weight can be significantly compressed.</p>
 
-<p><strong>Differences in surrogate objective estimation</strong></p>
+<h4 id="differences-in-surrogate-objective-estimation">Differences in Surrogate Objective Estimation</h4>
 
 <p><strong>Trajectory-level mixture</strong>: The advantage function reduces to ⟦INLMATH207MATHEND⟧, with a clear estimation path.</p>
 
 <p><strong>Advantage substitution bias in step/segment-level mixture</strong>: If single-policy advantage estimates are used, systematic bias will arise. The reason is that ⟦INLMATH208MATHEND⟧ requires taking expectations over future index switching, while ⟦INLMATH209MATHEND⟧ implicitly assumes “the future always follows ⟦INLMATH210MATHEND⟧.”</p>
 
-<p><strong>Unification under bandit setting</strong>: In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.</p>
+<h4 id="unification-under-bandit-setting">Unification Under Bandit Setting</h4>
+
+<p>In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.</p>
 
 <h3 id="62-risks-and-applicable-scenarios">6.2 Risks and Applicable Scenarios</h3>
 
 <p>Step/segment-level mixture has another hidden concern: even if single-step importance ratios are clipped, multi-step noise accumulation over long trajectories can still amplify gradient estimation variance. When policy changes per update are large, “behavioral discontinuities” within trajectories may induce heavier-tailed ratio distributions. This is why trajectory-level mixture is recommended for “large policy change per update” scenarios in the table below.</p>
 
-<p><strong>Applicable scenarios</strong></p>
+<h4 id="applicable-scenarios">Applicable Scenarios</h4>
 
-<p><strong>Table 6.1　Applicable Scenarios for Two Mixture Mechanisms</strong></p>
+<h4 id="table-61-applicable-scenarios-for-two-mixture-mechanisms">Table 6.1 Applicable Scenarios for Two Mixture Mechanisms</h4>
 
 <table>
   <thead>
@@ -562,7 +588,7 @@
 
 <p>Let the behavior policy modeled on the training side be ⟦INLMATH213MATHEND⟧, while the policy actually sampling on the inference side is ⟦INLMATH214MATHEND⟧.</p>
 
-<p><strong>Effective staleness</strong></p>
+<h4 id="effective-staleness">Effective Staleness</h4>
 
 <p>Define <strong>effective staleness</strong>:</p>
 
@@ -574,7 +600,7 @@
 
 <p>By Lemma 3.3, ⟦INLMATH215MATHEND⟧ can be expressed in sample-level computable form. Given threshold ⟦INLMATH216MATHEND⟧, if training only uses samples satisfying ⟦INLMATH217MATHEND⟧, then ⟦INLMATH218MATHEND⟧.</p>
 
-<p><strong>Key implementation points</strong>:</p>
+<h4 id="key-implementation-points">Key Implementation Points</h4>
 
 <ol>
   <li><strong>Behavior denominator alignment</strong>: The behavior probability in the loss should use the inference-side recorded ⟦INLMATH219MATHEND⟧</li>
@@ -583,13 +609,13 @@
 
 <h2 id="summary-practical-guidelines">Summary: Practical Guidelines</h2>
 
-<p><strong>Core theoretical framework</strong></p>
+<h4 id="core-theoretical-framework">Core Theoretical Framework</h4>
 
 <p>The structure of the monotonic improvement lower bound is:</p>
 
 <p>⟦DISPMATH28MATHEND⟧</p>
 
-<p><strong>Separation of concerns principle</strong></p>
+<h4 id="separation-of-concerns-principle">Separation of Concerns Principle</h4>
 
 <table>
   <thead>
@@ -622,7 +648,7 @@
   </tbody>
 </table>
 
-<p><strong>Clipping method selection</strong></p>
+<h4 id="clipping-method-selection">Clipping Method Selection</h4>
 
 <table>
   <thead>
@@ -651,7 +677,7 @@
   </tbody>
 </table>
 
-<p><strong>Handling training-inference inconsistency</strong></p>
+<h4 id="handling-training-inference-inconsistency">Handling Training-Inference Inconsistency</h4>
 
 <ul>
   <li>Use inference-side recorded ⟦INLMATH225MATHEND⟧ as the behavior denominator</li>
@@ -755,15 +781,21 @@
 
 <p>⟦DISPMATH9MATHEND⟧</p>
 
-<p><strong>折扣状态访问分布</strong>定义为策略长期运行中访问各状态的加权频率：</p>
+<h4 id="折扣状态访问分布">折扣状态访问分布</h4>
+
+<p>定义为策略长期运行中访问各状态的加权频率：</p>
 
 <p>⟦DISPMATH10MATHEND⟧</p>
 
-<p><strong>优势函数</strong>用于衡量在状态 ⟦INLMATH36MATHEND⟧ 下选择动作 ⟦INLMATH37MATHEND⟧ 相对于策略平均水平的优劣：</p>
+<h4 id="优势函数">优势函数</h4>
+
+<p>用于衡量在状态 ⟦INLMATH36MATHEND⟧ 下选择动作 ⟦INLMATH37MATHEND⟧ 相对于策略平均水平的优劣：</p>
 
 <p>⟦DISPMATH11MATHEND⟧</p>
 
-<p><strong>全变差距离</strong>（TV距离）用于衡量两个策略在给定状态 ⟦INLMATH38MATHEND⟧ 下动作分布的差异：</p>
+<h4 id="全变差距离tv-距离">全变差距离（TV 距离）</h4>
+
+<p>用于衡量两个策略在给定状态 ⟦INLMATH38MATHEND⟧ 下动作分布的差异：</p>
 
 <p>⟦DISPMATH12MATHEND⟧</p>
 
@@ -791,7 +823,7 @@
 
 <p>解决思路是：将期望分解为“旧分布下的期望”与“偏差项”两部分，然后对偏差项加以控制。关键问题在于：<strong>状态分布的差异与策略的差异之间存在怎样的定量关系？</strong></p>
 
-<p><strong>状态分布差异的控制</strong></p>
+<h4 id="状态分布差异的控制">状态分布差异的控制</h4>
 
 <blockquote>
   <p><strong>引理1.2（状态分布差异与策略TV距离的关系）</strong></p>
@@ -799,9 +831,13 @@
   <p>⟦DISPMATH2MATHEND⟧</p>
 </blockquote>
 
-<p><strong>物理意义</strong>：策略在动作空间上的微小差异，会通过环境动力学被“放大”为状态访问分布的差异。系数 ⟦INLMATH46MATHEND⟧ 反映了<strong>时间累积效应</strong>——在长时域任务中（⟦INLMATH47MATHEND⟧ 接近1），放大效应更为显著。</p>
+<h4 id="物理意义">物理意义</h4>
 
-<p><strong>证明思路</strong>：通过推导折扣访问分布的不动点方程，并利用随机矩阵的 ⟦INLMATH48MATHEND⟧ 非扩张性，可以证明状态分布差异被策略差异通过转移动力学放大，且放大系数正是 ⟦INLMATH49MATHEND⟧。</p>
+<p>策略在动作空间上的微小差异，会通过环境动力学被“放大”为状态访问分布的差异。系数 ⟦INLMATH46MATHEND⟧ 反映了<strong>时间累积效应</strong>——在长时域任务中（⟦INLMATH47MATHEND⟧ 接近1），放大效应更为显著。</p>
+
+<h4 id="证明思路">证明思路</h4>
+
+<p>通过推导折扣访问分布的不动点方程，并利用随机矩阵的 ⟦INLMATH48MATHEND⟧ 非扩张性，可以证明状态分布差异被策略差异通过转移动力学放大，且放大系数正是 ⟦INLMATH49MATHEND⟧。</p>
 
 <h3 id="22-策略性能改进下界">2.2 策略性能改进下界</h3>
 
@@ -884,7 +920,7 @@
 
 <p>⟦DISPMATH13MATHEND⟧</p>
 
-<p><strong>统一建模框架</strong></p>
+<h4 id="统一建模框架">统一建模框架</h4>
 
 <p>动态混合采样的两种典型形式都可以用索引转移核 ⟦INLMATH74MATHEND⟧ 统一刻画：</p>
 
@@ -904,7 +940,7 @@
 
 <p>⟦DISPMATH15MATHEND⟧</p>
 
-<p><strong>单调提升下界</strong></p>
+<h4 id="单调提升下界">单调提升下界</h4>
 
 <p>合并上述结果，我们得到核心定理：</p>
 
@@ -938,11 +974,15 @@
   <p>假设混合采样包含两个旧策略 ⟦INLMATH90MATHEND⟧ 和 ⟦INLMATH91MATHEND⟧，若存在某个状态 ⟦INLMATH92MATHEND⟧ 使得 ⟦INLMATH93MATHEND⟧，则不存在任何策略 ⟦INLMATH94MATHEND⟧ 能够同时满足 ⟦INLMATH95MATHEND⟧ 与 ⟦INLMATH96MATHEND⟧。</p>
 </blockquote>
 
-<p><strong>证明</strong>：由三角不等式，若同时满足两个约束，则 ⟦INLMATH97MATHEND⟧，矛盾。</p>
+<h4 id="证明">证明</h4>
 
-<p><strong>问题根源</strong>：更新偏移惩罚项将 ⟦INLMATH98MATHEND⟧ 与历史策略族 ⟦INLMATH99MATHEND⟧ 直接耦合，而后者的内部结构是历史训练的产物，不受当前更新控制。</p>
+<p>由三角不等式，若同时满足两个约束，则 ⟦INLMATH97MATHEND⟧，矛盾。</p>
 
-<p><strong>三角不等式分解</strong></p>
+<h4 id="问题根源">问题根源</h4>
+
+<p>更新偏移惩罚项将 ⟦INLMATH98MATHEND⟧ 与历史策略族 ⟦INLMATH99MATHEND⟧ 直接耦合，而后者的内部结构是历史训练的产物，不受当前更新控制。</p>
+
+<h4 id="三角不等式分解">三角不等式分解</h4>
 
 <p>解决方案是利用TV距离的三角不等式：</p>
 
@@ -965,7 +1005,9 @@
   <p>⟦DISPMATH7MATHEND⟧</p>
 </blockquote>
 
-<p><strong>为何分解能解决问题？</strong> 关键在于：分解后的 ⟦INLMATH102MATHEND⟧ 只涉及新策略 ⟦INLMATH103MATHEND⟧ 和当前策略 ⟦INLMATH104MATHEND⟧，<strong>与旧策略族 ⟦INLMATH105MATHEND⟧ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 ⟦INLMATH106MATHEND⟧ 都是可行的——这正是观察3.1所揭示的不可行性问题的解决之道。</p>
+<h4 id="为何分解能解决问题">为何分解能解决问题？</h4>
+
+<p>关键在于：分解后的 ⟦INLMATH102MATHEND⟧ 只涉及新策略 ⟦INLMATH103MATHEND⟧ 和当前策略 ⟦INLMATH104MATHEND⟧，<strong>与旧策略族 ⟦INLMATH105MATHEND⟧ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 ⟦INLMATH106MATHEND⟧ 都是可行的——这正是观察3.1所揭示的不可行性问题的解决之道。</p>
 
 <p>这揭示了一个重要的工程原则——<strong>职责分离</strong>：</p>
 
@@ -1007,9 +1049,11 @@
   <p>⟦DISPMATH8MATHEND⟧</p>
 </blockquote>
 
-<p><strong>直观理解</strong>：左侧是两个分布之间的TV距离（需要遍历所有动作），右侧是在 ⟦INLMATH114MATHEND⟧ 下采样时两个重要性比值的差的绝对值。这使我们能够通过样本来估计和控制TV距离。</p>
+<h4 id="直观理解">直观理解</h4>
 
-<p><strong>⟦INLMATH115MATHEND⟧ 的样本表示</strong></p>
+<p>左侧是两个分布之间的TV距离（需要遍历所有动作），右侧是在 ⟦INLMATH114MATHEND⟧ 下采样时两个重要性比值的差的绝对值。这使我们能够通过样本来估计和控制TV距离。</p>
+
+<h4 id="inlmath115mathend-的样本表示">⟦INLMATH115MATHEND⟧ 的样本表示</h4>
 
 <p>利用引理3.3，取 ⟦INLMATH116MATHEND⟧，⟦INLMATH117MATHEND⟧，⟦INLMATH118MATHEND⟧（采样来源策略），可得：</p>
 
@@ -1023,7 +1067,7 @@
 
 <h3 id="52-约束-inlmath123mathend两种裁剪方式">5.2 约束 ⟦INLMATH123MATHEND⟧：两种裁剪方式</h3>
 
-<p><strong>方法一：直接约束比值差</strong></p>
+<h4 id="方法一直接约束比值差">方法一：直接约束比值差</h4>
 
 <p>对每个样本 ⟦INLMATH124MATHEND⟧，要求满足：</p>
 
@@ -1031,7 +1075,7 @@
 
 <p>即裁剪区间为 ⟦INLMATH125MATHEND⟧，<strong>裁剪中心是 ⟦INLMATH126MATHEND⟧ 而非 1</strong>。</p>
 
-<p><strong>方法二：约束增量比值</strong></p>
+<h4 id="方法二约束增量比值">方法二：约束增量比值</h4>
 
 <p>注意到 ⟦INLMATH127MATHEND⟧，因此有：</p>
 
@@ -1048,15 +1092,21 @@
 
 <p>说明：若采用<strong>轨迹级混合</strong>（索引不变），则 ⟦INLMATH140MATHEND⟧，可直接用每条轨迹对应旧策略的优势估计；若为<strong>步/段级混合</strong>，直接用 ⟦INLMATH141MATHEND⟧ 代替 ⟦INLMATH142MATHEND⟧ 会引入优势替代偏差（第六部分详述），需要使用能反映未来索引切换的优势/价值估计。</p>
 
-<p><strong>标准PPO</strong>：以 1 为中心裁剪 ⟦INLMATH143MATHEND⟧</p>
+<h4 id="标准-ppo">标准 PPO</h4>
+
+<p>以 1 为中心裁剪 ⟦INLMATH143MATHEND⟧</p>
 
 <p>⟦DISPMATH24MATHEND⟧</p>
 
-<p><strong>方法一</strong>：以 ⟦INLMATH144MATHEND⟧ 为中心裁剪 ⟦INLMATH145MATHEND⟧</p>
+<h4 id="方法一">方法一</h4>
+
+<p>以 ⟦INLMATH144MATHEND⟧ 为中心裁剪 ⟦INLMATH145MATHEND⟧</p>
 
 <p>⟦DISPMATH25MATHEND⟧</p>
 
-<p><strong>方法二</strong>：以 1 为中心裁剪增量比值 ⟦INLMATH146MATHEND⟧</p>
+<h4 id="方法二">方法二</h4>
+
+<p>以 1 为中心裁剪增量比值 ⟦INLMATH146MATHEND⟧</p>
 
 <p>⟦DISPMATH26MATHEND⟧</p>
 
@@ -1064,7 +1114,7 @@
 
 <h3 id="53-对比与落地选型与采样侧控制">5.3 对比与落地：选型与采样侧控制</h3>
 
-<p><strong>表5.1　三种裁剪机制的对比</strong></p>
+<h4 id="表-51三种裁剪机制的对比">表 5.1　三种裁剪机制的对比</h4>
 
 <table>
   <thead>
@@ -1101,15 +1151,15 @@
   </tbody>
 </table>
 
-<p><strong>标准PPO在多策略混合下的根本问题</strong></p>
+<h4 id="标准-ppo-的根本问题多策略混合">标准 PPO 的根本问题（多策略混合）</h4>
 
 <p>标准PPO约束 ⟦INLMATH160MATHEND⟧，要求新策略同时接近所有采样来源策略。根据观察3.1，当各旧策略 ⟦INLMATH161MATHEND⟧ 之间差异显著时，<strong>不存在能够同时满足所有约束的 ⟦INLMATH162MATHEND⟧</strong>。这导致信赖域交集收缩甚至为空，更新被最陈旧的策略所限制。</p>
 
-<p><strong>方法一与方法二的共同优势</strong></p>
+<h4 id="方法一与方法二的共同优势">方法一与方法二的共同优势</h4>
 
 <p>两者都约束 ⟦INLMATH163MATHEND⟧——新策略相对于<strong>当前策略</strong>（而非采样策略）的偏离。由于 ⟦INLMATH164MATHEND⟧ 是唯一确定的，这个约束对所有来源的样本一致，完全规避了不可行性问题。</p>
 
-<p><strong>方法一 vs 方法二</strong></p>
+<h4 id="方法一-vs-方法二">方法一 vs 方法二</h4>
 
 <table>
   <thead>
@@ -1143,9 +1193,9 @@
   </tbody>
 </table>
 
-<p><strong>详细解释</strong>：</p>
+<h4 id="详细解释">详细解释</h4>
 
-<p><strong>(一) 陈旧样本处理</strong></p>
+<h4 id="一-陈旧样本处理">(一) 陈旧样本处理</h4>
 
 <p>当样本来自很旧的策略时，⟦INLMATH174MATHEND⟧ 可能很大。</p>
 
@@ -1154,7 +1204,7 @@
   <li>方法一直接约束 ⟦INLMATH178MATHEND⟧，被积函数上界恒为 ⟦INLMATH179MATHEND⟧，不受 ⟦INLMATH180MATHEND⟧ 放大。</li>
 </ul>
 
-<p><strong>(二) LLM大词表问题</strong></p>
+<h4 id="二-llm-大词表问题">(二) LLM 大词表问题</h4>
 
 <p>大语言模型词表规模巨大，大量token的概率极小。</p>
 
@@ -1163,19 +1213,19 @@
   <li>方法一约束 ⟦INLMATH184MATHEND⟧，这是<strong>加法型约束</strong>：若该 token 在旧策略下概率较高（例如 ⟦INLMATH185MATHEND⟧），即便当前概率很低，也允许较快提升。</li>
 </ul>
 
-<p><strong>采样陈旧性的控制</strong></p>
+<h4 id="采样陈旧性的控制">采样陈旧性的控制</h4>
 
 <p>推论3.2表明，⟦INLMATH186MATHEND⟧ 同样影响单调提升下界，但它<strong>无法通过优化侧的裁剪来控制</strong>，需要由采样系统实现：</p>
 
-<p><strong>(一) 丢弃陈旧数据</strong></p>
+<h4 id="一-丢弃陈旧数据">(一) 丢弃陈旧数据</h4>
 
 <p>设定阈值 ⟦INLMATH187MATHEND⟧，对每个样本计算 ⟦INLMATH188MATHEND⟧，丢弃超过该阈值的样本。</p>
 
-<p><strong>(二) 控制策略版本窗口</strong></p>
+<h4 id="二-控制策略版本窗口">(二) 控制策略版本窗口</h4>
 
 <p>限制混合采样的旧策略版本数量，例如仅使用最近 ⟦INLMATH189MATHEND⟧ 个版本的数据。</p>
 
-<p><strong>裁剪的操作含义</strong></p>
+<h4 id="裁剪的操作含义">裁剪的操作含义</h4>
 
 <p>最后，需要澄清裁剪与理论下界的关系。</p>
 
@@ -1187,7 +1237,7 @@
 
 <p>裁剪目标函数正是这一约束优化的实现——通过裁剪<strong>硬性限制</strong>更新幅度，确保 ⟦INLMATH195MATHEND⟧ 可控；在此前提下，通过梯度上升提升代理目标，从而为策略的单调改进提供保障。</p>
 
-<p><strong>本节小结</strong></p>
+<h4 id="本节小结">本节小结</h4>
 
 <p>本节建立了裁剪机制的理论基础：</p>
 
@@ -1220,27 +1270,29 @@
 
 <p>关键分水岭在于<strong>引理2.1的结构简化是否成立</strong>：轨迹级混合满足优势函数还原；步/段级混合一般不满足，因为未来回报受索引转移核影响。</p>
 
-<p><strong>采样陈旧性 ⟦INLMATH204MATHEND⟧ 的差异</strong></p>
+<h4 id="采样陈旧性-inlmath204mathend-的差异">采样陈旧性 ⟦INLMATH204MATHEND⟧ 的差异</h4>
 
 <p><strong>轨迹级混合</strong>的陈旧性来源于：混合权重 ⟦INLMATH205MATHEND⟧ 在新策略发布后仍对旧策略保留一定的比例。</p>
 
 <p><strong>步/段级混合</strong>具有<strong>指数压缩效应</strong>：考虑从旧到新以概率 ⟦INLMATH206MATHEND⟧ 切换的简化模型，折扣访问分布下旧索引的边缘质量为 ⟦INLMATH207MATHEND⟧。只要 ⟦INLMATH208MATHEND⟧，旧策略的权重即可被显著压缩。</p>
 
-<p><strong>代理目标估计的差异</strong></p>
+<h4 id="代理目标估计的差异">代理目标估计的差异</h4>
 
 <p><strong>轨迹级混合</strong>：优势函数还原为 ⟦INLMATH209MATHEND⟧，估计路径清晰。</p>
 
 <p><strong>步/段级混合的优势替代偏差</strong>：若沿用单策略优势估计，将产生系统性偏差。原因是 ⟦INLMATH210MATHEND⟧ 需要对未来索引切换取期望，而 ⟦INLMATH211MATHEND⟧ 隐含了“未来始终沿用 ⟦INLMATH212MATHEND⟧”的假设。</p>
 
-<p><strong>Bandit设定下的统一</strong>：在单步episode的LLM训练中，无后续状态转移，两类机制的估计问题统一，无上述偏差。</p>
+<h4 id="bandit-设定下的统一">Bandit 设定下的统一</h4>
+
+<p>在单步 episode 的 LLM 训练中，无后续状态转移，两类机制的估计问题统一，无上述偏差。</p>
 
 <h3 id="62-风险与适用场景">6.2 风险与适用场景</h3>
 
 <p>步/段级混合还有一个隐患：即便单步重要性比值被裁剪，长轨迹下多步噪声叠加仍会放大梯度估计方差。当每次更新的策略变化幅度较大时，轨迹内部的“行为突变”可能引发更重尾的比值分布。这也是表6.1中“策略变化幅度大”场景推荐轨迹级混合的原因。</p>
 
-<p><strong>适用场景</strong></p>
+<h4 id="适用场景">适用场景</h4>
 
-<p><strong>表6.1　两类混合机制的适用场景</strong></p>
+<h4 id="表-61两类混合机制的适用场景">表 6.1　两类混合机制的适用场景</h4>
 
 <table>
   <thead>
@@ -1294,7 +1346,7 @@
 
 <p>设训练侧建模的行为策略为 ⟦INLMATH215MATHEND⟧，而推理端实际采样的策略为 ⟦INLMATH216MATHEND⟧。</p>
 
-<p><strong>有效陈旧性</strong></p>
+<h4 id="有效陈旧性">有效陈旧性</h4>
 
 <p>定义<strong>有效陈旧性</strong>：</p>
 
@@ -1306,7 +1358,7 @@
 
 <p>由引理3.3，⟦INLMATH217MATHEND⟧ 可表示为样本级可计算形式。给定阈值 ⟦INLMATH218MATHEND⟧，若训练仅使用满足 ⟦INLMATH219MATHEND⟧ 的样本，则 ⟦INLMATH220MATHEND⟧。</p>
 
-<p><strong>关键实现要点</strong>：</p>
+<h4 id="关键实现要点">关键实现要点</h4>
 
 <ol>
   <li><strong>行为分母对齐</strong>：损失中的行为概率应使用推理端记录的 ⟦INLMATH221MATHEND⟧</li>
@@ -1315,13 +1367,13 @@
 
 <h2 id="总结实践指南">总结：实践指南</h2>
 
-<p><strong>核心理论框架</strong></p>
+<h4 id="核心理论框架">核心理论框架</h4>
 
 <p>单调提升下界的结构为：</p>
 
 <p>⟦DISPMATH28MATHEND⟧</p>
 
-<p><strong>职责分离原则</strong></p>
+<h4 id="职责分离原则">职责分离原则</h4>
 
 <table>
   <thead>
@@ -1354,7 +1406,7 @@
   </tbody>
 </table>
 
-<p><strong>裁剪方法选择</strong></p>
+<h4 id="裁剪方法选择">裁剪方法选择</h4>
 
 <table>
   <thead>
@@ -1383,7 +1435,7 @@
   </tbody>
 </table>
 
-<p><strong>训推不一致的处理</strong></p>
+<h4 id="训推不一致的处理">训推不一致的处理</h4>
 
 <ul>
   <li>使用推理端记录的 ⟦INLMATH227MATHEND⟧ 作为行为分母</li>
