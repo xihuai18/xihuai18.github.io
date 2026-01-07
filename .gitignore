@@ -16,3 +16,4 @@ AGENTs.md
 .playwright-mcp/
 node_modules/vendor/
 .bundle/
+config.json
