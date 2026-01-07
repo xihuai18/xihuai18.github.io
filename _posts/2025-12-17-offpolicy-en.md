@@ -32,19 +32,25 @@ $$
 J(\pi) := \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \mid \pi\right]
 $$
 
-The **discounted state visitation distribution** represents the weighted frequency of visiting each state during long-term policy execution:
+#### Discounted State Visitation Distribution
+
+Represents the weighted frequency of visiting each state during long-term policy execution:
 
 $$
 d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)
 $$
 
-The **advantage function** measures how much better action $a$ is compared to the policy's average:
+#### Advantage Function
+
+Measures how much better action $a$ is compared to the policy's average:
 
 $$
 A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)
 $$
 
-The **total variation distance** (TV distance) measures the difference between two policies' action distributions at state $s$:
+#### Total Variation Distance (TV Distance)
+
+Measures the difference between two policies' action distributions at state $s$:
 
 $$
 D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|
@@ -74,7 +80,7 @@ The Policy Performance Difference Lemma has a practical issue: the expectation o
 
 The solution is to decompose the expectation into "expectation under the old distribution + bias term," then control the bias. The key question is: **What is the quantitative relationship between the difference in state distributions and the difference in policies?**
 
-**Controlling state distribution differences**
+#### Controlling State Distribution Differences
 
 > **Lemma 1.2 (Relationship Between State Distribution Difference and Policy TV Distance)**
 > 
@@ -82,9 +88,13 @@ The solution is to decompose the expectation into "expectation under the old dis
 > \|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]
 > $$
 
-**Physical interpretation**: Small differences in policies in action space are "amplified" through environment dynamics into differences in state visitation distributions. The coefficient $\frac{\gamma}{1-\gamma}$ reflects the **temporal accumulation effect**—in long-horizon tasks ($\gamma$ close to 1), the amplification is stronger.
+#### Physical Interpretation
 
-**Proof sketch**: By deriving the fixed-point equation for discounted visitation distributions and exploiting the $\ell_1$ non-expansiveness of stochastic matrices, one can show that state distribution differences are amplified by policy differences through transition dynamics, with the amplification factor being precisely $\frac{\gamma}{1-\gamma}$.
+Small differences in policies in action space are "amplified" through environment dynamics into differences in state visitation distributions. The coefficient $\frac{\gamma}{1-\gamma}$ reflects the **temporal accumulation effect**—in long-horizon tasks ($\gamma$ close to 1), the amplification is stronger.
+
+#### Proof Sketch
+
+By deriving the fixed-point equation for discounted visitation distributions and exploiting the $\ell_1$ non-expansiveness of stochastic matrices, one can show that state distribution differences are amplified by policy differences through transition dynamics, with the amplification factor being precisely $\frac{\gamma}{1-\gamma}$.
 
 ### 2.2 Policy Performance Improvement Lower Bound
 
@@ -164,7 +174,7 @@ $$
 J(\pi_{k+1}) \geq J(\pi_k)
 $$
 
-**Unified modeling framework**
+#### Unified Modeling Framework
 
 Two typical forms of dynamic mixture sampling can be uniformly characterized by the index transition kernel $q(i'\mid i)$:
 
@@ -188,7 +198,7 @@ $$
 J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
 $$
 
-**Monotonic improvement bound**
+#### Monotonic Improvement Bound
 
 Combining the above results yields the core theorem:
 
@@ -226,11 +236,15 @@ The update shift penalty term in Theorem 3.1 might appear controllable by constr
 > 
 > Suppose the mixture sampling includes two old policies $\pi^{(1)}$ and $\pi^{(2)}$. If there exists some state $s$ such that $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) > 2\delta$, then no policy $\pi_{k+1}$ can simultaneously satisfy $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ and $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$.
 
-**Proof**: By the triangle inequality, if both constraints were satisfied, then $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) \leq 2\delta$, a contradiction.
+#### Proof
 
-**Root cause**: The update shift penalty directly couples $\pi_{k+1}$ with the historical policy family $\{\pi^{(i)}\}$, whose internal structure is a product of historical training and not controllable by the current update.
+By the triangle inequality, if both constraints were satisfied, then $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) \leq 2\delta$, a contradiction.
 
-**Triangle inequality decomposition**
+#### Root Cause
+
+The update shift penalty directly couples $\pi_{k+1}$ with the historical policy family $\{\pi^{(i)}\}$, whose internal structure is a product of historical training and not controllable by the current update.
+
+#### Triangle Inequality Decomposition
 
 The solution leverages the triangle inequality of TV distance:
 
@@ -255,7 +269,9 @@ $$
 > J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k
 > $$
 
-**Why does decomposition solve the problem?** The key is that after decomposition, $U_k$ only involves the new policy $\pi_{k+1}$ and the current policy $\pi_k$, **completely independent of the structure of the old policy family $\{\pi^{(i)}\}$**. Therefore, regardless of how different the old policies are from each other, constraining $U_k$ is always feasible—this is precisely the resolution to the infeasibility issue revealed in Observation 3.1.
+#### Why Does Decomposition Solve the Problem?
+
+The key is that after decomposition, $U_k$ only involves the new policy $\pi_{k+1}$ and the current policy $\pi_k$, **completely independent of the structure of the old policy family $\{\pi^{(i)}\}$**. Therefore, regardless of how different the old policies are from each other, constraining $U_k$ is always feasible—this is precisely the resolution to the infeasibility issue revealed in Observation 3.1.
 
 This reveals an important engineering principle—**separation of concerns**:
 
@@ -280,9 +296,11 @@ The key bridge is the following identity:
 > \mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot\mid s)} \left| \frac{\pi(a\mid s)}{\pi_1(a\mid s)} - \frac{\pi_2(a\mid s)}{\pi_1(a\mid s)} \right|
 > $$
 
-**Intuitive understanding**: The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under $\pi_1$. This enables us to estimate and control TV distance using samples.
+#### Intuitive Understanding
 
-**Sample representation of $U_k$**
+The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under $\pi_1$. This enables us to estimate and control TV distance using samples.
+
+#### Sample Representation of $U_k$
 
 Using Lemma 3.3, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling source policy), we obtain:
 
@@ -300,7 +318,7 @@ This means: **If we can ensure $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$ f
 
 ### 5.2 Constraining $U_k$: Two Clipping Options
 
-**Method 1: Direct Constraint on Ratio Difference**
+#### Method 1: Direct Constraint on Ratio Difference
 
 For each sample $(s, i, a)$, require:
 
@@ -310,7 +328,7 @@ $$
 
 The clipping interval is $\left[\frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} - \epsilon, \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} + \epsilon\right]$, with **clipping center at $\rho_k$ rather than 1**.
 
-**Method 2: Constraint on Incremental Ratio**
+#### Method 2: Constraint on Incremental Ratio
 
 Noting that $\rho_{k+1} - \rho_k = \rho_k \cdot \left(\frac{\pi_{k+1}}{\pi_k} - 1\right)$, we have:
 
@@ -322,7 +340,7 @@ If we constrain $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\
 
 This method clips $\pi_{k+1}/\pi_k$ with center at 1, meaning the **clipping constraint itself does not depend on the old policy family $\pi^{(i)}$**. However, if we use the weighted advantage $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$ below, we still need per-sample behavior probabilities (or recorded logprobs) to compute $\rho_k$.
 
-**Objective functions (three clipping mechanisms)**
+#### Objective Functions (Three Clipping Mechanisms)
 
 For comparison, we present the complete objective functions for three clipping mechanisms. Suppose the current sample comes from old policy $\pi^{(i)}$, and denote:
 - $\rho_{k+1} = \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}$ (new policy's ratio relative to sampling policy)
@@ -331,19 +349,25 @@ For comparison, we present the complete objective functions for three clipping m
 
 Note: under **trajectory-level mixture** (index fixed), $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$, so per-trajectory advantages from the corresponding old policy are consistent; under **step/segment-level mixture**, replacing $A^{\beta^{(k)}}$ with $A^{\pi^{(i)}}$ introduces advantage-substitution bias (discussed in Part VI), so the advantage/value estimator must reflect future index switching.
 
-**Standard PPO**: Clip $\rho_{k+1}$ with center at 1
+#### Standard PPO
+
+Clip $\rho_{k+1}$ with center at 1
 
 $$
 L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]
 $$
 
-**Method 1**: Clip $\rho_{k+1}$ with center at $\rho_k$
+#### Method 1
+
+Clip $\rho_{k+1}$ with center at $\rho_k$
 
 $$
 L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]
 $$
 
-**Method 2**: Clip incremental ratio $r$ with center at 1
+#### Method 2
+
+Clip incremental ratio $r$ with center at 1
 
 $$
 L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]
@@ -353,7 +377,7 @@ where $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advant
 
 ### 5.3 Comparison and Practical Controls
 
-**Table 5.1　Comparison of Three Clipping Mechanisms**
+#### Table 5.1 Comparison of Three Clipping Mechanisms
 
 | Method       | Clipped Variable                   | Clipping Center            | Clipping Interval                    | Constrained TV Distance                 |
 | ------------ | ---------------------------------- | -------------------------- | ------------------------------------ | --------------------------------------- |
@@ -361,15 +385,15 @@ where $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advant
 | Method 1     | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $\rho_k = \pi_k/\pi^{(i)}$ | $[\rho_k-\epsilon, \rho_k+\epsilon]$ | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$     |
 | Method 2     | $r = \pi_{k+1}/\pi_k$              | $1$                        | $[1-\epsilon, 1+\epsilon]$           | $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$     |
 
-**The Fundamental Problem with Standard PPO Under Multi-Policy Mixture**
+#### The Fundamental Problem with Standard PPO Under Multi-Policy Mixture
 
 Standard PPO constrains $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$, requiring the new policy to be simultaneously close to all sampling source policies. By Observation 3.1, when the old policies $\pi^{(1)}, \pi^{(2)}, \ldots$ differ significantly from each other, **no $\pi_{k+1}$ can simultaneously satisfy all constraints**. This causes the trust region intersection to shrink or even become empty, with updates being limited by the most stale policy.
 
-**Common Advantages of Methods 1 and 2**
+#### Common Advantages of Methods 1 and 2
 
 Both methods constrain $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$—the deviation of the new policy from the **current policy** (rather than the sampling policy). Since $\pi_k$ is uniquely determined, this constraint is consistent across all sample sources, completely avoiding the infeasibility problem.
 
-**Method 1 vs Method 2**
+#### Method 1 vs Method 2
 
 | Comparison Dimension                        | Method 1 (Adaptive Clipping)                          | Method 2 (Incremental Clipping)                        |
 | ------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
@@ -378,35 +402,35 @@ Both methods constrain $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$—the deviation of th
 | Implementation complexity                   | Requires storing $\pi^{(i)}(a\mid s)$ and $\pi_k(a\mid s)$  | Needs $\pi_k(a\mid s)$ and $\pi^{(i)}(a\mid s)$ (or stored logprobs) to compute $\rho_k$; clipping itself uses only $\pi_{k+1}/\pi_k$ |
 | Advantage function                          | Uses $A^{\beta^{(k)}}$                                | Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$ |
 
-**Detailed Explanations**:
+#### Detailed Explanations
 
-**(1) Handling Stale Samples**
+#### (1) Handling Stale Samples
 
 When samples come from very old policies, $\rho_k = \pi_k/\pi^{(i)}$ can be large.
 
 - Method 2's integrand is $\rho_k \cdot \lvert r - 1\rvert$; even if $\lvert r-1\rvert \leq \epsilon$, the integrand can reach $\epsilon \cdot \rho_k$, producing spikes.
 - Method 1 directly constrains $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$; the integrand's upper bound is always $\epsilon$, unaffected by $\rho_k$ amplification.
 
-**(2) LLM Large Vocabulary Issue**
+#### (2) LLM Large Vocabulary Issue
 
 Large language models have many tokens having very small probabilities.
 
 - Method 2 constrains $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$, which is a **multiplicative constraint**: if $\pi_k(a\mid s) = 10^{-6}$, the allowed absolute change is only $\epsilon \times 10^{-6}$.
 - Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an **additive constraint**: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a\mid s) = 0.1$), even if the current probability is very low, faster improvement is allowed.
 
-**Controlling sampling staleness**
+#### Controlling Sampling Staleness
 
 Corollary 3.2 shows that $S_k$ also affects the monotonic improvement lower bound, but it **cannot be controlled through optimization-side clipping** and must be implemented by the sampling system:
 
-**(1) Discarding Stale Data**
+#### (1) Discarding Stale Data
 
 Set a threshold $\epsilon_{\mathrm{stale}}$. For each sample, compute $\lvert\rho_k - 1\rvert = \lvert\pi_k(a\mid s)/\pi^{(i)}(a\mid s) - 1\rvert$, and discard samples exceeding the threshold.
 
-**(2) Controlling Policy Version Window**
+#### (2) Controlling Policy Version Window
 
 Limit the number of old policy versions in the mixture sampling, e.g., using only data from the most recent $W$ versions.
 
-**Operational meaning of clipping**
+#### Operational Meaning of Clipping
 
 Finally, we clarify the relationship between clipping and the theoretical lower bound.
 
@@ -416,7 +440,7 @@ In Corollary 3.2, the coefficient of $U_k$, namely $C_{\pi_{k+1},\beta^{(k)}}$, 
 
 The clipping objective function is precisely an implementation of this constrained optimization—clipping **hard limits** the update magnitude to ensure $U_k$ is controllable; under this premise, gradient ascent improves the surrogate objective, thereby providing guarantees for monotonic policy improvement.
 
-**Section summary**
+#### Section Summary
 
 This section established the theoretical foundations of clipping mechanisms:
 
@@ -443,27 +467,29 @@ The correspondence with common engineering terminology is:
 
 The key watershed is **whether Lemma 2.1's structural simplification holds**: trajectory-level mixture satisfies advantage function reduction; step/segment-level mixture generally does not, because future returns are affected by the index transition kernel.
 
-**Differences in sampling staleness $S_k$**
+#### Differences in Sampling Staleness $S_k$
 
 **Trajectory-level mixture**'s staleness arises from: mixture weights $\alpha_i^{(k)}$ retaining probability mass on old policies after new policy release.
 
 **Step/segment-level mixture** has an **exponential compression effect**: Consider a simplified model with switching probability $\sigma$ from old to new. The marginal probability mass on old indices under the discounted visitation distribution is $\frac{1-\gamma}{1-\gamma(1-\sigma)}$. As long as $\sigma \gg 1-\gamma$, the old policy weight can be significantly compressed.
 
-**Differences in surrogate objective estimation**
+#### Differences in Surrogate Objective Estimation
 
 **Trajectory-level mixture**: The advantage function reduces to $A^{\pi^{(i)}}(s,a)$, with a clear estimation path.
 
 **Advantage substitution bias in step/segment-level mixture**: If single-policy advantage estimates are used, systematic bias will arise. The reason is that $A^{\beta^{(k)}}((s,i),a)$ requires taking expectations over future index switching, while $A^{\pi^{(i)}}(s,a)$ implicitly assumes "the future always follows $\pi^{(i)}$."
 
-**Unification under bandit setting**: In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.
+#### Unification Under Bandit Setting
+
+In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.
 
 ### 6.2 Risks and Applicable Scenarios
 
 Step/segment-level mixture has another hidden concern: even if single-step importance ratios are clipped, multi-step noise accumulation over long trajectories can still amplify gradient estimation variance. When policy changes per update are large, "behavioral discontinuities" within trajectories may induce heavier-tailed ratio distributions. This is why trajectory-level mixture is recommended for "large policy change per update" scenarios in the table below.
 
-**Applicable scenarios**
+#### Applicable Scenarios
 
-**Table 6.1　Applicable Scenarios for Two Mixture Mechanisms**
+#### Table 6.1 Applicable Scenarios for Two Mixture Mechanisms
 
 | Scenario Characteristics                                     | Recommended Mechanism | Rationale                                  |
 | ------------------------------------------------------------ | --------------------- | ------------------------------------------ |
@@ -486,7 +512,7 @@ In large-scale distributed training, policies on the inference side and training
 
 Let the behavior policy modeled on the training side be $\pi^{(i)}$, while the policy actually sampling on the inference side is $\hat{\pi}^{(i)}$.
 
-**Effective staleness**
+#### Effective Staleness
 
 Define **effective staleness**:
 
@@ -500,14 +526,14 @@ This definition simultaneously covers version staleness and training-inference i
 
 By Lemma 3.3, $\hat{S}_k$ can be expressed in sample-level computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$.
 
-**Key implementation points**:
+#### Key Implementation Points
 
 1. **Behavior denominator alignment**: The behavior probability in the loss should use the inference-side recorded $\hat{\pi}^{(i)}(a\mid s)$
 2. **Probability smoothing**: If the inference side has truncation (e.g., top-k), ensure ratios are valid
 
 ## Summary: Practical Guidelines
 
-**Core theoretical framework**
+#### Core Theoretical Framework
 
 The structure of the monotonic improvement lower bound is:
 
@@ -515,7 +541,7 @@ $$
 J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{surrogate objective}} - \underbrace{C_1 \cdot U_k}_{\text{update shift penalty}} - \underbrace{C_2 \cdot S_k}_{\text{sampling staleness penalty}}
 $$
 
-**Separation of concerns principle**
+#### Separation of Concerns Principle
 
 | Control Term | Responsible Party      | Control Mechanism | Specific Operation                |
 | ------------ | ---------------------- | ----------------- | --------------------------------- |
@@ -523,7 +549,7 @@ $$
 | $S_k$        | Sampling system        | Data filtering    | Discard stale samples             |
 | $S_k$        | Sampling system        | Version window    | Use only most recent $W$ versions |
 
-**Clipping method selection**
+#### Clipping Method Selection
 
 | Scenario                              | Recommended Method     | Rationale                                            |
 | ------------------------------------- | ---------------------- | ---------------------------------------------------- |
@@ -531,7 +557,7 @@ $$
 | Implementation simplicity prioritized | Method 2 (incremental) | No need to store old policy information              |
 | LLM large vocabulary                  | Method 1               | Avoids slow updates for low-probability tokens       |
 
-**Handling training-inference inconsistency**
+#### Handling Training-Inference Inconsistency
 
 - Use inference-side recorded $\hat{\pi}^{(i)}$ as the behavior denominator
 - Compress effective staleness through sample filtering
