@@ -2,7 +2,7 @@
 layout: post
 title: "简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计"
 date: 2025-12-01
-description: "在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1, k2, k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并给出「用于 loss 梯度回传」与「用于 reward 惩罚」时的选型指南。"
+description: "在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1、k2、k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并提供在「用于 loss 梯度回传」与「用于 reward 惩罚」两种情况下的选型指南。"
 categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/12/01/kl-estimators-en.html
@@ -13,11 +13,11 @@ zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
 
 ![Mini-class](/assets/img/kl-estimators/kl-estimator.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
-> 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景的性质差异，并给出「用于 loss 梯度回传」与「用于 reward 惩罚」时的选型指南。
+> 在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景下的性质差异，并提供在「用于 loss 梯度回传」与「用于 reward 惩罚」两种情况下的选型指南。
 
 ## 引言：KL 散度在强化学习中的角色
 
-在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，旨在防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层次的选择：**使用哪个估计器**（$k_1$, $k_2$, $k_3$）、**从哪个策略采样**（on-policy 与 off-policy）、以及**如何使用**（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统地梳理这些选择及其相互关系，帮助读者厘清其中的关键概念。
+在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，**KL 惩罚**是约束新策略不偏离参考策略的核心手段，旨在防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层面的选择：**选择哪个估计器**（$k_1$、$k_2$、$k_3$）、**从哪个策略采样**（on-policy 还是 off-policy）、以及**如何应用**（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统梳理这些选择及其内在关联，帮助读者厘清其中的关键概念。
 
 ### 正向 KL 与反向 KL 的区别
 
@@ -44,24 +44,24 @@ $$
 </figure>
 
 **直观理解**：
-- **反向 KL** 倾向于「模式寻找」（mode-seeking）——策略会集中在参考分布的高概率区域，可能牺牲多样性。
-- **正向 KL** 倾向于「全覆盖」（mass-covering）——策略会尽量覆盖参考分布的支撑集。
+- **反向 KL** 倾向于「模式寻找」（mode-seeking），即策略会集中在参考分布的高概率区域，但可能会牺牲多样性。
+- **正向 KL** 倾向于「全覆盖」（mass-covering），即策略会尽量覆盖参考分布的支撑集。
 
-在 RLHF 的主流实现中，**反向 KL** 更为常见，因为我们希望 actor 策略不要偏离参考策略太远，而非要求完全覆盖其所有模式。
+在 RLHF 的主流实现中，**反向 KL** 更为常见，这是因为我们希望 actor 策略不要偏离参考策略太远，而非要求其完全覆盖参考策略的所有模式。
 
 ### 本文的核心问题：从谁采样、估计什么、怎么用
 
 在实际实现 KL 惩罚时，我们需要明确三个相互关联的问题：
 
 1. **从谁采样？** 样本来自当前策略 $q_\theta$（on-policy），还是来自行为策略 $\mu$（off-policy）？
-2. **估计什么？** 我们想要估计的是反向 KL $D_{\mathrm{KL}}(q_\theta \| p)$ 还是正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$？
+2. **估计什么？** 我们要估计的是反向 KL $D_{\mathrm{KL}}(q_\theta \| p)$ 还是正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$？
 3. **怎么用？** KL 项是作为 loss 参与梯度回传，还是作为 reward 惩罚（stop-gradient）？
 
-这三个问题的不同组合，决定了应该选用哪个估计器。本文的目标是系统地梳理这些选择及其相互关系。
+这三个问题的不同组合，决定了应选用哪种估计器。本文的目标是系统梳理这些选择及其内在关联。
 
 ## 准备工作：符号与基本概念
 
-在深入分析之前，我们先统一符号约定，并推导两个在后文反复用到的基础结论。
+在深入分析之前，我们先统一符号约定，并推导两个后文中将反复使用的基础结论。
 
 ### 符号、采样分布与真梯度
 
@@ -76,30 +76,30 @@ $$
 
 #### 统一的采样策略视角：引入 $\rho$ 记号
 
-在分析 KL 估计器的梯度性质时，on-policy 和 off-policy 场景看似需要分开处理，但我们实际上可以用一个统一的框架来描述。
+在分析 KL 估计器的梯度性质时，on-policy 与 off-policy 场景看似需要分别处理，但实际上我们可以采用一个统一的框架来描述。
 
-引入**采样策略** $\mu$：数据来自 $x \sim \mu$。定义**统一的比率**：
+我们引入**采样策略** $\mu$，即数据来源于 $x \sim \mu$，并定义**统一的比率**：
 
 $$
 \rho(x) := \frac{q_\theta(x)}{\text{sg}(\mu(x))}
 $$
 
-这里的关键是：**无论 on-policy 还是 off-policy，我们都把采样策略 $\mu$ 视为梯度常量**（即对 $\mu$ 做 stop-gradient）。
+这里的关键在于：**无论 on-policy 还是 off-policy，我们都将采样策略 $\mu$ 视为梯度常量**（即对 $\mu$ 应用 stop-gradient 操作）。
 
-- **Off-policy**（$\mu \neq q_\theta$）：$\mu$ 本来就不依赖 $\theta$，所以 $\text{sg}(\mu) = \mu$，有 $\rho = \frac{q_\theta}{\mu}$
-- **On-policy**（$\mu = q_\theta$）：令 $\mu = q_\theta$ 但 stop-gradient，于是 $\rho = \frac{q_\theta}{\text{sg}(q_\theta)} \equiv 1$（数值恒为 1），但 $\nabla_\theta \rho = s_\theta \neq 0$
+- **Off-policy**（$\mu \neq q_\theta$）：$\mu$ 本身不依赖于 $\theta$，因此 $\text{sg}(\mu) = \mu$，此时 $\rho = \frac{q_\theta}{\mu}$
+- **On-policy**（$\mu = q_\theta$）：令 $\mu = q_\theta$ 但对其应用 stop-gradient，则 $\rho = \frac{q_\theta}{\text{sg}(q_\theta)} \equiv 1$（数值恒为 1），但 $\nabla_\theta \rho = s_\theta \neq 0$
 
-**实现提示**：on-policy 时虽然数值上 $\rho\equiv 1$，但必须在计算图中显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$（或写成 $\rho=\exp(\log q_\theta-\text{sg}(\log q_\theta))$）。如果直接把 $\rho$ 写成常数 1，会丢失这条 score-function 梯度路径，导致推导退化为后文所说的“朴素 on-policy 写法”。
+**实现提示**：在 on-policy 情况下，虽然数值上 $\rho\equiv 1$，但必须在计算图中显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$（或等价地写成 $\rho=\exp(\log q_\theta-\text{sg}(\log q_\theta))$）。若直接将 $\rho$ 设为常数 1，则会丢失这条 score-function 梯度路径，导致推导退化为后文所述的「朴素 on-policy 写法」。
 
-**直观理解**：$\rho$ 的作用是把「采样分布对 $\theta$ 的依赖」那条梯度路径补回来。在 on-policy 时，这正是「先期望后梯度」与「先梯度后期望」分裂的根源与修复方式。
+**直观理解**：$\rho$ 的作用是补全「采样分布对 $\theta$ 的依赖」这条梯度路径。在 on-policy 情况下，这正是「先期望后梯度」与「先梯度后期望」两者分裂的根源，也是修复这一分裂的关键。
 
-有了这个统一记号，我们可以把 on-policy 和 off-policy 的分析合并成一套框架，大大简化后文的推导。
+通过这一统一记号，我们可以将 on-policy 与 off-policy 的分析合并到同一个框架中，从而大大简化后文的推导。
 
 #### Score Function 与 KL 真梯度
 
-Score function 有一个重要性质：$\mathbb{E}_{q_\theta}[s_\theta] = 0$（因为 $\int \nabla_\theta q_\theta dx = \nabla_\theta \int q_\theta dx = \nabla_\theta 1 = 0$）。
+Score function 具有一个重要性质：$\mathbb{E}_{q_\theta}[s_\theta] = 0$（因为 $\int \nabla_\theta q_\theta dx = \nabla_\theta \int q_\theta dx = \nabla_\theta 1 = 0$）。
 
-利用这一性质，我们可以推导正向和反向 KL 散度对 $\theta$ 的**真梯度**。
+基于这一性质，我们可以推导正向和反向 KL 散度关于参数 $\theta$ 的**真梯度**。
 
 **反向 KL 的梯度**：
 
@@ -107,7 +107,7 @@ $$
 D_{\mathrm{KL}}(q_\theta \| p) = \int q_\theta(x) \log \frac{q_\theta(x)}{p(x)} dx
 $$
 
-对 $\theta$ 求梯度（使用乘积法则）：
+对 $\theta$ 求梯度（运用乘积法则）：
 
 $$
 \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \int \nabla_\theta q_\theta \cdot \log \frac{q_\theta}{p} dx + \int q_\theta \cdot \nabla_\theta \log \frac{q_\theta}{p} dx
@@ -139,7 +139,7 @@ $$
 \nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \int p(x) \cdot \nabla_\theta \left(-\log q_\theta(x)\right) dx = -\mathbb{E}_p[s_\theta]
 $$
 
-为了用 $q$ 的样本估计这个量，进行重要性采样：
+为了使用 $q$ 的样本估计该梯度，我们引入重要性采样：
 
 $$
 -\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} \cdot s_\theta\right] = -\mathbb{E}_q\left[\frac{p}{q} \cdot s_\theta\right]
@@ -153,11 +153,11 @@ $$
 
 > **预告**：后文将推导 $\nabla_\theta k_3 = (1-\frac{p}{q}) s_\theta$，因此 $\mathbb{E}_q[\nabla_\theta k_3] = \nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)$（正向 KL）——这解释了为什么直接对 $k_3$ 反传会给出「错误」的梯度方向。
 
-有了这两个结果，我们就能在后文判断各估计器的梯度期望究竟对应哪个 KL 的真梯度。
+有了这两个结果，我们便能在后续分析中判断各估计器的梯度期望分别对应哪种 KL 散度的真梯度。
 
 ## 三种估计器的定义与设计原理
 
-记比值 $\frac{p(x)}{q_\theta(x)}$，John Schulman 提出的三种单样本估计器定义如下：
+基于概率比值 $\frac{p(x)}{q_\theta(x)}$，John Schulman 提出了三种单样本估计器，其定义如下：
 
 ### 三种估计器：定义与直觉
 
@@ -167,7 +167,7 @@ $$
 k_1(x) = -\log \frac{p(x)}{q_\theta(x)} = \log q_\theta(x) - \log p(x)
 $$
 
-这是最直接的定义——直接取 log-ratio 的负值。它对反向 KL 无偏，但有一个致命缺陷：**可能取负值**，而 KL 散度始终非负。这导致其方差极高，因为正负估计值会相互抵消。
+这是最直观的定义——直接取对数比值的负值。它对反向 KL 是无偏的，但存在一个致命缺陷：**估计值可能为负数**，而 KL 散度始终是非负的。这会导致方差极高，因为正负估计值会相互抵消。
 
 **$k_2$：基于 f-散度的平方估计器**
 
@@ -175,15 +175,15 @@ $$
 k_2(x) = \frac{1}{2}\left(\log \frac{p(x)}{q_\theta(x)}\right)^2
 $$
 
-**设计动机**：$k_1$ 的问题在于可正可负，而 $k_2$ 通过取平方保证**每个样本都是正的**，直观上每个样本都在衡量 $p$ 和 $q$ 之间的差异程度。
+**设计动机**：$k_1$ 的估计值可正可负，而 $k_2$ 通过取平方确保**每个样本的估计值都非负**，从而每个样本都能直观地衡量 $p$ 和 $q$ 之间的差异程度。
 
-**为什么偏差很小？** $k_2$ 本质上是一个 **f-散度**（f-divergence），其中 $f(x) = \frac{1}{2}(\log x)^2$。f-散度有一个重要性质：**所有可微的 f-散度在 $q \approx p$ 时，二阶展开都形如**
+**为什么偏差较小？** $k_2$ 本质上是一个 **f-散度**（f-divergence），其中 $f(x) = \frac{1}{2}(\log x)^2$。f-散度有一个重要性质：**所有可微的 f-散度在 $q \approx p$ 时，二阶展开都形如**
 
 $$
 D_f\big(p, q_{\theta_0+\Delta\theta}\big) = D_f\big(p, q_{\theta_0}\big) + \frac{f^{\prime\prime}(1)}{2}\, \Delta\theta^T F(\theta_0)\, \Delta\theta + O(\|\Delta\theta\|^3)
 $$
 
-其中 $F(\theta_0)$ 是在 $\theta_0$ 处的 Fisher 信息矩阵。KL 散度对应 $f(x) = -\log x$，有 $f^{\prime\prime}(1) = 1$；而 $k_2$ 对应的 $f(x) = \frac{1}{2}(\log x)^2$，同样有 $f^{\prime\prime}(1) = 1$。这意味着**当策略接近时，$\mathbb{E}_{q_\theta}[k_2]$ 与真实 KL 在二阶近似上具有相同的局部曲率**，偏差主要体现在更高阶项。
+其中 $F(\theta_0)$ 是 $\theta_0$ 处的 Fisher 信息矩阵。KL 散度对应 $f(x) = -\log x$，有 $f^{\prime\prime}(1) = 1$；而 $k_2$ 对应的 $f(x) = \frac{1}{2}(\log x)^2$，同样有 $f^{\prime\prime}(1) = 1$。这意味着**当策略接近时，$\mathbb{E}_{q_\theta}[k_2]$ 与真实 KL 散度在二阶近似下具有相同的局部曲率**，偏差主要来源于更高阶项。
 
 **$k_3$：控制变量法构造的 Bregman 散度估计器**
 
@@ -191,9 +191,9 @@ $$
 k_3(x) = \frac{p(x)}{q_\theta(x)} - 1 - \log \frac{p(x)}{q_\theta(x)}
 $$
 
-**设计动机**：我们想要一个**既无偏又低方差**的估计器。标准做法是给 $k_1$ 加一个**控制变量**（control variate）——一个期望为零但与 $k_1$ 负相关的量。
+**设计动机**：我们希望得到一个**既无偏又低方差**的估计器。标准做法是为 $k_1$ 添加一个**控制变量**（control variate）——即期望为零但与 $k_1$ 负相关的量。
 
-注意到 $\mathbb{E}_q\left[\frac{p}{q} - 1\right] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$，所以对于任意 $\lambda$，
+注意到 $\mathbb{E}_q\left[\frac{p}{q} - 1\right] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$，因此对于任意 $\lambda$，
 
 $$
 k_1 + \lambda\left(\frac{p}{q} - 1\right) = -\log \frac{p}{q} + \lambda\left(\frac{p}{q} - 1\right)
@@ -201,15 +201,15 @@ $$
 
 仍然是无偏估计。
 
-**为什么选 $\lambda = 1$？** 由于 $\log$ 是凹函数，有 $\log x \leq x - 1$，因此
+**为什么选择 $\lambda = 1$？** 由于 $\log$ 是凹函数，有 $\log x \leq x - 1$，因此
 
 $$
 k_3 = \left(\frac{p}{q} - 1\right) - \log \frac{p}{q} \geq 0
 $$
 
-**始终非负**！这保证了每个样本都在「正向」贡献信息，消除了 $k_1$ 正负抵消的问题。
+**始终非负**！这保证了每个样本都「正向」贡献信息，避免了 $k_1$ 中正负估计值相互抵消的问题。
 
-**几何直观**：$k_3$ 实际上是一个 **Bregman 散度**。考虑凸函数 $\phi(x) = -\log x$，它在 $x=1$ 处的切线为 $y = 1 - x$。Bregman 散度定义为「函数值与切线值之差」：
+**几何视角**：$k_3$ 实际上是一个 **Bregman 散度**。考虑凸函数 $\phi(x) = -\log x$，它在 $x=1$ 处的切线为 $y = 1 - x$。Bregman 散度定义为函数值与切线值之差：
 
 $$
 \begin{aligned}
@@ -220,7 +220,7 @@ D_\phi\left(\frac{p}{q}, 1\right) &= \phi\left(\frac{p}{q}\right) - \phi(1) - \p
 \end{aligned}
 $$
 
-由于凸函数始终位于其切线上方，这个差值**自然非负**。更重要的是，当 $\frac{p}{q} \to 1$ 时，函数与切线「贴合」得越来越紧密，差值以 $\left(\frac{p}{q} - 1\right)^2$ 的二阶速度趋近于零——这正是 $k_3$ 在策略接近时方差小的根本原因。
+由于凸函数始终位于其切线上方，该差值**自然非负**。更重要的是，当 $\frac{p}{q} \to 1$ 时，函数与切线「贴合」得越来越紧密，差值以 $\left(\frac{p}{q} - 1\right)^2$ 的二阶速度趋近于零——这正是 $k_3$ 在策略接近时方差较小的根本原因。
 
 **小结：三者的设计逻辑对比**
 
@@ -230,11 +230,11 @@ $$
 | $k_2$  | $\frac{1}{2}\left(\log \frac{p}{q}\right)^2$ | f-散度，二阶行为与 KL 一致 |
 | $k_3$  |     $\frac{p}{q} - 1 - \log \frac{p}{q}$     |  控制变量 + Bregman 散度   |
 
-了解了三种估计器的定义与设计原理后，我们首先分析它们在**估计 KL 数值**时的性质——即偏差与方差。
+了解了三种估计器的定义与设计原理后，我们首先分析它们在估计 KL 散度数值时的性质——即偏差与方差特性。
 
 ## 数值估计：偏差与方差
 
-本节分析三种估计器在**估计 KL 数值**时的性质。这些性质在任何使用场景下都是基础。
+本节分析三种估计器在估计 KL 散度数值时的性质。这些性质是任何使用场景下的基础。
 
 假设从 $q_\theta$ 采样来估计反向 KL $D_{\mathrm{KL}}(q_\theta \| p)$：
 
@@ -250,11 +250,11 @@ $$
 \end{aligned}
 $$
 
-**结论**：对于估计反向 KL 的**数值**，$k_1$ 和 $k_3$ 是无偏估计，而 $k_2$ 是有偏的。
+**结论**：在估计反向 KL 的数值时，$k_1$ 和 $k_3$ 是无偏估计，而 $k_2$ 是有偏估计。
 
 ### 方差特性分析
 
-John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）表明：
+John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）显示：
 
 | 估计器 | bias/true | stdev/true |
 | :----: | :-------: | :--------: |
@@ -272,8 +272,8 @@ John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，�
 
 **核心直观理解**：
 - $k_1 = -\log \frac{p}{q}$ 以一阶项起步，当 $\frac{p}{q}$ 接近 1 时波动较大，且可能取负值
-- $k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}$ 在 $\frac{p}{q}=1$ 处是二阶小量，始终非负，因此在策略接近时方差更小
-- 但当覆盖严重不足（$\frac{p}{q}$ 可能爆炸）时，$k_3$ 的方差会因权重爆炸而增大；此时 $k_1$ 反而更稳定
+- $k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}$ 在 $\frac{p}{q}=1$ 处是二阶小量，始终非负，因此在策略接近时方差较小
+- 但当覆盖严重不足（$\frac{p}{q}$ 可能极大）时，$k_3$ 的方差会因权重爆炸而增大；此时 $k_1$ 反而更加稳定
 
 **数值估计小结**
 
@@ -285,19 +285,19 @@ John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，�
 
 从数值估计的角度看，$k_3$ 是「无偏 + 低方差」的最优选择。
 
-> **注**：若要估计**正向 KL 的数值** $D_{\mathrm{KL}}(p \| q) = \mathbb{E}_p\left[\log \frac{p}{q}\right]$，而只能从 $q$ 采样，可用重要性采样 $\mathbb{E}_q\left[\frac{p}{q} \log \frac{p}{q}\right]$。
+> **注**：若要估计**正向 KL 的数值** $D_{\mathrm{KL}}(p \| q) = \mathbb{E}_p\left[\log \frac{p}{q}\right]$，且只能从 $q$ 采样，则可以使用重要性采样 $\mathbb{E}_q\left[\frac{p}{q} \log \frac{p}{q}\right]$。
 
 ## KL 惩罚的两种使用方式
 
-了解了估计器的数值性质后，我们需要进一步明确：**KL 惩罚在强化学习中到底怎么用？** 这一选择决定了我们是只关心估计器的数值性质，还是必须同时关心其梯度性质。
+了解了估计器的数值性质后，我们需要进一步明确：**KL 惩罚在强化学习中究竟如何应用？** 这一选择决定了我们是仅关心估计器的数值性质，还是必须同时关注其梯度性质。
 
-回顾 KL 正则化强化学习的目标函数（下式中用 $\tau\sim q_\theta$ 表示“由策略 $q_\theta$ 诱导的轨迹分布”）：
+回顾 KL 正则化强化学习的目标函数（下式中 $\tau\sim q_\theta$ 表示“由策略 $q_\theta$ 诱导的轨迹分布”）：
 
 $$
 J(\theta) = \mathbb{E}_{\tau \sim q_\theta} \left[ \sum_{t=0}^T \gamma^t r(s_t, a_t) \right] - \beta \cdot D_{\mathrm{KL}}(q_\theta \| p)
 $$
 
-这个数学形式看起来很统一，但在基于 Actor-Critic 的算法（如 PPO）中实现时，却衍生出了两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。
+这个数学形式看似统一，但在基于 Actor-Critic 的算法（如 PPO）中实现时，却衍生出两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。
 
 > **符号说明**：本节用 $\text{KL}_t$ 或 $\text{KL}(s)$ 泛指某个 token/state 级的 KL 估计器（如 $k_1, k_2, k_3$），具体定义见前文「三种估计器的定义与设计原理」一节。
 
@@ -307,7 +307,7 @@ $$
 actor_loss = -advantage * log_prob + beta * kl  # kl 参与梯度计算
 ```
 
-Critic 只学环境价值，KL 作为 actor 的正则项直接参与 loss 梯度回传。
+Critic 仅学习环境价值，KL 作为 actor 的正则项直接参与 loss 的梯度回传。
 
 ### 作为 Reward：KL 加入奖励塑形
 
@@ -316,32 +316,32 @@ kl = compute_kl(log_prob_q, log_prob_p).detach()
 shaped_reward = reward - beta * kl
 ```
 
-KL 被视为环境奖励的一部分，用 shaped reward 做标准 actor-critic 更新。KL 项不参与 loss 梯度回传。
+KL 被视为环境奖励的一部分，使用形塑后的奖励进行标准的 actor-critic 更新。KL 项不参与 loss 的梯度回传。
 
-这两种做法看似只是代码里一个 `.detach()` 的区别，实际上对应着截然不同的优化语义。两种方式的深入对比将在后文「$k_1$ in Reward 与低方差 KL in Loss 的等价性与差异」一节详细展开。这里先给出核心区分：
+这两种做法看似只是代码中一个 `.detach()` 的区别，实际上对应着截然不同的优化语义。两种方式的深入对比将在后文「$k_1$ in Reward 与低方差 KL in Loss 的等价性与差异」一节详细展开。此处先给出核心区别：
 
 - **KL 作为 Loss**：需要 KL 估计器的正确显式梯度，关心梯度对应哪个优化目标
-- **KL 作为 Reward**：需要 KL 的准确数值估计，同时还要关心它诱导的策略梯度是否正确
+- **KL 作为 Reward**：需要 KL 的准确数值估计，同时还要关注它诱导的策略梯度是否正确
 
 下面我们按照「作为 Loss」和「作为 Reward」两种使用方式，深入剖析估计器的梯度性质。
 
 ## 作为 Loss 时的梯度分析
 
-当 KL 作为 loss 参与梯度回传时，我们需要关心估计器对应的优化目标。这是实践中最容易混淆也最关键的部分。
+当 KL 散度作为损失函数参与梯度回传时，我们需要关注不同估计器对应的优化目标。这是实践中最易混淆，也最关键的环节。
 
-利用前文引入的统一框架，我们可以把 on-policy 和 off-policy 的分析合并成一套推导。回顾统一的比率定义：
+借助前文引入的统一框架，我们可以将 on-policy 与 off-policy 场景下的分析合并为一套推导。回顾统一的比率定义：
 
 $$
 \rho(x) := \frac{q_\theta(x)}{\text{sg}(\mu(x))}
 $$
 
-其中 $\mu$ 是采样策略。在这个框架下：
+其中 $\mu$ 为采样策略。在此框架下：
 - **On-policy**（$\mu = q_\theta$）：$\rho \equiv 1$，但 $\nabla_\theta \rho = s_\theta$
 - **Off-policy**（$\mu \neq q_\theta$）：$\rho = \frac{q_\theta}{\mu}$，且 $\nabla_\theta \rho = \rho \cdot s_\theta$
 
 ### 三种估计器的基本梯度
 
-首先计算三种估计器本身的梯度（不含 $\rho$），这些结果在后续分析中会反复用到。
+首先计算三种估计器本身的梯度（不含 $\rho$），这些结果将在后续分析中反复使用。
 
 **推导 $\nabla_\theta k_1$**：
 
@@ -400,13 +400,13 @@ $$
 - $\nabla_\theta k_2 = -\left(\log \frac{p}{q}\right) s_\theta = k_1 \cdot s_\theta$
 - $\nabla_\theta k_3 = \left(1 - \frac{p}{q}\right) s_\theta$
 
-这些基本梯度将在后续的统一框架分析中反复用到。
+这些基本梯度将在后续的统一框架分析中反复使用。
 
 #### 「先期望后梯度」vs「先梯度后期望」：一个重要警示
 
 在分析 KL 估计器的梯度时，有一个容易混淆的陷阱：**「先期望后梯度」与「先梯度后期望」可能给出不同的结果**。
 
-如果从解析角度把 $\mathbb{E}_q[k_i]$ 当作一个关于 $\theta$ 的函数再求梯度（即「先期望后梯度」），由「数值估计」一节的结论 $\mathbb{E}_q[k_1] = \mathbb{E}_q[k_3] = D_{\mathrm{KL}}(q \| p)$，我们有：
+如果从解析角度将 $\mathbb{E}_q[k_i]$ 视为 $\theta$ 的函数再求梯度（即「先期望后梯度」），根据「数值估计」一节的结论 $\mathbb{E}_q[k_1] = \mathbb{E}_q[k_3] = D_{\mathrm{KL}}(q \| p)$，我们有：
 
 $$
 \nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
@@ -416,15 +416,15 @@ $$
 \nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
 $$
 
-两者都给出反向 KL 的梯度。但在代码中直接对 $k_i$ 的样本均值调用反传时，自动微分执行的是「先梯度后期望」，得到的是 $\mathbb{E}_q[\nabla_\theta k_i]$——这与「先期望后梯度」的结果**可能不同**。
+两者都给出反向 KL 的梯度。然而，在代码中直接对 $k_i$ 的样本均值进行反向传播时，自动微分执行的是「先梯度后期望」，得到 $\mathbb{E}_q[\nabla_\theta k_i]$——这与「先期望后梯度」的结果**可能不同**。
 
-这种分裂的根源在于：当采样分布 $q_\theta$ 本身依赖于 $\theta$ 时，期望与梯度不能随意交换。这正是 on-policy 场景的核心困难，也是我们需要引入统一 $\rho$ 框架的原因。
+这种差异的根源在于：当采样分布 $q_\theta$ 本身依赖于 $\theta$ 时，期望与梯度不能随意交换。这正是 on-policy 场景的核心困难，也是我们需要引入统一 $\rho$ 框架的原因。
 
 ### 统一框架下的梯度分析
 
-现在我们用 $\rho$ 框架统一处理 on-policy 和 off-policy 场景。考虑 loss 形式 $L = \rho \cdot k$，其中 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$。
+现在，我们使用 $\rho$ 框架统一处理 on-policy 和 off-policy 场景。考虑损失函数形式 $L = \rho \cdot k$，其中 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$。
 
-**关键观察**：因为 $\text{sg}(\mu)$ 不依赖 $\theta$，对任何关于 $\theta$ 可微的函数 $f_\theta(x)$，有
+**关键观察**：由于 $\text{sg}(\mu)$ 不依赖于 $\theta$，对于任何关于 $\theta$ 可微的函数 $f_\theta(x)$，有
 
 $$
 \nabla_\theta \mathbb{E}_{\mu}[f_\theta(x)] = \mathbb{E}_{\mu}[\nabla_\theta f_\theta(x)]
@@ -432,11 +432,11 @@ $$
 
 这意味着在 $\rho$ 框架下，「先期望后梯度」与「先梯度后期望」**总是等价的**——无论 on-policy 还是 off-policy。
 
-> **注意**：这里的“期望”指的是对**固定的采样分布** $\mu$ 的 $\mathbb{E}_\mu[\cdot]$。我们把“分布对 $\theta$ 的依赖”统一塞进了 $\rho=\frac{q_\theta}{\text{sg}(\mu)}$ 这条路径里；因此不要把这句话误读成对 $\mathbb{E}_{q_\theta}[\cdot]$ 也能不加条件地交换微分与期望。
+> **注意**：这里的“期望”指的是对**固定的采样分布** $\mu$ 的 $\mathbb{E}_\mu[\cdot]$。我们将“分布对 $\theta$ 的依赖”统一纳入 $\rho=\frac{q_\theta}{\text{sg}(\mu)}$ 这条路径中；因此不要将这句话误读为对 $\mathbb{E}_{q_\theta}[\cdot]$ 也能无条件地交换微分与期望。
 
 #### 统一框架下三种估计器的梯度推导
 
-利用 $\nabla_\theta \rho = \rho \cdot s_\theta$（因为 $\rho = q_\theta / \text{sg}(\mu)$），结合前文已推导的 $\nabla_\theta k_i$，用乘积法则：
+利用 $\nabla_\theta \rho = \rho \cdot s_\theta$（因为 $\rho = q_\theta / \text{sg}(\mu)$），结合前文推导的 $\nabla_\theta k_i$，应用乘积法则：
 
 **$\nabla_\theta(\rho k_1)$**：
 
@@ -450,7 +450,7 @@ $$
 \nabla_\theta(\rho k_2) = \rho s_\theta k_2 + \rho \left(-\log \frac{p}{q}\right) s_\theta = \rho s_\theta \left(k_2 - \log \frac{p}{q}\right) = \rho s_\theta (k_2 + k_1)
 $$
 
-**$\nabla_\theta(\text{sg}(\rho) k_2)$**（对 $\rho$ 做 stop-gradient）：
+**$\nabla_\theta(\text{sg}(\rho) k_2)$**（对 $\rho$ 施加 stop-gradient）：
 
 $$
 \nabla_\theta(\text{sg}(\rho) k_2) = \text{sg}(\rho) \cdot \nabla_\theta k_2 = \rho \cdot \left(-\log \frac{p}{q}\right) s_\theta = \rho s_\theta k_1
@@ -468,7 +468,7 @@ $$
 k_3 + 1 - \frac{p}{q} = \left(\frac{p}{q} - 1 - \log \frac{p}{q}\right) + 1 - \frac{p}{q} = -\log \frac{p}{q} = k_1
 $$
 
-因此有一个关键简化：
+因此得到一个关键简化：
 
 $$
 \boxed{\nabla_\theta(\rho k_3) = \rho s_\theta k_1}
@@ -495,7 +495,7 @@ $$
 \end{aligned}
 $$
 
-也就是说，$\rho k_2$ 的梯度期望对应的是“最小化 $\mathbb{E}_{q_\theta}[k_2]$”（一个与 KL 二阶近似一致的 f-散度），而**不是**反向 KL $D_{\mathrm{KL}}(q_\theta\|p)$ 的真梯度；因此当目标是反向 KL 时，$\rho k_2$ 应当避免。
+也就是说，$\rho k_2$ 的梯度期望对应的是“最小化 $\mathbb{E}_{q_\theta}[k_2]$”（一个与 KL 二阶近似一致的 f-散度），而**不是**反向 KL $D_{\mathrm{KL}}(q_\theta\|p)$ 的真实梯度；因此当目标是反向 KL 时，应避免使用 $\rho k_2$。
 
 **$\mathbb{E}_\mu[\nabla_\theta(\text{sg}(\rho) k_2)]$**：
 
@@ -511,7 +511,7 @@ $$
 
 #### 梯度等价性：哪些方法产生相同的梯度随机变量
 
-从上述推导中，我们发现一个非常关键的事实：
+从上述推导中，我们发现一个关键事实：
 
 > **$\text{sg}(\rho) k_2$ 与 $\rho k_3$ 的梯度完全相同**：$\nabla_\theta(\text{sg}(\rho) k_2) = \nabla_\theta(\rho k_3) = \rho s_\theta k_1$
 
@@ -528,17 +528,17 @@ $$
 
 ### On-policy 与 Off-policy 的统一视角
 
-现在我们可以用统一框架重新审视 on-policy 和 off-policy 的关系。
+现在，我们可以通过统一框架重新审视 on-policy 与 off-policy 的关系。
 
 **On-policy**（$\mu = q_\theta$）：
 - $\rho = \frac{q_\theta}{\text{sg}(q_\theta)} \equiv 1$（数值恒为 1）
 - $\rho k_1 = k_1$，$\rho k_2 = k_2$，$\rho k_3 = k_3$
 - 但梯度不同！因为 $\nabla_\theta \rho = s_\theta \neq 0$
 
-这解释了为什么 on-policy 时**朴素直接反传**（不显式构造 $\rho$）用 $k_1$ 或 $k_3$ 作为 loss 会出问题：
-- 直接用 $k_1$：相当于没有 $\rho$ 的版本，$\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$，**完全无效**
-- 直接用 $k_3$：相当于没有 $\rho$ 的版本，$\mathbb{E}_q[\nabla k_3] = \nabla D_{\mathrm{KL}}(p \| q)$（正向 KL），**方向错误**
-- 直接用 $k_2$：$\mathbb{E}_q[\nabla k_2] = \nabla D_{\mathrm{KL}}(q \| p)$（反向 KL）✓ **朴素实现下唯一正确选择**
+这解释了为什么 on-policy 时**朴素直接反向传播**（不显式构造 $\rho$）使用 $k_1$ 或 $k_3$ 作为损失函数会出问题：
+- 直接使用 $k_1$：相当于没有 $\rho$ 的版本，$\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$，**完全无效**
+- 直接使用 $k_3$：相当于没有 $\rho$ 的版本，$\mathbb{E}_q[\nabla k_3] = \nabla D_{\mathrm{KL}}(p \| q)$（正向 KL），**方向错误**
+- 直接使用 $k_2$：$\mathbb{E}_q[\nabla k_2] = \nabla D_{\mathrm{KL}}(q \| p)$（反向 KL）✓ **朴素实现下唯一正确选择**
 
 但如果**显式构造** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$，则：
 - **可用**：$\rho k_1$（方差高）、$\text{sg}(\rho) k_2$（推荐）、$\rho k_3$（推荐）——三者均给出反向 KL 梯度
@@ -555,7 +555,7 @@ $$
 
 ### 方差分析
 
-前面我们看到，给出反向 KL 无偏梯度的有三个选择：$\rho k_1$、$\text{sg}(\rho) k_2$、$\rho k_3$。它们的梯度随机变量分别是（注意这里的 $s_\theta$ 是向量，因此梯度也是向量）：
+前面我们看到，给出反向 KL 无偏梯度的有三个选择：$\rho k_1$、$\text{sg}(\rho) k_2$、$\rho k_3$。它们的梯度随机变量分别为（注意 $s_\theta$ 是向量，因此梯度也是向量）：
 
 $$
 g_1(x) = \rho(x) s_\theta(x) (k_1(x) + 1), \quad g_\star(x) = \rho(x) s_\theta(x) k_1(x)
@@ -585,7 +585,7 @@ $$
 }
 $$
 
-（你也可以把这理解为对每个坐标分量分别比较方差；结论与直观量级判断是一致的。）
+（你也可以将此理解为对每个坐标分量分别比较方差；结论与直观量级判断一致。）
 
 **在典型的 KL 惩罚 regime 下**（$q_\theta \approx p \approx \mu$），取 $\frac{p(x)}{q(x)} = 1 + \varepsilon(x)$，$|\varepsilon| \ll 1$：
 - $k_1 = -\log \frac{p}{q} \approx -\varepsilon$
@@ -595,7 +595,7 @@ $$
 
 **核心直观理解**：
 - $g_1 = \rho s_\theta (k_1 + 1)$ 包含一个量级为 $O(1)$ 的零均值噪声项 $\rho s_\theta$
-- $g_\star = \rho s_\theta k_1$ 已把该常数噪声项消去，剩下与 $\varepsilon$ 成正比的一阶小量
+- $g_\star = \rho s_\theta k_1$ 已将该常数噪声项消去，剩下与 $\varepsilon$ 成正比的一阶小量
 
 **方差对比表格**：
 
@@ -611,9 +611,9 @@ $$
 
 **极度 off-policy 时的警示**：
 
-当 $\mu$ 与 $q_\theta$ 差异很大——比如 $\mu$ 在 $q_\theta$ 的高密度区域几乎没有采样，或 $\rho = q_\theta / \mu$ 在尾部爆炸——任何基于 $\rho$ 的方法都会遭遇严重的方差问题。此时 $\rho k_3$（或 $\text{sg}(\rho) k_2$）相对 $\rho k_1$ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。
+当 $\mu$ 与 $q_\theta$ 差异很大时——例如 $\mu$ 在 $q_\theta$ 的高密度区域几乎没有采样，或 $\rho = q_\theta / \mu$ 在尾部爆炸——任何基于 $\rho$ 的方法都会遭遇严重的方差问题。此时，$\rho k_3$（或 $\text{sg}(\rho) k_2$）相对于 $\rho k_1$ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。
 
-不过，在 RL 实践中我们通常会控制 KL 约束、限制 off-policy 程度（比如使用近邻策略 $\mu = q_{\theta_\text{old}}$），在这个常见的 regime 里，可以相当有信心地说：
+不过，在 RL 实践中，我们通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 $\mu = q_{\theta_\text{old}}$）。在这个常见的 regime 中，可以相当有信心地说：
 
 > **如果已经决定用重要性采样来优化反向 KL，推荐使用 $\rho k_3$ 或 $\text{sg}(\rho) k_2$（两者梯度等价且方差低）；相较之下，$\rho k_1$ 方差更高。**
 
@@ -637,29 +637,29 @@ $$
 
 其中 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$。当 on-policy（$\mu = q_\theta$）时，$\rho \equiv 1$。
 
-需要特别强调：**上表的结论针对的是 “loss 写成 $L=\rho\,k$ 且 $\rho$ 在计算图中保留梯度路径” 的统一框架**。在 on-policy 时虽然数值上 $\rho\equiv 1$，但由于 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，仍然有 $\nabla_\theta\rho=s_\theta\neq 0$，因此 $\rho k$ 与“直接对 $k$ 的样本均值反传”在梯度上并不等价。
+需要特别强调：**上表的结论针对的是 “loss 写成 $L=\rho\,k$ 且 $\rho$ 在计算图中保留梯度路径” 的统一框架**。在 on-policy 时，虽然数值上 $\rho\equiv 1$，但由于 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，仍有 $\nabla_\theta\rho=s_\theta\neq 0$，因此 $\rho k$ 与“直接对 $k$ 的样本均值反向传播”在梯度上并不等价。
 
-如果你采用的是**朴素 on-policy 写法**（即从 $q_\theta$ 采样后，把 $\{k_i(x)\}$ 当作普通标量，对其样本均值直接反传；不显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$ 来补上 score-function 那条路径），那么会退化为：
-- 直接用 $k_1$：$\mathbb{E}_q[\nabla k_1]=0$（无效）
-- 直接用 $k_2$：$\mathbb{E}_q[\nabla k_2]=\nabla D_{\mathrm{KL}}(q\|p)$（反向 KL）✓
-- 直接用 $k_3$：$\mathbb{E}_q[\nabla k_3]=\nabla D_{\mathrm{KL}}(p\|q)$（正向 KL）✗
+如果你采用的是**朴素 on-policy 写法**（即从 $q_\theta$ 采样后，将 $\{k_i(x)\}$ 视为普通标量，对其样本均值直接反向传播；不显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$ 来补上 score-function 路径），则会退化为：
+- 直接使用 $k_1$：$\mathbb{E}_q[\nabla k_1]=0$（无效）
+- 直接使用 $k_2$：$\mathbb{E}_q[\nabla k_2]=\nabla D_{\mathrm{KL}}(q\|p)$（反向 KL）✓
+- 直接使用 $k_3$：$\mathbb{E}_q[\nabla k_3]=\nabla D_{\mathrm{KL}}(p\|q)$（正向 KL）✗
 
 **关键结论**：
 
-1. **On-policy 优化反向 KL（朴素直接反传的实现）**：唯一正确选择是 $k_2$
+1. **On-policy 优化反向 KL（朴素直接反向传播的实现）**：唯一正确选择是 $k_2$
 2. **Off-policy 优化反向 KL**：有三个正确选项：
-  - $\rho k_1$：无偏但方差较高
-  - $\text{sg}(\rho) k_2$：无偏，与 $\rho k_3$ **梯度完全等价**
-  - $\rho k_3$：无偏且方差更低（与上一项等价，均为推荐选择）
+   - $\rho k_1$：无偏但方差较高
+   - $\text{sg}(\rho) k_2$：无偏，与 $\rho k_3$ **梯度完全等价**
+   - $\rho k_3$：无偏且方差更低（与上一项等价，均为推荐选择）
 3. **$\rho k_2$（权重参与梯度）失效**：这是一个容易被忽视的陷阱
 
 ## 作为 Reward 时的梯度分析
 
-前文分析了 KL 作为 Loss 时各估计器的梯度性质。一个自然的想法是：既然 $k_1$ 和 $k_3$ 对反向 KL 数值都是无偏的（见「数值估计」章节），那么把它们（加 stop-gradient）作为 reward 惩罚应该都没问题。
+前文分析了 KL 作为 Loss 时各估计器的梯度性质。一个自然的想法是：既然 $k_1$ 和 $k_3$ 对反向 KL 数值都是无偏的（见「数值估计」章节），那么将它们（加 stop-gradient）作为 reward 惩罚应该都没问题。
 
 **但这是错误的。**
 
-问题在于：当 KL 作为 reward 惩罚时，虽然 KL 项本身不反传梯度，但它会通过 advantage 间接影响策略梯度。因此，评价一个估计器「能否用于 reward 惩罚」，不应只看数值偏差，而应看**它诱导的策略梯度是否正确**。
+问题在于：当 KL 作为 reward 惩罚时，虽然 KL 项本身不反向传播梯度，但它会通过 advantage 间接影响策略梯度。因此，评价一个估计器「能否用于 reward 惩罚」，不应只看数值偏差，而应看**它诱导的策略梯度是否正确**。
 
 ### 真正的 KL 正则化策略梯度
 
@@ -689,7 +689,7 @@ $$
 
 #### 使用估计器 $\hat{k}$ 时的梯度形式
 
-当我们用某个估计器 $\hat{k}$（加 stop-gradient）作为 reward 惩罚时，shaped reward 为 $\tilde{R} = R - \beta \cdot \text{sg}(\hat{k})$，策略梯度变为：
+当我们使用某个估计器 $\hat{k}$（加 stop-gradient）作为 reward 惩罚时，shaped reward 为 $\tilde{R} = R - \beta \cdot \text{sg}(\hat{k})$，策略梯度变为：
 
 $$
 \nabla_\theta \tilde{J} = \mathbb{E}_{q_\theta}\left[s_\theta \cdot (R - \beta \cdot \hat{k})\right]
@@ -908,11 +908,11 @@ $$
 
 **实践建议**：
 
-1. **如果你希望 KL 约束是「修正性」的**——允许 agent 探索但在局部修正行为，且希望 KL 压力更可控、更不依赖 critic 质量 → 选择 **KL 作为 Loss**，使用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$（其中 on-policy 时若不想显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，直接用 $k_2$ 更简单且不易踩坑）
+1. **如果你希望 KL 约束是「修正性」的**——即允许智能体探索，但在局部修正其行为，同时希望 KL 的压力更可控、更少依赖 critic 的质量，那么请选择 **KL 作为 Loss**，使用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$。注意，在 on-policy 场景下，如果不想显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，直接使用 $k_2$ 会更简单且不易出错。
 
-2. **如果你希望 KL 约束是「预防性」的**——让 agent 从根源上避开高 KL 区域，且接受 KL 被 baseline 调制 → 选择 **KL 作为 Reward**，使用 $k_1$
+2. **如果你希望 KL 约束是「预防性」的**——即让智能体从根源上避开高 KL 区域，并且接受 KL 被 baseline 调制，那么请选择 **KL 作为 Reward**，使用 $k_1$。
 
-基于上述“数值无偏 vs 梯度正确”“Loss vs Reward 实现差异”的结论，下面进入可直接照抄到代码里的选型速查与常见踩坑点。
+基于上述“数值无偏 vs 梯度正确”以及“Loss 与 Reward 实现差异”的结论，下面进入可直接照抄到代码里的选型速查与常见踩坑点。
 
 ## 实践指南与常见陷阱
 
@@ -973,29 +973,29 @@ $$
 
 ### 常见陷阱
 
-1. **On-policy 下用 $k_1 = \log \frac{q_\theta}{p}$ 作为 Loss**：梯度期望为零，完全无效
-2. **On-policy 下用 $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 作为 Loss 优化反向 KL**：其梯度对应正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$，方向错误
-3. **Off-policy 下用 $\frac{q_\theta}{\mu} k_2$（重要性权重不 detach）**：梯度对应 f-散度而非反向 KL
-4. **在 Reward 惩罚中使用 $k_3$**：虽然数值无偏，但诱导的策略梯度有偏，可能导致训练崩溃
-5. **On-policy 时把 $\rho$ 写成常数 1**：必须显式构造 $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$（或 $\exp(\log q_\theta - \text{sg}(\log q_\theta))$），否则会丢失 score-function 梯度路径，导致 $\rho k_1$ 和 $\rho k_3$ 退化为朴素写法而失效
-6. **混淆「数值无偏」与「梯度正确」**：$k_3$ 对反向 KL 数值无偏，但作为 Reward 惩罚时诱导的策略梯度有偏；选估计器时必须同时考虑两个维度
+1. **On-policy 下使用 $k_1 = \log \frac{q_\theta}{p}$ 作为 Loss**：梯度期望为零，完全无效。
+2. **On-policy 下使用 $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 作为 Loss 来优化反向 KL**：其梯度对应正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$，方向错误。
+3. **Off-policy 下使用 $\frac{q_\theta}{\mu} k_2$（重要性权重不 detach）**：梯度对应 f-散度，而非反向 KL。
+4. **在 Reward 惩罚中使用 $k_3$**：虽然数值无偏，但诱导的策略梯度有偏，可能导致训练崩溃。
+5. **On-policy 时将 $\rho$ 简单地设为常数 1**：必须显式构造 $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$（或等价地 $\exp(\log q_\theta - \text{sg}(\log q_\theta))$），否则会丢失 score-function 梯度路径，导致 $\rho k_1$ 和 $\rho k_3$ 退化为朴素形式而失效。
+6. **混淆「数值无偏」与「梯度正确」**：$k_3$ 对反向 KL 数值无偏，但作为 Reward 惩罚时诱导的策略梯度有偏；选择估计器时必须同时考虑这两个维度。
 
 ## 总结
 
-本文围绕「**从谁采样**」「**怎么用**」「**估计什么**」三个核心问题，系统剖析了 $k_1, k_2, k_3$ 三种 KL 估计器。
+本文围绕「**从谁采样**」「**怎么用**」「**估计什么**」这三个核心问题，系统剖析了 $k_1, k_2, k_3$ 三种 KL 估计器。
 
-> **核心结论**：**数值无偏 ≠ 梯度正确**。选估计器时，必须同时考虑「估计谁的数值」和「梯度对应哪个优化目标」。
+> **核心结论**：**数值无偏 ≠ 梯度正确**。选择估计器时，必须同时考虑「估计谁的数值」和「梯度对应哪个优化目标」。
 
 **核心内容**：
 
-1. **数值估计**：$k_1$ 和 $k_3$ 对反向 KL 数值无偏，$k_3$ 兼具低方差
-2. **作为 Loss 时的梯度**：On-policy 用 $k_2$ 或 $\frac{q_\theta}{\text{sg}(q_\theta)} k_3$；Off-policy 用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$
-3. **作为 Reward 惩罚**：只能用 $k_1$，$k_3$ 会导致策略梯度有偏
+1. **数值估计**：$k_1$ 和 $k_3$ 对反向 KL 数值无偏，且 $k_3$ 兼具低方差。
+2. **作为 Loss 时的梯度**：在 on-policy 场景下使用 $k_2$ 或 $\frac{q_\theta}{\text{sg}(q_\theta)} k_3$；在 off-policy 场景下使用 $\frac{q_\theta}{\mu} k_3$ 或 $\text{sg}\left(\frac{q_\theta}{\mu}\right) k_2$。
+3. **作为 Reward 惩罚**：只能使用 $k_1$，因为 $k_3$ 会导致策略梯度有偏。
 4. **Loss 与 Reward 两种实现的关系**：
-   - **样本级等价性**：当 Loss 使用低方差实现（$\text{sg}(\rho) k_2$ 或 $\rho k_3$）、Reward 使用 $k_1$ 时，两者的 KL 梯度项是**同一个随机变量** $\rho s_\theta k_1$，不仅期望相同，方差也完全相同
-   - **整体语义差异**：Loss 方式中 KL 是独立正则项，与 advantage 完全解耦，不受 critic 质量影响；Reward 方式中 KL 通过 shaped reward 进入 advantage 计算，会被 baseline 处理和调制
-   - **信度分配差异**：Loss 方式的 KL 梯度是局部的（per-token）；Reward 方式的 KL 惩罚可能通过 return 回传影响更早的决策
-5. **统一 $\rho$ 框架**：本文引入 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$ 统一处理 on-policy 和 off-policy 场景。该框架的核心洞察是：把「采样分布对 $\theta$ 的依赖」显式地塞进 $\rho$ 这条梯度路径，从而使「先期望后梯度」与「先梯度后期望」在 $\mathbb{E}_\mu[\cdot]$ 下总是等价。On-policy 时 $\rho \equiv 1$ 但 $\nabla_\theta \rho = s_\theta \neq 0$，这解释了为什么直接对 $k_1$ 或 $k_3$ 反传会失效，而 $k_2$ 能「巧合」地工作
+   - **样本级等价性**：当 Loss 使用低方差实现（$\text{sg}(\rho) k_2$ 或 $\rho k_3$）、Reward 使用 $k_1$ 时，两者的 KL 梯度项是**同一个随机变量** $\rho s_\theta k_1$，不仅期望相同，方差也完全相同。
+   - **整体语义差异**：在 Loss 方式中，KL 是独立的正则项，与 advantage 完全解耦，不受 critic 质量的影响；而在 Reward 方式中，KL 通过 shaped reward 进入 advantage 计算，会被 baseline 处理和调制。
+   - **信度分配差异**：Loss 方式的 KL 梯度是局部的（per-token）；而 Reward 方式的 KL 惩罚可能通过 return 回传影响更早的决策。
+5. **统一 $\rho$ 框架**：本文引入 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$ 来统一处理 on-policy 和 off-policy 场景。该框架的核心洞察是：将「采样分布对 $\theta$ 的依赖」显式地纳入 $\rho$ 这条梯度路径，从而使「先期望后梯度」与「先梯度后期望」在 $\mathbb{E}_\mu[\cdot]$ 下总是等价。在 on-policy 场景中，$\rho \equiv 1$ 但 $\nabla_\theta \rho = s_\theta \neq 0$，这解释了为什么直接对 $k_1$ 或 $k_3$ 进行反向传播会失效，而 $k_2$ 能「巧合」地工作。
 
 ## 参考文献
 
