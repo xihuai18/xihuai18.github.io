@@ -116,16 +116,16 @@ $$
 Using $\nabla_\theta q_\theta = q_\theta \cdot s_\theta$, $\nabla_\theta \log q_\theta = s_\theta$, and $\nabla_\theta \log p = 0$:
 
 $$
-= \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] + \mathbb{E}_q[s_\theta] = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right]
+= \mathbb{E}_{q_\theta}\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] + \mathbb{E}_{q_\theta}[s_\theta] = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \log \frac{q_\theta}{p}\right]
 $$
 
 Thus:
 
 $$
-\boxed{\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] = -\mathbb{E}_q\left[s_\theta \cdot \log \frac{p}{q}\right]}
+\boxed{\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \log \frac{q_\theta}{p}\right] = -\mathbb{E}_{q_\theta}\left[s_\theta \cdot \log \frac{p}{q_\theta}\right]}
 $$
 
-> **Preview**: We will later define $k_1 := -\log\frac{p}{q}$, so the above can be written concisely as $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_q[s_\theta \cdot k_1]$ — this form appears repeatedly in gradient analysis.
+> **Preview**: We will later define $k_1 := -\log\frac{p}{q_\theta}$, so the above can be written concisely as $\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]$ — this form appears repeatedly in gradient analysis.
 
 **Forward KL Gradient:**
 
@@ -142,16 +142,16 @@ $$
 To estimate this using samples from $q$, apply importance sampling:
 
 $$
--\mathbb{E}_p[s_\theta] = -\mathbb{E}_q\left[\frac{p}{q_\theta} \cdot s_\theta\right] = -\mathbb{E}_q\left[\frac{p}{q} \cdot s_\theta\right]
+-\mathbb{E}_p[s_\theta] = -\mathbb{E}_{q_\theta}\left[\frac{p}{q_\theta} \cdot s_\theta\right]
 $$
 
-Using $\mathbb{E}_q[s_\theta] = 0$, this can be rewritten as:
+Using $\mathbb{E}_{q_\theta}[s_\theta] = 0$, this can be rewritten as:
 
 $$
-\boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_q\left[\left(1-\frac{p}{q}\right) \cdot s_\theta\right]}
+\boxed{\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{q_\theta}\left[\left(1-\frac{p}{q_\theta}\right) \cdot s_\theta\right]}
 $$
 
-> **Preview**: We will later derive $\nabla_\theta k_3 = (1-\frac{p}{q}) s_\theta$, so $\mathbb{E}_q[\nabla_\theta k_3] = \nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)$ (forward KL). This is why directly backpropagating through $k_3$ produces the "wrong" gradient direction when you intend reverse KL.
+> **Preview**: We will later derive $\nabla_\theta k_3 = (1-\frac{p}{q_\theta}) s_\theta$, so $\mathbb{E}_{q_\theta}[\nabla_\theta k_3] = \nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)$ (forward KL). This is why directly backpropagating through $k_3$ produces the "wrong" gradient direction when you intend reverse KL.
 
 With these two results, we can later determine which KL's true gradient each estimator's gradient expectation corresponds to.
 
@@ -193,10 +193,10 @@ $$
 
 **Design motivation**: We want an estimator that is **both unbiased and low variance**. A standard approach is to add a **control variate** to $k_1$—a term with zero expectation that (ideally) is negatively correlated with $k_1$.
 
-Note that $\mathbb{E}_q\left[\frac{p}{q} - 1\right] = \mathbb{E}_q\left[\frac{p}{q}\right] - 1 = 1 - 1 = 0$, so for any $\lambda$,
+Note that $\mathbb{E}_{q_\theta}\left[\frac{p}{q_\theta} - 1\right] = \mathbb{E}_{q_\theta}\left[\frac{p}{q_\theta}\right] - 1 = 1 - 1 = 0$, so for any $\lambda$,
 
 $$
-k_1 + \lambda\left(\frac{p}{q} - 1\right) = -\log \frac{p}{q} + \lambda\left(\frac{p}{q} - 1\right)
+k_1 + \lambda\left(\frac{p}{q_\theta} - 1\right) = -\log \frac{p}{q_\theta} + \lambda\left(\frac{p}{q_\theta} - 1\right)
 $$
 
 remains an unbiased estimator.
@@ -204,7 +204,7 @@ remains an unbiased estimator.
 **Why choose $\lambda = 1$?** Since $\log$ is concave, we have $\log x \leq x - 1$, therefore
 
 $$
-k_3 = \left(\frac{p}{q} - 1\right) - \log \frac{p}{q} \geq 0
+k_3 = \left(\frac{p}{q_\theta} - 1\right) - \log \frac{p}{q_\theta} \geq 0
 $$
 
 It is **always non-negative**. This ensures every sample contributes "positively" to the estimate, eliminating the cancellation problem of $k_1$.
@@ -213,22 +213,22 @@ It is **always non-negative**. This ensures every sample contributes "positively
 
 $$
 \begin{aligned}
-D_\phi\left(\frac{p}{q}, 1\right) &= \phi\left(\frac{p}{q}\right) - \phi(1) - \phi'(1)\left(\frac{p}{q} - 1\right) \\
-&= -\log \frac{p}{q} - 0 - (-1)\left(\frac{p}{q} - 1\right) \\
-&= \frac{p}{q} - 1 - \log \frac{p}{q} \\
+D_\phi\left(\frac{p}{q_\theta}, 1\right) &= \phi\left(\frac{p}{q_\theta}\right) - \phi(1) - \phi'(1)\left(\frac{p}{q_\theta} - 1\right) \\
+&= -\log \frac{p}{q_\theta} - 0 - (-1)\left(\frac{p}{q_\theta} - 1\right) \\
+&= \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta} \\
 &= k_3.
 \end{aligned}
 $$
 
-Since a convex function always lies above its tangent, this gap is **naturally non-negative**. More importantly, as $\frac{p}{q} \to 1$, the gap shrinks at a second-order rate $\left(\frac{p}{q} - 1\right)^2$, which is the fundamental reason why $k_3$ tends to have lower variance when the policies are close.
+Since a convex function always lies above its tangent, this gap is **naturally non-negative**. More importantly, as $\frac{p}{q_\theta} \to 1$, the gap shrinks at a second-order rate \left(\frac{p}{q_\theta} - 1\right)^2, which is the fundamental reason why $k_3$ tends to have lower variance when the policies are close.
 
 **Summary: Design Logic Comparison**
 
 | Estimator |                  Definition                  |             Design Principle             |
 | :-------: | :------------------------------------------: | :--------------------------------------: |
-|   $k_1$   |             $-\log \frac{p}{q}$              |             Naive definition             |
-|   $k_2$   | $\frac{1}{2}\left(\log \frac{p}{q}\right)^2$ | f-divergence, matches KL to second order |
-|   $k_3$   |     $\frac{p}{q} - 1 - \log \frac{p}{q}$     |   Control variate + Bregman divergence   |
+|   $k_1$   |             $-\log \frac{p}{q_\theta}$              |             Naive definition             |
+|   $k_2$   | $\frac{1}{2}\left(\log \frac{p}{q_\theta}\right)^2$ | f-divergence, matches KL to second order |
+|   $k_3$   |     $\frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$     |   Control variate + Bregman divergence   |
 
 With the definitions and design principles in place, we first analyze their behavior as **value estimators** of KL—specifically, bias and variance.
 
@@ -243,11 +243,11 @@ Assume we sample from $q_\theta$ to estimate reverse KL $D_{\mathrm{KL}}(q_\thet
 
 $$
 \begin{aligned}
-\mathbb{E}_{q}[k_1] &= \mathbb{E}_{q}\left[\log \tfrac{q}{p}\right] = D_{\mathrm{KL}}(q \| p) && \textbf{(unbiased)} \\[8pt]
-\mathbb{E}_{q}[k_3] &= \mathbb{E}_{q}\left[\frac{p}{q} - 1 - \log \frac{p}{q}\right] && \\
-&= 1 - 1 + D_{\mathrm{KL}}(q \| p) && \\
-&= D_{\mathrm{KL}}(q \| p) && \textbf{(unbiased)} \\[8pt]
-\mathbb{E}_{q}[k_2] &= \frac{1}{2}\mathbb{E}_{q}\left[\left(\log \frac{p}{q}\right)^2\right] \neq D_{\mathrm{KL}}(q \| p) && \textbf{(biased)}
+\mathbb{E}_{q_\theta}[k_1] &= \mathbb{E}_{q_\theta}\left[\log \tfrac{q_\theta}{p}\right] = D_{\mathrm{KL}}(q_\theta \| p) && \textbf{(unbiased)} \\[8pt]
+\mathbb{E}_{q_\theta}[k_3] &= \mathbb{E}_{q_\theta}\left[\frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}\right] && \\
+&= 1 - 1 + D_{\mathrm{KL}}(q_\theta \| p) && \\
+&= D_{\mathrm{KL}}(q_\theta \| p) && \textbf{(unbiased)} \\[8pt]
+\mathbb{E}_{q_\theta}[k_2] &= \frac{1}{2}\mathbb{E}_{q_\theta}\left[\left(\log \frac{p}{q_\theta}\right)^2\right] \neq D_{\mathrm{KL}}(q_\theta \| p) && \textbf{(biased)}
 \end{aligned}
 $$
 
@@ -286,7 +286,7 @@ When KL is large ($p = \mathcal{N}(1,1)$, true KL = 0.5):
 
 From a pure value-estimation perspective, $k_3$ is often the best choice among unbiased estimators due to its lower variance.
 
-> **Note**: To estimate the **forward KL value** $D_{\mathrm{KL}}(p \| q) = \mathbb{E}_p\left[\log \frac{p}{q}\right]$, but only sample from $q$, use importance sampling $\mathbb{E}_q\left[\frac{p}{q} \log \frac{p}{q}\right]$.
+> **Note**: To estimate the **forward KL value** $D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_p\left[\log \frac{p}{q_\theta}\right]$, but only sample from $q_\theta$, use importance sampling $\mathbb{E}_{q_\theta}\left[\frac{p}{q_\theta} \log \frac{p}{q_\theta}\right]$.
 
 ## Two Ways to Use a KL Penalty
 
@@ -357,7 +357,7 @@ $$
 **Deriving $\nabla_\theta k_2$**:
 
 $$
-k_2 = \frac{1}{2}\left(\log \frac{p}{q}\right)^2
+k_2 = \frac{1}{2}\left(\log \frac{p}{q_\theta}\right)^2
 $$
 
 By the chain rule:
@@ -365,41 +365,41 @@ By the chain rule:
 $$
 \begin{aligned}
 \nabla_\theta k_2 
-&= \left(\log \frac{p}{q}\right) \cdot \nabla_\theta\left(\log \frac{p}{q}\right) \\
-&= \left(\log \frac{p}{q}\right) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
-&= \left(\log \frac{p}{q}\right)(-s_\theta) \\
-&= - \left(\log \frac{p}{q}\right) s_\theta.
+&= \left(\log \frac{p}{q_\theta}\right) \cdot \nabla_\theta\left(\log \frac{p}{q_\theta}\right) \\
+&= \left(\log \frac{p}{q_\theta}\right) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
+&= \left(\log \frac{p}{q_\theta}\right)(-s_\theta) \\
+&= - \left(\log \frac{p}{q_\theta}\right) s_\theta.
 \end{aligned}
 $$
 
 **Deriving $\nabla_\theta k_3$**:
 
 $$
-k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}
+k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}
 $$
 
-First, compute $\nabla_\theta \frac{p}{q}$. Since $\frac{p}{q} = p(x) \cdot q_\theta(x)^{-1}$:
+First, compute $\nabla_\theta \frac{p}{q_\theta}$. Since $\frac{p}{q_\theta} = p(x) \cdot q_\theta(x)^{-1}$:
 
 $$
-\nabla_\theta \frac{p}{q} = p(x) \cdot (-1) \cdot q_\theta(x)^{-2} \cdot \nabla_\theta q_\theta(x) = -\frac{p(x)}{q_\theta(x)} \cdot \frac{\nabla_\theta q_\theta(x)}{q_\theta(x)} = -\frac{p}{q} \cdot s_\theta
+\nabla_\theta \frac{p}{q_\theta} = p(x) \cdot (-1) \cdot q_\theta(x)^{-2} \cdot \nabla_\theta q_\theta(x) = -\frac{p(x)}{q_\theta(x)} \cdot \frac{\nabla_\theta q_\theta(x)}{q_\theta(x)} = -\frac{p}{q_\theta} \cdot s_\theta
 $$
 
-Then compute $\nabla_\theta \log \frac{p}{q}$:
+Then compute $\nabla_\theta \log \frac{p}{q_\theta}$:
 
 $$
-\nabla_\theta \log \frac{p}{q} = \frac{q}{p} \nabla_\theta \frac{p}{q} = \frac{q}{p} \cdot \left(-\frac{p}{q} \cdot s_\theta\right) = -s_\theta
+\nabla_\theta \log \frac{p}{q_\theta} = \frac{q_\theta}{p} \nabla_\theta \frac{p}{q_\theta} = \frac{q_\theta}{p} \cdot \left(-\frac{p}{q_\theta} \cdot s_\theta\right) = -s_\theta
 $$
 
 Therefore:
 
 $$
-\nabla_\theta k_3 = \nabla_\theta \frac{p}{q} - 0 - \nabla_\theta \log \frac{p}{q} = -\frac{p}{q} \cdot s_\theta - (-s_\theta) = \left(1 - \frac{p}{q}\right) \cdot s_\theta
+\nabla_\theta k_3 = \nabla_\theta \frac{p}{q_\theta} - 0 - \nabla_\theta \log \frac{p}{q_\theta} = -\frac{p}{q_\theta} \cdot s_\theta - (-s_\theta) = \left(1 - \frac{p}{q_\theta}\right) \cdot s_\theta
 $$
 
 **Summary**: The gradients of the three estimators are:
 - $\nabla_\theta k_1 = s_\theta$
-- $\nabla_\theta k_2 = -\left(\log \frac{p}{q}\right) s_\theta = k_1 \cdot s_\theta$
-- $\nabla_\theta k_3 = \left(1 - \frac{p}{q}\right) s_\theta$
+- $\nabla_\theta k_2 = -\left(\log \frac{p}{q_\theta}\right) s_\theta = k_1 \cdot s_\theta$
+- $\nabla_\theta k_3 = \left(1 - \frac{p}{q_\theta}\right) s_\theta$
 
 These basic gradients will be used repeatedly in the unified framework analysis that follows.
 
@@ -407,17 +407,17 @@ These basic gradients will be used repeatedly in the unified framework analysis 
 
 When analyzing estimator gradients, there is a common pitfall: **“expect-then-differentiate” and “differentiate-then-expect” need not agree**.
 
-If we treat $\mathbb{E}_q[k_i]$ as a function of $\theta$ and differentiate analytically (i.e., “expect-then-differentiate”), then because $\mathbb{E}_q[k_1] = \mathbb{E}_q[k_3] = D_{\mathrm{KL}}(q \| p)$, we have:
+If we treat $\mathbb{E}_{q_\theta}[k_i]$ as a function of $\theta$ and differentiate analytically (i.e., “expect-then-differentiate”), then because $\mathbb{E}_{q_\theta}[k_1] = \mathbb{E}_{q_\theta}[k_3] = D_{\mathrm{KL}}(q_\theta \| p)$, we have:
 
 $$
-\nabla_\theta \mathbb{E}_q[k_1] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
+\nabla_\theta \mathbb{E}_{q_\theta}[k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)
 $$
 
 $$
-\nabla_\theta \mathbb{E}_q[k_3] = \nabla_\theta D_{\mathrm{KL}}(q \| p)
+\nabla_\theta \mathbb{E}_{q_\theta}[k_3] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)
 $$
 
-Both yield the reverse-KL gradient. However, when you backpropagate through the sample mean of $k_i$ in code, autograd effectively computes “differentiate-then-expect”, i.e., $\mathbb{E}_q[\nabla_\theta k_i]$, which **can differ**.
+Both yield the reverse-KL gradient. However, when you backpropagate through the sample mean of $k_i$ in code, autograd effectively computes “differentiate-then-expect”, i.e., $\mathbb{E}_{q_\theta}[\nabla_\theta k_i]$, which **can differ**.
 
 The root cause is that the sampling distribution $q_\theta$ depends on $\theta$, so expectation and differentiation cannot be exchanged naively. This is exactly the subtlety in the on-policy case, and why we introduce the unified $\rho$ framework.
 
@@ -448,25 +448,25 @@ $$
 **$\nabla_\theta(\rho k_2)$**:
 
 $$
-\nabla_\theta(\rho k_2) = \rho s_\theta k_2 + \rho \left(-\log \frac{p}{q}\right) s_\theta = \rho s_\theta \left(k_2 - \log \frac{p}{q}\right) = \rho s_\theta (k_2 + k_1)
+\nabla_\theta(\rho k_2) = \rho s_\theta k_2 + \rho \left(-\log \frac{p}{q_\theta}\right) s_\theta = \rho s_\theta \left(k_2 - \log \frac{p}{q_\theta}\right) = \rho s_\theta (k_2 + k_1)
 $$
 
 **$\nabla_\theta(\text{sg}(\rho) k_2)$** (applying stop-gradient to $\rho$):
 
 $$
-\nabla_\theta(\text{sg}(\rho) k_2) = \text{sg}(\rho) \cdot \nabla_\theta k_2 = \rho \cdot \left(-\log \frac{p}{q}\right) s_\theta = \rho s_\theta k_1
+\nabla_\theta(\text{sg}(\rho) k_2) = \text{sg}(\rho) \cdot \nabla_\theta k_2 = \rho \cdot \left(-\log \frac{p}{q_\theta}\right) s_\theta = \rho s_\theta k_1
 $$
 
 **$\nabla_\theta(\rho k_3)$**:
 
 $$
-\nabla_\theta(\rho k_3) = \rho s_\theta k_3 + \rho \left(1-\frac{p}{q}\right) s_\theta = \rho s_\theta \left(k_3 + 1 - \frac{p}{q}\right)
+\nabla_\theta(\rho k_3) = \rho s_\theta k_3 + \rho \left(1-\frac{p}{q_\theta}\right) s_\theta = \rho s_\theta \left(k_3 + 1 - \frac{p}{q_\theta}\right)
 $$
 
-Substituting $k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}$:
+Substituting $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$:
 
 $$
-k_3 + 1 - \frac{p}{q} = \left(\frac{p}{q} - 1 - \log \frac{p}{q}\right) + 1 - \frac{p}{q} = -\log \frac{p}{q} = k_1
+k_3 + 1 - \frac{p}{q_\theta} = \left(\frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}\right) + 1 - \frac{p}{q_\theta} = -\log \frac{p}{q_\theta} = k_1
 $$
 
 Thus we obtain a key simplification:
@@ -482,7 +482,7 @@ Using $\mathbb{E}_\mu[\rho \cdot f] = \mathbb{E}_{q_\theta}[f]$ and $\mathbb{E}_
 **$\mathbb{E}_\mu[\nabla_\theta(\rho k_1)]$**:
 
 $$
-\mathbb{E}_\mu[\rho s_\theta (k_1 + 1)] = \mathbb{E}_{q}[s_\theta k_1] + \underbrace{\mathbb{E}_{q}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
+\mathbb{E}_\mu[\rho s_\theta (k_1 + 1)] = \mathbb{E}_{q_\theta}[s_\theta k_1] + \underbrace{\mathbb{E}_{q_\theta}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
 $$
 
 **$\mathbb{E}_\mu[\nabla_\theta(\rho k_2)]$**:
@@ -490,9 +490,9 @@ $$
 $$
 \begin{aligned}
 \mathbb{E}_\mu[\rho s_\theta (k_2 + k_1)]
-&= \mathbb{E}_{q}[s_\theta k_2] + \mathbb{E}_{q}[s_\theta k_1] \\
-&= \mathbb{E}_{q}[s_\theta k_2] + \mathbb{E}_{q}[\nabla_\theta k_2] && \text{(since } \nabla_\theta k_2 = k_1 s_\theta \text{)} \\
-&= \nabla_\theta \mathbb{E}_{q}[k_2] && \text{(Leibniz rule)}
+&= \mathbb{E}_{q_\theta}[s_\theta k_2] + \mathbb{E}_{q_\theta}[s_\theta k_1] \\
+&= \mathbb{E}_{q_\theta}[s_\theta k_2] + \mathbb{E}_{q_\theta}[\nabla_\theta k_2] && \text{(since } \nabla_\theta k_2 = k_1 s_\theta \text{)} \\
+&= \nabla_\theta \mathbb{E}_{q_\theta}[k_2] && \text{(Leibniz rule)}
 \end{aligned}
 $$
 
@@ -501,13 +501,13 @@ In other words, the gradient expectation of $\rho k_2$ corresponds to "minimizin
 **$\mathbb{E}_\mu[\nabla_\theta(\text{sg}(\rho) k_2)]$**:
 
 $$
-\mathbb{E}_\mu[\rho s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
+\mathbb{E}_\mu[\rho s_\theta k_1] = \mathbb{E}_{q_\theta}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
 $$
 
 **$\mathbb{E}_\mu[\nabla_\theta(\rho k_3)]$**:
 
 $$
-\mathbb{E}_\mu[\rho s_\theta k_1] = \mathbb{E}_{q}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
+\mathbb{E}_\mu[\rho s_\theta k_1] = \mathbb{E}_{q_\theta}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
 $$
 
 #### Gradient Equivalence: Which Methods Produce Identical Gradient Random Variables
@@ -523,7 +523,7 @@ This means they are equal not only in expectation, but **as random variables**: 
 |       Loss Form       |  Gradient Random Variable   |          Expected Gradient          |     Optimization Objective      |
 | :-------------------: | :-------------------------: | :---------------------------------: | :-----------------------------: |
 |      $\rho k_1$       |   $\rho s_\theta (k_1+1)$   |  $\nabla D_{\mathrm{KL}}(q \| p)$   |          Reverse KL ✓           |
-|      $\rho k_2$       | $\rho s_\theta (k_2 + k_1)$ | $\nabla_\theta \mathbb{E}_{q}[k_2]$ | f-divergence (not reverse KL) ✗ |
+|      $\rho k_2$       | $\rho s_\theta (k_2 + k_1)$ | $\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$ | f-divergence (not reverse KL) ✗ |
 | $\text{sg}(\rho) k_2$ |     $\rho s_\theta k_1$     |  $\nabla D_{\mathrm{KL}}(q \| p)$   |          Reverse KL ✓           |
 |      $\rho k_3$       |     $\rho s_\theta k_1$     |  $\nabla D_{\mathrm{KL}}(q \| p)$   |          Reverse KL ✓           |
 
@@ -537,9 +537,9 @@ We can now revisit the relationship between on-policy and off-policy settings th
 - But the gradients differ, because $\nabla_\theta \rho = s_\theta \neq 0$.
 
 This explains why **naive direct backpropagation** (i.e., without explicitly constructing $\rho$) fails when using $k_1$ or $k_3$ as the KL loss term in the on-policy case:
-- Directly using $k_1$ (without $\rho$): $\mathbb{E}_q[\nabla k_1] = \mathbb{E}_q[s_\theta] = 0$, so the KL term is ineffective.
-- Directly using $k_3$ (without $\rho$): $\mathbb{E}_q[\nabla k_3] = \nabla D_{\mathrm{KL}}(p \| q)$ (forward KL), i.e., the wrong direction for reverse-KL regularization.
-- Directly using $k_2$: $\mathbb{E}_q[\nabla k_2] = \nabla D_{\mathrm{KL}}(q \| p)$ (reverse KL), which makes it the only correct choice under the naive implementation.
+- Directly using $k_1$ (without $\rho$): $\mathbb{E}_{q_\theta}[\nabla k_1] = \mathbb{E}_{q_\theta}[s_\theta] = 0$, so the KL term is ineffective.
+- Directly using $k_3$ (without $\rho$): $\mathbb{E}_{q_\theta}[\nabla k_3] = \nabla D_{\mathrm{KL}}(p \| q_\theta)$ (forward KL), i.e., the wrong direction for reverse-KL regularization.
+- Directly using $k_2$: $\mathbb{E}_{q_\theta}[\nabla k_2] = \nabla D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL), which makes it the only correct choice under the naive implementation.
 
 If you **explicitly construct** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$, then:
 - **Usable**: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.
@@ -550,7 +550,7 @@ If you **explicitly construct** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$, t
 - **Usable**: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.
 - **Not usable**: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes an f-divergence rather than the reverse KL.
 
-**Key insight**: The reason $k_2$ works directly in the on-policy case is that its gradient $-\log\frac{p}{q} \cdot s_\theta = k_1 \cdot s_\theta$ happens to match $\rho s_\theta k_1$ (when $\rho \equiv 1$). This is a special case, not a general rule.
+**Key insight**: The reason $k_2$ works directly in the on-policy case is that its gradient $-\log\frac{p}{q_\theta} \cdot s_\theta = k_1 \cdot s_\theta$ happens to match $\rho s_\theta k_1$ (when $\rho \equiv 1$). This is a special case, not a general rule.
 
 For an in-depth analysis of off-policy scenarios in large language models, refer to my previous blog post: [From Two-Policy to Three-Policy: TRPO Extension Under Behavior-Reference Mismatch in LLM RL](/reinforcement-learning/2025/11/15/three-policy-en.html).
 
@@ -588,8 +588,8 @@ $$
 
 (You can also understand this as comparing variance for each coordinate component separately; the conclusion is consistent with intuitive magnitude estimates.)
 
-**In the typical KL penalty regime** ($q_\theta \approx p \approx \mu$), setting $\frac{p(x)}{q(x)} = 1 + \varepsilon(x)$, $|\varepsilon| \ll 1$:
-- $k_1 = -\log \frac{p}{q} \approx -\varepsilon$
+**In the typical KL penalty regime** ($q_\theta \approx p \approx \mu$), setting $\frac{p(x)}{q_\theta(x)} = 1 + \varepsilon(x)$, $|\varepsilon| \ll 1$:
+- $k_1 = -\log \frac{p}{q_\theta} \approx -\varepsilon$
 - $2k_1 + 1 \approx 1 - 2\varepsilon$, with the leading term being a positive $O(1)$ constant
 
 Therefore $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$.
@@ -600,7 +600,7 @@ Therefore $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$.
 
 **Variance Comparison Table**:
 
-|       Estimator       | Gradient Random Variable | Coefficient Magnitude ($\frac{p}{q}\approx1$) | Variance |
+|       Estimator       | Gradient Random Variable | Coefficient Magnitude ($\frac{p}{q_\theta}\approx1$) | Variance |
 | :-------------------: | :----------------------: | :-------------------------------------------: | :------: |
 |      $\rho k_1$       | $\rho s_\theta (k_1+1)$  |                    $O(1)$                     |   High   |
 | $\text{sg}(\rho) k_2$ |   $\rho s_\theta k_1$    |               $O(\varepsilon)$                |   Low    |
@@ -632,7 +632,7 @@ Combining the above analysis, the following table summarizes the gradient expect
 | Sampling Type |         Loss          |      Expected $\nabla_\theta$ Loss      |    Optimization Objective     |    Usable for Reverse KL?     |
 | :-----------: | :-------------------: | :-------------------------------------: | :---------------------------: | :---------------------------: |
 | on/off-policy |      $\rho k_1$       | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |          Reverse KL           |      ✓ (higher variance)      |
-| on/off-policy |      $\rho k_2$       |   $\nabla_\theta \mathbb{E}_{q}[k_2]$   | f-divergence (not reverse KL) |               ✗               |
+| on/off-policy |      $\rho k_2$       |   $\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$   | f-divergence (not reverse KL) |               ✗               |
 | on/off-policy | $\text{sg}(\rho) k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |          Reverse KL           | ✓ (recommended, low variance) |
 | on/off-policy |      $\rho k_3$       | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |          Reverse KL           | ✓ (recommended, low variance) |
 
@@ -641,9 +641,9 @@ where $\rho = \frac{q_\theta}{\text{sg}(\mu)}$. When on-policy ($\mu = q_\theta$
 It must be emphasized: **the conclusions in the table above apply to the unified framework where "loss is written as $L=\rho\,k$ and $\rho$ retains its gradient path in the computation graph"**. In the on-policy case, although $\rho \equiv 1$ numerically, since $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$, we still have $\nabla_\theta\rho=s_\theta\neq 0$, so $\rho k$ and "directly backpropagating through the sample mean of $k$" are not equivalent in terms of gradients.
 
 If you use the **naive on-policy implementation** (i.e., after sampling from $q_\theta$, treat $\{k_i(x)\}$ as ordinary scalars and directly backpropagate through their sample mean; without explicitly constructing $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$ to restore the score-function path), then it degenerates to:
-- Directly using $k_1$: $\mathbb{E}_q[\nabla k_1]=0$ (ineffective)
-- Directly using $k_2$: $\mathbb{E}_q[\nabla k_2]=\nabla D_{\mathrm{KL}}(q\|p)$ (reverse KL) ✓
-- Directly using $k_3$: $\mathbb{E}_q[\nabla k_3]=\nabla D_{\mathrm{KL}}(p\|q)$ (forward KL) ✗
+- Directly using $k_1$: $\mathbb{E}_{q_\theta}[\nabla k_1]=0$ (ineffective)
+- Directly using $k_2$: $\mathbb{E}_{q_\theta}[\nabla k_2]=\nabla D_{\mathrm{KL}}(q_\theta\|p)$ (reverse KL) ✓
+- Directly using $k_3$: $\mathbb{E}_{q_\theta}[\nabla k_3]=\nabla D_{\mathrm{KL}}(p\|q_\theta)$ (forward KL) ✗
 
 **Key Conclusions**:
 
@@ -679,7 +679,7 @@ $$
 Using the result from the "Preliminaries" section, the reverse KL gradient is:
 
 $$
-\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(-\log \frac{p}{q}\right)\right] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
+\nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(-\log \frac{p}{q_\theta}\right)\right] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
 $$
 
 Therefore, the true KL-regularized policy gradient is:
@@ -714,28 +714,28 @@ Therefore, **when $k_1$ is used as a reward penalty, the induced policy gradient
 
 #### Using $k_3$ as Penalty: Gradient Biased
 
-When $\hat{k} = k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}$:
+When $\hat{k} = k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$:
 
 $$
-\mathbb{E}_{q_\theta}[s_\theta \cdot k_3] = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(\frac{p}{q} - 1\right)\right] + \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(-\log \frac{p}{q}\right)\right]
+\mathbb{E}_{q_\theta}[s_\theta \cdot k_3] = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(\frac{p}{q_\theta} - 1\right)\right] + \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(-\log \frac{p}{q_\theta}\right)\right]
 $$
 
 The second term is exactly $\mathbb{E}_{q_\theta}[s_\theta \cdot k_1]$. The problem lies in the first term:
 
 $$
-\mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(\frac{p}{q} - 1\right)\right] = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right] - \underbrace{\mathbb{E}_{q_\theta}[s_\theta]}_{=0} = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right]
+\mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(\frac{p}{q_\theta} - 1\right)\right] = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q_\theta}\right] - \underbrace{\mathbb{E}_{q_\theta}[s_\theta]}_{=0} = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q_\theta}\right]
 $$
 
 This can be rewritten as:
 
 $$
-\mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right] = \int q_\theta(x) \cdot \nabla_\theta \log q_\theta(x) \cdot \frac{p(x)}{q_\theta(x)} dx = \int p(x) \cdot \nabla_\theta \log q_\theta(x) dx = \mathbb{E}_p[s_\theta]
+\mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q_\theta}\right] = \int q_\theta(x) \cdot \nabla_\theta \log q_\theta(x) \cdot \frac{p(x)}{q_\theta(x)} dx = \int p(x) \cdot \nabla_\theta \log q_\theta(x) dx = \mathbb{E}_p[s_\theta]
 $$
 
 Using the forward KL gradient formula $\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta) = -\mathbb{E}_p[s_\theta]$, we have:
 
 $$
-\mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q}\right] = -\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)
+\mathbb{E}_{q_\theta}\left[s_\theta \cdot \frac{p}{q_\theta}\right] = -\nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)
 $$
 
 Therefore:
