@@ -223,9 +223,9 @@
   <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景下的性质差异，并提供在「用于 loss 梯度回传」与「用于 reward 惩罚」两种情况下的选型指南。</p>
 </blockquote>
 
-<h2 id="引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</h2>
+<h2 id="引言kl-散度kullback-leibler散度在强化学习中的角色">引言：KL 散度（Kullback-Leibler散度）在强化学习中的角色</h2>
 
-<p>在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，旨在防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层面的选择：<strong>选择哪个估计器</strong>（$k_1$、$k_2$、$k_3$）、<strong>从哪个策略采样</strong>（on-policy 还是 off-policy）、以及<strong>如何应用</strong>（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统梳理这些选择及其内在关联，帮助读者厘清其中的关键概念。</p>
+<p>在策略优化（如 PPO（Proximal Policy Optimization）、GRPO）或对齐训练（RLHF（Reinforcement Learning from Human Feedback）/RLAIF（Reinforcement Learning from AI Feedback））中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，旨在防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层面的选择：<strong>选择哪个估计器</strong>（$k_1$、$k_2$、$k_3$）、<strong>从哪个策略采样</strong>（on-policy（同策略）还是 off-policy（异策略））、以及<strong>如何应用</strong>（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统梳理这些选择及其内在关联，帮助读者厘清其中的关键概念。</p>
 
 <h3 id="正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</h3>
 
@@ -284,7 +284,7 @@ $$</p>
   <li>$q$：若无歧义，后文简写 $q := q_\theta$</li>
   <li>$p$：参考策略（reference policy），不依赖于 $\theta$</li>
   <li>$\mu$：行为策略（behavior policy），用于 off-policy 采样，不依赖于 $\theta$</li>
-  <li>$s_\theta(x) = \nabla_\theta \log q_\theta(x)$：score function</li>
+  <li>$s_\theta(x) = \nabla_\theta \log q_\theta(x)$：score function（得分函数）</li>
   <li>$\text{sg}(\cdot)$：stop-gradient 操作（在代码中对应 <code class="language-plaintext highlighter-rouge">.detach()</code>）</li>
 </ul>
 
@@ -501,8 +501,8 @@ $$</p>
   <thead>
     <tr>
       <th style="text-align: center">估计器</th>
-      <th style="text-align: center">bias/true</th>
-      <th style="text-align: center">stdev/true</th>
+      <th style="text-align: center">偏差/真值</th>
+      <th style="text-align: center">标准差/真值</th>
     </tr>
   </thead>
   <tbody>
@@ -530,8 +530,8 @@ $$</p>
   <thead>
     <tr>
       <th style="text-align: center">估计器</th>
-      <th style="text-align: center">bias/true</th>
-      <th style="text-align: center">stdev/true</th>
+      <th style="text-align: center">偏差/真值</th>
+      <th style="text-align: center">标准差/真值</th>
     </tr>
   </thead>
   <tbody>
@@ -605,7 +605,7 @@ $$</p>
 J(\theta) = \mathbb{E}_{\tau \sim q_\theta} \left[ \sum_{t=0}^T \gamma^t r(s_t, a_t) \right] - \beta \cdot D_{\mathrm{KL}}(q_\theta \| p)
 $$</p>
 
-<p>这个数学形式看似统一，但在基于 Actor-Critic 的算法（如 PPO）中实现时，却衍生出两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。</p>
+<p>这个数学形式看似统一，但在基于 Actor-Critic（演员-评论家）的算法（如 PPO）中实现时，却衍生出两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。</p>
 
 <blockquote>
   <p><strong>符号说明</strong>：本节用 $\text{KL}_t$ 或 $\text{KL}(s)$ 泛指某个 token/state 级的 KL 估计器（如 $k_1, k_2, k_3$），具体定义见前文「三种估计器的定义与设计原理」一节。</p>
@@ -943,7 +943,7 @@ $$</p>
 
 <p>（你也可以将此理解为对每个坐标分量分别比较方差；结论与直观量级判断一致。）</p>
 
-<p><strong>在典型的 KL 惩罚 regime 下</strong>（$q_\theta \approx p \approx \mu$），取 $\frac{p(x)}{q(x)} = 1 + \varepsilon(x)$，$|\varepsilon| \ll 1$：</p>
+<p><strong>在典型的 KL 惩罚场景下</strong>（$q_\theta \approx p \approx \mu$），取 $\frac{p(x)}{q(x)} = 1 + \varepsilon(x)$，$|\varepsilon| \ll 1$：</p>
 <ul>
   <li>$k_1 = -\log \frac{p}{q} \approx -\varepsilon$</li>
   <li>$2k_1 + 1 \approx 1 - 2\varepsilon$，主导项为正的 $O(1)$ 常数</li>
@@ -1000,7 +1000,7 @@ $$</p>
 
 <p>当 $\mu$ 与 $q_\theta$ 差异很大时——例如 $\mu$ 在 $q_\theta$ 的高密度区域几乎没有采样，或 $\rho = q_\theta / \mu$ 在尾部爆炸——任何基于 $\rho$ 的方法都会遭遇严重的方差问题。此时，$\rho k_3$（或 $\text{sg}(\rho) k_2$）相对于 $\rho k_1$ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。</p>
 
-<p>不过，在 RL 实践中，我们通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 $\mu = q_{\theta_\text{old}}$）。在这个常见的 regime 中，可以相当有信心地说：</p>
+<p>不过，在 RL 实践中，我们通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 $\mu = q_{\theta_\text{old}}$）。在这个常见的场景中，可以相当有信心地说：</p>
 
 <blockquote>
   <p><strong>如果已经决定用重要性采样来优化反向 KL，推荐使用 $\rho k_3$ 或 $\text{sg}(\rho) k_2$（两者梯度等价且方差低）；相较之下，$\rho k_1$ 方差更高。</strong></p>

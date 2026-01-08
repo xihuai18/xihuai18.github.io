@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-08T04:39:08+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-08T08:56:04+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="en"><title type="html">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html" rel="alternate" type="text/html" title="Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"><![CDATA[<h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
 
 <p>Consider the following scenario: you are training a large language model with reinforcement learning to improve its question-answering capabilities. Ideally, each time the model generates a batch of responses, you would immediately update the model with this data, then use the updated model to generate new data, and so on. This approach of “updating with data from the same policy that generated it” is called <strong>on-policy</strong> training.</p>
@@ -2798,9 +2798,9 @@
   <p>在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 ⟦INLMATH69MATHEND⟧ 在 on-policy 和 off-policy 场景下的性质差异，并提供在「用于 loss 梯度回传」与「用于 reward 惩罚」两种情况下的选型指南。</p>
 </blockquote>
 
-<h2 id="引言kl-散度在强化学习中的角色">引言：KL 散度在强化学习中的角色</h2>
+<h2 id="引言kl-散度kullback-leibler散度在强化学习中的角色">引言：KL 散度（Kullback-Leibler散度）在强化学习中的角色</h2>
 
-<p>在策略优化（如 PPO、GRPO）或对齐训练（RLHF/RLAIF）中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，旨在防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层面的选择：<strong>选择哪个估计器</strong>（⟦INLMATH70MATHEND⟧、⟦INLMATH71MATHEND⟧、⟦INLMATH72MATHEND⟧）、<strong>从哪个策略采样</strong>（on-policy 还是 off-policy）、以及<strong>如何应用</strong>（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统梳理这些选择及其内在关联，帮助读者厘清其中的关键概念。</p>
+<p>在策略优化（如 PPO（Proximal Policy Optimization）、GRPO）或对齐训练（RLHF（Reinforcement Learning from Human Feedback）/RLAIF（Reinforcement Learning from AI Feedback））中，<strong>KL 惩罚</strong>是约束新策略不偏离参考策略的核心手段，旨在防止训练不稳定或策略崩溃。然而，KL 惩罚的实现涉及多个层面的选择：<strong>选择哪个估计器</strong>（⟦INLMATH70MATHEND⟧、⟦INLMATH71MATHEND⟧、⟦INLMATH72MATHEND⟧）、<strong>从哪个策略采样</strong>（on-policy（同策略）还是 off-policy（异策略））、以及<strong>如何应用</strong>（作为 loss 梯度回传还是作为 reward 惩罚）。本文将系统梳理这些选择及其内在关联，帮助读者厘清其中的关键概念。</p>
 
 <h3 id="正向-kl-与反向-kl-的区别">正向 KL 与反向 KL 的区别</h3>
 
@@ -2855,7 +2855,7 @@
   <li>⟦INLMATH81MATHEND⟧：若无歧义，后文简写 ⟦INLMATH82MATHEND⟧</li>
   <li>⟦INLMATH83MATHEND⟧：参考策略（reference policy），不依赖于 ⟦INLMATH84MATHEND⟧</li>
   <li>⟦INLMATH85MATHEND⟧：行为策略（behavior policy），用于 off-policy 采样，不依赖于 ⟦INLMATH86MATHEND⟧</li>
-  <li>⟦INLMATH87MATHEND⟧：score function</li>
+  <li>⟦INLMATH87MATHEND⟧：score function（得分函数）</li>
   <li>⟦INLMATH88MATHEND⟧：stop-gradient 操作（在代码中对应 <code class="language-plaintext highlighter-rouge">.detach()</code>）</li>
 </ul>
 
@@ -3027,8 +3027,8 @@
   <thead>
     <tr>
       <th style="text-align: center">估计器</th>
-      <th style="text-align: center">bias/true</th>
-      <th style="text-align: center">stdev/true</th>
+      <th style="text-align: center">偏差/真值</th>
+      <th style="text-align: center">标准差/真值</th>
     </tr>
   </thead>
   <tbody>
@@ -3056,8 +3056,8 @@
   <thead>
     <tr>
       <th style="text-align: center">估计器</th>
-      <th style="text-align: center">bias/true</th>
-      <th style="text-align: center">stdev/true</th>
+      <th style="text-align: center">偏差/真值</th>
+      <th style="text-align: center">标准差/真值</th>
     </tr>
   </thead>
   <tbody>
@@ -3129,7 +3129,7 @@
 
 <p>⟦DISPMATH20MATHEND⟧</p>
 
-<p>这个数学形式看似统一，但在基于 Actor-Critic 的算法（如 PPO）中实现时，却衍生出两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。</p>
+<p>这个数学形式看似统一，但在基于 Actor-Critic（演员-评论家）的算法（如 PPO）中实现时，却衍生出两种截然不同的实现范式——它们在代码层面可能只差几行，却对应着完全不同的优化语义。</p>
 
 <blockquote>
   <p><strong>符号说明</strong>：本节用 ⟦INLMATH195MATHEND⟧ 或 ⟦INLMATH196MATHEND⟧ 泛指某个 token/state 级的 KL 估计器（如 ⟦INLMATH197MATHEND⟧），具体定义见前文「三种估计器的定义与设计原理」一节。</p>
@@ -3400,7 +3400,7 @@
 
 <p>（你也可以将此理解为对每个坐标分量分别比较方差；结论与直观量级判断一致。）</p>
 
-<p><strong>在典型的 KL 惩罚 regime 下</strong>（⟦INLMATH316MATHEND⟧），取 ⟦INLMATH317MATHEND⟧，⟦INLMATH318MATHEND⟧：</p>
+<p><strong>在典型的 KL 惩罚场景下</strong>（⟦INLMATH316MATHEND⟧），取 ⟦INLMATH317MATHEND⟧，⟦INLMATH318MATHEND⟧：</p>
 <ul>
   <li>⟦INLMATH319MATHEND⟧</li>
   <li>⟦INLMATH320MATHEND⟧，主导项为正的 ⟦INLMATH321MATHEND⟧ 常数</li>
@@ -3457,7 +3457,7 @@
 
 <p>当 ⟦INLMATH344MATHEND⟧ 与 ⟦INLMATH345MATHEND⟧ 差异很大时——例如 ⟦INLMATH346MATHEND⟧ 在 ⟦INLMATH347MATHEND⟧ 的高密度区域几乎没有采样，或 ⟦INLMATH348MATHEND⟧ 在尾部爆炸——任何基于 ⟦INLMATH349MATHEND⟧ 的方法都会遭遇严重的方差问题。此时，⟦INLMATH350MATHEND⟧（或 ⟦INLMATH351MATHEND⟧）相对于 ⟦INLMATH352MATHEND⟧ 的优势不再有理论保证，需要结合 clipping、正则化等策略综合处理。</p>
 
-<p>不过，在 RL 实践中，我们通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 ⟦INLMATH353MATHEND⟧）。在这个常见的 regime 中，可以相当有信心地说：</p>
+<p>不过，在 RL 实践中，我们通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 ⟦INLMATH353MATHEND⟧）。在这个常见的场景中，可以相当有信心地说：</p>
 
 <blockquote>
   <p><strong>如果已经决定用重要性采样来优化反向 KL，推荐使用 ⟦INLMATH354MATHEND⟧ 或 ⟦INLMATH355MATHEND⟧（两者梯度等价且方差低）；相较之下，⟦INLMATH356MATHEND⟧ 方差更高。</strong></p>
