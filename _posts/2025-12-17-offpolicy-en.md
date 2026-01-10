@@ -395,12 +395,12 @@ Both methods constrain $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$—the deviation of th
 
 #### Method 1 vs Method 2
 
-| Comparison Dimension                        | Method 1 (Adaptive Clipping)                          | Method 2 (Incremental Clipping)                        |
-| ------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
-| Stale samples ($\rho_k \gg 1$)              | Automatically tightens constraints, more conservative | May produce large gradient variance                    |
-| LLM large vocabulary low-probability tokens | Allows larger absolute changes (additive)             | Absolute changes are limited (multiplicative)          |
-| Implementation complexity                   | Requires storing $\pi^{(i)}(a\mid s)$ and $\pi_k(a\mid s)$  | Needs $\pi_k(a\mid s)$ and $\pi^{(i)}(a\mid s)$ (or stored logprobs) to compute $\rho_k$; clipping itself uses only $\pi_{k+1}/\pi_k$ |
-| Advantage function                          | Uses $A^{\beta^{(k)}}$                                | Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$ |
+| Comparison Dimension                        | Method 1 (Adaptive Clipping)                               | Method 2 (Incremental Clipping)                                                                                                       |
+| ------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Stale samples ($\rho_k \gg 1$)              | Automatically tightens constraints, more conservative      | May produce large gradient variance                                                                                                   |
+| LLM large vocabulary low-probability tokens | Allows larger absolute changes (additive)                  | Absolute changes are limited (multiplicative)                                                                                         |
+| Implementation complexity                   | Requires storing $\pi^{(i)}(a\mid s)$ and $\pi_k(a\mid s)$ | Needs $\pi_k(a\mid s)$ and $\pi^{(i)}(a\mid s)$ (or stored logprobs) to compute $\rho_k$; clipping itself uses only $\pi_{k+1}/\pi_k$ |
+| Advantage function                          | Uses $A^{\beta^{(k)}}$                                     | Uses weighted advantage $\rho_k \cdot A^{\beta^{(k)}}$                                                                                |
 
 #### Detailed Explanations
 
@@ -543,11 +543,11 @@ $$
 
 #### Separation of Concerns Principle
 
-| Control Term | Responsible Party      | Control Mechanism | Specific Operation                |
-| ------------ | ---------------------- | ----------------- | --------------------------------- |
+| Control Term | Responsible Party      | Control Mechanism | Specific Operation                                    |
+| ------------ | ---------------------- | ----------------- | ----------------------------------------------------- |
 | $U_k$        | Optimization algorithm | Policy clipping   | Clip update increments (e.g., clip $\pi_{k+1}/\pi_k$) |
-| $S_k$        | Sampling system        | Data filtering    | Discard stale samples             |
-| $S_k$        | Sampling system        | Version window    | Use only most recent $W$ versions |
+| $S_k$        | Sampling system        | Data filtering    | Discard stale samples                                 |
+| $S_k$        | Sampling system        | Version window    | Use only most recent $W$ versions                     |
 
 #### Clipping Method Selection
 

@@ -224,11 +224,11 @@ Since a convex function always lies above its tangent, this gap is **naturally n
 
 **Summary: Design Logic Comparison**
 
-| Estimator |                  Definition                  |             Design Principle             |
-| :-------: | :------------------------------------------: | :--------------------------------------: |
+| Estimator |                     Definition                      |             Design Principle             |
+| :-------: | :-------------------------------------------------: | :--------------------------------------: |
 |   $k_1$   |             $-\log \frac{p}{q_\theta}$              |             Naive definition             |
 |   $k_2$   | $\frac{1}{2}\left(\log \frac{p}{q_\theta}\right)^2$ | f-divergence, matches KL to second order |
-|   $k_3$   |     $\frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$     |   Control variate + Bregman divergence   |
+|   $k_3$   | $\frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$  |   Control variate + Bregman divergence   |
 
 With the definitions and design principles in place, we first analyze their behavior as **value estimators** of KL—specifically, bias and variance.
 
@@ -520,12 +520,12 @@ This means they are equal not only in expectation, but **as random variables**: 
 
 **Summary Table**:
 
-|       Loss Form       |  Gradient Random Variable   |          Expected Gradient          |     Optimization Objective      |
-| :-------------------: | :-------------------------: | :---------------------------------: | :-----------------------------: |
-|      $\rho k_1$       |   $\rho s_\theta (k_1+1)$   |  $\nabla D_{\mathrm{KL}}(q \| p)$   |          Reverse KL ✓           |
+|       Loss Form       |  Gradient Random Variable   |             Expected Gradient              |     Optimization Objective      |
+| :-------------------: | :-------------------------: | :----------------------------------------: | :-----------------------------: |
+|      $\rho k_1$       |   $\rho s_\theta (k_1+1)$   |      $\nabla D_{\mathrm{KL}}(q \| p)$      |          Reverse KL ✓           |
 |      $\rho k_2$       | $\rho s_\theta (k_2 + k_1)$ | $\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$ | f-divergence (not reverse KL) ✗ |
-| $\text{sg}(\rho) k_2$ |     $\rho s_\theta k_1$     |  $\nabla D_{\mathrm{KL}}(q \| p)$   |          Reverse KL ✓           |
-|      $\rho k_3$       |     $\rho s_\theta k_1$     |  $\nabla D_{\mathrm{KL}}(q \| p)$   |          Reverse KL ✓           |
+| $\text{sg}(\rho) k_2$ |     $\rho s_\theta k_1$     |      $\nabla D_{\mathrm{KL}}(q \| p)$      |          Reverse KL ✓           |
+|      $\rho k_3$       |     $\rho s_\theta k_1$     |      $\nabla D_{\mathrm{KL}}(q \| p)$      |          Reverse KL ✓           |
 
 ### A Unified View of On-Policy and Off-Policy
 
@@ -601,10 +601,10 @@ Therefore $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$.
 **Variance Comparison Table**:
 
 |       Estimator       | Gradient Random Variable | Coefficient Magnitude ($\frac{p}{q_\theta}\approx1$) | Variance |
-| :-------------------: | :----------------------: | :-------------------------------------------: | :------: |
-|      $\rho k_1$       | $\rho s_\theta (k_1+1)$  |                    $O(1)$                     |   High   |
-| $\text{sg}(\rho) k_2$ |   $\rho s_\theta k_1$    |               $O(\varepsilon)$                |   Low    |
-|      $\rho k_3$       |   $\rho s_\theta k_1$    |               $O(\varepsilon)$                |   Low    |
+| :-------------------: | :----------------------: | :--------------------------------------------------: | :------: |
+|      $\rho k_1$       | $\rho s_\theta (k_1+1)$  |                        $O(1)$                        |   High   |
+| $\text{sg}(\rho) k_2$ |   $\rho s_\theta k_1$    |                   $O(\varepsilon)$                   |   Low    |
+|      $\rho k_3$       |   $\rho s_\theta k_1$    |                   $O(\varepsilon)$                   |   Low    |
 
 **Conclusion**: $\text{sg}(\rho) k_2$ and $\rho k_3$ are equivalent at the gradient level (the same random variable). In contrast, $\rho k_1$ contains an additional zero-mean constant term, which leads to substantially higher variance in the typical small-KL regime.
 
@@ -629,12 +629,12 @@ This is why the DeepSeek v3.2 technical report uses $\frac{q_\theta}{\mu} k_3$ a
 
 Combining the above analysis, the following table summarizes the gradient expectations and corresponding optimization objectives for each estimator under the unified framework:
 
-| Sampling Type |         Loss          |      Expected $\nabla_\theta$ Loss      |    Optimization Objective     |    Usable for Reverse KL?     |
-| :-----------: | :-------------------: | :-------------------------------------: | :---------------------------: | :---------------------------: |
-| on/off-policy |      $\rho k_1$       | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |          Reverse KL           |      ✓ (higher variance)      |
-| on/off-policy |      $\rho k_2$       |   $\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$   | f-divergence (not reverse KL) |               ✗               |
-| on/off-policy | $\text{sg}(\rho) k_2$ | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |          Reverse KL           | ✓ (recommended, low variance) |
-| on/off-policy |      $\rho k_3$       | $\nabla_\theta D_{\mathrm{KL}}(q \| p)$ |          Reverse KL           | ✓ (recommended, low variance) |
+| Sampling Type |         Loss          |       Expected $\nabla_\theta$ Loss        |    Optimization Objective     |    Usable for Reverse KL?     |
+| :-----------: | :-------------------: | :----------------------------------------: | :---------------------------: | :---------------------------: |
+| on/off-policy |      $\rho k_1$       |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |          Reverse KL           |      ✓ (higher variance)      |
+| on/off-policy |      $\rho k_2$       | $\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$ | f-divergence (not reverse KL) |               ✗               |
+| on/off-policy | $\text{sg}(\rho) k_2$ |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |          Reverse KL           | ✓ (recommended, low variance) |
+| on/off-policy |      $\rho k_3$       |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |          Reverse KL           | ✓ (recommended, low variance) |
 
 where $\rho = \frac{q_\theta}{\text{sg}(\mu)}$. When on-policy ($\mu = q_\theta$), $\rho \equiv 1$.
 
