@@ -1229,15 +1229,28 @@ pre:not(.wrapped) pre {
   margin-bottom: 0;
 }
 .news .news-table.news-scrollable::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 8px;
+  height: 8px;
 }
 .news .news-table.news-scrollable::-webkit-scrollbar-thumb {
-  background-color: var(--global-divider-color);
-  border-radius: 5px;
+  background: linear-gradient(180deg, var(--global-theme-color) 0%, var(--global-hover-color) 100%);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.3s ease;
+}
+.news .news-table.news-scrollable::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--global-hover-color) 0%, var(--global-theme-color) 100%);
+  background-clip: padding-box;
 }
 .news .news-table.news-scrollable::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  margin: 4px 0;
+}
+.news .news-table.news-scrollable {
+  scrollbar-width: auto;
+  scrollbar-color: var(--global-theme-color) rgba(0, 0, 0, 0.08);
 }
 
 /*******************************************************************************
