@@ -122,6 +122,32 @@ body.sticky-bottom-footer {
 /*******************************************************************************
  * Styles for the base elements of the theme.
  ******************************************************************************/
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--global-divider-color);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--global-theme-color);
+}
+
+::selection {
+  background: var(--global-theme-color);
+  color: #fff;
+  text-shadow: none;
+}
+
 p,
 h1,
 h2,
@@ -169,6 +195,14 @@ table tbody + tbody,
   border-top: 2px solid var(--global-divider-color);
   border-color: var(--global-divider-color);
 }
+table tbody tr,
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+table tbody tr:hover,
+.table tbody tr:hover {
+  background-color: var(--global-code-bg-color);
+}
 table td,
 .table td {
   font-size: 1rem;
@@ -193,15 +227,18 @@ img {
   max-width: 100%;
   height: auto;
   border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
 }
 
 blockquote {
   background: var(--global-code-bg-color);
-  border-left: 5px solid var(--global-theme-color);
-  margin: 1.5em 10px;
+  border-left: 4px solid var(--global-theme-color);
+  margin: 1.5em 0;
   padding: 1em 1.5em;
   font-size: 1rem;
-  border-radius: 5px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .job-ad {
@@ -272,6 +309,16 @@ pre code {
 .card .card-item .row {
   display: flex;
   align-items: center;
+}
+
+.card.hoverable {
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+.card.hoverable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 .citation,
@@ -654,6 +701,7 @@ footer.sticky-bottom {
   padding-top: 25px;
   padding-bottom: 25px;
   font-size: 0.75rem;
+  text-align: center;
 }
 
 .cv {
@@ -909,16 +957,19 @@ footer.sticky-bottom {
 .publications ol.bibliography li .links a.btn {
   color: var(--global-text-color);
   border: 1px solid var(--global-text-color);
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 0.12rem;
-  padding-bottom: 0.12rem;
+  padding: 0.2rem 0.6rem;
   font-size: 0.75rem;
-  margin-right: 0.15rem;
+  margin-right: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 .publications ol.bibliography li .links a.btn:hover {
   color: var(--global-theme-color);
   border-color: var(--global-theme-color);
+  background-color: var(--global-code-bg-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
 }
 .publications ol.bibliography li .badges span {
   display: inline-block;
@@ -972,7 +1023,8 @@ figure.highlight {
 pre {
   color: var(--global-theme-color);
   background-color: var(--global-code-bg-color);
-  border-radius: 6px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   padding: 6px 12px;
 }
 pre pre,
@@ -1177,11 +1229,15 @@ pre:not(.wrapped) pre {
   margin-bottom: 0;
 }
 .news .news-table.news-scrollable::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
 .news .news-table.news-scrollable::-webkit-scrollbar-thumb {
   background-color: var(--global-divider-color);
-  border-radius: 6px;
+  border-radius: 5px;
+}
+.news .news-table.news-scrollable::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /*******************************************************************************
