@@ -7,6 +7,7 @@ categories: reinforcement-learning
 lang: en
 zh_url: /reinforcement-learning/2025/12/01/kl-estimators-zh.html
 zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
+wechat_url: https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw
 ---
 
 
@@ -29,8 +30,8 @@ D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_
 $$
 
 <figure style="text-align:center;" markdown="0">
-	<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;">
-	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+ <img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;">
+ <figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
 **Forward KL:**
@@ -39,11 +40,12 @@ D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\
 $$
 
 <figure style="text-align:center;" markdown="0">
-	<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;">
-	<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+ <img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;">
+ <figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
 **Intuition:**
+
 - **Reverse KL** is mode-seeking: the policy concentrates on high-probability regions of $p$, possibly sacrificing diversity.
 - **Forward KL** is mass-covering: the policy tries to cover the support of $p$.
 
@@ -240,7 +242,6 @@ Assume we sample from $q_\theta$ to estimate reverse KL $D_{\mathrm{KL}}(q_\thet
 
 ### Unbiasedness Analysis
 
-
 $$
 \begin{aligned}
 \mathbb{E}_{q_\theta}[k_1] &= \mathbb{E}_{q_\theta}\left[\log \tfrac{q_\theta}{p}\right] = D_{\mathrm{KL}}(q_\theta \| p) && \textbf{(unbiased)} \\[8pt]
@@ -272,6 +273,7 @@ When KL is large ($p = \mathcal{N}(1,1)$, true KL = 0.5):
 |   $k_3$   |     0     |    1.7     |
 
 **Intuition**:
+
 - $k_1 = -\log \frac{p}{q}$ has a first-order term; when $\frac{p}{q}$ is close to 1 it can fluctuate substantially and can be negative.
 - $k_3 = \frac{p}{q} - 1 - \log \frac{p}{q}$ is second-order around $\frac{p}{q}=1$ and is always non-negative, which typically yields lower variance when the policies are close.
 - In extreme mismatch regimes where $\frac{p}{q}$ can blow up, $k_3$ can inherit large variance from the ratio; in such cases $k_1$ may be more numerically stable.
@@ -337,6 +339,7 @@ $$
 $$
 
 where $\mu$ is the sampling policy. Within this framework:
+
 - **On-policy** ($\mu = q_\theta$): $\rho \equiv 1$, but $\nabla_\theta \rho = s_\theta$
 - **Off-policy** ($\mu \neq q_\theta$): $\rho = \frac{q_\theta}{\mu}$, and $\nabla_\theta \rho = \rho \cdot s_\theta$
 
@@ -364,7 +367,7 @@ By the chain rule:
 
 $$
 \begin{aligned}
-\nabla_\theta k_2 
+\nabla_\theta k_2
 &= \left(\log \frac{p}{q_\theta}\right) \cdot \nabla_\theta\left(\log \frac{p}{q_\theta}\right) \\
 &= \left(\log \frac{p}{q_\theta}\right) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
 &= \left(\log \frac{p}{q_\theta}\right)(-s_\theta) \\
@@ -397,6 +400,7 @@ $$
 $$
 
 **Summary**: The gradients of the three estimators are:
+
 - $\nabla_\theta k_1 = s_\theta$
 - $\nabla_\theta k_2 = -\left(\log \frac{p}{q_\theta}\right) s_\theta = k_1 \cdot s_\theta$
 - $\nabla_\theta k_3 = \left(1 - \frac{p}{q_\theta}\right) s_\theta$
@@ -532,20 +536,24 @@ This means they are equal not only in expectation, but **as random variables**: 
 We can now revisit the relationship between on-policy and off-policy settings through the unified framework.
 
 **On-policy** ($\mu = q_\theta$):
+
 - $\rho = \frac{q_\theta}{\text{sg}(q_\theta)} \equiv 1$ (numerically always 1)
 - $\rho k_1 = k_1$, $\rho k_2 = k_2$, $\rho k_3 = k_3$
 - But the gradients differ, because $\nabla_\theta \rho = s_\theta \neq 0$.
 
 This explains why **naive direct backpropagation** (i.e., without explicitly constructing $\rho$) fails when using $k_1$ or $k_3$ as the KL loss term in the on-policy case:
+
 - Directly using $k_1$ (without $\rho$): $\mathbb{E}_{q_\theta}[\nabla k_1] = \mathbb{E}_{q_\theta}[s_\theta] = 0$, so the KL term is ineffective.
 - Directly using $k_3$ (without $\rho$): $\mathbb{E}_{q_\theta}[\nabla k_3] = \nabla D_{\mathrm{KL}}(p \| q_\theta)$ (forward KL), i.e., the wrong direction for reverse-KL regularization.
 - Directly using $k_2$: $\mathbb{E}_{q_\theta}[\nabla k_2] = \nabla D_{\mathrm{KL}}(q_\theta \| p)$ (reverse KL), which makes it the only correct choice under the naive implementation.
 
 If you **explicitly construct** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$, then:
+
 - **Usable**: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.
 - **Not usable**: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes an f-divergence rather than the reverse KL.
 
 **Off-policy** ($\mu \neq q_\theta$):
+
 - $\rho = \frac{q_\theta}{\mu}$ (standard importance weight)
 - **Usable**: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.
 - **Not usable**: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes an f-divergence rather than the reverse KL.
@@ -589,12 +597,14 @@ $$
 (You can also understand this as comparing variance for each coordinate component separately; the conclusion is consistent with intuitive magnitude estimates.)
 
 **In the typical KL penalty regime** ($q_\theta \approx p \approx \mu$), setting $\frac{p(x)}{q_\theta(x)} = 1 + \varepsilon(x)$, $|\varepsilon| \ll 1$:
+
 - $k_1 = -\log \frac{p}{q_\theta} \approx -\varepsilon$
 - $2k_1 + 1 \approx 1 - 2\varepsilon$, with the leading term being a positive $O(1)$ constant
 
 Therefore $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$.
 
 **Core intuitive understanding**:
+
 - $g_1 = \rho s_\theta (k_1 + 1)$ contains a zero-mean noise term of magnitude $O(1)$: $\rho s_\theta$
 - $g_\star = \rho s_\theta k_1$ has eliminated this constant noise term, leaving only first-order terms proportional to $\varepsilon$
 
@@ -641,6 +651,7 @@ where $\rho = \frac{q_\theta}{\text{sg}(\mu)}$. When on-policy ($\mu = q_\theta$
 It must be emphasized: **the conclusions in the table above apply to the unified framework where "loss is written as $L=\rho\,k$ and $\rho$ retains its gradient path in the computation graph"**. In the on-policy case, although $\rho \equiv 1$ numerically, since $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$, we still have $\nabla_\theta\rho=s_\theta\neq 0$, so $\rho k$ and "directly backpropagating through the sample mean of $k$" are not equivalent in terms of gradients.
 
 If you use the **naive on-policy implementation** (i.e., after sampling from $q_\theta$, treat $\{k_i(x)\}$ as ordinary scalars and directly backpropagate through their sample mean; without explicitly constructing $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$ to restore the score-function path), then it degenerates to:
+
 - Directly using $k_1$: $\mathbb{E}_{q_\theta}[\nabla k_1]=0$ (ineffective)
 - Directly using $k_2$: $\mathbb{E}_{q_\theta}[\nabla k_2]=\nabla D_{\mathrm{KL}}(q_\theta\|p)$ (reverse KL) ✓
 - Directly using $k_3$: $\mathbb{E}_{q_\theta}[\nabla k_3]=\nabla D_{\mathrm{KL}}(p\|q_\theta)$ (forward KL) ✗
@@ -649,9 +660,11 @@ If you use the **naive on-policy implementation** (i.e., after sampling from $q_
 
 1. **On-policy optimization of reverse KL (naive direct backprop implementation)**: The only correct choice is $k_2$
 2. **Off-policy optimization of reverse KL**: Three correct options:
-  - $\rho k_1$: Unbiased but higher variance
-  - $\text{sg}(\rho) k_2$: Unbiased, **gradient identical** to $\rho k_3$
-  - $\rho k_3$: Unbiased and lower variance (equivalent to the above, both recommended)
+
+- $\rho k_1$: Unbiased but higher variance
+- $\text{sg}(\rho) k_2$: Unbiased, **gradient identical** to $\rho k_3$
+- $\rho k_3$: Unbiased and lower variance (equivalent to the above, both recommended)
+
 3. **$\rho k_2$ (weight participates in gradient) fails**: This is an easily overlooked pitfall
 
 ## Gradient Analysis When Used as a Reward Penalty
@@ -747,12 +760,14 @@ $$
 **When $k_3$ is used as a reward penalty, the gradient is biased**, with the bias term equal to the negative of the forward KL gradient.
 
 **Interpretation of the bias**: Using $k_3$ as a reward penalty is equivalent to optimizing a mixed objective that you likely do not intend:
+
 - Penalizing reverse KL (hoping policy doesn't deviate from reference)
 - But also **wrongly encouraging forward KL to increase** (hoping reference doesn't cover policy)
 
 These two directions can conflict and destabilize optimization.
 
 **Empirical evidence**: Shah et al. (2025) report that in on-policy RL fine-tuning of LLMs:
+
 - **$k_1$ in reward**: Training is stable
 - **$k_3$ in reward**: **Training collapses**
 
@@ -791,6 +806,7 @@ $$
 **Core lesson**: "Value unbiasedness" and "gradient correctness" are independent axes. For the reward-penalty setup discussed here (stop-gradient reward shaping with reverse-KL regularization, on-policy or off-policy), **only $k_1$ yields the correct induced policy gradient**. Even though $k_3$ is value-unbiased and often lower variance, using it as a reward penalty introduces a biased update and may trigger collapse.
 
 At this point, an apparent tension may arise:
+
 - In **reward penalty** we emphasize "only use $k_1$";
 - But in the earlier **loss-term backpropagation** discussion (especially off-policy), we recommend using $\rho k_3$ or $\text{sg}(\rho)k_2$ for lower-variance reverse-KL gradients.
 
@@ -821,12 +837,14 @@ $$
 **Key finding**: The KL gradient terms from both approaches are **identical at the sample level**.
 
 In other words, ignoring the specific construction details of baseline/advantage:
+
 - "Writing KL into loss with low-variance implementation ($\text{sg}(\rho)k_2$ or $\rho k_3$)"
 - and "Writing KL into reward with $k_1$ (stop-gradient shaped reward)"
 
 can exert exactly the same KL regularization "force" on policy updates.
 
 Specifically, if we only look at the gradient term contributed by KL penalty when "maximizing $J$" (the penalty term carries a negative sign in $J$, so the ascent direction naturally carries $-\beta$):
+
 - **KL in Loss (low-variance implementation)**: $-\beta \cdot \rho s_\theta k_1$
 - **KL in Reward ($k_1$ in reward)**: $\rho s_\theta \cdot (-\beta k_1) = -\beta \cdot \rho s_\theta k_1$
 
@@ -853,6 +871,7 @@ $$
 $$
 
 KL enters advantage computation through shaped reward and gets processed by the baseline. This means:
+
 - KL's influence is modulated by how advantage is constructed
 - If using a value function baseline, KL's influence is partially absorbed
 

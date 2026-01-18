@@ -7,6 +7,7 @@ categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/12/01/kl-estimators-en.html
 zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
+wechat_url: https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw
 ---
 
 
@@ -44,6 +45,7 @@ $$
 </figure>
 
 **直观解释**：
+
 - **反向KL**具有「模式寻找」（mode-seeking）特性，即优化后的策略倾向于集中在参考分布的高概率区域，但可能以牺牲多样性为代价。
 - **正向KL**表现出「全覆盖」（mass-covering）特性，即策略试图覆盖参考分布的整个支撑集。
 
@@ -271,6 +273,7 @@ John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，�
 | $k_3$  |     0     |     1.7     |
 
 **核心直观理解**：
+
 - $k_1 = -\log \frac{p}{q_\theta}$ 以一阶项起步，当 $\frac{p}{q_\theta}$ 接近 1 时波动较大，且可能取负值
 - $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 在 $\frac{p}{q_\theta}=1$ 处是二阶小量，始终非负，因此在策略接近时方差较小
 - 但当覆盖严重不足（$\frac{p}{q_\theta}$ 可能极大）时，$k_3$ 的方差会因权重爆炸而增大；此时 $k_1$ 反而更加稳定
@@ -336,6 +339,7 @@ $$
 $$
 
 其中 $\mu$ 为采样策略。在此框架下：
+
 - **On-policy**（$\mu = q_\theta$）：$\rho \equiv 1$，但 $\nabla_\theta \rho = s_\theta$
 - **Off-policy**（$\mu \neq q_\theta$）：$\rho = \frac{q_\theta}{\mu}$，且 $\nabla_\theta \rho = \rho \cdot s_\theta$
 
@@ -363,7 +367,7 @@ $$
 
 $$
 \begin{aligned}
-\nabla_\theta k_2 
+\nabla_\theta k_2
 &= \left(\log \frac{p}{q_\theta}\right) \cdot \nabla_\theta\left(\log \frac{p}{q_\theta}\right) \\
 &= \left(\log \frac{p}{q_\theta}\right) \cdot \nabla_\theta(\log p(x) - \log q_\theta(x)) \\
 &= \left(\log \frac{p}{q_\theta}\right)(-s_\theta) \\
@@ -396,6 +400,7 @@ $$
 $$
 
 **小结**：三种估计器的梯度分别为：
+
 - $\nabla_\theta k_1 = s_\theta$
 - $\nabla_\theta k_2 = -\left(\log \frac{p}{q_\theta}\right) s_\theta = k_1 \cdot s_\theta$
 - $\nabla_\theta k_3 = \left(1 - \frac{p}{q_\theta}\right) s_\theta$
@@ -532,20 +537,24 @@ $$
 现在，我们可以通过统一框架重新审视 on-policy 与 off-policy 的关系。
 
 **On-policy**（$\mu = q_\theta$）：
+
 - $\rho = \frac{q_\theta}{\text{sg}(q_\theta)} \equiv 1$（数值恒为 1）
 - $\rho k_1 = k_1$，$\rho k_2 = k_2$，$\rho k_3 = k_3$
 - 但梯度不同！因为 $\nabla_\theta \rho = s_\theta \neq 0$
 
 这解释了为什么 on-policy 时**朴素直接反向传播**（不显式构造 $\rho$）使用 $k_1$ 或 $k_3$ 作为损失函数会出问题：
+
 - 直接使用 $k_1$：相当于没有 $\rho$ 的版本，$\mathbb{E}_{q_\theta}[\nabla k_1] = \mathbb{E}_{q_\theta}[s_\theta] = 0$，**完全无效**
 - 直接使用 $k_3$：相当于没有 $\rho$ 的版本，$\mathbb{E}_{q_\theta}[\nabla k_3] = \nabla D_{\mathrm{KL}}(p \| q_\theta)$（正向 KL），**方向错误**
 - 直接使用 $k_2$：$\mathbb{E}_{q_\theta}[\nabla k_2] = \nabla D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL）✓ **朴素实现下唯一正确选择**
 
 但如果**显式构造** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$，则：
+
 - **可用**：$\rho k_1$（方差高）、$\text{sg}(\rho) k_2$（推荐）、$\rho k_3$（推荐）——三者均给出反向 KL 梯度
 - **不可用**：$\rho k_2$（$\rho$ 参与梯度）——优化的是 f-散度而非反向 KL
 
 **Off-policy**（$\mu \neq q_\theta$）：
+
 - $\rho = \frac{q_\theta}{\mu}$（标准重要性权重）
 - **可用**：$\rho k_1$（方差高）、$\text{sg}(\rho) k_2$（推荐）、$\rho k_3$（推荐）——三者均给出反向 KL 梯度
 - **不可用**：$\rho k_2$（$\rho$ 参与梯度）——优化的是 f-散度而非反向 KL
@@ -589,12 +598,14 @@ $$
 （你也可以将此理解为对每个坐标分量分别比较方差；结论与直观量级判断一致。）
 
 **在典型的 KL 惩罚场景下**（$q_\theta \approx p \approx \mu$），取 $\frac{p(x)}{q_\theta(x)} = 1 + \varepsilon(x)$，$|\varepsilon| \ll 1$：
+
 - $k_1 = -\log \frac{p}{q_\theta} \approx -\varepsilon$
 - $2k_1 + 1 \approx 1 - 2\varepsilon$，主导项为正的 $O(1)$ 常数
 
 因此 $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$。
 
 **核心直观理解**：
+
 - $g_1 = \rho s_\theta (k_1 + 1)$ 包含一个量级为 $O(1)$ 的零均值噪声项 $\rho s_\theta$
 - $g_\star = \rho s_\theta k_1$ 已将该常数噪声项消去，剩下与 $\varepsilon$ 成正比的一阶小量
 
@@ -641,6 +652,7 @@ $$
 需要特别强调：**上表的结论针对的是 “loss 写成 $L=\rho\,k$ 且 $\rho$ 在计算图中保留梯度路径” 的统一框架**。在 on-policy 时，虽然数值上 $\rho\equiv 1$，但由于 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，仍有 $\nabla_\theta\rho=s_\theta\neq 0$，因此 $\rho k$ 与“直接对 $k$ 的样本均值反向传播”在梯度上并不等价。
 
 如果你采用的是**朴素 on-policy 写法**（即从 $q_\theta$ 采样后，将 $\{k_i(x)\}$ 视为普通标量，对其样本均值直接反向传播；不显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$ 来补上 score-function 路径），则会退化为：
+
 - 直接使用 $k_1$：$\mathbb{E}_{q_\theta}[\nabla k_1]=0$（无效）
 - 直接使用 $k_2$：$\mathbb{E}_{q_\theta}[\nabla k_2]=\nabla D_{\mathrm{KL}}(q_\theta\|p)$（反向 KL）✓
 - 直接使用 $k_3$：$\mathbb{E}_{q_\theta}[\nabla k_3]=\nabla D_{\mathrm{KL}}(p\|q_\theta)$（正向 KL）✗
@@ -747,12 +759,14 @@ $$
 **$k_3$ 作为 reward 惩罚时，梯度是有偏的**，偏差项等于正向 KL 梯度的负值。
 
 **偏差的几何含义**：使用 $k_3$ 作为 reward 惩罚，相当于在优化一个「错误的混合目标」：
+
 - 既惩罚反向 KL（希望策略不偏离参考）
 - 又**错误地鼓励正向 KL 变大**（希望参考不覆盖策略）
 
 这两个方向相互冲突，可能导致优化不稳定。
 
 **实验验证**：Shah et al. (2025) 的实验表明，在 on-policy RL 微调 LLM 时：
+
 - **$k_1$ in reward**：训练稳定
 - **$k_3$ in reward**：**训练崩溃**
 
@@ -791,6 +805,7 @@ $$
 **核心教训**：评价 KL 估计器时，「数值无偏」和「梯度正确」是两个独立的维度。对于本文讨论的 reward 惩罚用法（stop-grad reward shaping，目标为反向 KL 正则；无论 on-policy 还是 off-policy），**只有 $k_1$ 是正确的选择**。$k_3$ 虽然数值无偏且方差更低，但作为 reward 惩罚会导致梯度有偏，可能引发训练崩溃。
 
 到这里容易产生一个“表面矛盾”：
+
 - 在 **Reward 惩罚**里我们强调“只能用 $k_1$”；
 - 但在前文 **Loss 反传**（尤其 off-policy）里，我们又推荐用 $\rho k_3$ 或 $\text{sg}(\rho)k_2$ 来获得更低方差的反向 KL 梯度。
 
@@ -821,12 +836,14 @@ $$
 **关键发现**：两者的 KL 梯度项**样本级完全相同**。
 
 也就是说，在不考虑 baseline/advantage 的具体构造细节时：
+
 - “把 KL 写进 loss 并用低方差实现（$\text{sg}(\rho)k_2$ 或 $\rho k_3$）”
 - 与“把 KL 写进 reward 并选 $k_1$（stop-grad shaped reward）”
 
 对策略更新施加的 KL 正则“力”可以是一模一样的。
 
 具体来说，如果我们只看“最大化 $J$”时 KL 惩罚贡献的那一项梯度（惩罚项在 $J$ 里带负号，因此这项的上升方向自然带 $-\beta$）：
+
 - **KL in Loss（低方差实现）**：$-\beta \cdot \rho s_\theta k_1$
 - **KL in Reward（$k_1$ in reward）**：$\rho s_\theta \cdot (-\beta k_1) = -\beta \cdot \rho s_\theta k_1$
 
@@ -853,6 +870,7 @@ $$
 $$
 
 KL 通过 shaped reward 进入 advantage 计算，会被 baseline 处理。这意味着：
+
 - KL 的影响会被 advantage 的构造方式调制
 - 如果使用 value function baseline，KL 的影响会被部分吸收
 
