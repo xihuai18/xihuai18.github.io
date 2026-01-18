@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-18T16:21:43+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://xihuai18.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://xihuai18.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2026-01-18T16:35:46+00:00</updated><id>https://xihuai18.github.io/feed.xml</id><title type="html">Xihuai Wang’s Page</title><subtitle>Xihuai&apos;s personal page.
 </subtitle><entry xml:lang="en"><title type="html">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</title><link href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html" rel="alternate" type="text/html" title="Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><published>2025-12-17T00:00:00+00:00</published><updated>2025-12-17T00:00:00+00:00</updated><id>https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en</id><content type="html" xml:base="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"><![CDATA[<h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
 
 <p>Consider the following scenario: you are training a large language model with reinforcement learning to improve its question-answering capabilities. Ideally, each time the model generates a batch of responses, you would immediately update the model with this data, then use the updated model to generate new data, and so on. This approach of “updating with data from the same policy that generated it” is called <strong>on-policy</strong> training.</p>
@@ -1537,19 +1537,20 @@
 ⟦DISPMATH1MATHEND⟧</p>
 
 <figure style="text-align:center;">
-<img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;" />
-<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+ <img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;" />
+ <figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
 <p><strong>Forward KL:</strong>
 ⟦DISPMATH2MATHEND⟧</p>
 
 <figure style="text-align:center;">
-<img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;" />
-<figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
+ <img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;" />
+ <figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
 <p><strong>Intuition:</strong></p>
+
 <ul>
   <li><strong>Reverse KL</strong> is mode-seeking: the policy concentrates on high-probability regions of ⟦INLMATH75MATHEND⟧, possibly sacrificing diversity.</li>
   <li><strong>Forward KL</strong> is mass-covering: the policy tries to cover the support of ⟦INLMATH76MATHEND⟧.</li>
@@ -1807,6 +1808,7 @@
 </table>
 
 <p><strong>Intuition</strong>:</p>
+
 <ul>
   <li>⟦INLMATH179MATHEND⟧ has a first-order term; when ⟦INLMATH180MATHEND⟧ is close to 1 it can fluctuate substantially and can be negative.</li>
   <li>⟦INLMATH181MATHEND⟧ is second-order around ⟦INLMATH182MATHEND⟧ and is always non-negative, which typically yields lower variance when the policies are close.</li>
@@ -1895,6 +1897,7 @@
 <p>⟦DISPMATH21MATHEND⟧</p>
 
 <p>where ⟦INLMATH199MATHEND⟧ is the sampling policy. Within this framework:</p>
+
 <ul>
   <li><strong>On-policy</strong> (⟦INLMATH200MATHEND⟧): ⟦INLMATH201MATHEND⟧, but ⟦INLMATH202MATHEND⟧</li>
   <li><strong>Off-policy</strong> (⟦INLMATH203MATHEND⟧): ⟦INLMATH204MATHEND⟧, and ⟦INLMATH205MATHEND⟧</li>
@@ -1935,6 +1938,7 @@
 <p>⟦DISPMATH29MATHEND⟧</p>
 
 <p><strong>Summary</strong>: The gradients of the three estimators are:</p>
+
 <ul>
   <li>⟦INLMATH213MATHEND⟧</li>
   <li>⟦INLMATH214MATHEND⟧</li>
@@ -2075,6 +2079,7 @@
 <p>We can now revisit the relationship between on-policy and off-policy settings through the unified framework.</p>
 
 <p><strong>On-policy</strong> (⟦INLMATH270MATHEND⟧):</p>
+
 <ul>
   <li>⟦INLMATH271MATHEND⟧ (numerically always 1)</li>
   <li>⟦INLMATH272MATHEND⟧, ⟦INLMATH273MATHEND⟧, ⟦INLMATH274MATHEND⟧</li>
@@ -2082,6 +2087,7 @@
 </ul>
 
 <p>This explains why <strong>naive direct backpropagation</strong> (i.e., without explicitly constructing ⟦INLMATH276MATHEND⟧) fails when using ⟦INLMATH277MATHEND⟧ or ⟦INLMATH278MATHEND⟧ as the KL loss term in the on-policy case:</p>
+
 <ul>
   <li>Directly using ⟦INLMATH279MATHEND⟧ (without ⟦INLMATH280MATHEND⟧): ⟦INLMATH281MATHEND⟧, so the KL term is ineffective.</li>
   <li>Directly using ⟦INLMATH282MATHEND⟧ (without ⟦INLMATH283MATHEND⟧): ⟦INLMATH284MATHEND⟧ (forward KL), i.e., the wrong direction for reverse-KL regularization.</li>
@@ -2089,12 +2095,14 @@
 </ul>
 
 <p>If you <strong>explicitly construct</strong> ⟦INLMATH287MATHEND⟧, then:</p>
+
 <ul>
   <li><strong>Usable</strong>: ⟦INLMATH288MATHEND⟧ (higher variance), ⟦INLMATH289MATHEND⟧ (recommended), and ⟦INLMATH290MATHEND⟧ (recommended) all yield reverse-KL gradients.</li>
   <li><strong>Not usable</strong>: ⟦INLMATH291MATHEND⟧ (where ⟦INLMATH292MATHEND⟧ participates in the gradient) optimizes an f-divergence rather than the reverse KL.</li>
 </ul>
 
 <p><strong>Off-policy</strong> (⟦INLMATH293MATHEND⟧):</p>
+
 <ul>
   <li>⟦INLMATH294MATHEND⟧ (standard importance weight)</li>
   <li><strong>Usable</strong>: ⟦INLMATH295MATHEND⟧ (higher variance), ⟦INLMATH296MATHEND⟧ (recommended), and ⟦INLMATH297MATHEND⟧ (recommended) all yield reverse-KL gradients.</li>
@@ -2128,6 +2136,7 @@
 <p>(You can also understand this as comparing variance for each coordinate component separately; the conclusion is consistent with intuitive magnitude estimates.)</p>
 
 <p><strong>In the typical KL penalty regime</strong> (⟦INLMATH314MATHEND⟧), setting ⟦INLMATH315MATHEND⟧, ⟦INLMATH316MATHEND⟧:</p>
+
 <ul>
   <li>⟦INLMATH317MATHEND⟧</li>
   <li>⟦INLMATH318MATHEND⟧, with the leading term being a positive ⟦INLMATH319MATHEND⟧ constant</li>
@@ -2136,6 +2145,7 @@
 <p>Therefore ⟦INLMATH320MATHEND⟧.</p>
 
 <p><strong>Core intuitive understanding</strong>:</p>
+
 <ul>
   <li>⟦INLMATH321MATHEND⟧ contains a zero-mean noise term of magnitude ⟦INLMATH322MATHEND⟧: ⟦INLMATH323MATHEND⟧</li>
   <li>⟦INLMATH324MATHEND⟧ has eliminated this constant noise term, leaving only first-order terms proportional to ⟦INLMATH325MATHEND⟧</li>
@@ -2248,6 +2258,7 @@
 <p>It must be emphasized: <strong>the conclusions in the table above apply to the unified framework where “loss is written as ⟦INLMATH368MATHEND⟧ and ⟦INLMATH369MATHEND⟧ retains its gradient path in the computation graph”</strong>. In the on-policy case, although ⟦INLMATH370MATHEND⟧ numerically, since ⟦INLMATH371MATHEND⟧, we still have ⟦INLMATH372MATHEND⟧, so ⟦INLMATH373MATHEND⟧ and “directly backpropagating through the sample mean of ⟦INLMATH374MATHEND⟧” are not equivalent in terms of gradients.</p>
 
 <p>If you use the <strong>naive on-policy implementation</strong> (i.e., after sampling from ⟦INLMATH375MATHEND⟧, treat ⟦INLMATH376MATHEND⟧ as ordinary scalars and directly backpropagate through their sample mean; without explicitly constructing ⟦INLMATH377MATHEND⟧ to restore the score-function path), then it degenerates to:</p>
+
 <ul>
   <li>Directly using ⟦INLMATH378MATHEND⟧: ⟦INLMATH379MATHEND⟧ (ineffective)</li>
   <li>Directly using ⟦INLMATH380MATHEND⟧: ⟦INLMATH381MATHEND⟧ (reverse KL) ✓</li>
@@ -2258,13 +2269,16 @@
 
 <ol>
   <li><strong>On-policy optimization of reverse KL (naive direct backprop implementation)</strong>: The only correct choice is ⟦INLMATH384MATHEND⟧</li>
-  <li><strong>Off-policy optimization of reverse KL</strong>: Three correct options:
-    <ul>
-      <li>⟦INLMATH385MATHEND⟧: Unbiased but higher variance</li>
-      <li>⟦INLMATH386MATHEND⟧: Unbiased, <strong>gradient identical</strong> to ⟦INLMATH387MATHEND⟧</li>
-      <li>⟦INLMATH388MATHEND⟧: Unbiased and lower variance (equivalent to the above, both recommended)</li>
-    </ul>
-  </li>
+  <li><strong>Off-policy optimization of reverse KL</strong>: Three correct options:</li>
+</ol>
+
+<ul>
+  <li>⟦INLMATH385MATHEND⟧: Unbiased but higher variance</li>
+  <li>⟦INLMATH386MATHEND⟧: Unbiased, <strong>gradient identical</strong> to ⟦INLMATH387MATHEND⟧</li>
+  <li>⟦INLMATH388MATHEND⟧: Unbiased and lower variance (equivalent to the above, both recommended)</li>
+</ul>
+
+<ol>
   <li><strong>⟦INLMATH389MATHEND⟧ (weight participates in gradient) fails</strong>: This is an easily overlooked pitfall</li>
 </ol>
 
@@ -2337,6 +2351,7 @@
 <p><strong>When ⟦INLMATH403MATHEND⟧ is used as a reward penalty, the gradient is biased</strong>, with the bias term equal to the negative of the forward KL gradient.</p>
 
 <p><strong>Interpretation of the bias</strong>: Using ⟦INLMATH404MATHEND⟧ as a reward penalty is equivalent to optimizing a mixed objective that you likely do not intend:</p>
+
 <ul>
   <li>Penalizing reverse KL (hoping policy doesn’t deviate from reference)</li>
   <li>But also <strong>wrongly encouraging forward KL to increase</strong> (hoping reference doesn’t cover policy)</li>
@@ -2345,6 +2360,7 @@
 <p>These two directions can conflict and destabilize optimization.</p>
 
 <p><strong>Empirical evidence</strong>: Shah et al. (2025) report that in on-policy RL fine-tuning of LLMs:</p>
+
 <ul>
   <li><strong>⟦INLMATH405MATHEND⟧ in reward</strong>: Training is stable</li>
   <li><strong>⟦INLMATH406MATHEND⟧ in reward</strong>: <strong>Training collapses</strong></li>
@@ -2403,6 +2419,7 @@
 <p><strong>Core lesson</strong>: “Value unbiasedness” and “gradient correctness” are independent axes. For the reward-penalty setup discussed here (stop-gradient reward shaping with reverse-KL regularization, on-policy or off-policy), <strong>only ⟦INLMATH419MATHEND⟧ yields the correct induced policy gradient</strong>. Even though ⟦INLMATH420MATHEND⟧ is value-unbiased and often lower variance, using it as a reward penalty introduces a biased update and may trigger collapse.</p>
 
 <p>At this point, an apparent tension may arise:</p>
+
 <ul>
   <li>In <strong>reward penalty</strong> we emphasize “only use ⟦INLMATH421MATHEND⟧”;</li>
   <li>But in the earlier <strong>loss-term backpropagation</strong> discussion (especially off-policy), we recommend using ⟦INLMATH422MATHEND⟧ or ⟦INLMATH423MATHEND⟧ for lower-variance reverse-KL gradients.</li>
@@ -2431,6 +2448,7 @@
 <p><strong>Key finding</strong>: The KL gradient terms from both approaches are <strong>identical at the sample level</strong>.</p>
 
 <p>In other words, ignoring the specific construction details of baseline/advantage:</p>
+
 <ul>
   <li>“Writing KL into loss with low-variance implementation (⟦INLMATH433MATHEND⟧ or ⟦INLMATH434MATHEND⟧)”</li>
   <li>and “Writing KL into reward with ⟦INLMATH435MATHEND⟧ (stop-gradient shaped reward)”</li>
@@ -2439,6 +2457,7 @@
 <p>can exert exactly the same KL regularization “force” on policy updates.</p>
 
 <p>Specifically, if we only look at the gradient term contributed by KL penalty when “maximizing ⟦INLMATH436MATHEND⟧” (the penalty term carries a negative sign in ⟦INLMATH437MATHEND⟧, so the ascent direction naturally carries ⟦INLMATH438MATHEND⟧):</p>
+
 <ul>
   <li><strong>KL in Loss (low-variance implementation)</strong>: ⟦INLMATH439MATHEND⟧</li>
   <li><strong>KL in Reward (⟦INLMATH440MATHEND⟧ in reward)</strong>: ⟦INLMATH441MATHEND⟧</li>
@@ -2463,6 +2482,7 @@
 <p>⟦DISPMATH64MATHEND⟧</p>
 
 <p>KL enters advantage computation through shaped reward and gets processed by the baseline. This means:</p>
+
 <ul>
   <li>KL’s influence is modulated by how advantage is constructed</li>
   <li>If using a value function baseline, KL’s influence is partially absorbed</li>
@@ -2823,6 +2843,7 @@
 </figure>
 
 <p><strong>直观解释</strong>：</p>
+
 <ul>
   <li><strong>反向KL</strong>具有「模式寻找」（mode-seeking）特性，即优化后的策略倾向于集中在参考分布的高概率区域，但可能以牺牲多样性为代价。</li>
   <li><strong>正向KL</strong>表现出「全覆盖」（mass-covering）特性，即策略试图覆盖参考分布的整个支撑集。</li>
@@ -3080,6 +3101,7 @@
 </table>
 
 <p><strong>核心直观理解</strong>：</p>
+
 <ul>
   <li>⟦INLMATH178MATHEND⟧ 以一阶项起步，当 ⟦INLMATH179MATHEND⟧ 接近 1 时波动较大，且可能取负值</li>
   <li>⟦INLMATH180MATHEND⟧ 在 ⟦INLMATH181MATHEND⟧ 处是二阶小量，始终非负，因此在策略接近时方差较小</li>
@@ -3168,6 +3190,7 @@
 <p>⟦DISPMATH21MATHEND⟧</p>
 
 <p>其中 ⟦INLMATH198MATHEND⟧ 为采样策略。在此框架下：</p>
+
 <ul>
   <li><strong>On-policy</strong>（⟦INLMATH199MATHEND⟧）：⟦INLMATH200MATHEND⟧，但 ⟦INLMATH201MATHEND⟧</li>
   <li><strong>Off-policy</strong>（⟦INLMATH202MATHEND⟧）：⟦INLMATH203MATHEND⟧，且 ⟦INLMATH204MATHEND⟧</li>
@@ -3208,6 +3231,7 @@
 <p>⟦DISPMATH29MATHEND⟧</p>
 
 <p><strong>小结</strong>：三种估计器的梯度分别为：</p>
+
 <ul>
   <li>⟦INLMATH212MATHEND⟧</li>
   <li>⟦INLMATH213MATHEND⟧</li>
@@ -3348,6 +3372,7 @@
 <p>现在，我们可以通过统一框架重新审视 on-policy 与 off-policy 的关系。</p>
 
 <p><strong>On-policy</strong>（⟦INLMATH270MATHEND⟧）：</p>
+
 <ul>
   <li>⟦INLMATH271MATHEND⟧（数值恒为 1）</li>
   <li>⟦INLMATH272MATHEND⟧，⟦INLMATH273MATHEND⟧，⟦INLMATH274MATHEND⟧</li>
@@ -3355,6 +3380,7 @@
 </ul>
 
 <p>这解释了为什么 on-policy 时<strong>朴素直接反向传播</strong>（不显式构造 ⟦INLMATH276MATHEND⟧）使用 ⟦INLMATH277MATHEND⟧ 或 ⟦INLMATH278MATHEND⟧ 作为损失函数会出问题：</p>
+
 <ul>
   <li>直接使用 ⟦INLMATH279MATHEND⟧：相当于没有 ⟦INLMATH280MATHEND⟧ 的版本，⟦INLMATH281MATHEND⟧，<strong>完全无效</strong></li>
   <li>直接使用 ⟦INLMATH282MATHEND⟧：相当于没有 ⟦INLMATH283MATHEND⟧ 的版本，⟦INLMATH284MATHEND⟧（正向 KL），<strong>方向错误</strong></li>
@@ -3362,12 +3388,14 @@
 </ul>
 
 <p>但如果<strong>显式构造</strong> ⟦INLMATH287MATHEND⟧，则：</p>
+
 <ul>
   <li><strong>可用</strong>：⟦INLMATH288MATHEND⟧（方差高）、⟦INLMATH289MATHEND⟧（推荐）、⟦INLMATH290MATHEND⟧（推荐）——三者均给出反向 KL 梯度</li>
   <li><strong>不可用</strong>：⟦INLMATH291MATHEND⟧（⟦INLMATH292MATHEND⟧ 参与梯度）——优化的是 f-散度而非反向 KL</li>
 </ul>
 
 <p><strong>Off-policy</strong>（⟦INLMATH293MATHEND⟧）：</p>
+
 <ul>
   <li>⟦INLMATH294MATHEND⟧（标准重要性权重）</li>
   <li><strong>可用</strong>：⟦INLMATH295MATHEND⟧（方差高）、⟦INLMATH296MATHEND⟧（推荐）、⟦INLMATH297MATHEND⟧（推荐）——三者均给出反向 KL 梯度</li>
@@ -3401,6 +3429,7 @@
 <p>（你也可以将此理解为对每个坐标分量分别比较方差；结论与直观量级判断一致。）</p>
 
 <p><strong>在典型的 KL 惩罚场景下</strong>（⟦INLMATH315MATHEND⟧），取 ⟦INLMATH316MATHEND⟧，⟦INLMATH317MATHEND⟧：</p>
+
 <ul>
   <li>⟦INLMATH318MATHEND⟧</li>
   <li>⟦INLMATH319MATHEND⟧，主导项为正的 ⟦INLMATH320MATHEND⟧ 常数</li>
@@ -3409,6 +3438,7 @@
 <p>因此 ⟦INLMATH321MATHEND⟧。</p>
 
 <p><strong>核心直观理解</strong>：</p>
+
 <ul>
   <li>⟦INLMATH322MATHEND⟧ 包含一个量级为 ⟦INLMATH323MATHEND⟧ 的零均值噪声项 ⟦INLMATH324MATHEND⟧</li>
   <li>⟦INLMATH325MATHEND⟧ 已将该常数噪声项消去，剩下与 ⟦INLMATH326MATHEND⟧ 成正比的一阶小量</li>
@@ -3521,6 +3551,7 @@
 <p>需要特别强调：<strong>上表的结论针对的是 “loss 写成 ⟦INLMATH369MATHEND⟧ 且 ⟦INLMATH370MATHEND⟧ 在计算图中保留梯度路径” 的统一框架</strong>。在 on-policy 时，虽然数值上 ⟦INLMATH371MATHEND⟧，但由于 ⟦INLMATH372MATHEND⟧，仍有 ⟦INLMATH373MATHEND⟧，因此 ⟦INLMATH374MATHEND⟧ 与“直接对 ⟦INLMATH375MATHEND⟧ 的样本均值反向传播”在梯度上并不等价。</p>
 
 <p>如果你采用的是<strong>朴素 on-policy 写法</strong>（即从 ⟦INLMATH376MATHEND⟧ 采样后，将 ⟦INLMATH377MATHEND⟧ 视为普通标量，对其样本均值直接反向传播；不显式构造 ⟦INLMATH378MATHEND⟧ 来补上 score-function 路径），则会退化为：</p>
+
 <ul>
   <li>直接使用 ⟦INLMATH379MATHEND⟧：⟦INLMATH380MATHEND⟧（无效）</li>
   <li>直接使用 ⟦INLMATH381MATHEND⟧：⟦INLMATH382MATHEND⟧（反向 KL）✓</li>
@@ -3610,6 +3641,7 @@
 <p><strong>⟦INLMATH404MATHEND⟧ 作为 reward 惩罚时，梯度是有偏的</strong>，偏差项等于正向 KL 梯度的负值。</p>
 
 <p><strong>偏差的几何含义</strong>：使用 ⟦INLMATH405MATHEND⟧ 作为 reward 惩罚，相当于在优化一个「错误的混合目标」：</p>
+
 <ul>
   <li>既惩罚反向 KL（希望策略不偏离参考）</li>
   <li>又<strong>错误地鼓励正向 KL 变大</strong>（希望参考不覆盖策略）</li>
@@ -3618,6 +3650,7 @@
 <p>这两个方向相互冲突，可能导致优化不稳定。</p>
 
 <p><strong>实验验证</strong>：Shah et al. (2025) 的实验表明，在 on-policy RL 微调 LLM 时：</p>
+
 <ul>
   <li><strong>⟦INLMATH406MATHEND⟧ in reward</strong>：训练稳定</li>
   <li><strong>⟦INLMATH407MATHEND⟧ in reward</strong>：<strong>训练崩溃</strong></li>
@@ -3676,6 +3709,7 @@
 <p><strong>核心教训</strong>：评价 KL 估计器时，「数值无偏」和「梯度正确」是两个独立的维度。对于本文讨论的 reward 惩罚用法（stop-grad reward shaping，目标为反向 KL 正则；无论 on-policy 还是 off-policy），<strong>只有 ⟦INLMATH420MATHEND⟧ 是正确的选择</strong>。⟦INLMATH421MATHEND⟧ 虽然数值无偏且方差更低，但作为 reward 惩罚会导致梯度有偏，可能引发训练崩溃。</p>
 
 <p>到这里容易产生一个“表面矛盾”：</p>
+
 <ul>
   <li>在 <strong>Reward 惩罚</strong>里我们强调“只能用 ⟦INLMATH422MATHEND⟧”；</li>
   <li>但在前文 <strong>Loss 反传</strong>（尤其 off-policy）里，我们又推荐用 ⟦INLMATH423MATHEND⟧ 或 ⟦INLMATH424MATHEND⟧ 来获得更低方差的反向 KL 梯度。</li>
@@ -3704,6 +3738,7 @@
 <p><strong>关键发现</strong>：两者的 KL 梯度项<strong>样本级完全相同</strong>。</p>
 
 <p>也就是说，在不考虑 baseline/advantage 的具体构造细节时：</p>
+
 <ul>
   <li>“把 KL 写进 loss 并用低方差实现（⟦INLMATH434MATHEND⟧ 或 ⟦INLMATH435MATHEND⟧）”</li>
   <li>与“把 KL 写进 reward 并选 ⟦INLMATH436MATHEND⟧（stop-grad shaped reward）”</li>
@@ -3712,6 +3747,7 @@
 <p>对策略更新施加的 KL 正则“力”可以是一模一样的。</p>
 
 <p>具体来说，如果我们只看“最大化 ⟦INLMATH437MATHEND⟧”时 KL 惩罚贡献的那一项梯度（惩罚项在 ⟦INLMATH438MATHEND⟧ 里带负号，因此这项的上升方向自然带 ⟦INLMATH439MATHEND⟧）：</p>
+
 <ul>
   <li><strong>KL in Loss（低方差实现）</strong>：⟦INLMATH440MATHEND⟧</li>
   <li><strong>KL in Reward（⟦INLMATH441MATHEND⟧ in reward）</strong>：⟦INLMATH442MATHEND⟧</li>
@@ -3736,6 +3772,7 @@
 <p>⟦DISPMATH64MATHEND⟧</p>
 
 <p>KL 通过 shaped reward 进入 advantage 计算，会被 baseline 处理。这意味着：</p>
+
 <ul>
   <li>KL 的影响会被 advantage 的构造方式调制</li>
   <li>如果使用 value function baseline，KL 的影响会被部分吸收</li>
