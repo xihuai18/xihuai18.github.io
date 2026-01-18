@@ -2,7 +2,7 @@
 layout: about
 title: About
 permalink: /
-subtitle: Ph.D. Candidate @ <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.
+subtitle: Ph.D. @ <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.
 
 profile:
   align: right
@@ -16,7 +16,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I am a Ph.D. candidate in the [APEX Lab](https://apex.sjtu.edu.cn/) at Shanghai Jiao Tong University, under the supervision of [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/), affiliated with both the SJTU-Apex Group and the SJTU-MARL Group. I was honored to be selected into the [Wen-Tsun Wu AI Honorary Doctoral Program](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Prior to this, I received my B.Eng. in Computer Science and Technology from the [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
+I received my Ph.D. from the [APEX Lab](https://apex.sjtu.edu.cn/) at Shanghai Jiao Tong University in 2026, under the supervision of [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/), affiliated with both the SJTU-Apex Group and the SJTU-MARL Group. I was honored to be selected into the [Wen-Tsun Wu AI Honorary Doctoral Program](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Prior to this, I received my B.Eng. in Computer Science and Technology from the [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
 
 My research lies at the intersection of **Reinforcement Learning** and **Multi-Agent Learning**. My current research focuses on:
 
@@ -28,12 +28,12 @@ My research lies at the intersection of **Reinforcement Learning** and **Multi-A
   - Zero-shot coordination and generalization in multi-agent systems
 
 <div class="job-ad" markdown="0">
-<div style="display: flex; align-items: center;">
-<span style="font-size: 2em; margin-right: 1rem;">🙋</span>
-<div>
-<strong>I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via <em>leoxhwang@sjtu.edu.cn</em> for potential opportunities.</strong>
-<br>
-<strong>本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 <em>leoxhwang@sjtu.edu.cn</em> 与我联系。</strong>
-</div>
-</div>
+  <div style="display: flex; align-items: center;">
+    <span style="font-size: 2em; margin-right: 1rem;">🙋</span>
+    <div>
+    <strong>I am on the 2025~2026 job market, seeking research and development positions in LLM reasoning and agent systems. Please feel free to reach out via <em>leoxhwang@sjtu.edu.cn</em> for potential opportunities.</strong>
+    <br>
+    <strong>本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 <em>leoxhwang@sjtu.edu.cn</em> 与我联系。</strong>
+    </div>
+  </div>
 </div>
