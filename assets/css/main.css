@@ -3443,6 +3443,103 @@ select:focus-visible {
 }
 
 /*******************************************************************************
+ * Featured Posts Card Styles - Horizontal Layout
+ ******************************************************************************/
+.featured-posts .featured-card-link {
+  text-decoration: none;
+  display: block;
+}
+.featured-posts .featured-card-link:hover {
+  text-decoration: none;
+}
+.featured-posts .featured-card {
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.featured-posts .featured-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+.featured-posts .featured-card .row {
+  min-height: 180px;
+}
+.featured-posts .featured-card-img-wrapper {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  background-color: var(--global-code-bg-color);
+}
+.featured-posts .featured-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  min-height: 180px;
+  transition: transform 0.3s ease;
+}
+.featured-posts .featured-card:hover .featured-card-img {
+  transform: scale(1.05);
+}
+.featured-posts .featured-card-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--global-theme-color) 0%, var(--global-hover-color) 100%);
+}
+.featured-posts .featured-card-placeholder span {
+  font-size: 3rem;
+  opacity: 0.8;
+}
+.featured-posts .featured-description {
+  color: var(--global-text-color-light);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.featured-posts .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.25rem;
+}
+.featured-posts .card-body .card-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+.featured-posts .card-body .post-meta {
+  margin-bottom: 0;
+  font-size: 0.75rem;
+  color: var(--global-text-color-light);
+}
+.featured-posts .card-body .post-year {
+  color: var(--global-text-color-light);
+}
+
+@media (max-width: 767px) {
+  .featured-posts .featured-card .row {
+    flex-direction: column;
+  }
+  .featured-posts .featured-card-img-wrapper {
+    max-height: 200px;
+  }
+  .featured-posts .featured-card-img {
+    min-height: 150px;
+    max-height: 200px;
+  }
+  .featured-posts .featured-card-placeholder {
+    min-height: 150px;
+    max-height: 200px;
+  }
+}
+/*******************************************************************************
  * Pseudocode.js (algorithmic blocks)
  ******************************************************************************/
 .pseudocode {
