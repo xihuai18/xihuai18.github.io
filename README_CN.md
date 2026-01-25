@@ -275,9 +275,11 @@ graph TD
 ### 图片
 
 **带缩放的基本图片**：
+{% raw %}
 ```liquid
 {% include figure.html path="assets/img/photo.jpg" class="img-fluid" zoomable=true caption="图片说明" %}
 ```
+{% endraw %}
 
 **HTML 方式（带缩放）**：
 ```html

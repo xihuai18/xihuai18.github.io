@@ -275,9 +275,11 @@ graph TD
 ### Images
 
 **Basic image with zoom**:
+{% raw %}
 ```liquid
 {% include figure.html path="assets/img/photo.jpg" class="img-fluid" zoomable=true caption="Caption" %}
 ```
+{% endraw %}
 
 **HTML with zoom**:
 ```html
