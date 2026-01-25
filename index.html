@@ -14,8 +14,13 @@
 
     <!-- 
     Unified Share Image URL Calculation
-    Priority: page.og_image > dynamic generation (for posts) > site.og_image
-    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    Priority:
+    1) page.disable_share_image / page.share_image: none  -> no image
+    2) page.og_image                                     -> explicit per-page image
+    3) dynamic generation (posts)                         -> horizontal OG via Tailgraph
+    4) site.og_image == 'auto'                            -> horizontal OG via Tailgraph for non-post pages
+    5) site.og_image                                      -> site default
+    This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="About" />
     <meta itemprop="description" content="Xihuai Wang (王锡淮) - Ph.D. from Shanghai Jiao Tong University. Research focuses on Reinforcement Learning, Multi-Agent Systems, and LLM Reasoning &amp; Agency." /><meta itemprop="image" content="https://xihuai18.github.io/assets/img/portrait-og.jpg" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="About" />
@@ -30,8 +35,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="About" /><meta property="og:locale" content="en_US" />
 
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="About" />
+        <!-- Twitter card --><meta name="twitter:card" content="summary" /><meta name="twitter:title" content="About" />
     <meta name="twitter:description" content="Xihuai Wang (王锡淮) - Ph.D. from Shanghai Jiao Tong University. Research focuses on Reinforcement Learning, Multi-Agent Systems, and LLM Reasoning &amp; Agency." /><meta name="twitter:image" content="https://xihuai18.github.io/assets/img/portrait-og.jpg" />
     <meta name="twitter:image:alt" content="About" />
     

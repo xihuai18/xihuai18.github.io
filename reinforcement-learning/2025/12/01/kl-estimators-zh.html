@@ -14,8 +14,13 @@
 
     <!-- 
     Unified Share Image URL Calculation
-    Priority: page.og_image > dynamic generation (for posts) > site.og_image
-    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    Priority:
+    1) page.disable_share_image / page.share_image: none  -> no image
+    2) page.og_image                                     -> explicit per-page image
+    3) dynamic generation (posts)                         -> horizontal OG via Tailgraph
+    4) site.og_image == 'auto'                            -> horizontal OG via Tailgraph for non-post pages
+    5) site.og_image                                      -> site default
+    This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="Xihuai&#39;s Blog | 简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" />
     <meta itemprop="description" content="在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1、k2、k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并提供在「用于 loss 梯度回传」与「用于 reward 惩罚」两种情况下的选型指南。" /><meta itemprop="image" content="https://xihuai18.github.io/assets/img/kl-estimators/kl-estimator-og.jpg" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" />
@@ -30,8 +35,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Xihuai&#39;s Blog | 简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" /><meta property="og:locale" content="zh_CN" />
 
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" />
+        <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" />
     <meta name="twitter:description" content="在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1、k2、k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并提供在「用于 loss 梯度回传」与「用于 reward 惩罚」两种情况下的选型指南。" /><meta name="twitter:image" content="https://xihuai18.github.io/assets/img/kl-estimators/kl-estimator-og.jpg" />
     <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | 简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计" />
     

@@ -14,8 +14,13 @@
 
     <!-- 
     Unified Share Image URL Calculation
-    Priority: page.og_image > dynamic generation (for posts) > site.og_image
-    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    Priority:
+    1) page.disable_share_image / page.share_image: none  -> no image
+    2) page.og_image                                     -> explicit per-page image
+    3) dynamic generation (posts)                         -> horizontal OG via Tailgraph
+    4) site.og_image == 'auto'                            -> horizontal OG via Tailgraph for non-post pages
+    5) site.og_image                                      -> site default
+    This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="Xihuai&#39;s Blog | From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" />
     <meta itemprop="description" content="Modern LLM RL pipelines often train under an &quot;old policy&quot; that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations." /><meta itemprop="image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-en-og.jpg" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" />
@@ -30,8 +35,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Xihuai&#39;s Blog | From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" /><meta property="og:locale" content="en_US" />
 
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" />
+        <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" />
     <meta name="twitter:description" content="Modern LLM RL pipelines often train under an &quot;old policy&quot; that silently drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumptions. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap cleanly decomposes into two TV distances that we can reason about and control. Seen through this lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, Worst Token Reject Sampling (WTRS), MoE routing replay, and common engineering tricks for training–inference alignment all become different ways of shrinking these two deviations." /><meta name="twitter:image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-en-og.jpg" />
     <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL" />
     

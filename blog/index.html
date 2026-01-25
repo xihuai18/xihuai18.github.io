@@ -15,26 +15,25 @@
 
     <!-- 
     Unified Share Image URL Calculation
-    Priority: page.og_image > dynamic generation (for posts) > site.og_image
-    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    Priority:
+    1) page.disable_share_image / page.share_image: none  -> no image
+    2) page.og_image                                     -> explicit per-page image
+    3) dynamic generation (posts)                         -> horizontal OG via Tailgraph
+    4) site.og_image == 'auto'                            -> horizontal OG via Tailgraph for non-post pages
+    5) site.og_image                                      -> site default
+    This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="Blog" />
-    <meta itemprop="description" content="Xihuai&#39;s personal page." /><meta itemprop="image" content="https://xihuai18.github.io/assets/img/portrait.png" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Blog" />
-    <meta name="weibo:article:description" content="Xihuai&#39;s personal page." /><meta name="weibo:article:image" content="https://xihuai18.github.io/assets/img/portrait.png" />
+    <meta itemprop="description" content="Xihuai&#39;s personal page." /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Blog" />
+    <meta name="weibo:article:description" content="Xihuai&#39;s personal page." />
 
     <!-- OpenGraph -->
     <meta property="og:site_name" content="Xihuai Wang's Page" /><meta property="og:type" content="website" /><meta property="og:title" content="Blog" />
     <meta property="og:url" content="https://xihuai18.github.io/blog/" />
-    <meta property="og:description" content="Xihuai&#39;s personal page." /><meta property="og:image" content="https://xihuai18.github.io/assets/img/portrait.png" />
-    <meta property="og:image:secure_url" content="https://xihuai18.github.io/assets/img/portrait.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Blog" /><meta property="og:locale" content="en_US" />
+    <meta property="og:description" content="Xihuai&#39;s personal page." /><meta property="og:locale" content="en_US" />
 
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Blog" />
-    <meta name="twitter:description" content="Xihuai&#39;s personal page." /><meta name="twitter:image" content="https://xihuai18.github.io/assets/img/portrait.png" />
-    <meta name="twitter:image:alt" content="Blog" />
+        <!-- Twitter card --><meta name="twitter:card" content="summary" /><meta name="twitter:title" content="Blog" />
+    <meta name="twitter:description" content="Xihuai&#39;s personal page." />
     
 
     <!-- Schema.org -->

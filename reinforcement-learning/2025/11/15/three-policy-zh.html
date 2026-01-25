@@ -14,8 +14,13 @@
 
     <!-- 
     Unified Share Image URL Calculation
-    Priority: page.og_image > dynamic generation (for posts) > site.og_image
-    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    Priority:
+    1) page.disable_share_image / page.share_image: none  -> no image
+    2) page.og_image                                     -> explicit per-page image
+    3) dynamic generation (posts)                         -> horizontal OG via Tailgraph
+    4) site.og_image == 'auto'                            -> horizontal OG via Tailgraph for non-post pages
+    5) site.og_image                                      -> site default
+    This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
     <meta itemprop="description" content="现代 LLM RL 流程中，&quot;旧策略&quot;常常悄然偏离实际生成 rollout 的行为策略，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可推理、可控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同实现方式。" /><meta itemprop="image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
@@ -30,8 +35,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" /><meta property="og:locale" content="zh_CN" />
 
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
+        <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
     <meta name="twitter:description" content="现代 LLM RL 流程中，&quot;旧策略&quot;常常悄然偏离实际生成 rollout 的行为策略，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个可推理、可控制的 TV 距离。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样 (WTRS)、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以看作是缩小这两个偏差的不同实现方式。" /><meta name="twitter:image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg" />
     <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
     

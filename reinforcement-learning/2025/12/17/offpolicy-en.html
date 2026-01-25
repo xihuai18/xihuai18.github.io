@@ -14,8 +14,13 @@
 
     <!-- 
     Unified Share Image URL Calculation
-    Priority: page.og_image > dynamic generation (for posts) > site.og_image
-    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    Priority:
+    1) page.disable_share_image / page.share_image: none  -> no image
+    2) page.og_image                                     -> explicit per-page image
+    3) dynamic generation (posts)                         -> horizontal OG via Tailgraph
+    4) site.og_image == 'auto'                            -> horizontal OG via Tailgraph for non-post pages
+    5) site.og_image                                      -> site default
+    This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
     <meta itemprop="description" content="A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies." /><meta itemprop="image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
@@ -30,8 +35,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><meta property="og:locale" content="en_US" />
 
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
+        <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
     <meta name="twitter:description" content="A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies." /><meta name="twitter:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
     <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
     
