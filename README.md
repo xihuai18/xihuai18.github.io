@@ -327,6 +327,7 @@ Use `<d-cite key="key"></d-cite>` and `<d-footnote>text</d-footnote>`.
 <details>
 <summary><strong>Collapsible Sections</strong></summary>
 
+{% raw %}
 ```liquid
 {% details "Click to expand" %}
 Hidden content with **Markdown** support.
@@ -336,6 +337,7 @@ Hidden content with **Markdown** support.
 Starts open.
 {% enddetails %}
 ```
+{% endraw %}
 </details>
 
 <details>

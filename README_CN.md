@@ -327,6 +327,7 @@ authors:
 <details>
 <summary><strong>可折叠区块</strong></summary>
 
+{% raw %}
 ```liquid
 {% details "点击展开" %}
 支持 **Markdown** 的隐藏内容。
@@ -336,6 +337,7 @@ authors:
 初始状态为展开。
 {% enddetails %}
 ```
+{% endraw %}
 </details>
 
 <details>
