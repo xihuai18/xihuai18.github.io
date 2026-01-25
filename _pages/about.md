@@ -5,6 +5,7 @@ permalink: /
 subtitle: Ph.D. @ <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.
 description: "Xihuai Wang (王锡淮) - Ph.D. from Shanghai Jiao Tong University. Research focuses on Reinforcement Learning, Multi-Agent Systems, and LLM Reasoning & Agency."
 og_image: /assets/img/portrait.png
+twitter_card: summary
 
 profile:
   align: right

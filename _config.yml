@@ -62,7 +62,7 @@ max_width: 960px
 # Display links to the page with a preview object on social media.
 serve_og_meta: true # Include Open Graph meta tags in the HTML head
 serve_schema_org: true # Include Schema.org in the HTML head
-og_image: /assets/img/portrait.png # The site-wide (default for all links) Open Graph preview image
+og_image: auto # Use auto-generated horizontal OG image by default; override per-page via `og_image`
 og_image_width: 1200 # Recommended: 1200x630 for optimal display
 og_image_height: 630
 

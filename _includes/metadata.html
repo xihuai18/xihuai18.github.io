@@ -58,10 +58,22 @@
 
     <!-- 
     Unified Share Image URL Calculation
-    Priority: page.og_image > dynamic generation (for posts) > site.og_image
-    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    Priority:
+    1) page.disable_share_image / page.share_image: none  -> no image
+    2) page.og_image                                     -> explicit per-page image
+    3) dynamic generation (posts)                         -> horizontal OG via Tailgraph
+    4) site.og_image == 'auto'                            -> horizontal OG via Tailgraph for non-post pages
+    5) site.og_image                                      -> site default
+    This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     -->
-    {%- if page.og_image -%}
+    {%- assign _disable_share_image = false -%}
+    {%- if page.disable_share_image == true or page.share_image == 'none' -%}
+        {%- assign _disable_share_image = true -%}
+    {%- endif -%}
+
+    {%- if _disable_share_image -%}
+        {%- assign _share_image_url = nil -%}
+    {%- elsif page.og_image -%}
         {%- assign _share_image_url = page.og_image -%}
         {%- unless _share_image_url contains '://' -%}
             {%- assign _share_image_url = _share_image_url | prepend: site.baseurl | prepend: site.url -%}
@@ -83,6 +95,13 @@
 
         {%- capture _share_date -%}{%- if page.date -%}{{ page.date | date: "%Y-%m-%d" }}{%- endif -%}{%- endcapture -%}
         {%- assign _share_image_url = "https://og.tailgraph.com/og?fontFamily=Inter&title=" | append: _share_title | append: "&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=" | append: _share_desc | append: "&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=" | append: _share_author | append: "%20%C2%B7%20" | append: _share_date | append: "&footerTailwind=text-gray-400&containerTailwind=p-12" -%}
+    {%- elsif site.og_image == 'auto' or site.og_image == blank -%}
+        {%- comment -%} Auto-generate a horizontal share image for non-post pages (e.g., /blog/ index). {%- endcomment -%}
+        {%- assign _share_title = _share_meta_title | url_encode -%}
+        {%- assign _share_desc = _share_meta_desc | truncate: 100 | url_encode -%}
+        {%- capture _share_author_raw -%}{{ site.first_name }} {{ site.last_name }}{%- endcapture -%}
+        {%- assign _share_author = _share_author_raw | strip_html | strip_newlines | url_encode -%}
+        {%- assign _share_image_url = "https://og.tailgraph.com/og?fontFamily=Inter&title=" | append: _share_title | append: "&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=" | append: _share_desc | append: "&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=" | append: _share_author | append: "&footerTailwind=text-gray-400&containerTailwind=p-12" -%}
     {%- elsif site.og_image -%}
         {%- assign _share_image_url = site.og_image -%}
         {%- unless _share_image_url contains '://' -%}
@@ -152,8 +171,15 @@
         {%- endif -%}
         <meta property="og:locale" content="{{ _og_locale }}" />
 
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" />
+        <!-- Twitter card -->
+        {%- if page.twitter_card -%}
+            {%- assign _twitter_card = page.twitter_card -%}
+        {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
+            {%- assign _twitter_card = 'summary_large_image' -%}
+        {%- else -%}
+            {%- assign _twitter_card = site.twitter_card | default: 'summary_large_image' -%}
+        {%- endif -%}
+    <meta name="twitter:card" content="{{ _twitter_card }}" />
     {%- comment -%} Add "Xihuai's Blog | " prefix for blog posts to build personal brand {%- endcomment -%}
     <meta name="twitter:title" content="{{ _share_meta_title }}" />
     <meta name="twitter:description" content="{{ _share_meta_desc }}" />

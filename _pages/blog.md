@@ -4,6 +4,8 @@ permalink: /blog/
 title: Blog
 nav: false
 nav_order: 1
+disable_share_image: true
+twitter_card: summary
 ---
 
 <div class="post">
