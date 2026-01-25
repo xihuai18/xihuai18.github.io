@@ -23,7 +23,7 @@
     {%- else -%}
         {%- capture title -%}{{ site.title }}{%- endcapture -%}
     {%- endif -%}
-    {% if page.url == '/blog/index.html' %}
+    {% if page.url == '/blog/' or page.url == '/blog/index.html' or page.permalink == '/blog/' %}
         {{ site.blog_nav_title }} | {{ title }}
     {%- elsif page.title != "blank" and page.url != "/" -%}
         {%- if page.title == nil or page.title == "" -%}
@@ -40,6 +40,56 @@
 {%- if page.keywords or site.keywords %}
     <meta name="keywords" content="{%- if page.keywords -%}{{ page.keywords }}{%- else -%}{{ site.keywords }}{%- endif -%}" />
 {%- endif %}
+
+    <!-- 
+    Unified Share Image URL Calculation
+    Priority: page.og_image > dynamic generation (for posts) > site.og_image
+    This ensures consistent image across all platforms (OG, Twitter, itemprop, weibo)
+    -->
+    {%- if page.og_image -%}
+        {%- assign _share_image_url = page.og_image -%}
+        {%- unless _share_image_url contains '://' -%}
+            {%- assign _share_image_url = _share_image_url | prepend: site.baseurl | prepend: site.url -%}
+        {%- endunless -%}
+    {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
+        {%- comment -%} Auto-generate share image for blog posts using dynamic service {%- endcomment -%}
+        {%- capture _share_title -%}Xihuai's Blog | {%- if page.title -%}{{ page.title | url_encode }}{%- else -%}{{ title | url_encode }}{%- endif -%}{%- endcapture -%}
+        {%- capture _share_desc -%}{%- if page.description -%}{{ page.description | truncate: 100 | url_encode }}{%- else -%}{{ site.description | url_encode }}{%- endif -%}{%- endcapture -%}
+        {%- capture _share_author -%}{{ site.first_name }} {{ site.last_name | url_encode }}{%- endcapture -%}
+        {%- capture _share_date -%}{%- if page.date -%}{{ page.date | date: "%Y-%m-%d" }}{%- endif -%}{%- endcapture -%}
+        {%- assign _share_image_url = "https://og.tailgraph.com/og?fontFamily=Inter&title=" | append: _share_title | append: "&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=" | append: _share_desc | append: "&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=" | append: _share_author | append: "%20%C2%B7%20" | append: _share_date | append: "&footerTailwind=text-gray-400&containerTailwind=p-12" -%}
+    {%- elsif site.og_image -%}
+        {%- assign _share_image_url = site.og_image -%}
+        {%- unless _share_image_url contains '://' -%}
+            {%- assign _share_image_url = _share_image_url | prepend: site.baseurl | prepend: site.url -%}
+        {%- endunless -%}
+    {%- endif -%}
+
+    <!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    <meta itemprop="name" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- else -%}
+    <meta itemprop="name" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- endif -%}
+    <meta itemprop="description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
+    {%- if _share_image_url -%}
+    <meta itemprop="image" content="{{ _share_image_url }}" />
+    {%- endif -%}
+
+    <!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms -->
+    {%- comment -%} 
+    These platforms primarily use Open Graph tags, but some also check these additional tags.
+    WeChat uses JS-SDK for custom sharing, but falls back to these meta tags.
+    {%- endcomment -%}
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    <meta name="weibo:article:title" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- else -%}
+    <meta name="weibo:article:title" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- endif -%}
+    <meta name="weibo:article:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
+    {%- if _share_image_url -%}
+    <meta name="weibo:article:image" content="{{ _share_image_url }}" />
+    {%- endif -%}
 
 {%- if site.serve_og_meta %}
 
@@ -71,31 +121,17 @@
     <meta property="og:url" content="{{ page.url | prepend: site.baseurl | prepend: site.url | remove_first: 'index.html' }}" />
     <meta property="og:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
     
-    {%- comment -%} Dynamic OG Image Generation for Blog Posts {%- endcomment -%}
-    {%- if page.og_image -%}
-        {%- assign og_image_url = page.og_image -%}
-        {%- unless og_image_url contains '://' -%}
-            {%- assign og_image_url = og_image_url | prepend: site.baseurl | prepend: site.url -%}
-        {%- endunless -%}
-    {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
-        {%- comment -%} Auto-generate OG image for blog posts using dynamic service {%- endcomment -%}
-        {%- capture og_title -%}{%- if page.title -%}{{ page.title | url_encode }}{%- else -%}{{ title | url_encode }}{%- endif -%}{%- endcapture -%}
-        {%- capture og_desc -%}{%- if page.description -%}{{ page.description | truncate: 100 | url_encode }}{%- else -%}{{ site.description | url_encode }}{%- endif -%}{%- endcapture -%}
-        {%- capture og_author -%}{{ site.first_name }} {{ site.last_name | url_encode }}{%- endcapture -%}
-        {%- capture og_date -%}{%- if page.date -%}{{ page.date | date: "%Y-%m-%d" }}{%- endif -%}{%- endcapture -%}
-        {%- assign og_image_url = "https://og.tailgraph.com/og?fontFamily=Inter&title=" | append: og_title | append: "&titleTailwind=font-bold%20text-5xl%20text-white&titleFontFamily=Inter&text=" | append: og_desc | append: "&textTailwind=text-xl%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=" | append: og_author | append: "%20%C2%B7%20" | append: og_date | append: "&footerTailwind=text-gray-400&containerTailwind=p-12" -%}
-    {%- elsif site.og_image -%}
-        {%- assign og_image_url = site.og_image -%}
-        {%- unless og_image_url contains '://' -%}
-            {%- assign og_image_url = og_image_url | prepend: site.baseurl | prepend: site.url -%}
-        {%- endunless -%}
-    {%- endif -%}
-    {%- if og_image_url -%}
-    <meta property="og:image" content="{{ og_image_url }}" />
-    <meta property="og:image:secure_url" content="{{ og_image_url }}" />
+    {%- comment -%} Use unified share image URL calculated earlier {%- endcomment -%}
+    {%- if _share_image_url -%}
+    <meta property="og:image" content="{{ _share_image_url }}" />
+    <meta property="og:image:secure_url" content="{{ _share_image_url }}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    <meta property="og:image:alt" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- else -%}
     <meta property="og:image:alt" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- endif -%}
     {%- endif -%}
         {%- assign _page_lang = page.lang | default: site.lang -%}
         {%- if _page_lang == 'zh' -%}
@@ -117,28 +153,14 @@
     {%- endif -%}
     <meta name="twitter:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
     
-    {%- comment -%} Dynamic Twitter Image Generation for Blog Posts {%- endcomment -%}
-    {%- if page.og_image -%}
-        {%- assign twitter_image_url = page.og_image -%}
-        {%- unless twitter_image_url contains '://' -%}
-            {%- assign twitter_image_url = twitter_image_url | prepend: site.baseurl | prepend: site.url -%}
-        {%- endunless -%}
-    {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
-        {%- comment -%} Auto-generate Twitter image for blog posts {%- endcomment -%}
-        {%- capture tw_title -%}{%- if page.title -%}{{ page.title | url_encode }}{%- else -%}{{ title | url_encode }}{%- endif -%}{%- endcapture -%}
-        {%- capture tw_desc -%}{%- if page.description -%}{{ page.description | truncate: 100 | url_encode }}{%- else -%}{{ site.description | url_encode }}{%- endif -%}{%- endcapture -%}
-        {%- capture tw_author -%}{{ site.first_name }} {{ site.last_name | url_encode }}{%- endcapture -%}
-        {%- capture tw_date -%}{%- if page.date -%}{{ page.date | date: "%Y-%m-%d" }}{%- endif -%}{%- endcapture -%}
-        {%- assign twitter_image_url = "https://og.tailgraph.com/og?fontFamily=Inter&title=" | append: tw_title | append: "&titleTailwind=font-bold%20text-5xl%20text-white&titleFontFamily=Inter&text=" | append: tw_desc | append: "&textTailwind=text-xl%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=" | append: tw_author | append: "%20%C2%B7%20" | append: tw_date | append: "&footerTailwind=text-gray-400&containerTailwind=p-12" -%}
-    {%- elsif site.og_image -%}
-        {%- assign twitter_image_url = site.og_image -%}
-        {%- unless twitter_image_url contains '://' -%}
-            {%- assign twitter_image_url = twitter_image_url | prepend: site.baseurl | prepend: site.url -%}
-        {%- endunless -%}
-    {%- endif -%}
-    {%- if twitter_image_url -%}
-    <meta name="twitter:image" content="{{ twitter_image_url }}" />
+    {%- comment -%} Use unified share image URL for Twitter {%- endcomment -%}
+    {%- if _share_image_url -%}
+    <meta name="twitter:image" content="{{ _share_image_url }}" />
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    <meta name="twitter:image:alt" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- else -%}
     <meta name="twitter:image:alt" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- endif -%}
     {%- endif %}
     {% if site.twitter_username -%}
     <meta name="twitter:site" content="@{{ site.twitter_username }}" />
