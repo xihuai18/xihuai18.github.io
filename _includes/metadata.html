@@ -35,8 +35,23 @@
         {{ title }}
     {%- endif -%}
     </title>
+
+    {%- comment -%}
+    Unified share title/description (escaped) for meta tags.
+    - strip_html/strip_newlines: avoid breaking meta attributes
+    - escape_once: safe for HTML attribute context
+    {%- endcomment -%}
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+        {%- capture _share_meta_title -%}Xihuai's Blog |{% if page.title %} {{ page.title }}{% else %} {{ title }}{% endif %}{%- endcapture -%}
+    {%- else -%}
+        {%- capture _share_meta_title -%}{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}{%- endcapture -%}
+    {%- endif -%}
+    {%- assign _share_meta_title = _share_meta_title | strip_html | strip_newlines | escape_once -%}
+    {%- capture _share_meta_desc -%}{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}{%- endcapture -%}
+    {%- assign _share_meta_desc = _share_meta_desc | strip_html | strip_newlines | escape_once -%}
+
     <meta name="author" content="{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}" />
-    <meta name="description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
+    <meta name="description" content="{{ _share_meta_desc }}" />
 {%- if page.keywords or site.keywords %}
     <meta name="keywords" content="{%- if page.keywords -%}{{ page.keywords }}{%- else -%}{{ site.keywords }}{%- endif -%}" />
 {%- endif %}
@@ -53,9 +68,19 @@
         {%- endunless -%}
     {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
         {%- comment -%} Auto-generate share image for blog posts using dynamic service {%- endcomment -%}
-        {%- capture _share_title -%}Xihuai's Blog | {%- if page.title -%}{{ page.title | url_encode }}{%- else -%}{{ title | url_encode }}{%- endif -%}{%- endcapture -%}
-        {%- capture _share_desc -%}{%- if page.description -%}{{ page.description | truncate: 100 | url_encode }}{%- else -%}{{ site.description | url_encode }}{%- endif -%}{%- endcapture -%}
-        {%- capture _share_author -%}{{ site.first_name }} {{ site.last_name | url_encode }}{%- endcapture -%}
+        {%- comment -%}
+        Tailgraph query params must be URL-encoded as a whole.
+        Encode the full title (including prefix) and full author.
+        {%- endcomment -%}
+        {%- capture _share_title_raw -%}Xihuai's Blog |{% if page.title %} {{ page.title }}{% else %} {{ title }}{% endif %}{%- endcapture -%}
+        {%- assign _share_title = _share_title_raw | strip_html | strip_newlines | url_encode -%}
+
+        {%- capture _share_desc_raw -%}{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}{%- endcapture -%}
+        {%- assign _share_desc = _share_desc_raw | strip_html | strip_newlines | truncate: 100 | url_encode -%}
+
+        {%- capture _share_author_raw -%}{{ site.first_name }} {{ site.last_name }}{%- endcapture -%}
+        {%- assign _share_author = _share_author_raw | strip_html | strip_newlines | url_encode -%}
+
         {%- capture _share_date -%}{%- if page.date -%}{{ page.date | date: "%Y-%m-%d" }}{%- endif -%}{%- endcapture -%}
         {%- assign _share_image_url = "https://og.tailgraph.com/og?fontFamily=Inter&title=" | append: _share_title | append: "&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=" | append: _share_desc | append: "&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=" | append: _share_author | append: "%20%C2%B7%20" | append: _share_date | append: "&footerTailwind=text-gray-400&containerTailwind=p-12" -%}
     {%- elsif site.og_image -%}
@@ -66,12 +91,8 @@
     {%- endif -%}
 
     <!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
-    <meta itemprop="name" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- else -%}
-    <meta itemprop="name" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- endif -%}
-    <meta itemprop="description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
+    <meta itemprop="name" content="{{ _share_meta_title }}" />
+    <meta itemprop="description" content="{{ _share_meta_desc }}" />
     {%- if _share_image_url -%}
     <meta itemprop="image" content="{{ _share_image_url }}" />
     {%- endif -%}
@@ -81,12 +102,8 @@
     These platforms primarily use Open Graph tags, but some also check these additional tags.
     WeChat uses JS-SDK for custom sharing, but falls back to these meta tags.
     {%- endcomment -%}
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
-    <meta name="weibo:article:title" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- else -%}
-    <meta name="weibo:article:title" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- endif -%}
-    <meta name="weibo:article:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
+    <meta name="weibo:article:title" content="{{ _share_meta_title }}" />
+    <meta name="weibo:article:description" content="{{ _share_meta_desc }}" />
     {%- if _share_image_url -%}
     <meta name="weibo:article:image" content="{{ _share_image_url }}" />
     {%- endif -%}
@@ -113,13 +130,9 @@
     <meta property="og:type" content="website" />
     {%- endif -%}
     {%- comment -%} Add "Xihuai's Blog | " prefix for blog posts to build personal brand {%- endcomment -%}
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
-    <meta property="og:title" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- else -%}
-    <meta property="og:title" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- endif -%}
-    <meta property="og:url" content="{{ page.url | prepend: site.baseurl | prepend: site.url | remove_first: 'index.html' }}" />
-    <meta property="og:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
+    <meta property="og:title" content="{{ _share_meta_title }}" />
+    <meta property="og:url" content="{{ page.url | replace:'index.html','' | absolute_url }}" />
+    <meta property="og:description" content="{{ _share_meta_desc }}" />
     
     {%- comment -%} Use unified share image URL calculated earlier {%- endcomment -%}
     {%- if _share_image_url -%}
@@ -127,11 +140,7 @@
     <meta property="og:image:secure_url" content="{{ _share_image_url }}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
-    <meta property="og:image:alt" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- else -%}
-    <meta property="og:image:alt" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- endif -%}
+    <meta property="og:image:alt" content="{{ _share_meta_title }}" />
     {%- endif -%}
         {%- assign _page_lang = page.lang | default: site.lang -%}
         {%- if _page_lang == 'zh' -%}
@@ -146,21 +155,13 @@
     <!-- Twitter card -->
     <meta name="twitter:card" content="summary_large_image" />
     {%- comment -%} Add "Xihuai's Blog | " prefix for blog posts to build personal brand {%- endcomment -%}
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
-    <meta name="twitter:title" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- else -%}
-    <meta name="twitter:title" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- endif -%}
-    <meta name="twitter:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
+    <meta name="twitter:title" content="{{ _share_meta_title }}" />
+    <meta name="twitter:description" content="{{ _share_meta_desc }}" />
     
     {%- comment -%} Use unified share image URL for Twitter {%- endcomment -%}
     {%- if _share_image_url -%}
     <meta name="twitter:image" content="{{ _share_image_url }}" />
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
-    <meta name="twitter:image:alt" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- else -%}
-    <meta name="twitter:image:alt" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
-    {%- endif -%}
+    <meta name="twitter:image:alt" content="{{ _share_meta_title }}" />
     {%- endif %}
     {% if site.twitter_username -%}
     <meta name="twitter:site" content="@{{ site.twitter_username }}" />
@@ -285,26 +286,53 @@
         {%- capture link -%}https://discord.com/users/{{ site.discord_id }}{%- endcapture -%}
         {%- assign sameaslinks = sameaslinks | push: link -%}
     {%- endif -%}
-    {%- if sameaslinks != blank -%}
-        {%- assign sameaslinks = sameaslinks | split: "" -%}
-    {%- endif -%}
+    {%- comment -%}
+    sameaslinks is already an array built via push, no need to split.
+    The previous `split: ""` was incorrect and could corrupt the array.
+    {%- endcomment -%}
 
     <script type="application/ld+json">
       {
-        "author":
-        {
+        "@context": "https://schema.org",
+        {%- if page.layout == 'post' or page.layout == 'distill' -%}
+        "@type": "BlogPosting",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": {{ page.url | replace:'index.html','' | absolute_url | jsonify }}
+        },
+        "headline": {{ _share_meta_title | jsonify }},
+        "description": {{ _share_meta_desc | jsonify }},
+        {%- if _share_image_url -%}
+        "image": {{ _share_image_url | jsonify }},
+        {%- endif -%}
+        "author": {
           "@type": "Person",
           "name": "{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}"
         },
-        "url": "{{ page.url | prepend: site.baseurl | prepend: site.url }}",
+        "publisher": {
+          "@type": "Person",
+          "name": "{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}"
+        },
+        {%- if page.date -%}
+        "datePublished": "{{ page.date | date_to_xmlschema }}",
+        {%- endif -%}
+        {%- if page.last_modified_at -%}
+        "dateModified": "{{ page.last_modified_at | date_to_xmlschema }}",
+        {%- elsif page.date -%}
+        "dateModified": "{{ page.date | date_to_xmlschema }}",
+        {%- endif -%}
+        {%- elsif page.url == '/' -%}
         "@type": "WebSite",
-        "description": "{%- if page.description -%}{{ page.description }}{%- else if site.description -%}{{ site.description }}{%- endif -%}",
-        "headline": "{%- if page.title -%}{{ page.title }}{%- else -%}{{ site.title }}{%- endif -%}",
-        {% if sameaslinks != blank -%}
-        "sameAs": {{ sameaslinks }},
-        {%- endif %}
         "name": "{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}",
-        "@context": "https://schema.org"
+        "description": {{ _share_meta_desc | jsonify }},
+        {%- else -%}
+        "@type": "WebPage",
+        "name": {{ _share_meta_title | jsonify }},
+        "description": {{ _share_meta_desc | jsonify }},
+        {%- endif -%}
+        "url": {{ page.url | replace:'index.html','' | absolute_url | jsonify }}{% if sameaslinks.size > 0 %},
+        "sameAs": {{ sameaslinks | jsonify }}
+        {%- endif %}
       }
     </script>
 {%- endif %}
