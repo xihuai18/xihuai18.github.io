@@ -72,19 +72,30 @@ nav_order: 1
 
 <div class="container featured-posts">
 {% assign is_even = featured_posts.size | modulo: 2 %}
-<div class="row row-cols-{% if featured_posts.size <= 2 or is_even == 0 %}2{% else %}3{% endif %}">
+<div class="row row-cols-1">
 {% for post in featured_posts %}
 <div class="col mb-4">
-<a href="{{ post.url | relative_url }}">
-<div class="card hoverable">
+<a href="{{ post.url | relative_url }}" class="featured-card-link">
+<div class="card hoverable featured-card">
 <div class="row g-0">
-<div class="col-md-12">
+<div class="col-md-4 featured-card-img-wrapper">
+{% if post.og_image %}
+<img src="{{ post.og_image | relative_url }}" class="featured-card-img" alt="{{ post.title }}">
+{% elsif post.thumbnail %}
+<img src="{{ post.thumbnail | relative_url }}" class="featured-card-img" alt="{{ post.title }}">
+{% else %}
+<div class="featured-card-placeholder">
+<span>📝</span>
+</div>
+{% endif %}
+</div>
+<div class="col-md-8">
 <div class="card-body">
 <div class="float-right">
 📌
 </div>
 <h3 class="card-title text-lowercase">{{ post.title }}</h3>
-<p class="card-text">{{ post.description }}</p>
+<p class="card-text featured-description">{{ post.description }}</p>
 
                     {% if post.external_source == blank %}
                       {% assign read_time = post.content | number_of_words | divided_by: 180 | plus: 1 %}
@@ -95,8 +106,7 @@ nav_order: 1
 
                     <p class="post-meta">
                       {{ read_time }} min read &nbsp; &middot; &nbsp;
-                      <a href="{{ '/blog/' | relative_url }}?year={{ year }}" data-filter-link data-filter-type="year" data-filter-value="{{ year }}">
-                        📅 {{ year }} </a>
+                      <span class="post-year">📅 {{ year }}</span>
                       {% if uv_enabled and uv_has_modes > 0 %}
                         {% include post_uv.html url=post.url %}
                         &nbsp; &middot; &nbsp;

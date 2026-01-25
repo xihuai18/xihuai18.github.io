@@ -62,7 +62,12 @@
     {%- else -%}
     <meta property="og:type" content="website" />
     {%- endif -%}
+    {%- comment -%} Add "Xihuai's Blog | " prefix for blog posts to build personal brand {%- endcomment -%}
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    <meta property="og:title" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- else -%}
     <meta property="og:title" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- endif -%}
     <meta property="og:url" content="{{ page.url | prepend: site.baseurl | prepend: site.url | remove_first: 'index.html' }}" />
     <meta property="og:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
     
@@ -104,7 +109,12 @@
 
     <!-- Twitter card -->
     <meta name="twitter:card" content="summary_large_image" />
+    {%- comment -%} Add "Xihuai's Blog | " prefix for blog posts to build personal brand {%- endcomment -%}
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    <meta name="twitter:title" content="Xihuai's Blog | {%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- else -%}
     <meta name="twitter:title" content="{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}" />
+    {%- endif -%}
     <meta name="twitter:description" content="{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}" />
     
     {%- comment -%} Dynamic Twitter Image Generation for Blog Posts {%- endcomment -%}
