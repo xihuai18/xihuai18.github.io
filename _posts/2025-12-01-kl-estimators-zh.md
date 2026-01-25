@@ -3,6 +3,7 @@ layout: post
 title: "简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计"
 date: 2025-12-01
 description: "在强化学习中，KL 散度的估计方式直接影响训练稳定性。本文系统剖析三种经典估计器 k1、k2、k3 的性质差异，涵盖 on-policy 与 off-policy 两种场景，并提供在「用于 loss 梯度回传」与「用于 reward 惩罚」两种情况下的选型指南。"
+og_image: /assets/img/kl-estimators/kl-estimator.png
 categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/12/01/kl-estimators-en.html

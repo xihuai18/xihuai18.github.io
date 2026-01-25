@@ -3,6 +3,7 @@ layout: post
 title: "Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation"
 date: 2025-12-01
 description: "How you approximate KL can make or break training stability. This post analyzes the classic estimators k1, k2, k3 in on-policy and off-policy settings, and gives practical guidance on using KL as a differentiable loss term versus as a detached reward penalty."
+og_image: /assets/img/kl-estimators/kl-estimator.png
 categories: reinforcement-learning
 lang: en
 zh_url: /reinforcement-learning/2025/12/01/kl-estimators-zh.html
