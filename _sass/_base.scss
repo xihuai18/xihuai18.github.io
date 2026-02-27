@@ -1962,6 +1962,17 @@ pre {
     margin-left: 0;
     width: 100%;
 
+    // Remove Bootstrap row/column gutters so the list aligns with the intro text
+    .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    [class*="col-"] {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
     ol,
     li {
       padding-left: 0;
