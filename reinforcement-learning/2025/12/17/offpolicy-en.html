@@ -322,11 +322,11 @@ $$</p>
 
 <h4 id="physical-interpretation">Physical Interpretation</h4>
 
-<p>Small differences in policies in action space are “amplified” through environment dynamics into differences in state visitation distributions. The coefficient $\frac{\gamma}{1-\gamma}$ reflects the <strong>temporal accumulation effect</strong>—in long-horizon tasks ($\gamma$ close to 1), the amplification is stronger.</p>
+<p>Small differences in policies in action space are “amplified” through environment dynamics into differences in state visitation distributions. The coefficient $\frac{2\gamma}{1-\gamma}$ reflects the <strong>temporal accumulation effect</strong>—in long-horizon tasks ($\gamma$ close to 1), the amplification is stronger.</p>
 
 <h4 id="proof-sketch">Proof Sketch</h4>
 
-<p>By deriving the fixed-point equation for discounted visitation distributions and exploiting the $\ell_1$ non-expansiveness of stochastic matrices, one can show that state distribution differences are amplified by policy differences through transition dynamics, with the amplification factor being precisely $\frac{\gamma}{1-\gamma}$.</p>
+<p>By deriving the fixed-point equation for discounted visitation distributions and exploiting the $\ell_1$ non-expansiveness of stochastic matrices, one can show that state-distribution differences are amplified by policy differences through transition dynamics, yielding the bound in Lemma 3.1.</p>
 
 <h3 id="32-policy-performance-improvement-lower-bound">3.2 Policy Performance Improvement Lower Bound</h3>
 
@@ -359,7 +359,7 @@ $$</p>
   </li>
 </ol>
 
-<p><strong>Core conclusion</strong>: if the surrogate is large enough and the policy-shift term stays under control, this lower bound certifies improvement.</p>
+<p><strong>Core conclusion</strong>: this is an explicit improvement lower bound. In particular, when the right-hand side is positive, improvement is guaranteed.</p>
 
 <h2 id="4-multi-policy-static-mixture-sampling">4. Multi-Policy Static Mixture Sampling</h2>
 
@@ -407,6 +407,8 @@ $$</p>
 
 <p>This result shows that when mixing trajectories from multiple old policy versions for training, if we construct the loss using importance ratios corresponding to each trajectory’s source policy while controlling the new policy’s deviation from each old policy, the new policy’s performance has a clear improvement lower bound.</p>
 
+<p>Using $\max_i C_{\pi,\pi^{(i)}}$ is just a compact way to write the result. A slightly tighter version would keep a separate $C_i$ for each component and then average them with the mixture weights.</p>
+
 <h2 id="5-dynamic-mixture-sampling-and-monotonic-improvement-conditions">5. Dynamic Mixture Sampling and Monotonic Improvement Conditions</h2>
 
 <h3 id="51-problem-and-unified-modeling-dynamic-mixture">5.1 Problem and Unified Modeling (Dynamic Mixture)</h3>
@@ -437,7 +439,7 @@ $$</p>
 J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{improvement over mixture policy}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{mixture bias term}}
 $$</p>
 
-<p>The first term is handled using Theorem 3.2. The second is the <strong>mixture bias term</strong>, which can be shown to satisfy:</p>
+<p>The first term is handled using Theorem 3.2. The second is the <strong>mixture bias term</strong>. One way to see it is to expand $J_{\mathrm{mix}}^{(k)} - J(\pi_k)$ into a weighted sum of $J(\pi^{(i)}) - J(\pi_k)$ terms and then bound each component via TV distance. The resulting inequality is:</p>
 
 <p>$$
 J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
@@ -577,7 +579,7 @@ $$</p>
 
 <p>The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under $\pi_1$. This enables us to estimate and control TV distance using samples.</p>
 
-<h4 id="sample-representation-of-inlmath120mathend">Sample Representation of $U_k$</h4>
+<h4 id="sample-representation-of-inlmath124mathend">Sample Representation of $U_k$</h4>
 
 <p>Using Lemma 6.1, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling-source policy), we obtain:</p>
 
@@ -593,7 +595,7 @@ $$</p>
 
 <p>This means: <strong>If we can ensure $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$ for each sample, we can guarantee $U_k \leq \epsilon/2$</strong>.</p>
 
-<h3 id="62-constraining-inlmath128mathend-two-clipping-options">6.2 Constraining $U_k$: Two Clipping Options</h3>
+<h3 id="62-constraining-inlmath132mathend-two-clipping-options">6.2 Constraining $U_k$: Two Clipping Options</h3>
 
 <h4 id="method-1-direct-constraint-on-ratio-difference">Method 1: Direct Constraint on Ratio Difference</h4>
 
@@ -613,9 +615,17 @@ $$</p>
 |\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right|
 $$</p>
 
-<p>If we constrain $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$, since $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$, one can show $U_k \leq \epsilon/2$.</p>
+<p>If we constrain $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$, then</p>
+
+<p>$$
+|\rho_{k+1} - \rho_k| \leq \epsilon\,\rho_k.
+$$</p>
+
+<p>Taking expectations gives $\mathbb{E}[|\rho_{k+1} - \rho_k|] \leq \epsilon\,\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = \epsilon$, hence $U_k \leq \epsilon/2$.</p>
 
 <p>This method clips $\pi_{k+1}/\pi_k$ with center at 1, meaning the <strong>clipping constraint itself does not depend on the old policy family $\pi^{(i)}$</strong>. However, if we use the weighted advantage $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$ below, we still need per-sample behavior probabilities (or recorded logprobs) to compute $\rho_k$.</p>
+
+<p>Before writing down the clipped objectives, one caveat is worth making explicit: the two inequalities above are <strong>hard per-sample constraints at the theory level</strong>. The clipped surrogates below are practical approximations meant to keep $U_k$ in a manageable range; they are not literal guarantees that every optimization step exactly satisfies the hard constraint.</p>
 
 <h4 id="objective-functions-three-clipping-mechanisms">Objective Functions (Three Clipping Mechanisms)</h4>
 
@@ -629,7 +639,7 @@ $$</p>
 
 <p>Note: under <strong>trajectory-level mixture</strong> (index fixed), $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$, so per-trajectory advantages from the corresponding old policy are consistent; under <strong>step/segment-level mixture</strong>, replacing $A^{\beta^{(k)}}$ with $A^{\pi^{(i)}}$ introduces advantage-substitution bias (discussed in Section 7), so the advantage/value estimator must reflect future index switching.</p>
 
-<h4 id="standard-ppo">Standard PPO</h4>
+<h4 id="standard-ppo-trajectory-level-mixture">Standard PPO (Trajectory-Level Mixture)</h4>
 
 <p>Clip $\rho_{k+1}$ with center at 1</p>
 
@@ -753,7 +763,7 @@ $$</p>
 
 <ul>
   <li>Method 2 constrains $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$, which is a <strong>multiplicative constraint</strong>: if $\pi_k(a\mid s) = 10^{-6}$, the allowed absolute change is only $\epsilon \times 10^{-6}$.</li>
-  <li>Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an <strong>additive constraint</strong>: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a\mid s) = 0.1$), even if the current probability is very low, faster improvement is allowed.</li>
+  <li>Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an <strong>additive constraint</strong>: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a\mid s) = 0.1$), even if the current probability is very low, faster improvement is allowed - provided the token still has enough observable mass under the sampling policy.</li>
 </ul>
 
 <h4 id="controlling-sampling-staleness">Controlling Sampling Staleness</h4>
@@ -813,7 +823,7 @@ $$</p>
 
 <p>The key dividing line is <strong>whether Lemma 4.1’s structural simplification holds</strong>: trajectory-level mixture satisfies the advantage reduction, while step/segment-level mixture generally does not because future returns depend on the index transition kernel.</p>
 
-<h4 id="differences-in-sampling-staleness-inlmath208mathend">Differences in Sampling Staleness $S_k$</h4>
+<h4 id="differences-in-sampling-staleness-inlmath213mathend">Differences in Sampling Staleness $S_k$</h4>
 
 <p><strong>Trajectory-level mixture</strong>’s staleness arises from: mixture weights $\alpha_i^{(k)}$ retaining probability mass on old policies after new policy release.</p>
 
@@ -974,7 +984,7 @@ $$</p>
     <tr>
       <td>Implementation simplicity prioritized</td>
       <td>Method 2 (incremental)</td>
-      <td>No need to store old policy information</td>
+      <td>Clipping form is simpler, though behavior logprobs are still needed for $\rho_k$</td>
     </tr>
     <tr>
       <td>LLM large vocabulary</td>
@@ -1061,7 +1071,7 @@ $$</p>
 
 <div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025OffPolicyLLMRL</span><span class="p">,</span>
 	<span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
-	<span class="na">title</span>        <span class="p">=</span> <span class="s">{Off-Policy Training in LLM Reinforcement Learning: From Theory to Practice}</span><span class="p">,</span>
+	<span class="na">title</span>        <span class="p">=</span> <span class="s">{Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees}</span><span class="p">,</span>
 	<span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
 	<span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
 	<span class="na">day</span>          <span class="p">=</span> <span class="s">{17}</span><span class="p">,</span>

@@ -834,8 +834,6 @@ $$</p>
 
 <p>$$
 \mathbb{E}_\mu[\rho s_\theta (k_1 + 1)] = \mathbb{E}_{q_\theta}[s_\theta k_1] + \underbrace{\mathbb{E}_{q_\theta}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
-
-
 $$</p>
 
 <p><strong>$\mathbb{E}_\mu[\nabla_\theta(\rho k_2)]$</strong>：</p>
@@ -845,7 +843,7 @@ $$</p>
 \mathbb{E}_\mu[\rho s_\theta (k_2 + k_1)]
 &= \mathbb{E}_{q_\theta}[s_\theta k_2] + \mathbb{E}_{q_\theta}[s_\theta k_1] \\
 &= \mathbb{E}_{q_\theta}[s_\theta k_2] + \mathbb{E}_{q_\theta}[\nabla_\theta k_2] && \text{（因为 } \nabla_\theta k_2 = k_1 s_\theta \text{）} \\
-&= \nabla_\theta \mathbb{E}_{q_\theta}[k_2] && \text{（Leibniz 规则）}
+&= \nabla_\theta \mathbb{E}_{q_\theta}[k_2] && \text{（把 score-function 项与显式梯度项重新合并）}
 \end{aligned}
 $$</p>
 
@@ -1135,7 +1133,7 @@ $$</p>
 
 <p>前文分析的是 KL 作为 loss 时各估计器的梯度性质。一个自然的想法是：既然 $k_1$ 和 $k_3$ 对反向 KL 的数值估计都是无偏的（见「数值估计」一节），那把它们加上 stop-gradient 之后放进奖励塑形里，似乎也应该没问题。</p>
 
-<p><strong>但这是错误的。</strong></p>
+<p><strong>但这个判断还不够充分。</strong></p>
 
 <p>问题在于：当 KL 进入奖励塑形时，虽然 KL 项本身不反向传播梯度，但它会通过 advantage 间接影响策略梯度。因此，判断一个估计器能不能这样用，不能只看数值偏差，还要看<strong>它诱导出来的策略梯度是否正确</strong>。</p>
 
@@ -1300,6 +1298,12 @@ $$</p>
       <td style="text-align: center">稳定</td>
     </tr>
     <tr>
+      <td style="text-align: center">$k_2$</td>
+      <td style="text-align: center">✗</td>
+      <td style="text-align: center">✗</td>
+      <td style="text-align: center">不建议</td>
+    </tr>
+    <tr>
       <td style="text-align: center">$k_3$</td>
       <td style="text-align: center">✓</td>
       <td style="text-align: center">✗</td>
@@ -1323,7 +1327,7 @@ $$</p>
 
 <p>下一节将解释：两者并不冲突——就“KL 正则项对应的 policy-gradient 随机变量”而言，它们甚至可以做到<strong>样本级完全等价</strong>；差异主要来自 KL 是否进入 advantage/baseline、以及信用分配（credit assignment）的路径。</p>
 
-<h2 id="8-inlmath431mathend-的-reward-用法与低方差-kl-loss-用法的等价性与差异">8. $k_1$ 的 Reward 用法与低方差 KL Loss 用法的等价性与差异</h2>
+<h2 id="8-inlmath432mathend-的-reward-用法与低方差-kl-loss-用法的等价性与差异">8. $k_1$ 的 Reward 用法与低方差 KL Loss 用法的等价性与差异</h2>
 
 <p>前面我们分别分析了 KL 作为 Loss 和作为 Reward 两种使用方式。一个自然的问题是：<strong>这两种方式在什么意义上等价，又在什么意义上不同？</strong> 本节将深入探讨这个问题，特别是在大模型 RL 的实践场景下。</p>
 
@@ -1465,8 +1469,8 @@ $$</p>
     </tr>
     <tr>
       <td style="text-align: center">适用场景</td>
-      <td style="text-align: center">希望 KL 约束更可控、更不依赖 critic</td>
-      <td style="text-align: center">希望 KL 约束更全局、有规划性</td>
+      <td style="text-align: center">希望 KL 作为显式正则项单独控制</td>
+      <td style="text-align: center">希望 KL 随 shaped reward 一起进入 advantage / return</td>
     </tr>
   </tbody>
 </table>
@@ -1475,10 +1479,10 @@ $$</p>
 
 <ol>
   <li>
-    <p><strong>如果你希望 KL 约束是“独立且可控”的</strong>——即希望 KL 作为一个单独的正则力出现，尽量少受 critic / baseline 质量影响，那么请选择 <strong>KL 作为 Loss</strong>，使用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$。注意，在 on-policy 场景下，如果不想显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，直接使用 $k_2$ 会更简单且不易出错。</p>
+    <p><strong>如果你希望 KL 作为显式正则项单独控制</strong>——也就是尽量少受 advantage 构造、critic / baseline 质量影响，那么请选择 <strong>KL 作为 Loss</strong>，使用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$。注意，在 on-policy 场景下，如果不想显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，直接使用 $k_2$ 会更简单且不易出错。</p>
   </li>
   <li>
-    <p><strong>如果你希望 KL 通过 shaped reward 进入 advantage / return</strong>——也就是接受它与 baseline、信用分配路径耦合，那么请选择 <strong>KL 作为 Reward</strong>，并使用 $k_1$。</p>
+    <p><strong>如果你希望 KL 随 shaped reward 一起进入 advantage / return</strong>——也就是接受它与 baseline、信用分配路径耦合，那么请选择 <strong>KL 作为 Reward</strong>，并使用 $k_1$。</p>
   </li>
 </ol>
 
@@ -1722,7 +1726,7 @@ $$</p>
   <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
   <span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
   <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
-  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
+  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html}</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
