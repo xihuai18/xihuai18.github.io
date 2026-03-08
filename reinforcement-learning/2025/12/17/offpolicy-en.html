@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees | Xihuai Wang's Page</title><meta name="author" content="Xihuai Leo Wang" />
-    <meta name="description" content="A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies." />
+    <meta name="description" content="A structured derivation of off-policy training theory for LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a triangle-inequality decomposition into update shift and sampling staleness, and concrete clipping and filtering strategies." />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
 
     <!-- 
@@ -23,20 +23,20 @@
     This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
-    <meta itemprop="description" content="A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies." /><meta itemprop="image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
-    <meta name="weibo:article:description" content="A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies." /><meta name="weibo:article:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta itemprop="description" content="A structured derivation of off-policy training theory for LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a triangle-inequality decomposition into update shift and sampling staleness, and concrete clipping and filtering strategies." /><meta itemprop="image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+structured+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+from+single...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
+    <meta name="weibo:article:description" content="A structured derivation of off-policy training theory for LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a triangle-inequality decomposition into update shift and sampling staleness, and concrete clipping and filtering strategies." /><meta name="weibo:article:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+structured+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+from+single...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
 
     <!-- OpenGraph -->
     <meta property="og:site_name" content="Xihuai Wang's Page" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2025-12-17T00:00:00+00:00" /><meta property="article:author" content="Xihuai Leo Wang" /><meta property="og:title" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
     <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html" />
-    <meta property="og:description" content="A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies." /><meta property="og:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
-    <meta property="og:image:secure_url" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta property="og:description" content="A structured derivation of off-policy training theory for LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a triangle-inequality decomposition into update shift and sampling staleness, and concrete clipping and filtering strategies." /><meta property="og:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+structured+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+from+single...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta property="og:image:secure_url" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+structured+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+from+single...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" /><meta property="og:locale" content="en_US" />
 
         <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
-    <meta name="twitter:description" content="A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies." /><meta name="twitter:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta name="twitter:description" content="A structured derivation of off-policy training theory for LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a triangle-inequality decomposition into update shift and sampling staleness, and concrete clipping and filtering strategies." /><meta name="twitter:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+structured+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+from+single...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
     <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees" />
     
 
@@ -49,7 +49,7 @@
           "@id": "https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"
         },
         "headline": "Xihuai&#39;s Blog | Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees",
-        "description": "A systematic derivation of off-policy training theory for LLM reinforcement learning: starting from single-policy sampling performance improvement bounds, extending to multi-policy static/dynamic mixture sampling, establishing sufficient conditions for monotonic improvement, decomposing constraints via the triangle inequality into update increment shift (controllable by optimization) and sampling staleness (controllable by sampling), and ultimately translating these into actionable clipping mechanisms and data filtering strategies.","image": "https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+systematic+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+starting+fr...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12","author": {
+        "description": "A structured derivation of off-policy training theory for LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a triangle-inequality decomposition into update shift and sampling staleness, and concrete clipping and filtering strategies.","image": "https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+Taming+Stale+Data%3A+Off-Policy+Reinforcement+Learning+for+LLMs+with+Monotonic+Improvement+Guarantees&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=A+structured+derivation+of+off-policy+training+theory+for+LLM+reinforcement+learning%3A+from+single...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12","author": {
           "@type": "Person",
           "name": "Xihuai Leo Wang"
         },
@@ -230,19 +230,25 @@
     
 
       <article class="post-content">
-        <h2 id="introduction-why-should-we-care-about-off-policy">Introduction: Why Should We Care About “Off-Policy”?</h2>
+        <blockquote>
+  <p>This post focuses on a specific question: when a training batch mixes data from multiple historical policy versions, under what conditions can a PPO-style update still maintain an analyzable monotonic-improvement lower bound?</p>
+</blockquote>
 
-<p>Consider the following scenario: you are training a large language model with reinforcement learning to improve its question-answering capabilities. Ideally, each time the model generates a batch of responses, you would immediately update the model with this data, then use the updated model to generate new data, and so on. This approach of “updating with data from the same policy that generated it” is called <strong>on-policy</strong> training.</p>
+<h2 id="1-introduction-why-should-we-care-about-off-policy">1. Introduction: Why Should We Care About “Off-Policy”?</h2>
 
-<p>Reality, however, is not so simple. In large-scale distributed training, hundreds of GPUs generate data in parallel, while model updates take time. When a new model is deployed, much data generated by “older versions” of the model remains unused—discarding it seems wasteful, yet using it raises concerns about whether “stale data” might harm training effectiveness.</p>
+<p>When training a large language model with reinforcement learning, the most direct setup is <strong>on-policy</strong> training: generate a batch of data, update on that batch, then sample again from the updated model.</p>
 
-<p>This is the core problem faced by <strong>off-policy</strong> training: <strong>Can we guarantee continued performance improvement when using data collected by older policies to update newer policies?</strong></p>
+<p>In large-scale distributed training, though, hundreds of GPUs sample in parallel and model updates take time. By the time a new version is deployed, data generated by older versions are often still sitting in the queue: throwing them away is wasteful, but using them means training on stale data.</p>
 
-<p>This article systematically addresses this question. Starting from foundational theory, we progressively derive actionable conditions that specify when mixing data from multiple policy versions can still guarantee monotonic training improvement.</p>
+<p>That is the central off-policy question: <strong>when can data collected by older policies still support reliable improvement of a newer one?</strong></p>
 
-<h2 id="part-i-theoretical-foundations">Part I: Theoretical Foundations</h2>
+<p>This post studies exactly that question: under what conditions can a mixture of data from multiple policy versions still support a monotonic-improvement guarantee?</p>
 
-<h3 id="11-basic-setup">1.1 Basic Setup</h3>
+<p>One scope note up front: many LLM-RL workloads are closer to single-episode contextual bandits than to general long-horizon MDPs. I still start from the discounted-MDP setting because it makes the roles of multi-source sampling, staleness, and clipping easiest to state. Section 7 returns to the bandit simplifications.</p>
+
+<h2 id="2-theoretical-foundations">2. Theoretical Foundations</h2>
+
+<h3 id="21-basic-setup">2.1 Basic Setup</h3>
 
 <p>We consider a standard Markov Decision Process (MDP) comprising a state space $\mathcal{S}$, action space $\mathcal{A}$, transition probability $p(s'\mid s,a)$, reward function $r(s,a)$, initial distribution $\rho_0$, and discount factor $\gamma \in (0,1)$.</p>
 
@@ -278,12 +284,12 @@ $$</p>
 
 <p>Throughout, we use $\mid$ for conditional probability (e.g., $\pi(a\mid s)$) and reserve $\|\cdot\|$ for norms.</p>
 
-<h3 id="12-core-tool-policy-performance-difference-lemma">1.2 Core Tool: Policy Performance Difference Lemma</h3>
+<h3 id="22-core-tool-policy-performance-difference-lemma">2.2 Core Tool: Policy Performance Difference Lemma</h3>
 
 <p>The cornerstone of the entire theory is this elegant result:</p>
 
 <blockquote>
-  <p><strong>Lemma 1.1 (Policy Performance Difference Lemma)</strong></p>
+  <p><strong>Lemma 2.1 (Policy Performance Difference Lemma)</strong></p>
 
   <p>For any policies $\pi_k$ (old) and $\pi$ (new), the performance difference can be expressed as:</p>
 
@@ -294,9 +300,9 @@ $$</p>
 
 <p><strong>Intuitive understanding</strong>: How much better the new policy is than the old equals the “average advantage” obtained by selecting actions according to the new policy under the state distribution visited by the new policy.</p>
 
-<h2 id="part-ii-performance-improvement-bounds-for-single-policy-sampling">Part II: Performance Improvement Bounds for Single-Policy Sampling</h2>
+<h2 id="3-performance-improvement-bounds-for-single-policy-sampling">3. Performance Improvement Bounds for Single-Policy Sampling</h2>
 
-<h3 id="21-distribution-mismatch-and-controlling-state-shift">2.1 Distribution Mismatch and Controlling State Shift</h3>
+<h3 id="31-distribution-mismatch-and-controlling-state-shift">3.1 Distribution Mismatch and Controlling State Shift</h3>
 
 <p>The Policy Performance Difference Lemma has a practical issue: the expectation on the right-hand side is computed under $d_\pi$ (the new policy’s state distribution), while we can only sample from $d_{\pi_k}$ (the old policy).</p>
 
@@ -305,12 +311,14 @@ $$</p>
 <h4 id="controlling-state-distribution-differences">Controlling State Distribution Differences</h4>
 
 <blockquote>
-  <p><strong>Lemma 1.2 (Relationship Between State Distribution Difference and Policy TV Distance)</strong></p>
+  <p><strong>Lemma 3.1 (Relationship Between State Distribution Difference and Policy TV Distance)</strong></p>
 
   <p>$$
 \|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]
 $$</p>
 </blockquote>
+
+<p>This is an average-divergence / average-TV style bound. It is closer in spirit to CPO / Achiam et al. (2017) than to the classic TRPO presentation based on $\max_s D_{\mathrm{TV}}$. I use it here because it lands more naturally on sample averages and is easier to carry into the multi-source setting.</p>
 
 <h4 id="physical-interpretation">Physical Interpretation</h4>
 
@@ -320,10 +328,10 @@ $$</p>
 
 <p>By deriving the fixed-point equation for discounted visitation distributions and exploiting the $\ell_1$ non-expansiveness of stochastic matrices, one can show that state distribution differences are amplified by policy differences through transition dynamics, with the amplification factor being precisely $\frac{\gamma}{1-\gamma}$.</p>
 
-<h3 id="22-policy-performance-improvement-lower-bound">2.2 Policy Performance Improvement Lower Bound</h3>
+<h3 id="32-policy-performance-improvement-lower-bound">3.2 Policy Performance Improvement Lower Bound</h3>
 
 <blockquote>
-  <p><strong>Theorem 1.1 (Policy Performance Improvement Lower Bound)</strong></p>
+  <p><strong>Theorem 3.2 (Policy Performance Improvement Lower Bound)</strong></p>
 
   <p>Define the expected advantage upper bound constant $C_{\pi,\pi_k} := \max_{s} \lvert \mathbb{E}_{a \sim \pi}[A^{\pi_k}(s,a)] \rvert$. Then:</p>
 
@@ -338,6 +346,8 @@ L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k}
 $$</p>
 </blockquote>
 
+<p>Here $L_{\pi_k}(\pi)$ omits the additive constant $J(\pi_k)$, so in textbook TRPO notation one could also write the objective as $J(\pi_k)+L_{\pi_k}(\pi)$. Also note that $C_{\pi,\pi_k}$ depends on the new policy $\pi$, so it should be read as a structural coefficient in the bound rather than a tunable hyperparameter.</p>
+
 <p>This lower bound consists of two parts:</p>
 
 <ol>
@@ -349,13 +359,13 @@ $$</p>
   </li>
 </ol>
 
-<p><strong>Core conclusion</strong>: Maximizing the surrogate objective while controlling policy shift guarantees performance improvement.</p>
+<p><strong>Core conclusion</strong>: if the surrogate is large enough and the policy-shift term stays under control, this lower bound certifies improvement.</p>
 
-<h2 id="part-iii-multi-policy-static-mixture-sampling">Part III: Multi-Policy Static Mixture Sampling</h2>
+<h2 id="4-multi-policy-static-mixture-sampling">4. Multi-Policy Static Mixture Sampling</h2>
 
-<h3 id="31-setup-and-unified-modeling-static-mixture">3.1 Setup and Unified Modeling (Static Mixture)</h3>
+<h3 id="41-setup-and-unified-modeling-static-mixture">4.1 Setup and Unified Modeling (Static Mixture)</h3>
 
-<p>In practice, a batch of data may come from multiple policy versions $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$, with respective proportions $\alpha_1, \ldots, \alpha_M$. How do we extend Theorem 1.1 to this setting?</p>
+<p>In practice, a batch of data may come from multiple policy versions $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$, with respective proportions $\alpha_1, \ldots, \alpha_M$. How do we extend Theorem 3.2 to this setting?</p>
 
 <p><strong>Core idea: augmented state space</strong></p>
 
@@ -365,16 +375,16 @@ $$</p>
 
 <p>The evolution of indices is characterized by the <strong>index transition kernel</strong> $q(i' \mid i)$. The augmented MDP inherits the original MDP’s rewards and environment transitions, with indices evolving independently according to $q(i'\mid i)$.</p>
 
-<p>This technique works because the new policy $\pi$’s return in the augmented MDP equals its return in the original MDP, allowing direct application of Theorem 1.1.</p>
+<p>This technique works because the new policy $\pi$ has the same return in the augmented MDP as in the original one, so Theorem 3.2 can be applied directly.</p>
 
-<h3 id="32-trajectory-level-mixture-simplification-and-improvement-bound">3.2 Trajectory-Level Mixture: Simplification and Improvement Bound</h3>
+<h3 id="42-trajectory-level-mixture-simplification-and-improvement-bound">4.2 Trajectory-Level Mixture: Simplification and Improvement Bound</h3>
 
 <p>The most common scenario is <strong>using a single old policy per trajectory</strong>: at trajectory start, sample index $I_0 \sim \alpha$, and use $\pi^{(I_0)}$ throughout. In this case, the index transition kernel is the identity: $q(i' \mid i) = \mathbf{1}_{i'=i}$.</p>
 
 <p>From an engineering perspective, in many <strong>actor-learner asynchronous training</strong> setups (when sampling and training organize data by “entire trajectories/complete episodes belonging to a certain policy version”), this approximately corresponds to what we call <strong>trajectory-level mixture</strong>: actors use a fixed policy snapshot within a sampling unit to generate data, while learners mix trajectories from different versions for updates. We say “approximately” because different systems may not have identical boundaries for “trajectory/sampling unit.”</p>
 
 <blockquote>
-  <p><strong>Lemma 2.1 (Structural Simplification for Trajectory-Level Mixture)</strong></p>
+  <p><strong>Lemma 4.1 (Structural Simplification for Trajectory-Level Mixture)</strong></p>
 
   <p>(a) The augmented state visitation distribution decomposes as: $d_{\beta}(s, i) = \alpha_i \cdot d_{\pi^{(i)}}(s)$</p>
 
@@ -388,7 +398,7 @@ $$</p>
 <p><strong>Improvement bound</strong></p>
 
 <blockquote>
-  <p><strong>Corollary 2.1 (Performance Improvement Lower Bound for Trajectory-Level Mixture)</strong></p>
+  <p><strong>Corollary 4.2 (Performance Improvement Lower Bound for Trajectory-Level Mixture)</strong></p>
 
   <p>$$
 J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\pi^{(i)}}(\pi) - \frac{2\gamma \max_i C_{\pi, \pi^{(i)}}}{(1-\gamma)^2} \sum_{i=1}^{M} \alpha_i \mathbb{E}_{s \sim d_{\pi^{(i)}}} \big[ D_{\mathrm{TV}}(\pi, \pi^{(i)}; s) \big]
@@ -397,11 +407,11 @@ $$</p>
 
 <p>This result shows that when mixing trajectories from multiple old policy versions for training, if we construct the loss using importance ratios corresponding to each trajectory’s source policy while controlling the new policy’s deviation from each old policy, the new policy’s performance has a clear improvement lower bound.</p>
 
-<h2 id="part-iv-dynamic-mixture-sampling-and-monotonic-improvement-conditions">Part IV: Dynamic Mixture Sampling and Monotonic Improvement Conditions</h2>
+<h2 id="5-dynamic-mixture-sampling-and-monotonic-improvement-conditions">5. Dynamic Mixture Sampling and Monotonic Improvement Conditions</h2>
 
-<h3 id="41-problem-and-unified-modeling-dynamic-mixture">4.1 Problem and Unified Modeling (Dynamic Mixture)</h3>
+<h3 id="51-problem-and-unified-modeling-dynamic-mixture">5.1 Problem and Unified Modeling (Dynamic Mixture)</h3>
 
-<p>Part III discussed <strong>static mixture</strong>—where mixture weights $\alpha_i$ remain fixed. This section considers the more general <strong>dynamic mixture</strong>—where sampling gradually transitions to the new policy after it is released.</p>
+<p>Section 4 discussed <strong>static mixture</strong>—where mixture weights $\alpha_i$ remain fixed. This section considers the more general <strong>dynamic mixture</strong>—where sampling gradually transitions to the new policy after it is released.</p>
 
 <p>The previous results characterize improvement of “the new policy relative to the mixture behavior policy.” However, in actual training, what we truly care about is: <strong>Does the latest policy $\pi_{k+1}$ after each update monotonically improve over the previous latest policy $\pi_k$?</strong></p>
 
@@ -419,7 +429,7 @@ $$</p>
 
 <p>where $\sigma(i)$ is the switching probability and $\kappa(\cdot\mid i)$ is the target index distribution.</p>
 
-<h3 id="42-decomposition-and-monotonic-improvement-bound">4.2 Decomposition and Monotonic Improvement Bound</h3>
+<h3 id="52-decomposition-and-monotonic-improvement-bound">5.2 Decomposition and Monotonic Improvement Bound</h3>
 
 <p>By introducing the mixture return $J_{\mathrm{mix}}^{(k)}$ as an intermediate bridge, the performance difference decomposes as:</p>
 
@@ -427,7 +437,7 @@ $$</p>
 J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{improvement over mixture policy}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{mixture bias term}}
 $$</p>
 
-<p>The first term can be handled using Theorem 1.1. The second term is the <strong>mixture bias term</strong>, which can be shown to satisfy:</p>
+<p>The first term is handled using Theorem 3.2. The second is the <strong>mixture bias term</strong>, which can be shown to satisfy:</p>
 
 <p>$$
 J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
@@ -438,7 +448,7 @@ $$</p>
 <p>Combining the above results yields the core theorem:</p>
 
 <blockquote>
-  <p><strong>Theorem 3.1 (Monotonic Improvement Lower Bound Under Dynamic Mixture Sampling)</strong></p>
+  <p><strong>Theorem 5.1 (Monotonic Improvement Lower Bound Under Dynamic Mixture Sampling)</strong></p>
 
   <p>$$
 \begin{aligned}
@@ -449,30 +459,33 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;& L_{\beta^{(k)}}(\pi_{k+1}) \\
 $$</p>
 </blockquote>
 
-<p>Here $L_{\beta^{(k)}}(\pi_{k+1})$ denotes the surrogate objective relative to the behavior policy $\beta^{(k)}$ (the same form as $L_{\pi_k}(\pi)$ in Part II, but with the behavior policy generalized from a single $\pi_k$ to the mixture $\beta^{(k)}$).</p>
+<p>Here $L_{\beta^{(k)}}(\pi_{k+1})$ denotes the surrogate objective relative to the behavior policy $\beta^{(k)}$ (the same shape as $L_{\pi_k}(\pi)$ in Section 3, but with the behavior policy generalized from a single $\pi_k$ to the mixture $\beta^{(k)}$).</p>
 
-<p>More explicitly, one can write
-$$
+<p>More explicitly, one can write</p>
+
+<p>$$
 L_{\beta^{(k)}}(\pi_{k+1}) := \frac{1}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}},\, a\sim \pi^{(i)}(\cdot\mid s)}\left[\frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}\,A^{\beta^{(k)}}((s,i),a)\right].
 $$</p>
 
-<p>Similarly, define
-$$
+<p>Similarly, define</p>
+
+<p>$$
 C_{\pi_{k+1},\beta^{(k)}} := \max_{(s,i)}\left|\mathbb{E}_{a\sim \pi_{k+1}(\cdot\mid s)}\big[A^{\beta^{(k)}}((s,i),a)\big]\right|.
 $$</p>
 
-<p>This lower bound reveals the necessity of <strong>dual control</strong>:</p>
+<p>This lower bound contains two penalties, so it naturally points to <strong>two separate control problems</strong>:</p>
+
 <ul>
   <li><strong>Update shift penalty</strong>: Deviation of the new policy $\pi_{k+1}$ from the sampling source policy $\pi^{(i)}$</li>
   <li><strong>Sampling staleness penalty</strong>: Staleness of the sampling source policy $\pi^{(i)}$ relative to the current policy $\pi_k$</li>
 </ul>
 
-<h3 id="43-why-direct-constraints-are-infeasible-triangle-inequality-decomposition">4.3 Why Direct Constraints Are Infeasible: Triangle Inequality Decomposition</h3>
+<h3 id="53-why-direct-constraints-are-infeasible-triangle-inequality-decomposition">5.3 Why Direct Constraints Are Infeasible: Triangle Inequality Decomposition</h3>
 
-<p>The update shift penalty term in Theorem 3.1 might appear controllable by constraining $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s)$, but this is actually <strong>infeasible</strong>:</p>
+<p>The update-shift penalty in Theorem 5.1 may look controllable through constraints on $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s)$, but that interpretation quickly runs into a practical infeasibility:</p>
 
 <blockquote>
-  <p><strong>Observation 3.1 (Infeasibility of Update Shift Constraints)</strong></p>
+  <p><strong>Observation 5.2 (Infeasibility of Update Shift Constraints)</strong></p>
 
   <p>Suppose the mixture sampling includes two old policies $\pi^{(1)}$ and $\pi^{(2)}$. If there exists some state $s$ such that $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) > 2\delta$, then no policy $\pi_{k+1}$ can simultaneously satisfy $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ and $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$.</p>
 </blockquote>
@@ -507,7 +520,7 @@ U_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_{k+1}, \p
 $$</p>
 
 <blockquote>
-  <p><strong>Corollary 3.2 (Decomposed Monotonic Improvement Lower Bound)</strong></p>
+  <p><strong>Corollary 5.3 (Decomposed Monotonic Improvement Lower Bound)</strong></p>
 
   <p>$$
 J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k
@@ -516,9 +529,9 @@ $$</p>
 
 <h4 id="why-does-decomposition-solve-the-problem">Why Does Decomposition Solve the Problem?</h4>
 
-<p>The key is that after decomposition, $U_k$ only involves the new policy $\pi_{k+1}$ and the current policy $\pi_k$, <strong>completely independent of the structure of the old policy family $\{\pi^{(i)}\}$</strong>. Therefore, regardless of how different the old policies are from each other, constraining $U_k$ is always feasible—this is precisely the resolution to the infeasibility issue revealed in Observation 3.1.</p>
+<p>The key is that after decomposition, $U_k$ only involves the new policy $\pi_{k+1}$ and the current policy $\pi_k$, <strong>completely independent of the structure of the old policy family $\{\pi^{(i)}\}$</strong>. So no matter how far apart the old policies are, constraining $U_k$ remains feasible. This is exactly how the infeasibility in Observation 5.2 is avoided.</p>
 
-<p>This reveals an important engineering principle—<strong>separation of concerns</strong>:</p>
+<p>Operationally, this leads to a simple <strong>separation of concerns</strong>:</p>
 
 <table>
   <thead>
@@ -542,16 +555,16 @@ $$</p>
   </tbody>
 </table>
 
-<h2 id="part-v-theoretical-foundations-of-clipping-mechanisms">Part V: Theoretical Foundations of Clipping Mechanisms</h2>
+<h2 id="6-theoretical-foundations-of-clipping-mechanisms">6. Theoretical Foundations of Clipping Mechanisms</h2>
 
-<h3 id="51-from-tv-distance-to-sample-controllable-quantities">5.1 From TV Distance to Sample-Controllable Quantities</h3>
+<h3 id="61-from-tv-distance-to-sample-controllable-quantities">6.1 From TV Distance to Sample-Controllable Quantities</h3>
 
-<p>Corollary 3.2 tells us that to guarantee monotonic improvement, we need to control the update increment shift $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$. However, TV distance is a distribution-level quantity—how can we control it using samples?</p>
+<p>Corollary 5.3 tells us that to guarantee monotonic improvement, we need to control the update increment shift $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$. But TV distance is a distribution-level quantity, so how do we control it with samples?</p>
 
-<p>The key bridge is the following identity:</p>
+<p>The bridge from theory to samples is the following identity:</p>
 
 <blockquote>
-  <p><strong>Lemma 3.3 (Ratio Difference Representation of TV Distance)</strong></p>
+  <p><strong>Lemma 6.1 (Ratio Difference Representation of TV Distance)</strong></p>
 
   <p>Suppose policy $\pi_1$’s support covers the supports of $\pi$ and $\pi_2$. Then for any state distribution $\mu$:</p>
 
@@ -564,9 +577,9 @@ $$</p>
 
 <p>The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under $\pi_1$. This enables us to estimate and control TV distance using samples.</p>
 
-<h4 id="sample-representation-of-inlmath114mathend">Sample Representation of $U_k$</h4>
+<h4 id="sample-representation-of-inlmath120mathend">Sample Representation of $U_k$</h4>
 
-<p>Using Lemma 3.3, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling source policy), we obtain:</p>
+<p>Using Lemma 6.1, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling-source policy), we obtain:</p>
 
 <p>$$
 U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot\mid s)} \left| \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)} - \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} \right|
@@ -580,7 +593,7 @@ $$</p>
 
 <p>This means: <strong>If we can ensure $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$ for each sample, we can guarantee $U_k \leq \epsilon/2$</strong>.</p>
 
-<h3 id="52-constraining-inlmath122mathend-two-clipping-options">5.2 Constraining $U_k$: Two Clipping Options</h3>
+<h3 id="62-constraining-inlmath128mathend-two-clipping-options">6.2 Constraining $U_k$: Two Clipping Options</h3>
 
 <h4 id="method-1-direct-constraint-on-ratio-difference">Method 1: Direct Constraint on Ratio Difference</h4>
 
@@ -607,13 +620,14 @@ $$</p>
 <h4 id="objective-functions-three-clipping-mechanisms">Objective Functions (Three Clipping Mechanisms)</h4>
 
 <p>For comparison, we present the complete objective functions for three clipping mechanisms. Suppose the current sample comes from old policy $\pi^{(i)}$, and denote:</p>
+
 <ul>
   <li>$\rho_{k+1} = \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}$ (new policy’s ratio relative to sampling policy)</li>
   <li>$\rho_k = \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)}$ (current policy’s ratio relative to sampling policy)</li>
   <li>$r = \frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)}$ (new policy’s incremental ratio relative to current policy)</li>
 </ul>
 
-<p>Note: under <strong>trajectory-level mixture</strong> (index fixed), $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$, so per-trajectory advantages from the corresponding old policy are consistent; under <strong>step/segment-level mixture</strong>, replacing $A^{\beta^{(k)}}$ with $A^{\pi^{(i)}}$ introduces advantage-substitution bias (discussed in Part VI), so the advantage/value estimator must reflect future index switching.</p>
+<p>Note: under <strong>trajectory-level mixture</strong> (index fixed), $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$, so per-trajectory advantages from the corresponding old policy are consistent; under <strong>step/segment-level mixture</strong>, replacing $A^{\beta^{(k)}}$ with $A^{\pi^{(i)}}$ introduces advantage-substitution bias (discussed in Section 7), so the advantage/value estimator must reflect future index switching.</p>
 
 <h4 id="standard-ppo">Standard PPO</h4>
 
@@ -641,9 +655,9 @@ $$</p>
 
 <p>where $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advantage estimate.</p>
 
-<h3 id="53-comparison-and-practical-controls">5.3 Comparison and Practical Controls</h3>
+<h3 id="63-comparison-and-practical-controls">6.3 Comparison and Practical Controls</h3>
 
-<h4 id="table-51-comparison-of-three-clipping-mechanisms">Table 5.1 Comparison of Three Clipping Mechanisms</h4>
+<h4 id="table-61-comparison-of-three-clipping-mechanisms">Table 6.1 Comparison of Three Clipping Mechanisms</h4>
 
 <table>
   <thead>
@@ -682,7 +696,7 @@ $$</p>
 
 <h4 id="the-fundamental-problem-with-standard-ppo-under-multi-policy-mixture">The Fundamental Problem with Standard PPO Under Multi-Policy Mixture</h4>
 
-<p>Standard PPO constrains $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$, requiring the new policy to be simultaneously close to all sampling source policies. By Observation 3.1, when the old policies $\pi^{(1)}, \pi^{(2)}, \ldots$ differ significantly from each other, <strong>no $\pi_{k+1}$ can simultaneously satisfy all constraints</strong>. This causes the trust region intersection to shrink or even become empty, with updates being limited by the most stale policy.</p>
+<p>Standard PPO constrains $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$, requiring the new policy to be close to every sampling-source policy at once. By Observation 5.2, when the old policies $\pi^{(1)}, \pi^{(2)}, \ldots$ differ substantially, <strong>no $\pi_{k+1}$ can satisfy all of those constraints simultaneously</strong>. The result is a trust-region intersection that shrinks, or even becomes empty, with the most stale policy becoming the bottleneck.</p>
 
 <h4 id="common-advantages-of-methods-1-and-2">Common Advantages of Methods 1 and 2</h4>
 
@@ -744,7 +758,7 @@ $$</p>
 
 <h4 id="controlling-sampling-staleness">Controlling Sampling Staleness</h4>
 
-<p>Corollary 3.2 shows that $S_k$ also affects the monotonic improvement lower bound, but it <strong>cannot be controlled through optimization-side clipping</strong> and must be implemented by the sampling system:</p>
+<p>Corollary 5.3 shows that $S_k$ also enters the monotonic-improvement lower bound, but it <strong>cannot be controlled from the optimization side</strong>. It has to be handled by the sampling system:</p>
 
 <h4 id="1-discarding-stale-data">(1) Discarding Stale Data</h4>
 
@@ -758,30 +772,30 @@ $$</p>
 
 <p>Finally, we clarify the relationship between clipping and the theoretical lower bound.</p>
 
-<p>In Corollary 3.2, the coefficient of $U_k$, namely $C_{\pi_{k+1},\beta^{(k)}}$, depends on the new policy $\pi_{k+1}$, so the penalty term <strong>cannot be simply replaced by a constant</strong>. The correct operational meaning is:</p>
+<p>In Corollary 5.3, the coefficient of $U_k$, namely $C_{\pi_{k+1},\beta^{(k)}}$, depends on the new policy $\pi_{k+1}$, so the penalty term <strong>cannot simply be replaced by a fixed constant</strong>. Operationally, the clipped objective should be read as an approximation to a constrained update, not as a literal theorem with a hand-picked scalar penalty:</p>
 
 <blockquote>
   <p><strong>Maximize the surrogate objective $L_{\beta^{(k)}}(\pi_{k+1})$ subject to the constraint $U_k \leq \epsilon/2$</strong></p>
 </blockquote>
 
-<p>The clipping objective function is precisely an implementation of this constrained optimization—clipping <strong>hard limits</strong> the update magnitude to ensure $U_k$ is controllable; under this premise, gradient ascent improves the surrogate objective, thereby providing guarantees for monotonic policy improvement.</p>
+<p>The clipping objective can be read as a practical approximation to this constrained optimization: clipping keeps the update magnitude in check so that $U_k$ stays manageable, and then gradient ascent pushes up the surrogate objective within that approximation.</p>
 
 <h4 id="section-summary">Section Summary</h4>
 
 <p>This section established the theoretical foundations of clipping mechanisms:</p>
 
 <ol>
-  <li><strong>Lemma 3.3</strong> converts TV distance to sample-level ratio differences, serving as the bridge between theory and implementation</li>
-  <li><strong>Two constraint methods</strong>: Method 1 (adaptive clipping center) and Method 2 (fixed incremental clipping), both guaranteeing $U_k \leq \epsilon/2$</li>
-  <li><strong>Comparison with standard PPO</strong>: Standard PPO constrains $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$, which is infeasible under multi-policy mixture; Methods 1/2 constrain $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$, avoiding this issue</li>
+  <li><strong>Lemma 6.1</strong> converts TV distance to sample-level ratio differences, serving as the bridge between theory and implementation</li>
+  <li><strong>Two constraint methods</strong>: Method 1 (adaptive clipping center) and Method 2 (fixed incremental clipping) correspond to two different ways of controlling $U_k$</li>
+  <li><strong>Comparison with standard PPO</strong>: Standard PPO constrains $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$, which becomes structurally problematic under multi-policy mixture; Methods 1/2 instead target $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$</li>
   <li><strong>Method selection</strong>: Method 1 (adaptive) is recommended for high staleness or LLM large vocabulary scenarios; Method 2 (incremental) is attractive when you want the trust-region/clipping constraint to avoid depending on the old policy family (but data still needs to provide behavior logprobs to compute $\rho_k$)</li>
   <li><strong>$S_k$ control</strong> is the sampling side’s responsibility, implemented through data filtering and version windows</li>
   <li><strong>Clipping is constrained optimization</strong>: Maximize the surrogate objective subject to $U_k$ constraints</li>
 </ol>
 
-<h2 id="part-vi-comparison-of-trajectory-level-and-stepsegment-level-mixture">Part VI: Comparison of Trajectory-Level and Step/Segment-Level Mixture</h2>
+<h2 id="7-comparison-of-trajectory-level-and-stepsegment-level-mixture">7. Comparison of Trajectory-Level and Step/Segment-Level Mixture</h2>
 
-<h3 id="61-mechanism-differences-and-estimation-implications">6.1 Mechanism Differences and Estimation Implications</h3>
+<h3 id="71-mechanism-differences-and-estimation-implications">7.1 Mechanism Differences and Estimation Implications</h3>
 
 <p>The essential difference between the two mixture mechanisms lies in the structure of the index transition kernel:</p>
 
@@ -797,9 +811,9 @@ $$</p>
   <li><strong>Step/segment-level mixture</strong> here can be roughly understood as an abstraction of “<strong>partial rollout</strong>”: due to asynchrony between actors and learners, and possible refresh to new policy versions at segment boundaries, using an index transition kernel that allows “within-trajectory version switching” can better approximate this phenomenon.</li>
 </ul>
 
-<p>The key watershed is <strong>whether Lemma 2.1’s structural simplification holds</strong>: trajectory-level mixture satisfies advantage function reduction; step/segment-level mixture generally does not, because future returns are affected by the index transition kernel.</p>
+<p>The key dividing line is <strong>whether Lemma 4.1’s structural simplification holds</strong>: trajectory-level mixture satisfies the advantage reduction, while step/segment-level mixture generally does not because future returns depend on the index transition kernel.</p>
 
-<h4 id="differences-in-sampling-staleness-inlmath202mathend">Differences in Sampling Staleness $S_k$</h4>
+<h4 id="differences-in-sampling-staleness-inlmath208mathend">Differences in Sampling Staleness $S_k$</h4>
 
 <p><strong>Trajectory-level mixture</strong>’s staleness arises from: mixture weights $\alpha_i^{(k)}$ retaining probability mass on old policies after new policy release.</p>
 
@@ -815,13 +829,13 @@ $$</p>
 
 <p>In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.</p>
 
-<h3 id="62-risks-and-applicable-scenarios">6.2 Risks and Applicable Scenarios</h3>
+<h3 id="72-risks-and-applicable-scenarios">7.2 Risks and Applicable Scenarios</h3>
 
 <p>Step/segment-level mixture has another hidden concern: even if single-step importance ratios are clipped, multi-step noise accumulation over long trajectories can still amplify gradient estimation variance. When policy changes per update are large, “behavioral discontinuities” within trajectories may induce heavier-tailed ratio distributions. This is why trajectory-level mixture is recommended for “large policy change per update” scenarios in the table below.</p>
 
 <h4 id="applicable-scenarios">Applicable Scenarios</h4>
 
-<h4 id="table-61-applicable-scenarios-for-two-mixture-mechanisms">Table 6.1 Applicable Scenarios for Two Mixture Mechanisms</h4>
+<h4 id="table-71-applicable-scenarios-for-two-mixture-mechanisms">Table 7.1 Applicable Scenarios for Two Mixture Mechanisms</h4>
 
 <table>
   <thead>
@@ -862,9 +876,9 @@ $$</p>
 
 <p><strong>Core trade-off</strong>: Step/segment-level mixture is stronger on the sampling side (fast staleness removal), while trajectory-level mixture is more stable on the estimation side (easier surrogate objective estimation).</p>
 
-<h2 id="part-vii-handling-training-inference-inconsistency">Part VII: Handling Training-Inference Inconsistency</h2>
+<h2 id="8-handling-training-inference-inconsistency">8. Handling Training-Inference Inconsistency</h2>
 
-<h3 id="71-background-and-effective-staleness">7.1 Background and Effective Staleness</h3>
+<h3 id="81-background-and-effective-staleness">8.1 Background and Effective Staleness</h3>
 
 <p>In large-scale distributed training, policies on the inference side and training side may be inconsistent:</p>
 
@@ -885,9 +899,9 @@ $$</p>
 
 <p>This definition simultaneously covers version staleness and training-inference implementation differences.</p>
 
-<h3 id="72-actionable-control">7.2 Actionable Control</h3>
+<h3 id="82-actionable-control">8.2 Actionable Control</h3>
 
-<p>By Lemma 3.3, $\hat{S}_k$ can be expressed in sample-level computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$.</p>
+<p>By Lemma 6.1, $\hat{S}_k$ can be written in a sample-computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then the effective staleness on the <strong>filtered training sub-distribution</strong> (which we may denote by $\hat{S}_k^{\mathrm{eff}}$) can be controlled to at most $\epsilon_{\mathrm{stale}}/2$. This controls the filtered training distribution, not the original sampling distribution’s $\hat{S}_k$.</p>
 
 <h4 id="key-implementation-points">Key Implementation Points</h4>
 
@@ -896,7 +910,7 @@ $$</p>
   <li><strong>Probability smoothing</strong>: If the inference side has truncation (e.g., top-k), ensure ratios are valid</li>
 </ol>
 
-<h2 id="summary-practical-guidelines">Summary: Practical Guidelines</h2>
+<h2 id="9-practical-guidelines">9. Practical Guidelines</h2>
 
 <h4 id="core-theoretical-framework">Core Theoretical Framework</h4>
 
@@ -905,6 +919,8 @@ $$</p>
 <p>$$
 J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{surrogate objective}} - \underbrace{C_1 \cdot U_k}_{\text{update shift penalty}} - \underbrace{C_2 \cdot S_k}_{\text{sampling staleness penalty}}
 $$</p>
+
+<p>Here $C_1$ and $C_2$ are just compressed notation for the theoretical coefficients introduced earlier. They are not free hyperparameters.</p>
 
 <h4 id="separation-of-concerns-principle">Separation of Concerns Principle</h4>
 

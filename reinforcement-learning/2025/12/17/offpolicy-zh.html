@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证 | Xihuai Wang's Page</title><meta name="author" content="Xihuai Leo Wang" />
+    <title>驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件 | Xihuai Wang's Page</title><meta name="author" content="Xihuai Leo Wang" />
     <meta name="description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" />
     <meta name="keywords" content="Reinforcement Learning, Multi-agent System, Language Model" />
 
@@ -22,22 +22,22 @@
     5) site.og_image                                      -> site default
     This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
-    <meta itemprop="name" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" />
-    <meta itemprop="description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta itemprop="image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%94%B9%E8%BF%9B%E4%BF%9D%E8%AF%81&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" />
-    <meta name="weibo:article:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta name="weibo:article:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%94%B9%E8%BF%9B%E4%BF%9D%E8%AF%81&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta itemprop="name" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
+    <meta itemprop="description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta itemprop="image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
+    <meta name="weibo:article:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta name="weibo:article:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
 
     <!-- OpenGraph -->
-    <meta property="og:site_name" content="Xihuai Wang's Page" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2025-12-17T00:00:00+00:00" /><meta property="article:author" content="Xihuai Leo Wang" /><meta property="og:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" />
+    <meta property="og:site_name" content="Xihuai Wang's Page" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2025-12-17T00:00:00+00:00" /><meta property="article:author" content="Xihuai Leo Wang" /><meta property="og:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
     <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html" />
-    <meta property="og:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta property="og:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%94%B9%E8%BF%9B%E4%BF%9D%E8%AF%81&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
-    <meta property="og:image:secure_url" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%94%B9%E8%BF%9B%E4%BF%9D%E8%AF%81&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta property="og:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta property="og:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta property="og:image:secure_url" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" /><meta property="og:locale" content="zh_CN" />
+    <meta property="og:image:alt" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" /><meta property="og:locale" content="zh_CN" />
 
-        <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" />
-    <meta name="twitter:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta name="twitter:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%94%B9%E8%BF%9B%E4%BF%9D%E8%AF%81&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
-    <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证" />
+        <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
+    <meta name="twitter:description" content="系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。" /><meta name="twitter:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
     
 
     <!-- Schema.org -->
@@ -48,8 +48,8 @@
           "@type": "WebPage",
           "@id": "https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html"
         },
-        "headline": "Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证",
-        "description": "系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。","image": "https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%94%B9%E8%BF%9B%E4%BF%9D%E8%AF%81&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12","author": {
+        "headline": "Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件",
+        "description": "系统推导大模型强化学习中的异策略训练理论：从单策略采样的性能改进下界出发，扩展到多策略静态/动态混合采样，给出单调提升的充分条件，并通过三角不等式分解将约束拆分为更新增量偏移（优化侧可控）与采样陈旧性（采样侧可控）两部分，最终落地为可操作的裁剪机制与数据过滤策略。","image": "https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E7%B3%BB%E7%BB%9F%E6%8E%A8%E5%AF%BC%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E7%90%86%E8%AE%BA%EF%BC%9A%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E7%BB%99%E5%87%BA%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E7%9A%84%E5%85%85%E5%88%86%E6%9D%A1%E4%BB%B6%EF%BC%8C%E5%B9%B6%E9%80%9A%E8%BF%87%E4%B8%89%E8%A7%92%E4%B8%8D%E7%AD%89%E5%BC%8F%E5%88%86%E8%A7%A3%E5%B0%86%E7%BA%A6%E6%9D%9F%E6%8B%86%E5%88%86%E4%B8%BA%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%EF%BC%88%E4%BC%98%E5%8C%96%E4%BE%A7%E5%8F%AF%E6%8E%A7%EF%BC%89%E4%B8%8E%E9%87%87%E6%A0%B7...&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12","author": {
           "@type": "Person",
           "name": "Xihuai Leo Wang"
         },
@@ -179,7 +179,7 @@
 
 <div class="post toc-layout">
   <header class="post-header">
-    <h1 class="post-title">驯服陈旧数据：LLM 强化学习的异策略训练与单调改进保证</h1>
+    <h1 class="post-title">驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件</h1>
     <div class="post-meta-container">
       <div class="post-meta-row">
         <span class="post-date">
@@ -230,19 +230,25 @@
     
 
       <article class="post-content">
-        <h2 id="引言为什么我们需要关心异策略">引言：为什么我们需要关心”异策略”？</h2>
+        <blockquote>
+  <p>本文关注的是一个更具体的问题：当训练批次混入多个历史策略版本的数据时，PPO 式更新还能在什么条件下维持可分析的单调提升下界？</p>
+</blockquote>
 
-<p>设想这样一个场景：你正在使用强化学习训练一个大语言模型，希望它能够更好地回答问题。理想情况下，每当模型生成一批回答后，你都会立即用这些数据来更新模型，接着用更新后的模型生成新的数据，如此循环往复。这种”谁的数据就用来更新谁”的方式称为<strong>同策略</strong>（on-policy）训练。</p>
+<h2 id="1-引言为什么我们需要关心异策略">1. 引言：为什么我们需要关心”异策略”？</h2>
 
-<p>然而，现实情况往往更为复杂。在大规模分布式训练中，数百个GPU并行生成数据，而模型更新需要时间。当新模型发布时，大量由旧版本模型生成的数据尚未被使用——直接丢弃过于浪费，但继续使用又担心数据”过时”会影响训练效果。</p>
+<p>用强化学习训练大语言模型时，最直接的做法是同策略（on-policy）训练：模型生成一批数据，立刻用这批数据更新，再用更新后的模型采样下一批。</p>
 
-<p>这便是<strong>异策略</strong>（off-policy）训练所面临的核心问题：<strong>用旧策略采集的数据来更新新策略，能否保证性能持续提升？</strong></p>
+<p>但在大规模分布式训练中，数百个 GPU 并行采样，模型更新本身也有延迟。新版本发布时，旧版本生成的数据往往还留在队列里：直接丢掉太浪费，继续使用又担心数据已经过时。</p>
 
-<p>本文将系统地回答这个问题。我们从基础理论出发，逐步推导出可操作的条件，阐明在何种情况下，混合使用多个版本策略的数据仍然能够保证训练的单调改进。</p>
+<p>这便是<strong>异策略</strong>（off-policy）训练所面临的核心问题：<strong>用旧策略采集的数据来更新新策略，究竟在什么条件下还能继续获得可靠的性能提升？</strong></p>
 
-<h2 id="第一部分理论基础">第一部分：理论基础</h2>
+<p>本文关心的就是这个问题：混合多个版本策略的数据来训练时，在什么条件下还能维持可分析的单调提升下界。</p>
 
-<h3 id="11-基本设定">1.1 基本设定</h3>
+<p>先说明一点：很多 LLM-RL 任务更接近单步 episode / contextual bandit。本文仍先在一般折扣 MDP 上推导，是为了把“多源采样、陈旧性、裁剪”这些结构写清楚；到第七部分再看 bandit 化之后哪些地方会明显简化。</p>
+
+<h2 id="2-理论基础">2. 理论基础</h2>
+
+<h3 id="21-基本设定">2.1 基本设定</h3>
 
 <p>我们考虑一个标准的马尔可夫决策过程（MDP），包含状态空间 $\mathcal{S}$、动作空间 $\mathcal{A}$、转移概率 $p(s'\mid s,a)$、奖励函数 $r(s,a)$、初始状态分布 $\rho_0$ 和折扣因子 $\gamma \in (0,1)$。</p>
 
@@ -278,12 +284,12 @@ $$</p>
 
 <p>本文统一用 $\mid$ 表示条件概率（例如 $\pi(a\mid s)$），并保留 $\|\cdot\|$ 表示范数。</p>
 
-<h3 id="12-核心工具策略性能差异引理">1.2 核心工具：策略性能差异引理</h3>
+<h3 id="22-核心工具策略性能差异引理">2.2 核心工具：策略性能差异引理</h3>
 
 <p>整个理论的基石是如下简洁的结论：</p>
 
 <blockquote>
-  <p><strong>引理1.1（策略性能差异引理）</strong></p>
+  <p><strong>引理 2.1（策略性能差异引理）</strong></p>
 
   <p>对于任意旧策略 $\pi_k$ 和新策略 $\pi$，性能差异可表示为：</p>
 
@@ -292,11 +298,11 @@ J(\pi) - J(\pi_k) = \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_\pi}\left[ \mathbb{E
 $$</p>
 </blockquote>
 
-<p><strong>直观理解</strong>：新策略相较于旧策略的改进程度，等于在新策略访问的状态分布下，采用新策略选择动作所能获得的“平均优势”。</p>
+<p><strong>直观理解</strong>：新策略带来的改进，等于它自身访问到的状态分布下，按它选动作所得到的平均优势。</p>
 
-<h2 id="第二部分单策略采样的性能改进下界">第二部分：单策略采样的性能改进下界</h2>
+<h2 id="3-单策略采样的性能改进下界">3. 单策略采样的性能改进下界</h2>
 
-<h3 id="21-分布不匹配与分布差异控制">2.1 分布不匹配与分布差异控制</h3>
+<h3 id="31-分布不匹配与分布差异控制">3.1 分布不匹配与分布差异控制</h3>
 
 <p>策略性能差异引理存在一个实际问题：右侧的期望是在新策略的状态分布 $d_\pi$ 下计算的，而我们只能从旧策略的分布 $d_{\pi_k}$ 中采样。</p>
 
@@ -305,25 +311,27 @@ $$</p>
 <h4 id="状态分布差异的控制">状态分布差异的控制</h4>
 
 <blockquote>
-  <p><strong>引理1.2（状态分布差异与策略TV距离的关系）</strong></p>
+  <p><strong>引理 3.1（状态分布差异与策略TV距离的关系）</strong></p>
 
   <p>$$
 \|d_\pi - d_{\pi_k}\|_1 \leq \frac{2\gamma}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}} \big[ D_{\mathrm{TV}}(\pi, \pi_k; s) \big]
 $$</p>
 </blockquote>
 
+<p>这里直接采用的是 <strong>average-divergence / average-TV</strong> 风格的写法。它不是 TRPO 中最常见的 $\max_s D_{\mathrm{TV}}$ 版本，而更接近 CPO / Achiam et al. (2017) 那类“用平均散度刻画性能差距”的表述；这样写更容易落到样本平均，也更方便后文处理多源采样与陈旧性。</p>
+
 <h4 id="物理意义">物理意义</h4>
 
-<p>策略在动作空间上的微小差异，会通过环境动力学被“放大”为状态访问分布的差异。系数 $\frac{\gamma}{1-\gamma}$ 反映了<strong>时间累积效应</strong>——在长时域任务中（$\gamma$ 接近1），放大效应更为显著。</p>
+<p>策略在动作空间上的微小差异，会通过环境动力学被“放大”为状态访问分布的差异。上式中的系数 $\frac{2\gamma}{1-\gamma}$ 反映了<strong>时间累积效应</strong>——在长时域任务中（$\gamma$ 接近1），放大效应更为显著。</p>
 
 <h4 id="证明思路">证明思路</h4>
 
-<p>通过推导折扣访问分布的不动点方程，并利用随机矩阵的 $\ell_1$ 非扩张性，可以证明状态分布差异被策略差异通过转移动力学放大，且放大系数正是 $\frac{\gamma}{1-\gamma}$。</p>
+<p>证明通常从折扣访问分布的不动点方程出发，再配合 average-divergence 风格的性能界来完成。由于本文重点不在复现这条证明链，而在于如何把它推广到多源采样与陈旧数据场景，故此处不再展开完整推导。</p>
 
-<h3 id="22-策略性能改进下界">2.2 策略性能改进下界</h3>
+<h3 id="32-策略性能改进下界">3.2 策略性能改进下界</h3>
 
 <blockquote>
-  <p><strong>定理1.1（策略性能改进下界）</strong></p>
+  <p><strong>定理 3.2（策略性能改进下界）</strong></p>
 
   <p>定义期望优势上界常数 $C_{\pi,\pi_k} := \max_{s} \lvert \mathbb{E}_{a \sim \pi}[A^{\pi_k}(s,a)] \rvert$，则：</p>
 
@@ -338,43 +346,45 @@ L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k}
 $$</p>
 </blockquote>
 
-<p>该下界由两部分组成：</p>
+<p>这里的 $L_{\pi_k}(\pi)$ 省略了与 $\pi$ 无关的常数项 $J(\pi_k)$；若写成更接近 TRPO 教科书的形式，就是 $J(\pi_k)+L_{\pi_k}(\pi)$。另外，$C_{\pi,\pi_k}$ 本身依赖新策略 $\pi$，所以它更像一个结构性的下界系数，而不是实践里可以直接当作固定超参数的常数。</p>
+
+<p>这个下界由两部分组成：</p>
 
 <ol>
   <li>
-    <p><strong>代理目标</strong> $L_{\pi_k}(\pi)$：可通过旧策略数据利用重要性采样直接估计，它是TRPO/PPO等算法的优化目标。</p>
+    <p><strong>代理目标</strong> $L_{\pi_k}(\pi)$：可通过旧策略数据利用重要性采样直接估计，它是 TRPO 的经典 surrogate，也是 PPO clipped / penalized 目标的出发点。</p>
   </li>
   <li>
     <p><strong>策略偏移惩罚</strong>：随着新旧策略的TV距离增大而增加，这解释了为何PPO等算法需要限制更新幅度。</p>
   </li>
 </ol>
 
-<p><strong>核心结论</strong>：在最大化代理目标的同时控制策略偏移，即可保证性能的改进。</p>
+<p><strong>核心结论</strong>：该定理给出了一个显式的改进下界；当右侧为正时，就能保证性能改进。</p>
 
-<h2 id="第三部分多策略静态混合采样">第三部分：多策略静态混合采样</h2>
+<h2 id="4-多策略静态混合采样">4. 多策略静态混合采样</h2>
 
-<h3 id="31-问题设定与统一建模静态混合">3.1 问题设定与统一建模（静态混合）</h3>
+<h3 id="41-问题设定与统一建模静态混合">4.1 问题设定与统一建模（静态混合）</h3>
 
-<p>在实际训练中，一个批次的数据可能来自多个策略版本 $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$，各版本占比为 $\alpha_1, \ldots, \alpha_M$。如何将定理1.1推广到这种情形？</p>
+<p>在实际训练中，一个批次的数据可能来自多个策略版本 $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$，各版本占比为 $\alpha_1, \ldots, \alpha_M$。如何将定理 3.2 推广到这种情形？</p>
 
 <p><strong>核心思想：扩展状态空间</strong></p>
 
-<p>解决方案采用了一个优雅的建模技巧：<strong>将策略版本索引作为状态的一部分</strong>。</p>
+<p>做法很直接：<strong>把策略版本索引并入状态空间</strong>。</p>
 
 <p>定义扩展状态空间 $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$，其中 $\mathcal{I} = \{1, \ldots, M\}$ 是策略索引集合。在扩展状态 $(s, i)$ 下，<strong>混合行为策略</strong>定义为 $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$。</p>
 
 <p>索引的演化由<strong>索引转移核</strong> $q(i' \mid i)$ 刻画。扩展MDP继承原始MDP的奖励和环境转移，索引按 $q(i'\mid i)$ 独立演化。</p>
 
-<p>这个技巧之所以有效，是因为新策略 $\pi$ 在扩展MDP上的回报与在原始MDP中的回报相同，从而可以直接应用定理1.1。</p>
+<p>这个技巧之所以有效，是因为新策略 $\pi$ 在扩展MDP上的回报与在原始MDP中的回报相同，从而可以直接应用定理 3.2。</p>
 
-<h3 id="32-轨迹级混合结构简化与改进下界">3.2 轨迹级混合：结构简化与改进下界</h3>
+<h3 id="42-轨迹级混合结构简化与改进下界">4.2 轨迹级混合：结构简化与改进下界</h3>
 
 <p>最常见的情形是<strong>每条轨迹仅使用一个旧策略</strong>：在轨迹开始时采样索引 $I_0 \sim \alpha$，随后整条轨迹都使用策略 $\pi^{(I_0)}$。此时索引转移核为恒等转移：$q(i' \mid i) = \mathbf{1}_{i'=i}$。</p>
 
 <p>从工程实现的角度看，在许多 <strong>actor-learner 的异步训练</strong>架构中（如果采样端与训练端将数据按“整条轨迹/完整 episode 归属于某个策略版本”的方式组织），这可以近似对应这里的<strong>轨迹级混合</strong>：actor 在一个采样单元内固定使用某个策略快照生成数据，learner 再混合使用来自不同版本的整条轨迹数据进行更新。这里使用“近似”一词，是因为不同系统对“轨迹/采样单元”的切分边界可能不完全一致。</p>
 
 <blockquote>
-  <p><strong>引理2.1（轨迹级混合的结构简化）</strong></p>
+  <p><strong>引理 4.1（轨迹级混合的结构简化）</strong></p>
 
   <p>(a) 扩展状态访问分布分解为：$d_{\beta}(s, i) = \alpha_i \cdot d_{\pi^{(i)}}(s)$</p>
 
@@ -388,20 +398,22 @@ $$</p>
 <p><strong>改进下界</strong></p>
 
 <blockquote>
-  <p><strong>推论2.1（轨迹级混合的性能改进下界）</strong></p>
+  <p><strong>推论 4.2（轨迹级混合的性能改进下界）</strong></p>
 
   <p>$$
 J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\pi^{(i)}}(\pi) - \frac{2\gamma \max_i C_{\pi, \pi^{(i)}}}{(1-\gamma)^2} \sum_{i=1}^{M} \alpha_i \mathbb{E}_{s \sim d_{\pi^{(i)}}} \big[ D_{\mathrm{TV}}(\pi, \pi^{(i)}; s) \big]
 $$</p>
 </blockquote>
 
-<p>该结论表明：当混合使用多个旧策略版本的轨迹进行训练时，若对每条轨迹使用对应旧策略的重要性比率来构造损失，并同时控制新策略与各旧策略之间的偏移，则新策略的性能将有明确的改进下界。</p>
+<p>这里取 $\max_i C_{\pi,\pi^{(i)}}$ 只是为了把表达写得更紧凑；更细的写法是让每个分量各自带自己的 $C_i$ 再加权求和。也就是说，这里额外牺牲了一些紧度，换来更统一的展示形式。</p>
 
-<h2 id="第四部分动态混合采样与单调提升条件">第四部分：动态混合采样与单调提升条件</h2>
+<p>这说明：只要对每条轨迹用对应旧策略的重要性比率构造损失，并控制新策略与各旧策略之间的偏移，混合训练仍然有明确的改进下界。</p>
 
-<h3 id="41-问题与统一建模动态混合">4.1 问题与统一建模（动态混合）</h3>
+<h2 id="5-动态混合采样与单调提升条件">5. 动态混合采样与单调提升条件</h2>
 
-<p>第三部分讨论的是<strong>静态混合</strong>——混合权重 $\alpha_i$ 固定不变。本节考虑更一般的<strong>动态混合</strong>——即新策略发布后，采样逐步由新策略接管的过程。</p>
+<h3 id="51-问题与统一建模动态混合">5.1 问题与统一建模（动态混合）</h3>
+
+<p>上一部分讨论的是<strong>静态混合</strong>——混合权重 $\alpha_i$ 固定不变。本节考虑更一般的<strong>动态混合</strong>——即新策略发布后，采样逐步由新策略接管的过程。</p>
 
 <p>前面的结论刻画了“新策略相对于混合行为策略”的改进。但在实际训练中，我们真正关心的是：<strong>每轮更新后的最新策略 $\pi_{k+1}$ 相对于上一轮最新策略 $\pi_k$ 是否具有单调提升性？</strong></p>
 
@@ -419,7 +431,7 @@ $$</p>
 
 <p>其中 $\sigma(i)$ 为切换概率，$\kappa(\cdot\mid i)$ 为目标索引分布。</p>
 
-<h3 id="42-分解与单调提升下界">4.2 分解与单调提升下界</h3>
+<h3 id="52-分解与单调提升下界">5.2 分解与单调提升下界</h3>
 
 <p>通过引入混合回报 $J_{\mathrm{mix}}^{(k)}$ 作为中间桥梁，性能差异可分解为：</p>
 
@@ -427,7 +439,7 @@ $$</p>
 J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{相对混合策略的改进}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{混合偏差项}}
 $$</p>
 
-<p>第一项可用定理1.1处理。第二项是<strong>混合偏差项</strong>，可以证明它满足以下不等式：</p>
+<p>第一项可用定理 3.2 处理。第二项是<strong>混合偏差项</strong>，它可以通过把 $J_{\mathrm{mix}}^{(k)} - J(\pi_k)$ 分解成各个 $J(\pi^{(i)}) - J(\pi_k)$ 的加权和，再对各分量应用 TV 上界来得到。这里先直接给出结果：</p>
 
 <p>$$
 J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
@@ -438,7 +450,7 @@ $$</p>
 <p>合并上述结果，我们得到核心定理：</p>
 
 <blockquote>
-  <p><strong>定理3.1（动态混合采样下的单调提升下界）</strong></p>
+  <p><strong>定理 5.1（动态混合采样下的单调提升下界）</strong></p>
 
   <p>$$
 \begin{aligned}
@@ -449,30 +461,33 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;& L_{\beta^{(k)}}(\pi_{k+1}) \\
 $$</p>
 </blockquote>
 
-<p>其中 $L_{\beta^{(k)}}(\pi_{k+1})$ 表示“相对行为策略 $\beta^{(k)}$ 的代理目标”（与第二部分的 $L_{\pi_k}(\pi)$ 同形，只是把行为策略从单一 $\pi_k$ 推广到混合 $\beta^{(k)}$）。</p>
+<p>其中 $L_{\beta^{(k)}}(\pi_{k+1})$ 表示“相对行为策略 $\beta^{(k)}$ 的代理目标”（与第三部分的 $L_{\pi_k}(\pi)$ 同形，只是把行为策略从单一 $\pi_k$ 推广到混合 $\beta^{(k)}$）。</p>
 
-<p>更具体地，可写为
-$$
+<p>更具体地，可写为</p>
+
+<p>$$
 L_{\beta^{(k)}}(\pi_{k+1}) := \frac{1}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}},\, a\sim \pi^{(i)}(\cdot\mid s)}\left[\frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}\,A^{\beta^{(k)}}((s,i),a)\right].
 $$</p>
 
-<p>类似地，记
-$$
+<p>类似地，记</p>
+
+<p>$$
 C_{\pi_{k+1},\beta^{(k)}} := \max_{(s,i)}\left|\mathbb{E}_{a\sim \pi_{k+1}(\cdot\mid s)}\big[A^{\beta^{(k)}}((s,i),a)\big]\right|.
 $$</p>
 
-<p>该下界揭示了<strong>双重控制</strong>的必要性：</p>
+<p>这个下界里有两个惩罚项，对应<strong>双重控制</strong>：</p>
+
 <ul>
   <li><strong>更新偏移惩罚</strong>：新策略 $\pi_{k+1}$ 相对于采样来源策略 $\pi^{(i)}$ 的偏移</li>
   <li><strong>采样陈旧性惩罚</strong>：采样来源策略 $\pi^{(i)}$ 相对于当前策略 $\pi_k$ 的陈旧性</li>
 </ul>
 
-<h3 id="43-直接约束为何不可行三角不等式分解">4.3 直接约束为何不可行：三角不等式分解</h3>
+<h3 id="53-直接约束为何不可行三角不等式分解">5.3 直接约束为何不可行：三角不等式分解</h3>
 
-<p>定理3.1中的更新偏移惩罚项看似可以通过约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s)$ 来控制，但这实际上<strong>不可行</strong>：</p>
+<p>定理 5.1 中的更新偏移惩罚项看似可以通过约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s)$ 来控制；但如果把它理解成“对每个采样来源策略都施加统一的 trust-region 约束”，就会遇到一个实际上的不可行性问题：</p>
 
 <blockquote>
-  <p><strong>观察3.1（更新偏移约束的不可行性）</strong></p>
+  <p><strong>观察 5.2（更新偏移约束的不可行性）</strong></p>
 
   <p>假设混合采样包含两个旧策略 $\pi^{(1)}$ 和 $\pi^{(2)}$，若存在某个状态 $s$ 使得 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) > 2\delta$，则不存在任何策略 $\pi_{k+1}$ 能够同时满足 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ 与 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$。</p>
 </blockquote>
@@ -507,7 +522,7 @@ U_k := \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[D_{\mathrm{TV}}(\pi_{k+1}, \p
 $$</p>
 
 <blockquote>
-  <p><strong>推论3.2（分解后的单调提升下界）</strong></p>
+  <p><strong>推论 5.3（分解后的单调提升下界）</strong></p>
 
   <p>$$
 J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} U_k - \left( \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2} + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \right) S_k
@@ -516,9 +531,9 @@ $$</p>
 
 <h4 id="为何分解能解决问题">为何分解能解决问题？</h4>
 
-<p>关键在于：分解后的 $U_k$ 只涉及新策略 $\pi_{k+1}$ 和当前策略 $\pi_k$，<strong>与旧策略族 $\{\pi^{(i)}\}$ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 $U_k$ 都是可行的——这正是观察3.1所揭示的不可行性问题的解决之道。</p>
+<p>关键在于：分解后的 $U_k$ 只涉及新策略 $\pi_{k+1}$ 和当前策略 $\pi_k$，<strong>与旧策略族 $\{\pi^{(i)}\}$ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 $U_k$ 都是可行的——这正是观察 5.2 所揭示的不可行性问题的解决之道。</p>
 
-<p>这揭示了一个重要的工程原则——<strong>职责分离</strong>：</p>
+<p>对应的工程原则就是<strong>职责分离</strong>：</p>
 
 <table>
   <thead>
@@ -542,16 +557,16 @@ $$</p>
   </tbody>
 </table>
 
-<h2 id="第五部分裁剪机制的理论基础">第五部分：裁剪机制的理论基础</h2>
+<h2 id="6-裁剪机制的理论基础">6. 裁剪机制的理论基础</h2>
 
-<h3 id="51-从-tv-距离到样本可控量">5.1 从 TV 距离到样本可控量</h3>
+<h3 id="61-从-tv-距离到样本可控量">6.1 从 TV 距离到样本可控量</h3>
 
-<p>推论3.2告诉我们，要保证单调提升，需要控制更新增量偏移 $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$。但TV距离是分布层面的量，如何用样本来控制它？</p>
+<p>推论 5.3 告诉我们，要保证单调提升，需要控制更新增量偏移 $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$。但TV距离是分布层面的量，如何用样本来控制它？</p>
 
-<p>关键桥梁是下面这个恒等式：</p>
+<p>连接理论和样本的是下面这个恒等式：</p>
 
 <blockquote>
-  <p><strong>引理3.3（TV距离的比值差表示）</strong></p>
+  <p><strong>引理 6.1（TV距离的比值差表示）</strong></p>
 
   <p>设策略 $\pi_1$ 的支撑覆盖 $\pi$ 和 $\pi_2$ 的支撑，则对任意状态分布 $\mu$：</p>
 
@@ -564,9 +579,9 @@ $$</p>
 
 <p>左侧是两个分布之间的TV距离（需要遍历所有动作），右侧是在 $\pi_1$ 下采样时两个重要性比值的差的绝对值。这使我们能够通过样本来估计和控制TV距离。</p>
 
-<h4 id="inlmath115mathend-的样本表示">$U_k$ 的样本表示</h4>
+<h4 id="inlmath124mathend-的样本表示">$U_k$ 的样本表示</h4>
 
-<p>利用引理3.3，取 $\pi = \pi_{k+1}$，$\pi_2 = \pi_k$，$\pi_1 = \pi^{(i)}$（采样来源策略），可得：</p>
+<p>利用引理 6.1，取 $\pi = \pi_{k+1}$，$\pi_2 = \pi_k$，$\pi_1 = \pi^{(i)}$（采样来源策略），可得：</p>
 
 <p>$$
 U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot\mid s)} \left| \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)} - \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} \right|
@@ -578,9 +593,9 @@ $$</p>
 U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{训练数据}} \big| \rho_{k+1} - \rho_k \big|
 $$</p>
 
-<p>这意味着：<strong>如果我们能使每个样本满足 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，就能保证 $U_k \leq \epsilon/2$</strong>。</p>
+<p>这意味着：<strong>如果我们在理论上硬性要求每个样本都满足 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，就能保证 $U_k \leq \epsilon/2$</strong>。</p>
 
-<h3 id="52-约束-inlmath123mathend两种裁剪方式">5.2 约束 $U_k$：两种裁剪方式</h3>
+<h3 id="62-约束-inlmath132mathend两种裁剪方式">6.2 约束 $U_k$：两种裁剪方式</h3>
 
 <h4 id="方法一直接约束比值差">方法一：直接约束比值差</h4>
 
@@ -600,18 +615,21 @@ $$</p>
 |\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right|
 $$</p>
 
-<p>如果约束 $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$，由于 $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$，可以证明 $U_k \leq \epsilon/2$。</p>
+<p>如果进一步在理论上硬性约束 $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$，由于 $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$，可以证明 $U_k \leq \epsilon/2$。</p>
 
-<p>这种方法直接对 $\pi_{k+1}/\pi_k$ 以 1 为中心进行裁剪，<strong>裁剪约束本身不依赖旧策略 $\pi^{(i)}$</strong>。但如果采用后文的 $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$，仍需要每条样本的行为概率 $\pi^{(i)}(a\mid s)$（或记录的 logprob）来计算 $\rho_k$。下面我们给出三种裁剪机制的完整目标函数。设当前样本来自旧策略 $\pi^{(i)}$，记：</p>
+<p>这种方法直接对 $\pi_{k+1}/\pi_k$ 以 1 为中心进行裁剪，<strong>裁剪约束本身不依赖旧策略 $\pi^{(i)}$</strong>。但如果采用后文的 $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$，仍需要每条样本的行为概率 $\pi^{(i)}(a\mid s)$（或记录的 logprob）来计算 $\rho_k$。</p>
+
+<p>先强调一点：上面两条都是<strong>理论上的逐样本硬约束</strong>。下面写出的 clipped surrogate 只是实践中的近似实现，目的是把 $U_k$ 控制在一个可接受的范围内，而不是让每一步优化都自动满足严格保证。设当前样本来自旧策略 $\pi^{(i)}$，记：</p>
+
 <ul>
   <li>$\rho_{k+1} = \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}$（新策略相对采样策略的比值）</li>
   <li>$\rho_k = \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)}$（当前策略相对采样策略的比值）</li>
   <li>$r = \frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)}$（新策略相对当前策略的增量比值）</li>
 </ul>
 
-<p>说明：若采用<strong>轨迹级混合</strong>（索引不变），则 $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$，可直接用每条轨迹对应旧策略的优势估计；若为<strong>步/段级混合</strong>，直接用 $A^{\pi^{(i)}}$ 代替 $A^{\beta^{(k)}}$ 会引入优势替代偏差（第六部分详述），需要使用能反映未来索引切换的优势/价值估计。</p>
+<p>说明：若采用<strong>轨迹级混合</strong>（索引不变），则 $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$，可直接用每条轨迹对应旧策略的优势估计；若为<strong>步/段级混合</strong>，直接用 $A^{\pi^{(i)}}$ 代替 $A^{\beta^{(k)}}$ 会引入优势替代偏差（第七部分详述），需要使用能反映未来索引切换的优势/价值估计。</p>
 
-<h4 id="标准-ppo">标准 PPO</h4>
+<h4 id="标准-ppo轨迹级混合时">标准 PPO（轨迹级混合时）</h4>
 
 <p>以 1 为中心裁剪 $\rho_{k+1}$</p>
 
@@ -637,9 +655,9 @@ $$</p>
 
 <p>其中 $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ 是经过重要性加权的优势估计。</p>
 
-<h3 id="53-对比与落地选型与采样侧控制">5.3 对比与落地：选型与采样侧控制</h3>
+<h3 id="63-对比与落地选型与采样侧控制">6.3 对比与落地：选型与采样侧控制</h3>
 
-<h4 id="表-51三种裁剪机制的对比">表 5.1　三种裁剪机制的对比</h4>
+<h4 id="表-61三种裁剪机制的对比">表 6.1　三种裁剪机制的对比</h4>
 
 <table>
   <thead>
@@ -648,7 +666,7 @@ $$</p>
       <th>裁剪变量</th>
       <th>裁剪中心</th>
       <th>裁剪区间</th>
-      <th>约束的TV距离</th>
+      <th>主要对应的目标 TV 距离</th>
     </tr>
   </thead>
   <tbody>
@@ -678,7 +696,7 @@ $$</p>
 
 <h4 id="标准-ppo-的根本问题多策略混合">标准 PPO 的根本问题（多策略混合）</h4>
 
-<p>标准PPO约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$，要求新策略同时接近所有采样来源策略。根据观察3.1，当各旧策略 $\pi^{(1)}, \pi^{(2)}, \ldots$ 之间差异显著时，<strong>不存在能够同时满足所有约束的 $\pi_{k+1}$</strong>。这导致信赖域交集收缩甚至为空，更新被最陈旧的策略所限制。</p>
+<p>如果沿用单源 PPO 的 trust-region 解读，标准 PPO 约束的是 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$，也就是要求新策略同时接近所有采样来源策略。根据观察 5.2，当各旧策略 $\pi^{(1)}, \pi^{(2)}, \ldots$ 之间差异显著时，<strong>这组约束可能无法同时满足</strong>。结果就是信赖域交集收缩甚至接近为空，更新容易被最陈旧的策略所限制。</p>
 
 <h4 id="方法一与方法二的共同优势">方法一与方法二的共同优势</h4>
 
@@ -720,7 +738,7 @@ $$</p>
 
 <h4 id="详细解释">详细解释</h4>
 
-<h4 id="一-陈旧样本处理">(一) 陈旧样本处理</h4>
+<h4 id="维度一陈旧样本处理">维度一：陈旧样本处理</h4>
 
 <p>当样本来自很旧的策略时，$\rho_k = \pi_k/\pi^{(i)}$ 可能很大。</p>
 
@@ -729,18 +747,18 @@ $$</p>
   <li>方法一直接约束 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，被积函数上界恒为 $\epsilon$，不受 $\rho_k$ 放大。</li>
 </ul>
 
-<h4 id="二-llm-大词表问题">(二) LLM 大词表问题</h4>
+<h4 id="维度二llm-大词表问题">维度二：LLM 大词表问题</h4>
 
 <p>大语言模型词表规模巨大，大量token的概率极小。</p>
 
 <ul>
   <li>方法二约束 $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$，这是<strong>乘法型约束</strong>：若 $\pi_k(a\mid s) = 10^{-6}$，允许的绝对变化仅为 $\epsilon \times 10^{-6}$。</li>
-  <li>方法一约束 $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$，这是<strong>加法型约束</strong>：若该 token 在旧策略下概率较高（例如 $\pi^{(i)}(a\mid s) = 0.1$），即便当前概率很低，也允许较快提升。</li>
+  <li>方法一约束 $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$，这是<strong>尺度由采样策略概率 $\pi^{(i)}$ 决定的约束</strong>：若该 token 在旧策略下概率较高（例如 $\pi^{(i)}(a\mid s) = 0.1$），即便当前概率很低，也允许较快提升；当然，这仍以该 token 在采样分布中有足够可观测质量为前提。</li>
 </ul>
 
 <h4 id="采样陈旧性的控制">采样陈旧性的控制</h4>
 
-<p>推论3.2表明，$S_k$ 同样影响单调提升下界，但它<strong>无法通过优化侧的裁剪来控制</strong>，需要由采样系统实现：</p>
+<p>推论 5.3 表明，$S_k$ 同样影响单调提升下界，但它<strong>无法通过优化侧的裁剪来控制</strong>，需要由采样系统实现：</p>
 
 <h4 id="一-丢弃陈旧数据">(一) 丢弃陈旧数据</h4>
 
@@ -754,30 +772,30 @@ $$</p>
 
 <p>最后，需要澄清裁剪与理论下界的关系。</p>
 
-<p>推论3.2中，$U_k$ 的系数 $C_{\pi_{k+1},\beta^{(k)}}$ 依赖于新策略 $\pi_{k+1}$，因此惩罚项<strong>不能简单地替换为常数</strong>。正确的操作含义是：</p>
+<p>推论 5.3 中，$U_k$ 的系数 $C_{\pi_{k+1},\beta^{(k)}}$ 依赖于新策略 $\pi_{k+1}$，因此惩罚项<strong>不能简单地替换为常数</strong>。正确的操作含义是：</p>
 
 <blockquote>
   <p><strong>在 $U_k \leq \epsilon/2$ 的约束下，最大化代理目标 $L_{\beta^{(k)}}(\pi_{k+1})$</strong></p>
 </blockquote>
 
-<p>裁剪目标函数正是这一约束优化的实现——通过裁剪<strong>硬性限制</strong>更新幅度，确保 $U_k$ 可控；在此前提下，通过梯度上升提升代理目标，从而为策略的单调改进提供保障。</p>
+<p>裁剪目标函数可以被理解为这一约束优化的<strong>近似实现</strong>——通过裁剪近似限制更新幅度，促使 $U_k$ 保持可控；在此前提下，再通过梯度上升提升代理目标，从而尽量贴近前述单调改进分析。</p>
 
 <h4 id="本节小结">本节小结</h4>
 
 <p>本节建立了裁剪机制的理论基础：</p>
 
 <ol>
-  <li><strong>引理3.3</strong>将TV距离转化为样本层面的比值差，是连接理论与实现的桥梁</li>
-  <li><strong>两种约束方法</strong>：方法一（自适应裁剪中心）和方法二（固定增量裁剪），均保证 $U_k \leq \epsilon/2$</li>
-  <li><strong>与标准PPO对比</strong>：标准PPO约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$，在多策略混合下不可行；方法一/二约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$，规避了该问题</li>
+  <li><strong>引理 6.1</strong>将TV距离转化为样本层面的比值差，是连接理论与实现的桥梁</li>
+  <li><strong>两种约束方法</strong>：方法一（自适应裁剪中心）和方法二（固定增量裁剪）的<strong>硬约束版本</strong>都能保证 $U_k \leq \epsilon/2$；实践中的 clipped surrogate 则是对这一思路的近似实现</li>
+  <li><strong>与标准PPO对比</strong>：若沿用单源 trust-region 的解释，标准PPO约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)})$，在多策略混合下会遇到约束难以同时满足的问题；方法一/二把目标改为 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$，从而规避这一结构性困难</li>
   <li><strong>方法选择</strong>：陈旧性高或LLM大词表场景推荐方法一；若更关注“裁剪/信赖域不再依赖旧策略族”，可选方法二（但仍需数据侧提供行为 logprob 以计算 $\rho_k$）</li>
   <li><strong>$S_k$ 的控制</strong>由采样侧负责，通过数据过滤和版本窗口实现</li>
   <li><strong>裁剪是约束优化</strong>：在 $U_k$ 约束下最大化代理目标</li>
 </ol>
 
-<h2 id="第六部分轨迹级与步段级混合的比较">第六部分：轨迹级与步/段级混合的比较</h2>
+<h2 id="7-轨迹级与步段级混合的比较">7. 轨迹级与步/段级混合的比较</h2>
 
-<h3 id="61-机制差异与估计影响">6.1 机制差异与估计影响</h3>
+<h3 id="71-机制差异与估计影响">7.1 机制差异与估计影响</h3>
 
 <p>两类混合机制的本质区别在于索引转移核的结构：</p>
 
@@ -793,9 +811,9 @@ $$</p>
   <li>这里的<strong>步/段级混合</strong>可以大致理解为<strong>partial rollout</strong>的一个抽象：由于 actor 与 learner 异步，且 segment 边界处可能刷新到新策略版本，使用索引转移核允许“轨迹内部版本切换”，可以更好地近似刻画这种现象。</li>
 </ul>
 
-<p>关键分水岭在于<strong>引理2.1的结构简化是否成立</strong>：轨迹级混合满足优势函数还原；步/段级混合一般不满足，因为未来回报受索引转移核影响。</p>
+<p>关键分水岭在于<strong>引理 4.1 的结构简化是否成立</strong>：轨迹级混合满足优势函数还原；步/段级混合一般不满足，因为未来回报受索引转移核影响。</p>
 
-<h4 id="采样陈旧性-inlmath204mathend-的差异">采样陈旧性 $S_k$ 的差异</h4>
+<h4 id="采样陈旧性-inlmath214mathend-的差异">采样陈旧性 $S_k$ 的差异</h4>
 
 <p><strong>轨迹级混合</strong>的陈旧性来源于：混合权重 $\alpha_i^{(k)}$ 在新策略发布后仍对旧策略保留一定的比例。</p>
 
@@ -811,13 +829,13 @@ $$</p>
 
 <p>在单步 episode 的 LLM 训练中，无后续状态转移，两类机制的估计问题统一，无上述偏差。</p>
 
-<h3 id="62-风险与适用场景">6.2 风险与适用场景</h3>
+<h3 id="72-风险与适用场景">7.2 风险与适用场景</h3>
 
 <p>步/段级混合还有一个隐患：即便单步重要性比值被裁剪，长轨迹下多步噪声叠加仍会放大梯度估计方差。当每次更新的策略变化幅度较大时，轨迹内部的“行为突变”可能引发更重尾的比值分布。这也是表6.1中“策略变化幅度大”场景推荐轨迹级混合的原因。</p>
 
 <h4 id="适用场景">适用场景</h4>
 
-<h4 id="表-61两类混合机制的适用场景">表 6.1　两类混合机制的适用场景</h4>
+<h4 id="表-71两类混合机制的适用场景">表 7.1　两类混合机制的适用场景</h4>
 
 <table>
   <thead>
@@ -858,9 +876,9 @@ $$</p>
 
 <p><strong>核心权衡</strong>：步/段级混合在采样侧更强（快速去陈旧），轨迹级混合在估计侧更稳（代理目标易于估计）。</p>
 
-<h2 id="第七部分训推不一致的处理">第七部分：训推不一致的处理</h2>
+<h2 id="8-训推不一致的处理">8. 训推不一致的处理</h2>
 
-<h3 id="71-背景与有效陈旧性">7.1 背景与有效陈旧性</h3>
+<h3 id="81-背景与有效陈旧性">8.1 背景与有效陈旧性</h3>
 
 <p>在大规模分布式训练中，推理端和训练端的策略可能存在不一致：</p>
 
@@ -881,18 +899,18 @@ $$</p>
 
 <p>该定义同时覆盖了版本陈旧性与训推实现差异。</p>
 
-<h3 id="72-可操作控制">7.2 可操作控制</h3>
+<h3 id="82-可操作控制">8.2 可操作控制</h3>
 
-<p>由引理3.3，$\hat{S}_k$ 可表示为样本级可计算形式。给定阈值 $\epsilon_{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则 $\hat{S}_k \leq \epsilon_{\mathrm{stale}}/2$。</p>
+<p>由引理 6.1，$\hat{S}_k$ 可表示为样本级可计算形式。给定阈值 $\epsilon_{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则<strong>参与训练的数据子分布</strong>上的有效陈旧性（可记为 $\hat{S}_k^{\mathrm{eff}}$）可被控制在 $\epsilon_{\mathrm{stale}}/2$ 以内。换言之，这里控制的是过滤后的训练分布，而不是原始采样分布上的 $\hat{S}_k$。</p>
 
 <h4 id="关键实现要点">关键实现要点</h4>
 
 <ol>
   <li><strong>行为分母对齐</strong>：损失中的行为概率应使用推理端记录的 $\hat{\pi}^{(i)}(a\mid s)$</li>
-  <li><strong>概率平滑</strong>：若推理端有截断（如top-k），需确保比值合法</li>
+  <li><strong>概率平滑</strong>：若推理端有截断（如 top-k），需通过平滑等方式确保比值合法，并满足前文所需的支撑覆盖条件</li>
 </ol>
 
-<h2 id="总结实践指南">总结：实践指南</h2>
+<h2 id="9-总结实践指南">9. 总结：实践指南</h2>
 
 <h4 id="核心理论框架">核心理论框架</h4>
 
@@ -901,6 +919,8 @@ $$</p>
 <p>$$
 J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{代理目标}} - \underbrace{C_1 \cdot U_k}_{\text{更新偏移惩罚}} - \underbrace{C_2 \cdot S_k}_{\text{采样陈旧性惩罚}}
 $$</p>
+
+<p>这里的 $C_1, C_2$ 只是对前文理论常数的压缩记号，用来概括下界结构；它们不是实践里可自由调节的超参数。</p>
 
 <h4 id="职责分离原则">职责分离原则</h4>
 
@@ -954,7 +974,7 @@ $$</p>
     <tr>
       <td>实现简洁优先</td>
       <td>方法二（增量）</td>
-      <td>无需存储旧策略信息</td>
+      <td>裁剪形式更简洁，但仍需行为 logprob / $\rho_k$ 参与优势构造</td>
     </tr>
     <tr>
       <td>LLM大词表</td>
@@ -968,7 +988,7 @@ $$</p>
 
 <ul>
   <li>使用推理端记录的 $\hat{\pi}^{(i)}$ 作为行为分母</li>
-  <li>通过样本过滤压缩有效陈旧性</li>
+  <li>通过样本过滤压缩参与训练数据上的有效陈旧性</li>
 </ul>
 
 <h2 id="附录关键符号速查表">附录：关键符号速查表</h2>
@@ -1045,7 +1065,7 @@ $$</p>
 	<span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
 	<span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
 	<span class="na">day</span>          <span class="p">=</span> <span class="s">{17}</span><span class="p">,</span>
-	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html}</span><span class="p">,</span>
+	<span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html}</span><span class="p">,</span>
 	<span class="na">urldate</span>      <span class="p">=</span> <span class="s">{2025-12-17}</span>
 <span class="p">}</span>
 </code></pre></div></div>
