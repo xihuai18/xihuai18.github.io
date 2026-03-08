@@ -33,7 +33,7 @@ In the classical idealized setup, we usually **implicitly assume** $\mu = \pi_{\
 
 Below is a rough timeline of the works that left a strong impression on me (this is only a partial and biased subset of the literature I’ve seen):
 
-- [Decoupled PPO](https://arxiv.org/pdf/2110.00641) was among the first to point out that in trust-region policy optimization methods (TRPO and PPO), the “old policy” actually plays two distinct roles:
+- [Decoupled PPO](https://arxiv.org/abs/2110.00641) was among the first to point out that in trust-region policy optimization methods (TRPO and PPO), the “old policy” actually plays two distinct roles:
   1. It is used for importance sampling to perform off-policy correction. In this sense, the “old policy” is meant to represent the **behavior policy** that generated the training data.
 
   2. It is also used to limit the update step size of the new policy. In this sense, the “old policy” acts as a baseline to measure how much the new and old policies differ, i.e., a **proximal policy** (what I call the reference policy here).
@@ -79,6 +79,8 @@ The derivation itself is small: take the usual TRPO lower bound and add one tria
 
 We stick to the notation from above and consider a discounted MDP with discount factor $\gamma \in (0,1)$:
 
+> For LLM RL, many workloads are closer to finite-horizon sequence decision problems than to infinite-horizon discounted MDPs. I still use the discounted-MDP notation here because it connects most directly to the classical TRPO derivation; the same decomposition carries over to finite-horizon versions as well.
+
 - States $s \in \mathcal{S}$, actions $a \in \mathcal{A}$.
 - Policy $\pi(a \mid s)$.
 - Discounted state distribution:
@@ -108,7 +110,7 @@ In the ideal setup we assume $\mu = \pi_{\theta_{\text{old}}}$; in real systems 
 
 > If you’re already familiar with TRPO, feel free to skip ahead to the “Three-Policy TRPO” subsection.
 
-All the theoretical guarantees in TRPO are stated **with respect to the advantage function of some baseline policy**. Since the only advantage we can estimate reliably in practice is $A_\mu$ (data are sampled under $\mu$), we may as well treat $\mu$ as the baseline policy.
+All the theoretical guarantees in TRPO are stated **with respect to the advantage function of some baseline policy**. Here I take $\mu$ as the baseline for two reasons: the data are sampled under $\mu$, and in practice the critic / GAE we can estimate most naturally from those data is also anchored to that behavior distribution. I will ignore the additional approximation error from estimating $A_\mu$ itself and focus only on the policy-mismatch part.
 
 A classical result is the **Performance Difference Lemma**:
 
@@ -141,6 +143,8 @@ L_\mu(\pi_\theta)
 $$
 
 Intuitively, $L_\mu$ asks the following question: “Under the states visited by the behavior policy, how good is the new policy if we just let it pick the actions?”
+
+In actual PPO / GRPO-style implementations, this expectation is usually rewritten using importance sampling. That is also where a second policy often enters the picture: the denominator in the ratio is frequently the reference policy $\pi_{\theta_{\text{old}}}$ rather than the true behavior policy $\mu$. The gap between those two is exactly what will become $\alpha_1$ later.
 
 Starting from the Performance Difference Lemma, the difference between the true objective and the surrogate is:
 
@@ -226,7 +230,7 @@ This suggests:
   \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
   $$
 
-If you can directly control this $\beta$, you can essentially port TRPO’s monotonic improvement guarantees to the behavior-policy view.
+If you can directly control this $\beta$, you can essentially port TRPO’s monotonic-improvement logic to the behavior-policy view. This is a deliberately conservative worst-case-TV presentation: the goal here is to make the structure transparent, not to optimize constants.
 
 ### 3.3 Three-Policy TRPO
 
@@ -365,7 +369,7 @@ The meaning of this bound is quite straightforward:
   - The deviation between reference and target policies, $\alpha_0$.
   - The deviation between behavior and reference policies, $\alpha_1$.
 
-As long as both terms are small, **optimizing $L_\mu$ is likely to improve $\mathcal{J}$**.
+As long as both terms are small, the surrogate is more trustworthy. Strictly speaking, though, the bound by itself does not guarantee improvement unless $L_\mu(\pi_\theta)$ is large enough to overcome the penalty term, and in large LLM settings the constant $\epsilon_\mu = \max_{s,a}|A_\mu(s,a)|$ can be very loose. So the main value of Theorem 2 is structural: it tells us which two mismatch sources we need to track.
 
 ### 3.4 How to Control These Two Deviations in Practice?
 
@@ -397,7 +401,7 @@ In practice, this usually involves both **system-level mechanisms** and **algori
 
 ## 4. Importance Sampling and Masking: Four Implementations of Constraint 2
 
-In this section I’ll reuse the notation introduced above to write down the objectives of these three methods, focusing only on the design choices related to “behavior vs. reference policy.” Let the token-level PPO / GRPO-style update term be
+In this section I’ll reuse the notation introduced above to write down the objectives of four representative mechanisms, focusing only on the design choices related to “behavior vs. reference policy.” The unified notation below is meant to highlight the core Constraint-2 operation rather than reproduce every implementation detail from each paper (advantage estimation, baselines, extra regularizers, and so on). Let the token-level PPO / GRPO-style update term be
 
 $$
 g_\theta(t)
@@ -459,6 +463,7 @@ $$
 
 - The blue $\color{blue}{w_t}$ is the truncated IS weight: extremely large ratios are capped at a constant $C_{\text{IS}}$.
 - From the three-policy TRPO perspective, this is a _soft_ way to downweight tokens where behavior and reference policies differ significantly, effectively reducing their contribution to $\alpha_1$ in the gradient.
+- Note that $w_t$ truncates the **behavior-to-reference** ratio (Constraint 2), while the clipping inside $g_\theta(t)$ controls the **reference-to-target** ratio (Constraint 1). These are two separate operations.
 
 ### 4.2 IcePop: Token-Level Two-Sided Masking in MoE
 
@@ -508,11 +513,13 @@ In words:
 
 From the three-policy TRPO viewpoint, sequence-level MIS no longer truncates at the token level. Instead, it performs **trajectory-level** filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. This implements Constraint 2 at the sequence level.
 
+> **Note**: In this unified form, $\rho(y\mid x)$ handles the sequence-level correction from behavior to reference, while $g_\theta(t)$ still handles the token-level update from reference to target. In practice, implementations often add extra truncation or stabilization on top of this basic structure.
+
 ### 4.4 Worst Token Reject Sampling: Rejecting Entire Sequences Based on the Worst Token
 
 The verl Token Veto mechanism and INTELLECT-3 both adopt a rejection sampling strategy that can be collectively called **Worst Token Reject Sampling (WTRS)**:
 
-- **verl Token Veto**: In its rollout correction module, if any token in a trajectory has $\min_t \rho_t < \tau_{\text{veto}}$, the entire sequence is discarded via response*mask. The threshold $\tau*{\text{veto}}$ is user-configurable.
+- **verl Token Veto**: In its rollout correction module, if any token in a trajectory has $\min_t \rho_t < \tau_{\text{veto}}$, the entire sequence is discarded via `response_mask`. The threshold $\tau_{\text{veto}}$ is user-configurable.
 
 - **INTELLECT-3 Token Masking**: In its asynchronous distributed RL framework, if any token's ratio is below $10^{-5}$, the entire trajectory is masked.
 
@@ -585,6 +592,8 @@ F_\theta(s,z)
 $$
 
 to denote the expert-level aggregation of advantages.
+
+Here $A_\mu(s,a,z)$ denotes the advantage when “choosing expert $z$ and then generating token $a$” is treated as a joint decision. In other words, this section is working with an extended model in which routing is made explicit inside the decision process.
 
 The key point is that **in the original $L_\mu(\pi_\theta)$, the routing distribution is precisely the current router $\omega_\theta$ that we are updating**. In other words, RL on MoE is updating not only the token-generation distribution but also the router itself.
 
@@ -677,7 +686,7 @@ From two policies to three, what we did is conceptually very small:
   - **Constraint 2: behavior vs. reference**, $\alpha_1$, capturing real-world factors like asynchronous frameworks, training–inference mismatch, MoE routing volatility, kernel-level nondeterminism, etc.
 
 - This leads to a simple conclusion:
-  The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ scales with $\alpha_0 + \alpha_1$.
+  The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ is bounded by $C(\alpha_0 + \alpha_1)$.
 
 Under this lens (which is of course only one of many possible perspectives):
 

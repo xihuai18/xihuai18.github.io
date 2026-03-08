@@ -604,7 +604,7 @@ $$
 ```bibtex
 @misc{WangZhang2025OffPolicyLLMRL,
 	author       = {Wang, Xihuai and Zhang, Shao},
-	title        = {Off-Policy Training in LLM Reinforcement Learning: From Theory to Practice},
+	title        = {驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件},
 	year         = {2025},
 	month        = dec,
 	day          = {17},

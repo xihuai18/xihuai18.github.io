@@ -501,8 +501,6 @@ $$
 
 $$
 \mathbb{E}_\mu[\rho s_\theta (k_1 + 1)] = \mathbb{E}_{q_\theta}[s_\theta k_1] + \underbrace{\mathbb{E}_{q_\theta}[s_\theta]}_{=0} = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
-
-
 $$
 
 **$\mathbb{E}_\mu[\nabla_\theta(\rho k_2)]$**：
@@ -512,7 +510,7 @@ $$
 \mathbb{E}_\mu[\rho s_\theta (k_2 + k_1)]
 &= \mathbb{E}_{q_\theta}[s_\theta k_2] + \mathbb{E}_{q_\theta}[s_\theta k_1] \\
 &= \mathbb{E}_{q_\theta}[s_\theta k_2] + \mathbb{E}_{q_\theta}[\nabla_\theta k_2] && \text{（因为 } \nabla_\theta k_2 = k_1 s_\theta \text{）} \\
-&= \nabla_\theta \mathbb{E}_{q_\theta}[k_2] && \text{（Leibniz 规则）}
+&= \nabla_\theta \mathbb{E}_{q_\theta}[k_2] && \text{（把 score-function 项与显式梯度项重新合并）}
 \end{aligned}
 $$
 
@@ -687,7 +685,7 @@ $$
 
 前文分析的是 KL 作为 loss 时各估计器的梯度性质。一个自然的想法是：既然 $k_1$ 和 $k_3$ 对反向 KL 的数值估计都是无偏的（见「数值估计」一节），那把它们加上 stop-gradient 之后放进奖励塑形里，似乎也应该没问题。
 
-**但这是错误的。**
+**但这个判断还不够充分。**
 
 问题在于：当 KL 进入奖励塑形时，虽然 KL 项本身不反向传播梯度，但它会通过 advantage 间接影响策略梯度。因此，判断一个估计器能不能这样用，不能只看数值偏差，还要看**它诱导出来的策略梯度是否正确**。
 
@@ -830,6 +828,7 @@ $$
 | 估计器 | 数值无偏？ | 作为 Reward 惩罚时梯度主项无偏？ |  实际表现  |
 | :----: | :--------: | :------------------------------: | :--------: |
 | $k_1$  |     ✓      |                ✓                 |    稳定    |
+| $k_2$  |     ✗      |                ✗                 |   不建议   |
 | $k_3$  |     ✓      |                ✗                 | 显著不稳定 |
 
 **核心教训**：评价 KL 估计器时，「数值无偏」和「梯度正确」是两个独立的维度。对于本文讨论的奖励塑形用法（stop-grad reward shaping，目标为反向 KL 正则；无论 on-policy 还是 off-policy），**就策略梯度主项而言，只有 $k_1$ 满足目标要求**。$k_3$ 虽然数值无偏且方差更低，但放进奖励塑形后会导致梯度有偏，实践中可能显著不稳定甚至崩溃。
@@ -948,19 +947,19 @@ $$
 
 ### 8.2 何时选择哪种方式？
 
-|     维度     |            KL 作为 Loss             |               KL 作为 Reward               |
-| :----------: | :---------------------------------: | :----------------------------------------: |
-| KL 梯度形态  |  $\rho s_\theta k_1$（低方差选择）  |            $\rho s_\theta k_1$             |
-| 与 Advantage |              完全解耦               |          通过 shaped reward 耦合           |
-|  KL 中心化   |           无（绝对惩罚）            | 有（$\text{KL} - \text{mean}(\text{KL})$） |
-|   信用分配   |           局部、per-token           |        可能有时间回传（取决于实现）        |
-|   适用场景   | 希望 KL 约束更可控、更不依赖 critic |        希望 KL 约束更全局、有规划性        |
+|     维度     |           KL 作为 Loss            |                    KL 作为 Reward                    |
+| :----------: | :-------------------------------: | :--------------------------------------------------: |
+| KL 梯度形态  | $\rho s_\theta k_1$（低方差选择） |                 $\rho s_\theta k_1$                  |
+| 与 Advantage |             完全解耦              |               通过 shaped reward 耦合                |
+|  KL 中心化   |          无（绝对惩罚）           |      有（$\text{KL} - \text{mean}(\text{KL})$）      |
+|   信用分配   |          局部、per-token          |             可能有时间回传（取决于实现）             |
+|   适用场景   |  希望 KL 作为显式正则项单独控制   | 希望 KL 随 shaped reward 一起进入 advantage / return |
 
 **实践建议**：
 
-1. **如果你希望 KL 约束是“独立且可控”的**——即希望 KL 作为一个单独的正则力出现，尽量少受 critic / baseline 质量影响，那么请选择 **KL 作为 Loss**，使用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$。注意，在 on-policy 场景下，如果不想显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，直接使用 $k_2$ 会更简单且不易出错。
+1. **如果你希望 KL 作为显式正则项单独控制**——也就是尽量少受 advantage 构造、critic / baseline 质量影响，那么请选择 **KL 作为 Loss**，使用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$。注意，在 on-policy 场景下，如果不想显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，直接使用 $k_2$ 会更简单且不易出错。
 
-2. **如果你希望 KL 通过 shaped reward 进入 advantage / return**——也就是接受它与 baseline、信用分配路径耦合，那么请选择 **KL 作为 Reward**，并使用 $k_1$。
+2. **如果你希望 KL 随 shaped reward 一起进入 advantage / return**——也就是接受它与 baseline、信用分配路径耦合，那么请选择 **KL 作为 Reward**，并使用 $k_1$。
 
 基于上述“数值无偏 vs 梯度正确”以及“Loss 与 Reward 实现差异”的结论，下面进入可直接照抄到代码里的选型速查与常见踩坑点。
 
@@ -1070,6 +1069,6 @@ $$
   year         = {2025},
   month        = dec,
   day          = {01},
-  url          = {https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}
+  url          = {https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html}
 }
 ```

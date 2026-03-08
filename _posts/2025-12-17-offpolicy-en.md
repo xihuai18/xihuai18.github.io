@@ -94,11 +94,11 @@ This is an average-divergence / average-TV style bound. It is closer in spirit t
 
 #### Physical Interpretation
 
-Small differences in policies in action space are "amplified" through environment dynamics into differences in state visitation distributions. The coefficient $\frac{\gamma}{1-\gamma}$ reflects the **temporal accumulation effect**—in long-horizon tasks ($\gamma$ close to 1), the amplification is stronger.
+Small differences in policies in action space are "amplified" through environment dynamics into differences in state visitation distributions. The coefficient $\frac{2\gamma}{1-\gamma}$ reflects the **temporal accumulation effect**—in long-horizon tasks ($\gamma$ close to 1), the amplification is stronger.
 
 #### Proof Sketch
 
-By deriving the fixed-point equation for discounted visitation distributions and exploiting the $\ell_1$ non-expansiveness of stochastic matrices, one can show that state distribution differences are amplified by policy differences through transition dynamics, with the amplification factor being precisely $\frac{\gamma}{1-\gamma}$.
+By deriving the fixed-point equation for discounted visitation distributions and exploiting the $\ell_1$ non-expansiveness of stochastic matrices, one can show that state-distribution differences are amplified by policy differences through transition dynamics, yielding the bound in Lemma 3.1.
 
 ### 3.2 Policy Performance Improvement Lower Bound
 
@@ -124,7 +124,7 @@ This lower bound consists of two parts:
 
 2. **Policy shift penalty**: Increases with the TV distance between new and old policies, explaining why PPO needs to constrain update magnitude.
 
-**Core conclusion**: if the surrogate is large enough and the policy-shift term stays under control, this lower bound certifies improvement.
+**Core conclusion**: this is an explicit improvement lower bound. In particular, when the right-hand side is positive, improvement is guaranteed.
 
 ## 4. Multi-Policy Static Mixture Sampling
 
@@ -168,6 +168,8 @@ Consequently, the mixture policy's return is the weighted average of individual 
 
 This result shows that when mixing trajectories from multiple old policy versions for training, if we construct the loss using importance ratios corresponding to each trajectory's source policy while controlling the new policy's deviation from each old policy, the new policy's performance has a clear improvement lower bound.
 
+Using $\max_i C_{\pi,\pi^{(i)}}$ is just a compact way to write the result. A slightly tighter version would keep a separate $C_i$ for each component and then average them with the mixture weights.
+
 ## 5. Dynamic Mixture Sampling and Monotonic Improvement Conditions
 
 ### 5.1 Problem and Unified Modeling (Dynamic Mixture)
@@ -198,7 +200,7 @@ $$
 J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{improvement over mixture policy}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{mixture bias term}}
 $$
 
-The first term is handled using Theorem 3.2. The second is the **mixture bias term**, which can be shown to satisfy:
+The first term is handled using Theorem 3.2. The second is the **mixture bias term**. One way to see it is to expand $J_{\mathrm{mix}}^{(k)} - J(\pi_k)$ into a weighted sum of $J(\pi^{(i)}) - J(\pi_k)$ terms and then bound each component via TV distance. The resulting inequality is:
 
 $$
 J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
@@ -345,9 +347,17 @@ $$
 |\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right|
 $$
 
-If we constrain $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$, since $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$, one can show $U_k \leq \epsilon/2$.
+If we constrain $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$, then
+
+$$
+|\rho_{k+1} - \rho_k| \leq \epsilon\,\rho_k.
+$$
+
+Taking expectations gives $\mathbb{E}[|\rho_{k+1} - \rho_k|] \leq \epsilon\,\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = \epsilon$, hence $U_k \leq \epsilon/2$.
 
 This method clips $\pi_{k+1}/\pi_k$ with center at 1, meaning the **clipping constraint itself does not depend on the old policy family $\pi^{(i)}$**. However, if we use the weighted advantage $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$ below, we still need per-sample behavior probabilities (or recorded logprobs) to compute $\rho_k$.
+
+Before writing down the clipped objectives, one caveat is worth making explicit: the two inequalities above are **hard per-sample constraints at the theory level**. The clipped surrogates below are practical approximations meant to keep $U_k$ in a manageable range; they are not literal guarantees that every optimization step exactly satisfies the hard constraint.
 
 #### Objective Functions (Three Clipping Mechanisms)
 
@@ -359,7 +369,7 @@ For comparison, we present the complete objective functions for three clipping m
 
 Note: under **trajectory-level mixture** (index fixed), $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$, so per-trajectory advantages from the corresponding old policy are consistent; under **step/segment-level mixture**, replacing $A^{\beta^{(k)}}$ with $A^{\pi^{(i)}}$ introduces advantage-substitution bias (discussed in Section 7), so the advantage/value estimator must reflect future index switching.
 
-#### Standard PPO
+#### Standard PPO (Trajectory-Level Mixture)
 
 Clip $\rho_{k+1}$ with center at 1
 
@@ -426,7 +436,7 @@ When samples come from very old policies, $\rho_k = \pi_k/\pi^{(i)}$ can be larg
 Large language models have many tokens having very small probabilities.
 
 - Method 2 constrains $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$, which is a **multiplicative constraint**: if $\pi_k(a\mid s) = 10^{-6}$, the allowed absolute change is only $\epsilon \times 10^{-6}$.
-- Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an **additive constraint**: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a\mid s) = 0.1$), even if the current probability is very low, faster improvement is allowed.
+- Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an **additive constraint**: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a\mid s) = 0.1$), even if the current probability is very low, faster improvement is allowed - provided the token still has enough observable mass under the sampling policy.
 
 #### Controlling Sampling Staleness
 
@@ -563,11 +573,11 @@ Here $C_1$ and $C_2$ are just compressed notation for the theoretical coefficien
 
 #### Clipping Method Selection
 
-| Scenario                              | Recommended Method     | Rationale                                            |
-| ------------------------------------- | ---------------------- | ---------------------------------------------------- |
-| High staleness                        | Method 1 (adaptive)    | Automatically tightens constraints for stale samples |
-| Implementation simplicity prioritized | Method 2 (incremental) | No need to store old policy information              |
-| LLM large vocabulary                  | Method 1               | Avoids slow updates for low-probability tokens       |
+| Scenario                              | Recommended Method     | Rationale                                                                        |
+| ------------------------------------- | ---------------------- | -------------------------------------------------------------------------------- |
+| High staleness                        | Method 1 (adaptive)    | Automatically tightens constraints for stale samples                             |
+| Implementation simplicity prioritized | Method 2 (incremental) | Clipping form is simpler, though behavior logprobs are still needed for $\rho_k$ |
+| LLM large vocabulary                  | Method 1               | Avoids slow updates for low-probability tokens                                   |
 
 #### Handling Training-Inference Inconsistency
 
@@ -604,7 +614,7 @@ Here $C_1$ and $C_2$ are just compressed notation for the theoretical coefficien
 ```bibtex
 @misc{WangZhang2025OffPolicyLLMRL,
 	author       = {Wang, Xihuai and Zhang, Shao},
-	title        = {Off-Policy Training in LLM Reinforcement Learning: From Theory to Practice},
+	title        = {Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees},
 	year         = {2025},
 	month        = dec,
 	day          = {17},

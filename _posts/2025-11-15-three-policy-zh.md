@@ -31,7 +31,7 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 
 ## 2. 相关工作
 
-下面按时间线简要列举一些我印象较深的工作（仅代表个人看到的片面子集）：
+下面按时间线简要列出一些我印象较深的工作（只是我接触到的一部分，并不求完整）：
 
 - [Decoupled PPO](https://arxiv.org/abs/2110.00641) 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，"旧策略"（old policy）实际上承担了两个不同的角色：一是用于重要性采样以进行异策略修正，此时"旧策略"代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，此时"旧策略"被用于衡量新旧策略的变化程度，称为近端策略（proximal policy，对应本文中的"参考策略"）。文章指出这两个目的下的"旧策略"可以是不同的策略，从而提出了 Decoupled PPO 更新目标，将"采样用谁"和"对谁做 trust region"在形式上解耦开来。
 
@@ -247,7 +247,7 @@ $$
    D_{\mathrm{TV}}\big(\mu(\cdot\mid s),\pi_{\theta_{\text{old}}}(\cdot\mid s)\big).
    $$
 
-于是自然就定义两个“proxy 差异”：
+于是自然就得到两个“代理差异”：
 
 - **约束 1：参考 vs 目标**
   $$
