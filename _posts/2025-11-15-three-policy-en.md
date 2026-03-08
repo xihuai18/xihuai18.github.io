@@ -230,7 +230,7 @@ This suggests:
   \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
   $$
 
-If you can directly control this $\beta$, you can essentially port TRPO’s monotonic-improvement logic to the behavior-policy view. This is a deliberately conservative worst-case-TV presentation: the goal here is to make the structure transparent, not to optimize constants.
+If you can directly control this $\beta$, you can essentially port TRPO’s monotonic-improvement logic to the behavior-policy view. This is a deliberately conservative worst-case-TV presentation: the goal here is to make the structure transparent, not to optimize constants. If you switch to an average-TV version, you get a similar conclusion closer to sample averages, with modified constants and expectations.
 
 ### 3.3 Three-Policy TRPO
 
@@ -508,7 +508,7 @@ $$
 
 In words:
 
-- For **sequences with small IS ratios**, the full weight $\rho(y\mid x)$ is retained for off-policy correction.
+- For **sequences whose IS ratios do not exceed the threshold**, the full weight $\rho(y\mid x)$ is retained for off-policy correction.
 - For **sequences whose ratios exceed the threshold $C$**, the entire policy loss is masked out (weight set to $0$).
 
 From the three-policy TRPO viewpoint, sequence-level MIS no longer truncates at the token level. Instead, it performs **trajectory-level** filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. This implements Constraint 2 at the sequence level.

@@ -559,13 +559,13 @@ This explains why **naive direct backpropagation** (i.e., without explicitly con
 If you **explicitly construct** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$, then:
 
 - **Usable**: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.
-- **Not usable**: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes an f-divergence rather than the reverse KL.
+- **Not usable**: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes a local second-order surrogate rather than the reverse KL.
 
 **Off-policy** ($\mu \neq q_\theta$):
 
 - $\rho = \frac{q_\theta}{\mu}$ (standard importance weight)
 - **Usable**: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.
-- **Not usable**: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes an f-divergence rather than the reverse KL.
+- **Not usable**: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes a local second-order surrogate rather than the reverse KL.
 
 **Key insight**: The reason $k_2$ works directly in the on-policy case is that its gradient $-\log\frac{p}{q_\theta} \cdot s_\theta = k_1 \cdot s_\theta$ happens to match $\rho s_\theta k_1$ (when $\rho \equiv 1$). This is a special case, not a general rule.
 
@@ -612,6 +612,8 @@ $$
 
 Therefore $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$.
 
+Once you leave this small-KL neighborhood, however, the sign of $2k_1+1$ is no longer guaranteed. At that point the comparison also depends on the $\rho^2$ weighting and the score-function term, so the local expansion above should not be over-interpreted.
+
 **Core intuitive understanding**:
 
 - $g_1 = \rho s_\theta (k_1 + 1)$ contains a zero-mean noise term of magnitude $O(1)$: $\rho s_\theta$
@@ -648,12 +650,12 @@ This is why the DeepSeek v3.2 technical report uses $\frac{q_\theta}{\mu} k_3$ a
 
 Combining the above analysis, the following table summarizes the gradient expectations and corresponding optimization objectives for each estimator under the unified framework:
 
-| Sampling Type |         Loss          |       Expected $\nabla_\theta$ Loss        |    Optimization Objective     |    Usable for Reverse KL?     |
-| :-----------: | :-------------------: | :----------------------------------------: | :---------------------------: | :---------------------------: |
-| on/off-policy |      $\rho k_1$       |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |          Reverse KL           |      ✓ (higher variance)      |
-| on/off-policy |      $\rho k_2$       | $\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$ | f-divergence (not reverse KL) |               ✗               |
-| on/off-policy | $\text{sg}(\rho) k_2$ |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |          Reverse KL           | ✓ (recommended, low variance) |
-| on/off-policy |      $\rho k_3$       |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |          Reverse KL           | ✓ (recommended, low variance) |
+| Sampling Type |         Loss          |       Expected $\nabla_\theta$ Loss        |   Optimization Objective   |    Usable for Reverse KL?     |
+| :-----------: | :-------------------: | :----------------------------------------: | :------------------------: | :---------------------------: |
+| on/off-policy |      $\rho k_1$       |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |         Reverse KL         |      ✓ (higher variance)      |
+| on/off-policy |      $\rho k_2$       | $\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$ | Surrogate (not reverse KL) |               ✗               |
+| on/off-policy | $\text{sg}(\rho) k_2$ |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |         Reverse KL         | ✓ (recommended, low variance) |
+| on/off-policy |      $\rho k_3$       |  $\nabla_\theta D_{\mathrm{KL}}(q \| p)$   |         Reverse KL         | ✓ (recommended, low variance) |
 
 where $\rho = \frac{q_\theta}{\text{sg}(\mu)}$. When on-policy ($\mu = q_\theta$), $\rho \equiv 1$.
 
@@ -816,13 +818,15 @@ $$
 - Shaped reward keeps its original form: $\tilde{R} = R - \beta \cdot k_1$ (not $R - \beta \cdot \frac{q_\theta}{\mu} k_1$)
 - Under the **stop-gradient reward shaping** ($\tilde{R}=R-\beta\,\text{sg}(k)$) with the **reverse-KL regularization** setting discussed in this post, the conclusion is the same as in the on-policy case: **use $k_1$, not $k_3$**.
 
+> **Note**: This discussion assumes the usual current-sample / current-token reward-shaping form. In a general multi-step MDP, a fully rigorous off-policy derivation also needs per-step importance weighting or the corresponding value-function correction.
+
 ### 7.2 Key Finding: Under This Reward-Shaping Setup, Only $k_1$ Keeps the Policy-Gradient Term Unbiased
 
 | Estimator | Value unbiased? | Policy-gradient term unbiased under stop-grad reward shaping? | Actual performance |
 | :-------: | :-------------: | :-----------------------------------------------------------: | :----------------: |
 |   $k_1$   |        ✓        |                               ✓                               |       Stable       |
 |   $k_2$   |        ✗        |                               ✗                               |    Not advised     |
-|   $k_3$   |        ✓        |                               ✗                               |     Collapses      |
+|   $k_3$   |        ✓        |                               ✗                               |    Can collapse    |
 
 **Core lesson**: "Value unbiasedness" and "gradient correctness" are independent axes. For the stop-gradient reward-shaping setup discussed here, **only $k_1$ gives the correct policy-gradient term for reverse-KL regularization**. Even though $k_3$ is value-unbiased and often lower variance, using it as a reward penalty introduces a biased update and may trigger collapse.
 
@@ -1011,7 +1015,7 @@ $$
 - ✓✓: **Strongly recommended**, theoretically correct with good practical performance
 - ✓: Recommended, theoretically correct but slightly more complex or has minor drawbacks
 - △: Usable but with caution, has issues like high variance
-- ✗✗: **Do not use**, theoretically incorrect or causes training failure
+- ✗✗: **Not recommended for reverse KL**; does not match the optimization objective discussed here or behaves poorly in practice
 
 ### 9.4 Common Pitfalls
 
@@ -1058,7 +1062,7 @@ This post analyzes the three KL estimators $k_1, k_2, k_3$ around three practica
 ```bibtex
 @misc{WangZhang2025KLEstimators,
   author       = {Wang, Xihuai and Zhang, Shao},
-  title        = {Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation},
+  title        = {Understanding KL Divergence Estimators in RL: From Numerical Estimation to Gradient Estimation},
   year         = {2025},
   month        = dec,
   day          = {01},

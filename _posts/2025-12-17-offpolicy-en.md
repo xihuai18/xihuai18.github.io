@@ -22,6 +22,8 @@ This post studies exactly that question: under what conditions can a mixture of 
 
 One scope note up front: many LLM-RL workloads are closer to single-episode contextual bandits than to general long-horizon MDPs. I still start from the discounted-MDP setting because it makes the roles of multi-source sampling, staleness, and clipping easiest to state. Section 7 returns to the bandit simplifications.
 
+You can also read this post as a continuation of the earlier three-policy perspective: here the behavior side is no longer a single policy $\mu$, but a mixture over historical policies $\{\pi^{(i)}\}$, while $\pi_k$ and $\pi_{k+1}$ play the roles of the current reference policy and update target.
+
 ## 2. Theoretical Foundations
 
 ### 2.1 Basic Setup
@@ -549,7 +551,7 @@ By Lemma 6.1, $\hat{S}_k$ can be written in a sample-computable form. Given thre
 #### Key Implementation Points
 
 1. **Behavior denominator alignment**: The behavior probability in the loss should use the inference-side recorded $\hat{\pi}^{(i)}(a\mid s)$
-2. **Probability smoothing**: If the inference side has truncation (e.g., top-k), ensure ratios are valid
+2. **Probability smoothing**: If the inference side has truncation (e.g., top-k), ensure ratios are valid and the support-coverage condition required by Lemma 6.1 still holds
 
 ## 9. Practical Guidelines
 
@@ -561,7 +563,15 @@ $$
 J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{surrogate objective}} - \underbrace{C_1 \cdot U_k}_{\text{update shift penalty}} - \underbrace{C_2 \cdot S_k}_{\text{sampling staleness penalty}}
 $$
 
-Here $C_1$ and $C_2$ are just compressed notation for the theoretical coefficients introduced earlier. They are not free hyperparameters.
+Here $C_1$ and $C_2$ are just compressed notation for the theoretical coefficients introduced earlier. Concretely, one can read them as
+
+$$
+C_1 = \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2},
+\qquad
+C_2 = C_1 + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma},
+$$
+
+up to the exact naming convention used in the intermediate statements. They are not free hyperparameters.
 
 #### Separation of Concerns Principle
 

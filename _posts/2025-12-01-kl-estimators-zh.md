@@ -1065,7 +1065,7 @@ $$
 ```bibtex
 @misc{WangZhang2025KLEstimators,
   author       = {Wang, Xihuai and Zhang, Shao},
-  title        = {Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation},
+  title        = {Understanding KL Divergence Estimators in RL: From Numerical Estimation to Gradient Estimation},
   year         = {2025},
   month        = dec,
   day          = {01},
