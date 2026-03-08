@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation"
+title: "Understanding KL Divergence Estimators in RL: From Numerical Estimation to Gradient Estimation"
 date: 2025-12-01
-description: "How you approximate KL can make or break training stability. This post compares the classic estimators k1, k2, k3 in on-policy and off-policy settings, and gives practical guidance on using KL as a differentiable loss term versus as a detached reward-shaping term."
+description: "Different KL estimators can behave quite differently in RL training. This post compares the classic estimators k1, k2, k3 in on-policy and off-policy settings, and explains how the choice changes when KL is used as a differentiable loss term versus a detached reward-shaping term."
 og_image: /assets/img/kl-estimators/kl-estimator.png
 categories: reinforcement-learning
 lang: en
@@ -13,11 +13,11 @@ wechat_url: https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw
 
 ![Mini-class](/assets/img/kl-estimators/kl-estimator.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
-> How you approximate KL divergence can make or break training stability. This post compares three estimators $k_1, k_2, k_3$ in both on-policy and off-policy settings, and shows how the answer changes depending on whether KL is used as a differentiable loss term or as a detached reward-shaping term.
+> Different KL estimators can behave quite differently in RL training. This post compares three estimators $k_1, k_2, k_3$ in both on-policy and off-policy settings, and shows how the answer changes depending on whether KL is used as a differentiable loss term or as a detached reward-shaping term.
 
 ## 1. Introduction: The Role of KL Divergence in Reinforcement Learning
 
-In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), a **KL penalty** is what keeps the updated policy from drifting too far from a reference policy. But “adding a KL penalty” hides several separate design choices: **which estimator** ($k_1$, $k_2$, $k_3$), **which sampling distribution** (on-policy vs. off-policy), and **how the KL term enters optimization** (as a differentiable loss term vs. as a detached reward-shaping term). This post makes those choices explicit and clarifies how they interact.
+In policy optimization (PPO, GRPO, etc.) and alignment training (RLHF/RLAIF), a **KL penalty** keeps the updated policy from drifting too far from a reference policy. But “adding a KL penalty” hides several separate design choices: **which estimator** ($k_1$, $k_2$, $k_3$), **which sampling distribution** (on-policy vs. off-policy), and **how the KL term enters optimization** (as a differentiable loss term vs. as a detached reward-shaping term). This post makes those choices explicit and clarifies how they interact.
 
 ### 1.1 The Distinction Between Forward KL and Reverse KL
 

@@ -2,13 +2,13 @@
 layout: post
 title: "Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees"
 date: 2025-12-17
-description: "A structured derivation of off-policy training theory for LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a triangle-inequality decomposition into update shift and sampling staleness, and concrete clipping and filtering strategies."
+description: "This post derives an off-policy view of LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions, a decomposition via triangle inequality into update shift and sampling staleness, and practical clipping and filtering strategies."
 categories: reinforcement-learning
 lang: en
 zh_url: /reinforcement-learning/2025/12/17/offpolicy-zh.html
 ---
 
-> This post focuses on a specific question: when a training batch mixes data from multiple historical policy versions, under what conditions can a PPO-style update still maintain an analyzable monotonic-improvement lower bound?
+> This post asks a specific question: when a training batch mixes data from multiple historical policy versions, under what conditions can a PPO-style update still retain an analyzable monotonic-improvement lower bound?
 
 ## 1. Introduction: Why Should We Care About "Off-Policy"?
 

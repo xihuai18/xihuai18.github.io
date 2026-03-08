@@ -2,7 +2,7 @@
 layout: post
 title: "From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL"
 date: 2025-11-15
-description: Modern LLM RL pipelines often train under an "old policy" that quietly drifts away from the behavior policy that actually generates rollouts, breaking the usual on-policy assumption. This post rewrites the classic TRPO lower bound in a three-policy form — behavior, reference, and target — so that the performance gap splits into two deviation terms. Through that lens, methods like Decoupled PPO, AReaL, TIS, IcePop, sequence-level MIS, WTRS, and MoE routing replay can all be discussed in one framework.
+description: In modern LLM RL pipelines, the policy used as the "old policy" in training can differ from the behavior policy that actually generated the rollouts, breaking the usual on-policy assumption. This post rewrites the TRPO lower bound in a three-policy form — behavior, reference, and target — so the performance gap splits into two deviation terms, giving a common lens on training–inference mismatch and related methods.
 og_image: /assets/img/three-policy/three-policy-mini-class-en.png
 categories: reinforcement-learning
 lang: en
@@ -15,9 +15,9 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 
 ## 1. Training–Inference Mismatch and Asynchronous Frameworks
 
-Recently there has been a lot of discussion around _training-inference mismatch_ and _asynchronous RL frameworks_ for large language models. Look closely and many of these issues reduce to the same tension: a mismatch between the **behavior policy** and the **reference policy**.
+Recent LLM RL work has repeatedly run into the same issue: the **behavior policy** that actually generates data may not match the **reference policy** used in training.
 
-This post first reviews the recent work, then puts it into a single frame built around “behavior policy vs. reference policy.”
+This post first reviews recent work, then organizes it around that single mismatch.
 
 Throughout the post I’ll use:
 

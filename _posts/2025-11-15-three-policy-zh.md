@@ -2,7 +2,7 @@
 layout: post
 title: "从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展"
 date: 2025-11-15
-description: 现代 LLM RL 流程中，"旧策略"常常悄然偏离实际生成 rollout 的行为策略，破坏了通常的同策略假设。本文将经典的 TRPO 下界改写为三策略形式——行为策略、参考策略和目标策略——使得性能差距可以分解为两个偏差来源。在这一视角下，Decoupled PPO、AReaL、TIS、IcePop、sequence-level MIS、最坏 Token 拒绝采样（WTRS）、MoE 路由回放等方法，以及常见的训推对齐工程技巧，都可以被放到同一分析框架下理解。
+description: 在现代 LLM RL 流程中，训练里使用的“旧策略”可能已经不同于真正生成 rollout 的行为策略，从而破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，使性能差距拆成两个偏差来源，并用它统一理解训推不一致及相关方法。
 og_image: /assets/img/three-policy/three-policy-mini-class-zh.jpg
 categories: reinforcement-learning
 lang: zh
@@ -17,9 +17,9 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 
 ## 1. 引言：训推不一致与异步框架
 
-最近大模型强化学习里关于"训推不一致"和"异步训推框架"的讨论越来越多。细看下来，相当一部分问题都绕不开同一个矛盾——**行为策略（behavior policy）和参考策略（reference policy）不一致。**
+最近不少 LLM 强化学习工作反复碰到同一个问题：**真正生成数据的行为策略（behavior policy）和训练里使用的参考策略（reference policy）并不一致。**
 
-本文先梳理近期相关工作，再从"行为策略 vs 参考策略"这条线出发，把它们放进同一个分析框架。
+本文先梳理相关工作，再围绕这一个不一致把问题放进同一个分析框架。
 
 在本文中，我将使用以下记号：
 

@@ -2,7 +2,7 @@
 layout: post
 title: "简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计"
 date: 2025-12-01
-description: "在强化学习中，KL 散度的估计方式会直接影响训练稳定性。本文比较三种经典估计器 k1、k2、k3 在 on-policy 与 off-policy 场景下的性质差异，并给出它们在「作为 loss 参与反向传播」和「作为奖励塑形项」两种用法下的选型建议。"
+description: "在强化学习中，不同 KL 估计器在训练里的行为可能差别很大。本文比较三种经典估计器 k1、k2、k3 在 on-policy 与 off-policy 场景下的性质差异，并说明当 KL 作为可微 loss 或 detached 的奖励塑形项时，选型结论会怎样变化。"
 og_image: /assets/img/kl-estimators/kl-estimator.png
 categories: reinforcement-learning
 lang: zh
@@ -13,7 +13,7 @@ wechat_url: https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw
 
 ![Mini-class](/assets/img/kl-estimators/kl-estimator.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
-> 在强化学习中，KL 散度的估计方式会直接影响训练稳定性。本文比较三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景下的性质差异，并给出它们在「作为 loss 参与反向传播」和「作为奖励塑形项」两种用法下的选型建议。
+> 在强化学习中，不同 KL 估计器在训练里的行为可能差别很大。本文比较三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景下的性质差异，并说明当 KL 作为可微 loss 或 detached 的奖励塑形项时，选型结论会怎样变化。
 
 ## 1. 引言：KL 散度（Kullback-Leibler 散度）在强化学习中的角色
 
