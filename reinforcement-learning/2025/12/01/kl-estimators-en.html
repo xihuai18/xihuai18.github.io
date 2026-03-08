@@ -929,7 +929,7 @@ $$</p>
 
 <ul>
   <li><strong>Usable</strong>: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.</li>
-  <li><strong>Not usable</strong>: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes an f-divergence rather than the reverse KL.</li>
+  <li><strong>Not usable</strong>: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes a local second-order surrogate rather than the reverse KL.</li>
 </ul>
 
 <p><strong>Off-policy</strong> ($\mu \neq q_\theta$):</p>
@@ -937,7 +937,7 @@ $$</p>
 <ul>
   <li>$\rho = \frac{q_\theta}{\mu}$ (standard importance weight)</li>
   <li><strong>Usable</strong>: $\rho k_1$ (higher variance), $\text{sg}(\rho) k_2$ (recommended), and $\rho k_3$ (recommended) all yield reverse-KL gradients.</li>
-  <li><strong>Not usable</strong>: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes an f-divergence rather than the reverse KL.</li>
+  <li><strong>Not usable</strong>: $\rho k_2$ (where $\rho$ participates in the gradient) optimizes a local second-order surrogate rather than the reverse KL.</li>
 </ul>
 
 <p><strong>Key insight</strong>: The reason $k_2$ works directly in the on-policy case is that its gradient $-\log\frac{p}{q_\theta} \cdot s_\theta = k_1 \cdot s_\theta$ happens to match $\rho s_\theta k_1$ (when $\rho \equiv 1$). This is a special case, not a general rule.</p>
@@ -986,6 +986,8 @@ $$</p>
 </ul>
 
 <p>Therefore $\mathrm{Var}_\mu(g_1) > \mathrm{Var}_\mu(g_\star)$.</p>
+
+<p>Once you leave this small-KL neighborhood, however, the sign of $2k_1+1$ is no longer guaranteed. At that point the comparison also depends on the $\rho^2$ weighting and the score-function term, so the local expansion above should not be over-interpreted.</p>
 
 <p><strong>Core intuitive understanding</strong>:</p>
 
@@ -1076,7 +1078,7 @@ $$</p>
       <td style="text-align: center">on/off-policy</td>
       <td style="text-align: center">$\rho k_2$</td>
       <td style="text-align: center">$\nabla_\theta \mathbb{E}_{q_\theta}[k_2]$</td>
-      <td style="text-align: center">f-divergence (not reverse KL)</td>
+      <td style="text-align: center">Surrogate (not reverse KL)</td>
       <td style="text-align: center">✗</td>
     </tr>
     <tr>
@@ -1159,7 +1161,7 @@ $$</p>
 \nabla_\theta J = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(R - \beta \cdot k_1\right)\right]
 $$</p>
 
-<h4 id="gradient-form-when-using-estimator-inlmath390mathend">Gradient Form When Using Estimator $\hat{k}$</h4>
+<h4 id="gradient-form-when-using-estimator-inlmath392mathend">Gradient Form When Using Estimator $\hat{k}$</h4>
 
 <p>For the next few paragraphs, focus only on the <strong>policy-gradient term itself</strong>. I am not folding in extra effects from learned critics, GAE, baseline fitting error, or normalization. In that simplified setting, when we use some estimator $\hat{k}$ (with stop-gradient) as a reward penalty, the shaped reward is $\tilde{R} = R - \beta \cdot \text{sg}(\hat{k})$, and the policy gradient becomes:</p>
 
@@ -1173,7 +1175,7 @@ $$</p>
 \mathbb{E}_{q_\theta}[s_\theta \cdot \hat{k}] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
 $$</p>
 
-<h4 id="using-inlmath394mathend-as-penalty-gradient-unbiased">Using $k_1$ as Penalty: Gradient Unbiased</h4>
+<h4 id="using-inlmath396mathend-as-penalty-gradient-unbiased">Using $k_1$ as Penalty: Gradient Unbiased</h4>
 
 <p>When $\hat{k} = k_1$, the condition is automatically satisfied:</p>
 
@@ -1183,7 +1185,7 @@ $$</p>
 
 <p>Therefore, <strong>when $k_1$ is used as a reward penalty, the induced policy gradient is unbiased</strong>.</p>
 
-<h4 id="using-inlmath397mathend-as-penalty-gradient-biased">Using $k_3$ as Penalty: Gradient Biased</h4>
+<h4 id="using-inlmath399mathend-as-penalty-gradient-biased">Using $k_3$ as Penalty: Gradient Biased</h4>
 
 <p>When $\hat{k} = k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$:</p>
 
@@ -1235,7 +1237,7 @@ $$</p>
 
 <p>This is consistent with the theoretical analysis above.</p>
 
-<h4 id="using-inlmath405mathend-as-penalty-also-biased">Using $k_2$ as Penalty: Also Biased</h4>
+<h4 id="using-inlmath407mathend-as-penalty-also-biased">Using $k_2$ as Penalty: Also Biased</h4>
 
 <p>When $\hat{k} = k_2 = \frac{1}{2}k_1^2$, the KL part of the induced policy-gradient term becomes</p>
 
@@ -1271,7 +1273,11 @@ $$</p>
   <li>Under the <strong>stop-gradient reward shaping</strong> ($\tilde{R}=R-\beta\,\text{sg}(k)$) with the <strong>reverse-KL regularization</strong> setting discussed in this post, the conclusion is the same as in the on-policy case: <strong>use $k_1$, not $k_3$</strong>.</li>
 </ul>
 
-<h3 id="72-key-finding-under-this-reward-shaping-setup-only-inlmath418mathend-keeps-the-policy-gradient-term-unbiased">7.2 Key Finding: Under This Reward-Shaping Setup, Only $k_1$ Keeps the Policy-Gradient Term Unbiased</h3>
+<blockquote>
+  <p><strong>Note</strong>: This discussion assumes the usual current-sample / current-token reward-shaping form. In a general multi-step MDP, a fully rigorous off-policy derivation also needs per-step importance weighting or the corresponding value-function correction.</p>
+</blockquote>
+
+<h3 id="72-key-finding-under-this-reward-shaping-setup-only-inlmath420mathend-keeps-the-policy-gradient-term-unbiased">7.2 Key Finding: Under This Reward-Shaping Setup, Only $k_1$ Keeps the Policy-Gradient Term Unbiased</h3>
 
 <table>
   <thead>
@@ -1299,7 +1305,7 @@ $$</p>
       <td style="text-align: center">$k_3$</td>
       <td style="text-align: center">✓</td>
       <td style="text-align: center">✗</td>
-      <td style="text-align: center">Collapses</td>
+      <td style="text-align: center">Can collapse</td>
     </tr>
   </tbody>
 </table>
@@ -1319,7 +1325,7 @@ $$</p>
 
 <p>The next section explains why these are not contradictory: for the KL regularization term’s contribution to the policy-gradient update, the two implementations can be <strong>sample-wise equivalent</strong>. The practical differences arise mainly from whether the KL term enters the advantage/baseline and from the resulting credit-assignment pathway.</p>
 
-<h2 id="8-inlmath427mathend-in-reward-vs-low-variance-kl-in-loss-equivalence-and-differences">8. $k_1$ in Reward vs. Low-Variance KL in Loss: Equivalence and Differences</h2>
+<h2 id="8-inlmath429mathend-in-reward-vs-low-variance-kl-in-loss-equivalence-and-differences">8. $k_1$ in Reward vs. Low-Variance KL in Loss: Equivalence and Differences</h2>
 
 <p>Having separately analyzed KL as Loss and as Reward, a natural question arises: <strong>In what sense are these two approaches equivalent, and how do they differ?</strong> This section explores this question in depth, with particular focus on LLM RL practice.</p>
 
@@ -1648,7 +1654,7 @@ $$</p>
   <li>✓✓: <strong>Strongly recommended</strong>, theoretically correct with good practical performance</li>
   <li>✓: Recommended, theoretically correct but slightly more complex or has minor drawbacks</li>
   <li>△: Usable but with caution, has issues like high variance</li>
-  <li>✗✗: <strong>Do not use</strong>, theoretically incorrect or causes training failure</li>
+  <li>✗✗: <strong>Not recommended for reverse KL</strong>; does not match the optimization objective discussed here or behaves poorly in practice</li>
 </ul>
 
 <h3 id="94-common-pitfalls">9.4 Common Pitfalls</h3>
@@ -1714,7 +1720,7 @@ $$</p>
 
 <div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
   <span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
-  <span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding KL Divergence Estimators in RL: From Value Approximation to Gradient Estimation}</span><span class="p">,</span>
+  <span class="na">title</span>        <span class="p">=</span> <span class="s">{Understanding KL Divergence Estimators in RL: From Numerical Estimation to Gradient Estimation}</span><span class="p">,</span>
   <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
   <span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
   <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>

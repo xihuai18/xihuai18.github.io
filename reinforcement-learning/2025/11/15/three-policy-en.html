@@ -507,7 +507,7 @@ $$
   $$</li>
 </ul>
 
-<p>If you can directly control this $\beta$, you can essentially port TRPO’s monotonic-improvement logic to the behavior-policy view. This is a deliberately conservative worst-case-TV presentation: the goal here is to make the structure transparent, not to optimize constants.</p>
+<p>If you can directly control this $\beta$, you can essentially port TRPO’s monotonic-improvement logic to the behavior-policy view. This is a deliberately conservative worst-case-TV presentation: the goal here is to make the structure transparent, not to optimize constants. If you switch to an average-TV version, you get a similar conclusion closer to sample averages, with modified constants and expectations.</p>
 
 <h3 id="33-three-policy-trpo">3.3 Three-Policy TRPO</h3>
 
@@ -826,7 +826,7 @@ $$</p>
 <p>In words:</p>
 
 <ul>
-  <li>For <strong>sequences with small IS ratios</strong>, the full weight $\rho(y\mid x)$ is retained for off-policy correction.</li>
+  <li>For <strong>sequences whose IS ratios do not exceed the threshold</strong>, the full weight $\rho(y\mid x)$ is retained for off-policy correction.</li>
   <li>For <strong>sequences whose ratios exceed the threshold $C$</strong>, the entire policy loss is masked out (weight set to $0$).</li>
 </ul>
 

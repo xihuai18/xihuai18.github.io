@@ -246,6 +246,8 @@
 
 <p>One scope note up front: many LLM-RL workloads are closer to single-episode contextual bandits than to general long-horizon MDPs. I still start from the discounted-MDP setting because it makes the roles of multi-source sampling, staleness, and clipping easiest to state. Section 7 returns to the bandit simplifications.</p>
 
+<p>You can also read this post as a continuation of the earlier three-policy perspective: here the behavior side is no longer a single policy $\mu$, but a mixture over historical policies $\{\pi^{(i)}\}$, while $\pi_k$ and $\pi_{k+1}$ play the roles of the current reference policy and update target.</p>
+
 <h2 id="2-theoretical-foundations">2. Theoretical Foundations</h2>
 
 <h3 id="21-basic-setup">2.1 Basic Setup</h3>
@@ -579,7 +581,7 @@ $$</p>
 
 <p>The left side is the TV distance between two distributions (requiring enumeration over all actions), while the right side is the absolute difference of two importance ratios when sampling under $\pi_1$. This enables us to estimate and control TV distance using samples.</p>
 
-<h4 id="sample-representation-of-inlmath124mathend">Sample Representation of $U_k$</h4>
+<h4 id="sample-representation-of-inlmath129mathend">Sample Representation of $U_k$</h4>
 
 <p>Using Lemma 6.1, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling-source policy), we obtain:</p>
 
@@ -595,7 +597,7 @@ $$</p>
 
 <p>This means: <strong>If we can ensure $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$ for each sample, we can guarantee $U_k \leq \epsilon/2$</strong>.</p>
 
-<h3 id="62-constraining-inlmath132mathend-two-clipping-options">6.2 Constraining $U_k$: Two Clipping Options</h3>
+<h3 id="62-constraining-inlmath137mathend-two-clipping-options">6.2 Constraining $U_k$: Two Clipping Options</h3>
 
 <h4 id="method-1-direct-constraint-on-ratio-difference">Method 1: Direct Constraint on Ratio Difference</h4>
 
@@ -823,7 +825,7 @@ $$</p>
 
 <p>The key dividing line is <strong>whether Lemma 4.1’s structural simplification holds</strong>: trajectory-level mixture satisfies the advantage reduction, while step/segment-level mixture generally does not because future returns depend on the index transition kernel.</p>
 
-<h4 id="differences-in-sampling-staleness-inlmath213mathend">Differences in Sampling Staleness $S_k$</h4>
+<h4 id="differences-in-sampling-staleness-inlmath218mathend">Differences in Sampling Staleness $S_k$</h4>
 
 <p><strong>Trajectory-level mixture</strong>’s staleness arises from: mixture weights $\alpha_i^{(k)}$ retaining probability mass on old policies after new policy release.</p>
 
@@ -917,7 +919,7 @@ $$</p>
 
 <ol>
   <li><strong>Behavior denominator alignment</strong>: The behavior probability in the loss should use the inference-side recorded $\hat{\pi}^{(i)}(a\mid s)$</li>
-  <li><strong>Probability smoothing</strong>: If the inference side has truncation (e.g., top-k), ensure ratios are valid</li>
+  <li><strong>Probability smoothing</strong>: If the inference side has truncation (e.g., top-k), ensure ratios are valid and the support-coverage condition required by Lemma 6.1 still holds</li>
 </ol>
 
 <h2 id="9-practical-guidelines">9. Practical Guidelines</h2>
@@ -930,7 +932,15 @@ $$</p>
 J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{surrogate objective}} - \underbrace{C_1 \cdot U_k}_{\text{update shift penalty}} - \underbrace{C_2 \cdot S_k}_{\text{sampling staleness penalty}}
 $$</p>
 
-<p>Here $C_1$ and $C_2$ are just compressed notation for the theoretical coefficients introduced earlier. They are not free hyperparameters.</p>
+<p>Here $C_1$ and $C_2$ are just compressed notation for the theoretical coefficients introduced earlier. Concretely, one can read them as</p>
+
+<p>$$
+C_1 = \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2},
+\qquad
+C_2 = C_1 + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma},
+$$</p>
+
+<p>up to the exact naming convention used in the intermediate statements. They are not free hyperparameters.</p>
 
 <h4 id="separation-of-concerns-principle">Separation of Concerns Principle</h4>
 

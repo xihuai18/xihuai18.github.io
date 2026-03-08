@@ -262,7 +262,7 @@
 
 <ul>
   <li>
-    <p><a href="https://arxiv.org/abs/2110.00641">Decoupled PPO</a> 率先指出，在信赖域策略优化（TRPO 和 PPO）方法中，”旧策略”（old policy）实际上承担了两个不同的角色：一是用于重要性采样以进行异策略修正，此时”旧策略”代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，此时”旧策略”被用于衡量新旧策略的变化程度，称为近端策略（proximal policy，对应本文中的”参考策略”）。文章指出这两个目的下的”旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，将”采样用谁”和”对谁做 trust region”在形式上解耦开来。</p>
+    <p><a href="https://arxiv.org/abs/2110.00641">Decoupled PPO</a> 较早指出，在信赖域策略优化（TRPO 和 PPO）方法中，”旧策略”（old policy）实际上承担了两个不同的角色：一是用于重要性采样以进行异策略修正，此时”旧策略”代表训练数据集所服从的行为策略（behavior policy）；二是用于限制新策略的更新幅度，此时”旧策略”被用于衡量新旧策略的变化程度，称为近端策略（proximal policy，对应本文中的”参考策略”）。文章指出这两个目的下的”旧策略”可以是不同的策略，从而提出了 Decoupled PPO 更新目标，将”采样用谁”和”对谁做 trust region”在形式上解耦开来。</p>
   </li>
   <li>
     <p><a href="https://arxiv.org/abs/2505.24298">AReaL</a> 关注到异步训练框架下行为策略与参考策略不一致的问题：rollout 往往由滞后的参数版本或不同 worker 产生。文章在异步框架下采用了 Decoupled PPO 风格的目标，将”行为策略分布”和”参考策略”显式区分开来，从而在异步场景下仍能维持类似 PPO 的优化性质。</p>
@@ -296,7 +296,7 @@
   </li>
 </ul>
 
-<h2 id="3-三策略-trpo-视角下的最小统一理解">3. 三策略 TRPO 视角下的最小统一理解</h2>
+<h2 id="3-三策略-trpo-视角下的一个最简统一视角">3. 三策略 TRPO 视角下的一个最简统一视角</h2>
 
 <p>上面列举的这些工作，看似各自解决不同层面的问题：</p>
 
@@ -385,7 +385,7 @@ $$</p>
 
 <p>因为 $d_{\pi_\theta}$ 是”新策略”的状态分布，我们没有在这个分布下采样过。</p>
 
-<p>于是 TRPO 引入了一个替代目标：将状态分布换成行为策略的：</p>
+<p>于是 TRPO 引入了一个代理目标：将状态分布换成行为策略的：</p>
 
 <p>$$
 L_\mu(\pi_\theta)
@@ -488,7 +488,7 @@ $$</p>
 <p>这说明：</p>
 
 <ul>
-  <li><strong>真正决定“替代目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong>
+  <li><strong>真正决定“代理目标 $L_\mu$ 靠不靠谱”的，是行为策略 $\mu$ 和目标策略 $\pi_\theta$ 的差异：</strong>
 $$
   \beta = \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s), \pi_\theta(\cdot\mid s)\big).
   $$</li>
@@ -635,7 +635,7 @@ $$</p>
 <p>定理 2 的含义可以拆成两条：</p>
 
 <ul>
-  <li><strong>替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，可以拆成两部分：</strong>
+  <li><strong>代理目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 之间的 gap，可以拆成两部分：</strong>
     <ul>
       <li>参考 vs 目标的偏移 $\alpha_0$；</li>
       <li>行为 vs 参考的偏移 $\alpha_1$。</li>
@@ -798,7 +798,7 @@ $$</p>
 <p>简而言之：</p>
 
 <ul>
-  <li>对于 <strong>IS 比率较小的序列</strong>：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；</li>
+  <li>对于 <strong>IS 比率未超过阈值的序列</strong>：保留完整的 $\rho(y\mid x)$ 权重，正常做 off-policy 修正；</li>
   <li>对于 <strong>IS 比率超过阈值 $C$ 的序列</strong>：整个序列的 policy loss 被 mask 掉（权重变成 $0$）。</li>
 </ul>
 
@@ -987,7 +987,7 @@ $$</p>
   <p><strong>在本文这套显式路由建模下，routing replay 更适合被理解为一种 surrogate objective 的改写，而不宜直接理解为对 $\alpha_0$ 或 $\alpha_1$ 的直接约束。</strong></p>
 </blockquote>
 
-<h2 id="6-小结">6. 小结</h2>
+<h2 id="6-讨论">6. 讨论</h2>
 
 <p>如果把这篇文章压缩成一句话，那就是：</p>
 
@@ -1006,7 +1006,7 @@ $$</p>
     </ul>
   </li>
   <li>得到了一个非常直接的结论：
-在 $\epsilon_\mu$ 有界等前提下，替代目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 的差距至多被 $C(\alpha_0 + \alpha_1)$ 所上界。</li>
+在 $\epsilon_\mu$ 有界等前提下，代理目标 $L_\mu(\pi_\theta)$ 与真实性能 $\mathcal{J}(\pi_\theta)$ 的差距至多被 $C(\alpha_0 + \alpha_1)$ 所上界。</li>
 </ul>
 
 <p>在这个视角下（当然这只是众多可能视角之一）：</p>
