@@ -30,7 +30,7 @@ My research lies at the intersection of **Reinforcement Learning** and **Multi-A
   - Sample-efficient algorithms for cooperative MARL
   - Zero-shot coordination and generalization in multi-agent systems
 
-<div class="job-ad" markdown="0">
+<!-- <div class="job-ad" markdown="0">
   <div style="display: flex; align-items: center;">
     <span style="font-size: 2em; margin-right: 1rem;">🙋</span>
     <div>
@@ -39,4 +39,4 @@ My research lies at the intersection of **Reinforcement Learning** and **Multi-A
     <strong>本人正在寻求大语言模型推理及智能体系统相关的研发岗位。如有合适机会，欢迎通过 <em>leoxhwang@sjtu.edu.cn</em> 与我联系。</strong>
     </div>
   </div>
-</div>
+</div> -->
