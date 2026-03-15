@@ -2,7 +2,7 @@
 layout: post
 title: "From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL"
 date: 2025-11-15
-description: In modern LLM RL pipelines, the policy used as the "old policy" in training can differ from the behavior policy that actually generated the rollouts, breaking the usual on-policy assumption. This post rewrites the TRPO lower bound in a three-policy form — behavior, reference, and target — so the performance gap splits into two deviation terms, giving a common lens on training–inference mismatch and related methods.
+description: In modern LLM RL pipelines, the policy used as the "old policy" in training can differ from the behavior policy that actually generated the rollouts, breaking the usual on-policy assumption. This note rewrites the TRPO lower bound in a three-policy form — behavior, reference, and target — and argues that the surrogate gap is jointly controlled by two mismatch sources.
 og_image: /assets/img/three-policy/three-policy-mini-class-en.png
 categories: reinforcement-learning
 lang: en
@@ -17,9 +17,17 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 
 Recent LLM RL work has repeatedly run into the same issue: the **behavior policy** that actually generates data may not match the **reference policy** used in training.
 
-This post first reviews recent work, then organizes it around that single mismatch.
+This note first reviews the pieces of prior work that matter most for the story, then organizes them around that single mismatch.
 
-Throughout the post I’ll use:
+I am not trying to prove a stronger TRPO theorem here. What I care about is separating three policies that are often collapsed together in LLM RL, and using that split to say more precisely what training-inference mismatch is actually breaking.
+
+More concretely, this note does only three things:
+
+- rewrites the usual TRPO surrogate gap with the behavior policy as the baseline;
+- upper-bounds that gap using behavior, reference, and target policies simultaneously;
+- uses that decomposition to reread training-inference mismatch, sample-level correction, and routing replay in LLM RL.
+
+Throughout the note I’ll use:
 
 - **Behavior policy** $\mu$: the policy that _actually_ generates rollouts, i.e., “under which distribution your data are sampled.” In modern LLM RL systems this typically corresponds to the implementation inside the inference engine (vLLM, SGLang, etc.), and under asynchronous frameworks it is often a **mixture distribution over multiple worker policies**.
 
@@ -31,7 +39,7 @@ In the classical idealized setup, we usually **implicitly assume** $\mu = \pi_{\
 
 ## 2. Related Work
 
-Below is a rough timeline of the works that left a strong impression on me (this is only a partial and biased subset of the literature I’ve seen):
+Below is a selective list of works that matter most for the three-policy story.
 
 - [Decoupled PPO](https://arxiv.org/abs/2110.00641) was among the first to point out that in trust-region policy optimization methods (TRPO and PPO), the “old policy” actually plays two distinct roles:
   1. It is used for importance sampling to perform off-policy correction. In this sense, the “old policy” is meant to represent the **behavior policy** that generated the training data.
@@ -60,7 +68,7 @@ Below is a rough timeline of the works that left a strong impression on me (this
 
 - [INTELLECT-3 Technical Report](https://storage.googleapis.com/intellect-3-paper/INTELLECT_3_Technical_Report.pdf) adopts a similar rejection sampling strategy in its asynchronous distributed RL training framework. INTELLECT-3 computes **token-level** importance ratios for each rollout; if any token's ratio falls below a threshold ($10^{-5}$ in the paper), the entire trajectory is masked.
 
-## 3. A Minimally Unified View from a Three-Policy TRPO Perspective
+## 3. Three-Policy TRPO: A Minimal Unifying Frame
 
 At first glance, the works listed above seem to tackle different aspects:
 
@@ -68,12 +76,12 @@ At first glance, the works listed above seem to tackle different aspects:
 - **Systems level**: how to align inference and training stacks.
 - **Model level**: how MoE routing amplifies instability, and so on.
 
-However, if we organize everything along a single axis — **behavior policy vs. reference policy** — most of these issues can be placed inside a single theoretical frame: **three-policy TRPO**.
+However, if we organize everything along a single axis — **behavior policy vs. reference policy** — most of these issues fit inside one minimal frame: **three-policy TRPO**.
 
-The derivation itself is small: take the usual TRPO lower bound and add one triangle inequality. But that extra split is exactly what makes training-inference mismatch easier to reason about:
+The derivation is short. First write the surrogate gap with the behavior policy as baseline; then add one triangle inequality and the two mismatch sources appear. What surprised me is how useful this tiny split is once you start looking at modern LLM RL systems through it:
 
 - On the one hand, it helps us understand what exactly “training–inference mismatch” and “asynchronous training frameworks” are harming within the TRPO view.
-- On the other hand, it offers a unifying way to interpret TIS, IcePop, sequence-level MIS, etc. In the view of this post, they can all be seen as different incarnations of **Constraint 2** introduced below.
+- On the other hand, it offers a unifying way to interpret TIS, IcePop, sequence-level MIS, etc. In the view of this note, these methods mostly mitigate the estimation bias/variance consequences of behavior-reference mismatch, rather than directly changing the worst-case value of $\alpha_1$.
 
 ### 3.1 Three Policies
 
@@ -96,21 +104,17 @@ We stick to the notation from above and consider a discounted MDP with discount 
   V_\pi(s),\quad Q_\pi(s,a),\quad A_\pi(s,a) := Q_\pi(s,a) - V_\pi(s).
   $$
 
-It’s worth spelling out that in the three-policy setup we have:
-
-- **Behavior policy** $\mu$: the policy that actually generates rollouts. Data $(s,a,r,\dots)$ are sampled from it.
-
-- **Reference policy** $\pi_{\theta_{\text{old}}}$: the “old policy” used in the optimization objective for importance sampling ratios, clipping, or KL constraints.
-
-- **Target policy** $\pi_\theta$: the policy we are optimizing in this update.
+I keep the notation from the introduction: behavior policy $\mu$, reference policy $\pi_{\theta_{\text{old}}}$, and target policy $\pi_\theta$.
 
 In the ideal setup we assume $\mu = \pi_{\theta_{\text{old}}}$; in real systems they are often unequal. This is the mathematical shadow of “training–inference mismatch.”
 
-### 3.2 Two-Policy TRPO
+### 3.2 Two-Policy TRPO: A Behavior-Baselined Surrogate-Gap Bound
 
 > If you’re already familiar with TRPO, feel free to skip ahead to the “Three-Policy TRPO” subsection.
 
-All the theoretical guarantees in TRPO are stated **with respect to the advantage function of some baseline policy**. Here I take $\mu$ as the baseline for two reasons: the data are sampled under $\mu$, and in practice the critic / GAE we can estimate most naturally from those data is also anchored to that behavior distribution. I will ignore the additional approximation error from estimating $A_\mu$ itself and focus only on the policy-mismatch part.
+I keep the core TRPO logic, but I will not try to reproduce the exact theorem statement from Schulman et al. (2015). For the three-policy story below, a looser behavior-baselined surrogate-gap bound is the more useful object.
+
+All the theoretical guarantees in TRPO are stated **with respect to the advantage function of some baseline policy**. Here I take $\mu$ as the baseline for two reasons: the data are sampled under $\mu$, and in practice the critic / GAE / group-normalized reward proxy we can estimate most naturally from those data is also anchored to that behavior distribution. I ignore the approximation error in estimating $A_\mu$ itself and focus only on the policy-mismatch part.
 
 A classical result is the **Performance Difference Lemma**:
 
@@ -121,11 +125,6 @@ A classical result is the **Performance Difference Lemma**:
 > = \frac{1}{1-\gamma}\;
 > \mathbb{E}_{s\sim d_{\pi_\theta},\, a\sim\pi_\theta}[A_\mu(s,a)].
 > $$
-
-The intuition is simple:
-
-- $A_\mu(s,a)$ says: “if I deviate from what $\mu$ would do at state $s$ and instead take action $a$, how much will the long-term return change?”
-- Summing that “gain” across all time steps, states, and actions gives the total improvement of the new policy over the behavior policy.
 
 The challenge in TRPO is that we cannot compute
 
@@ -141,8 +140,6 @@ $$
 L_\mu(\pi_\theta)
 := \mathcal{J}(\mu) + \frac{1}{1-\gamma}\mathbb{E}_{s\sim d_\mu,\,a\sim \pi_\theta}[A_\mu(s,a)].
 $$
-
-Intuitively, $L_\mu$ asks the following question: “Under the states visited by the behavior policy, how good is the new policy if we just let it pick the actions?”
 
 In actual PPO / GRPO-style implementations, this expectation is usually rewritten using importance sampling. That is also where a second policy often enters the picture: the denominator in the ratio is frequently the reference policy $\pi_{\theta_{\text{old}}}$ rather than the true behavior policy $\mu$. The gap between those two is exactly what will become $\alpha_1$ later.
 
@@ -211,9 +208,9 @@ $$
 = \frac{2\epsilon_\mu\gamma}{(1-\gamma)^2}\,\beta.
 $$
 
-This gives a compact **two-policy TRPO lower bound (baseline = behavior policy)**:
+This gives a compact **two-policy surrogate-gap bound with the behavior policy as baseline**:
 
-> **Theorem 1 (Two-Policy TRPO)**
+> **Theorem 1 (Behavior-Baselined Two-Policy Bound)**
 >
 > $$
 > \mathcal{J}(\pi_\theta)
@@ -241,7 +238,7 @@ In most PPO / GRPO / GSPO / RLHF-style frameworks, the actual situation is:
 - Rollout data are generated by some **behavior policy** $\mu$ (some particular parameter version plus system details inside the inference engine).
 - During updates, we would like to leverage a **reference policy** $\pi_{\theta_{\text{old}}}$ to limit the update of the **target policy** $\pi_\theta$.
 
-In other words, what we can actually touch and control are two quantities:
+Practically, the quantities we can directly control or indirectly influence are:
 
 1. **Reference vs. target**: via KL penalties, clipping, etc., we constrain
 
@@ -255,9 +252,9 @@ In other words, what we can actually touch and control are two quantities:
    $$
    small as well — this is where training–inference mismatch and asynchronous execution come in.
 
-This motivates defining two “proxy gaps”:
+This motivates two deviation sources, corresponding to two TV-distance terms:
 
-- **Constraint 1: reference vs. target**
+- **Deviation source A: reference vs. target**
 
   $$
   \alpha_0
@@ -265,7 +262,7 @@ This motivates defining two “proxy gaps”:
                                 \pi_\theta(\cdot\mid s)\big);
   $$
 
-- **Constraint 2: behavior vs. reference**
+- **Deviation source B: behavior vs. reference**
   $$
   \alpha_1
   := \max_s D_{\mathrm{TV}}\big(\mu(\cdot\mid s),
@@ -274,7 +271,7 @@ This motivates defining two “proxy gaps”:
 
 Intuitively:
 
-- $\alpha_0$: how far the new policy is from the “old policy” you are using in the loss — this is the trust-region part.
+- $\alpha_0$: how far the new policy is from the reference policy chosen in the loss — this is the trust-region part.
 - $\alpha_1$: how far the reference policy used in training is from the _actual_ behavior policy that generated the data — this is the footprint of training–inference mismatch and asynchrony.
 
 Now we can plug these two quantities back into the TRPO lower bound.
@@ -363,45 +360,40 @@ This yields a very direct **three-policy TRPO lower bound**:
 >   \mathbb{E}_{s\sim d_\mu,a\sim\pi_\theta}[A_\mu(s,a)].
 > $$
 
-The meaning of this bound is quite straightforward:
+The point of Theorem 2 is simple: the gap between $L_\mu(\pi_\theta)$ and $\mathcal{J}(\pi_\theta)$ is not exactly decomposed into two terms, but it is controlled by a conservative upper bound involving both $\alpha_0$ and $\alpha_1$. To get improvement you still need $L_\mu(\pi_\theta)$ itself to be large enough. Numerically this bound is often loose in LLM settings, so I read it mainly as a structural tool rather than a performance certificate.
 
-- **The gap between the surrogate objective $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ decomposes into two pieces:**
-  - The deviation between reference and target policies, $\alpha_0$.
-  - The deviation between behavior and reference policies, $\alpha_1$.
-
-As long as both terms are small, the surrogate is more trustworthy. Strictly speaking, though, the bound by itself does not guarantee improvement unless $L_\mu(\pi_\theta)$ is large enough to overcome the penalty term, and in large LLM settings the constant $\epsilon_\mu = \max_{s,a}|A_\mu(s,a)|$ can be very loose. So the main value of Theorem 2 is structural: it tells us which two mismatch sources we need to track.
-
-### 3.4 How to Control These Two Deviations in Practice?
+### 3.4 How to Control These Two Deviation Sources?
 
 We can now revisit various practical methods through the lens of Theorem 2:
 
-- Most PPO / GRPO / GSPO-style work focuses on controlling **Constraint 1: $\alpha_0$**.
-- Most TIS / IcePop / MIS-style work, in the view of this post, can be understood as primarily targeting **Constraint 2: $\alpha_1$**.
+- Most PPO / GRPO-style work focuses on the **reference-vs.-target** side, i.e. $\alpha_0$.
+- GSPO belongs to the same side, but it does something stronger than “control $\alpha_0$ more carefully”: it changes the basic unit of ratio, clipping, and optimization from token level to sequence level.
+- TIS / IcePop / MIS / WTRS mostly operate on sample weights, sample subsets, or rejection rules to mitigate the estimation consequences of **behavior-vs.-reference** mismatch, rather than directly changing the worst-case definition of $\alpha_1$.
 
-In the remainder of this post I will focus on **Constraint 2**.
+If I had to say which side worries me more in practice, it is almost always the latter: many systems drift out of the “approximately on-policy” regime because behavior and reference policies have already diverged before the trust-region machinery itself visibly fails. In the remainder of this note I focus on the **behavior-vs.-reference** side.
 
-The goal of Constraint 2 is: **ensure that the data used in training come (effectively) from a behavior policy that is close to the reference policy.**
+The goal on this side is simple: **make the effective training data come from a behavior policy close enough to the reference policy, or at least prevent badly mismatched samples from dominating the gradient.**
 
 In practice, this usually involves both **system-level mechanisms** and **algorithmic mechanisms (importance sampling)**.
 
-1. **System level: keep the behavior policy from drifting too far**
+1. **System level: keep behavior and reference policies close**
    - Asynchronous frameworks:
      Tag each sample with a policy version, and only use data generated by parameter versions that are close enough to $\pi_{\theta_{\text{old}}}$.
 
    - Training–inference alignment:
      Use consistent precision, operators, and similar kernel behavior between the training and inference stacks.
 
-   These mechanisms act “outside” the algorithm to make $\mu$ closer to $\pi_{\theta_{\text{old}}}$, thereby shrinking $\alpha_1$.
+   These mechanisms act “outside” the algorithm to make $\mu$ closer to $\pi_{\theta_{\text{old}}}$, thereby reducing $\alpha_1$ more directly.
 
 2. **Algorithmic level: sample-wise correction**
 
-   At the algorithmic level, we no longer attempt to “fix” the entire behavior policy. Instead, we use importance sampling ratios to correct at the **sample level**: we filter or reweight samples so that the behavior policy is close to the reference policy _on the subset of data that actually participates in training_, or at least reduce the influence of samples with large mismatch.
+   At the algorithmic level, we no longer attempt to “fix” the entire behavior policy. Instead, we use importance sampling ratios to filter or reweight samples at the **sample level**, so that the subset of data that actually participates in training is closer to the reference policy, or at least so that badly mismatched samples carry less weight.
 
-   Concretely, this gives rise to methods like TIS, IcePop, and MIS, which can be seen as different ways of implementing Constraint 2 at the sample level.
+   Concretely, this gives rise to methods like TIS, IcePop, MIS, and WTRS. They are best understood as different ways to manage the consequences of this mismatch at training time.
 
-## 4. Importance Sampling and Masking: Four Implementations of Constraint 2
+## 4. Importance Sampling and Masking: Four Sample-Level Responses to Behavior-Reference Mismatch
 
-In this section I’ll reuse the notation introduced above to write down the objectives of four representative mechanisms, focusing only on the design choices related to “behavior vs. reference policy.” The unified notation below is meant to highlight the core Constraint-2 operation rather than reproduce every implementation detail from each paper (advantage estimation, baselines, extra regularizers, and so on). Let the token-level PPO / GRPO-style update term be
+In this section I reuse the notation above to write down four representative mechanisms, focusing only on the design choices related to “behavior vs. reference policy.” The unified notation below is meant to highlight how this mismatch is handled in the training loss, not to reproduce every implementation detail from each paper (advantage estimation, baselines, extra regularizers, and so on). The losses $L_{\text{TIS}}, L_{\text{IcePop}}, L_{\text{MIS}}, L_{\text{WTRS}}$ are therefore comparison devices, not literal unbiased estimators of the theoretical surrogate $L_\mu$. Let the token-level PPO / GRPO-style update term be
 
 $$
 g_\theta(t)
@@ -412,13 +404,13 @@ where
 
 $$
 r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)},
-\quad (s_t,a_t)\sim\mu,\quad A_t := A_\mu(s_t,a_t).
+\quad (s_t,a_t)\sim\mu.
 $$
 
 Here:
 
-- $r_t(\theta)$ is the **target vs. reference** ratio (corresponding to Constraint 1).
-- $A_t$ is the advantage estimated from data sampled under the behavior policy.
+- $r_t(\theta)$ is the **target-vs.-reference** ratio.
+- $A_t$ denotes the practical advantage term corresponding to the theoretical $A_\mu(s_t,a_t)$. In real implementations it typically comes from a critic / GAE / group-normalized reward proxy estimated from $\mu$-sampled data, so it should not be read as a literal unbiased replacement for $A_\mu$.
 
 To connect token-level $(s_t,a_t)$ with sequence-level $(x,y)$ notation, consider the RLHF setting (reinforcement learning from human feedback) for LLMs:
 
@@ -444,7 +436,7 @@ $$
 = \prod_{t=1}^{|y|} \rho_t^{(\text{ref}\leftarrow\text{beh})}.
 $$
 
-The difference between TIS, IcePop, and MIS lies in **how they use $\rho$ to implement Constraint 2**.
+The difference between TIS, IcePop, and MIS lies in **how they use $\rho$ to manage behavior-reference mismatch during training**.
 
 ### 4.1 TIS: Token-Level Truncated Importance Sampling
 
@@ -462,8 +454,8 @@ L_{\text{TIS}}(\theta)
 $$
 
 - The blue $\color{blue}{w_t}$ is the truncated IS weight: extremely large ratios are capped at a constant $C_{\text{IS}}$.
-- From the three-policy TRPO perspective, this is a _soft_ way to downweight tokens where behavior and reference policies differ significantly, effectively reducing their contribution to $\alpha_1$ in the gradient.
-- Note that $w_t$ truncates the **behavior-to-reference** ratio (Constraint 2), while the clipping inside $g_\theta(t)$ controls the **reference-to-target** ratio (Constraint 1). These are two separate operations.
+- From the three-policy TRPO perspective, this is a _soft_ way to downweight tokens where behavior and reference policies differ significantly, thereby reducing their influence on the effective training distribution.
+- Note that $w_t$ truncates the **behavior-to-reference** ratio, while the clipping inside $g_\theta(t)$ controls the **reference-to-target** ratio. These are two separate operations.
 
 ### 4.2 IcePop: Token-Level Two-Sided Masking in MoE
 
@@ -481,7 +473,7 @@ L_{\text{IcePop}}(\theta)
 $$
 
 - The blue $\color{blue}{m_t}$ decides whether a token participates in the update: tokens with ratios that are too large or too small are dropped entirely.
-- This is a _hard_ sample selection scheme: only tokens where behavior and reference policies are reasonably aligned (ratios within $[C_{\text{low}}, C_{\text{high}}]$) are kept, implementing a stricter version of Constraint 2 at the token level.
+- This is a _hard_ sample selection scheme: only tokens where behavior and reference policies are reasonably aligned (ratios within $[C_{\text{low}}, C_{\text{high}}]$) are kept.
 
 ### 4.3 Sequence-Level MIS: Masked Importance Sampling Over Entire Sequences
 
@@ -506,18 +498,15 @@ L_{\text{MIS}}(\theta)
 \Big].
 $$
 
-In words:
-
-- For **sequences whose IS ratios do not exceed the threshold**, the full weight $\rho(y\mid x)$ is retained for off-policy correction.
-- For **sequences whose ratios exceed the threshold $C$**, the entire policy loss is masked out (weight set to $0$).
-
-From the three-policy TRPO viewpoint, sequence-level MIS no longer truncates at the token level. Instead, it performs **trajectory-level** filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. This implements Constraint 2 at the sequence level.
+From the three-policy TRPO viewpoint, sequence-level MIS no longer truncates at the token level. Instead, it performs **trajectory-level** filtering: it drops trajectories where behavior and reference policies diverge too much, and only optimizes on the subset with $\rho(y\mid x)\le C$. My own bias is that once sequences get long, this sequence-level treatment is usually more honest than token-level patching, because token-level weights get dominated by extremes too easily.
 
 > **Note**: In this unified form, $\rho(y\mid x)$ handles the sequence-level correction from behavior to reference, while $g_\theta(t)$ still handles the token-level update from reference to target. In practice, implementations often add extra truncation or stabilization on top of this basic structure.
 
-### 4.4 Worst Token Reject Sampling: Rejecting Entire Sequences Based on the Worst Token
+### 4.4 A Veto-Style Extreme: What I Call WTRS
 
-The verl Token Veto mechanism and INTELLECT-3 both adopt a rejection sampling strategy that can be collectively called **Worst Token Reject Sampling (WTRS)**:
+The verl Token Veto mechanism and INTELLECT-3 both use a veto-style rejection idea. For the sake of analysis, I will refer to this shared pattern as **Worst Token Reject Sampling (WTRS)**. This is my umbrella term, not a standard name from either source paper, and the concrete implementations are not identical.
+
+Under that abstraction:
 
 - **verl Token Veto**: In its rollout correction module, if any token in a trajectory has $\min_t \rho_t < \tau_{\text{veto}}$, the entire sequence is discarded via `response_mask`. The threshold $\tau_{\text{veto}}$ is user-configurable.
 
@@ -542,20 +531,17 @@ L_{\text{WTRS}}(\theta)
 \Big].
 $$
 
-In words:
-
-- For **sequences where all tokens have IS ratios $\ge \tau$**: participate in training normally.
-- For **sequences where any token has an IS ratio $< \tau$**: the entire sequence's policy loss is masked out.
-
-From the three-policy TRPO perspective, WTRS adopts a hybrid "token-level detection, sequence-level veto" strategy: it detects extreme mismatch signals at the **token level**, and once detected, rejects at the **sequence level**. This "one-vote veto" design reflects a conservative philosophy — when a trajectory contains a token that "the behavior policy generated but the reference policy would almost never generate," **the credibility of the entire trajectory is called into question**, thereby implementing control over Constraint 2 ($\mu$ vs. $\pi_{\theta_{\text{old}}}$ deviation) at the trajectory granularity.
+From the three-policy TRPO perspective, WTRS adopts a hybrid "token-level detection, sequence-level veto" strategy: it detects extreme mismatch signals at the **token level**, and once detected, rejects at the **sequence level**. This is aggressively conservative. The price is poor sample efficiency; the benefit is that under severe system noise it can be more stable than trying to rescue bad trajectories token by token.
 
 ## 5. MoE Routing Replay: What Does It Actually Do in Three-Policy TRPO?
 
 In MoE (Mixture-of-Experts) models, training–inference mismatch often first appears as **routing inconsistency**: even with identical parameters, the inference and training stacks may route tokens to different experts because of small differences in operators, parallelism, or numerics. A natural engineering response is **routing replay**: during rollout (inference), record the actual expert paths, and during training, force the model to reuse these routing decisions.
 
-These methods are often intuitively described as “implementing Constraint 2 and shrinking $\alpha_1$.” From the three-policy TRPO perspective, a more precise statement is:
+**Modeling assumption:** in this section I treat routing choice $z$ as part of the action space, i.e. “choose an expert” and “generate a token” are modeled as a joint decision. Everything below about routing replay as an objective rewrite is conditional on that modeling choice.
 
-> **Routing replay does not tighten the original surrogate objective via a constraint; instead, it rewrites the surrogate objective into one that is conditioned on / replaces the routing.**
+These methods are often described as “implementing behavior-reference correction” or even “shrinking $\alpha_1$.” From the three-policy TRPO perspective, a more precise statement is:
+
+> **Routing replay does not directly shrink the original policy-distance terms; instead, it rewrites the surrogate objective into one that is conditioned on / replaces the routing.**
 > It makes routing mismatch invisible in the loss, but it does not actually shrink the true policy distances $\alpha_0$ or $\alpha_1$.
 
 Below I’ll sketch a **minimal** abstraction that is sufficient to make this concrete.
@@ -593,9 +579,9 @@ $$
 
 to denote the expert-level aggregation of advantages.
 
-Here $A_\mu(s,a,z)$ denotes the advantage when “choosing expert $z$ and then generating token $a$” is treated as a joint decision. In other words, this section is working with an extended model in which routing is made explicit inside the decision process.
+Here $A_\mu(s,a,z)$ denotes the advantage when “choosing expert $z$ and then generating token $a$” is treated as a joint decision. This section therefore works with an extended model in which routing is made explicit inside the decision process.
 
-The key point is that **in the original $L_\mu(\pi_\theta)$, the routing distribution is precisely the current router $\omega_\theta$ that we are updating**. In other words, RL on MoE is updating not only the token-generation distribution but also the router itself.
+The key point is that **in the original $L_\mu(\pi_\theta)$, the routing distribution is precisely the current router $\omega_\theta$ that we are updating**. RL on MoE is therefore updating not only the token-generation distribution but also the router itself.
 
 ### 5.2 Replaying Behavior-Policy Routing (Behavior-Router Replay / R3-Style)
 
@@ -671,28 +657,31 @@ So, in the three-policy TRPO view, a more accurate characterization is:
 
 > **Routing replay is best thought of as a rewrite of the surrogate objective, not as a direct implementation of a constraint on $\alpha_0$ or $\alpha_1$.**
 
+Put more bluntly: routing replay is often an effective workaround, not a theoretical fix.
+
 ## 6. Discussion
 
-If I had to compress this post into a single sentence, it would be:
+The core claim of this note is:
 
-> **Many issues around “training–inference mismatch” and “asynchronous training” in large-scale LLM RL can be understood, in the TRPO framework, as severely underestimating the deviation between the behavior policy $\mu$ and the reference policy $\pi_{\theta_{\text{old}}}$ — i.e., the term $\alpha_1$.**
+> **Many issues around training-inference mismatch and asynchronous training in large-scale LLM RL are easier to understand once you stop collapsing behavior policy and reference policy into the same object; in practice, the missing term is often $\alpha_1$.**
 
-From two policies to three, what we did is conceptually very small:
+From two policies to three, the actual move is small:
 
 - We rewrote the TRPO lower bound from an “old vs. new policy” narrative into a “**behavior–reference–target**” three-policy relationship.
 
 - We explicitly separated two TV distances:
-  - **Constraint 1: reference vs. target**, $\alpha_0$, corresponding to the KL / clip / trust-region style constraints in PPO / GRPO / GSPO.
-  - **Constraint 2: behavior vs. reference**, $\alpha_1$, capturing real-world factors like asynchronous frameworks, training–inference mismatch, MoE routing volatility, kernel-level nondeterminism, etc.
+  - **reference vs. target**, $\alpha_0$, corresponding to the KL / clip / trust-region style controls in PPO / GRPO / GSPO;
+  - **behavior vs. reference**, $\alpha_1$, capturing real-world factors like asynchronous frameworks, training-inference mismatch, MoE routing volatility, kernel-level nondeterminism, etc.
 
 - This leads to a simple conclusion:
   The gap between the surrogate $L_\mu(\pi_\theta)$ and the true performance $\mathcal{J}(\pi_\theta)$ is bounded by $C(\alpha_0 + \alpha_1)$.
 
-Under this lens (which is of course only one of many possible perspectives):
+Under this lens:
 
 - Decoupled PPO / AReaL can be viewed as **formally acknowledging the existence of three policies** and explicitly decoupling the behavior distribution from the reference policy in the objective.
 
-- TIS, IcePop, MIS, and WTRS can be seen as different ways of implementing **Constraint 2** using importance sampling truncation / masking:
+- PPO / GRPO primarily control the reference-vs.-target side; GSPO also lives on that side, but it does so by changing the optimization unit from token level to sequence level.
+- TIS, IcePop, MIS, and WTRS can be seen as different ways of managing the training-time consequences of behavior-reference mismatch:
   - TIS: token-level truncation of IS weights to soften the influence of extreme samples.
   - IcePop: token-level two-sided masking in MoE to hard-drop tokens with severe mismatch.
   - MIS: sequence-level masking to ignore entire trajectories whose behavior–reference mismatch is too large.
@@ -702,17 +691,16 @@ Under this lens (which is of course only one of many possible perspectives):
 
 - Engineering advice such as in _RL 老训崩？训推差异是基石_ and system-level work like _Defeating Nondeterminism in LLM Inference_ can be interpreted as efforts to **reduce $\alpha_1$ on the systems and numerical side**, so that the assumptions underlying the algorithms do not break too badly.
 
-From this unified perspective, it may also be easier to think about the following practical questions (these are completely open and I don’t have definitive answers):
+One more practical point matters here: Theorem 2 is written in terms of worst-case TV distances, which are almost impossible to observe directly in LLM-scale systems. What you can usually monitor instead are engineering proxies: average KL on logged states, quantiles of token- or sequence-level importance weights, effective sample size (ESS), rejection / masking rate, and staleness across asynchronous workers. The theorem tells you which mismatches matter; the proxies tell you when they are getting out of hand.
+
+If I had to pick one side to watch first in a real system, it would usually be $\alpha_1$. That side is easier to ignore, and in practice it often breaks the “approximately PPO / TRPO” regime before the nominal trust-region machinery does.
+
+From this perspective, two practical questions seem especially worth chasing:
 
 - Under what conditions can we still reasonably interpret “LLM RL training” as some approximate form of TRPO / PPO?
+- For a concrete RL system, should we spend effort first on tighter $\alpha_0$ control or on pushing $\alpha_1$ back into a tolerable regime? My bias is the latter: once the behavior distribution has drifted too far, a beautiful trust region is constraining the wrong object.
 
-- For a concrete RL system, where should we invest more effort:
-  - tightening $\alpha_0$ (stronger KL control, more stable sequence-level objectives), or
-  - reducing $\alpha_1$ (better training–inference alignment, more aggressive MIS / TIS / IcePop)?
-
-- In the presence of MoE, asynchronous sampling, and complex agent workflows, how long can we safely pretend that “$\mu \approx \pi_{\theta_{\text{old}}}$”?
-
-What this post really does is small: it makes the three policies explicit and uses them to organize a set of existing observations. If you run into similar issues in your own system, try abstracting the setup into the relationship between $\mu$, $\pi_{\theta_{\text{old}}}$, and $\pi_\theta$, then look again at the inequality in Theorem 2. It is often a useful way to see which mismatch actually matters.
+If this note is useful at all, I hope it is because it makes one neglected point harder to ignore: many things that look like “PPO instability” are already broken one step earlier, at $\mu \neq \pi_{\theta_{\text{old}}}$. Writing the three policies separately is often the fastest way to see where the real bottleneck sits.
 
 ## References
 
