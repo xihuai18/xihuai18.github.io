@@ -40,7 +40,7 @@ $$
 
 #### Discounted State Visitation Distribution
 
-is defined as:
+We define it as:
 
 $$
 d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)
@@ -48,7 +48,7 @@ $$
 
 #### Advantage Function
 
-is defined as:
+We define it as:
 
 $$
 A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)
@@ -56,7 +56,7 @@ $$
 
 #### Total Variation Distance (TV Distance)
 
-is defined as:
+We define it as:
 
 $$
 D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|
@@ -192,7 +192,7 @@ Two typical forms of dynamic mixture sampling can be uniformly characterized by 
 
 **Trajectory-level mixture** (can be viewed as an abstraction of conventional asynchronous training; identity index transition): $q(i'\mid i) = \mathbf{1}\{i'=i\}$
 
-**Step/segment-level mixture** (an abstraction of partial rollout / segment-based sampling; allows switching): $q(i'\mid i) = (1-\sigma(i))\mathbf{1}\{i'=i\} + \sigma(i)\kappa(i'\mid i)$
+**Step/segment-level mixture** (an abstraction of partial rollout, or segment-based sampling; allows switching): $q(i'\mid i) = (1-\sigma(i))\mathbf{1}\{i'=i\} + \sigma(i)\kappa(i'\mid i)$
 
 where $\sigma(i)$ is the switching probability and $\kappa(\cdot\mid i)$ is the target index distribution.
 
