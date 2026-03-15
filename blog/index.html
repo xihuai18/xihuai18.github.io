@@ -375,10 +375,10 @@ December 17, 2025
 
 <h3>
 
-  <a class="post-title" href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">Understanding KL Divergence Estimators in RL: From Numerical Estimation to Gradient Estimation</a>
+  <a class="post-title" href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness</a>
 
 </h3>
-<p>Different KL estimators can behave quite differently in RL training. This post compares the classic estimators k1, k2, k3 in on-policy and off-policy settings, and explains how the choice changes when KL is used as a differentiable loss term versus a detached reward-shaping term.</p>
+<p>In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares k1, k2, k3 in on-policy and off-policy settings, and turns the result into a practical selection guide.</p>
 <p class="post-meta">
 38 min read &nbsp; &middot; &nbsp;
 December 01, 2025
@@ -420,12 +420,12 @@ December 01, 2025
 
 <h3>
 
-  <a class="post-title" href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">简单理解 RL 中的 KL 散度估计器：从数值估计到梯度估计</a>
+  <a class="post-title" href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">RL 中的 KL 估计器选型：从数值无偏到梯度正确</a>
 
 </h3>
-<p>在强化学习中，不同 KL 估计器在训练里的行为可能差别很大。本文比较三种经典估计器 k1、k2、k3 在 on-policy 与 off-policy 场景下的性质差异，并说明当 KL 作为可微 loss 或 detached 的奖励塑形项时，选型结论会怎样变化。</p>
+<p>在强化学习中，KL 估计器不能只看数值估得准不准，还要看它在 loss 或 reward 写法下究竟优化了谁。本文比较 k1、k2、k3 在 on-policy 与 off-policy 场景中的差异，并给出可直接落地的选型建议。</p>
 <p class="post-meta">
-17 分钟阅读 &nbsp; &middot; &nbsp;
+16 分钟阅读 &nbsp; &middot; &nbsp;
 2025年12月01日
 
 
@@ -524,9 +524,9 @@ December 01, 2025
   <a class="post-title" href="/reinforcement-learning/2025/11/15/three-policy-en.html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</a>
 
 </h3>
-<p>In modern LLM RL pipelines, the policy used as the "old policy" in training can differ from the behavior policy that actually generated the rollouts, breaking the usual on-policy assumption. This post rewrites the TRPO lower bound in a three-policy form — behavior, reference, and target — so the performance gap splits into two deviation terms, giving a common lens on training–inference mismatch and related methods.</p>
+<p>In modern LLM RL pipelines, the policy used as the "old policy" in training can differ from the behavior policy that actually generated the rollouts, breaking the usual on-policy assumption. This note rewrites the TRPO lower bound in a three-policy form — behavior, reference, and target — and argues that the surrogate gap is jointly controlled by two mismatch sources.</p>
 <p class="post-meta">
-29 min read &nbsp; &middot; &nbsp;
+30 min read &nbsp; &middot; &nbsp;
 November 15, 2025
 
 
@@ -569,7 +569,7 @@ November 15, 2025
   <a class="post-title" href="/reinforcement-learning/2025/11/15/three-policy-zh.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>
 
 </h3>
-<p>在现代 LLM RL 流程中，训练里使用的“旧策略”可能已经不同于真正生成 rollout 的行为策略，从而破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，使性能差距拆成两个偏差来源，并用它统一理解训推不一致及相关方法。</p>
+<p>在现代 LLM RL 流程中，训练里使用的“旧策略”可能已经不同于真正生成 rollout 的行为策略，从而破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 会同时受到两个偏差来源的共同控制。</p>
 <p class="post-meta">
 10 分钟阅读 &nbsp; &middot; &nbsp;
 2025年11月15日
