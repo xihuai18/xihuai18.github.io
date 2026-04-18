@@ -22,7 +22,7 @@ That is the central off-policy question: **when can data collected by older poli
 
 We will ultimately see that the lower bound is governed by three pieces: a surrogate objective we try to maximize, an update-shift penalty controlled on the optimization side, and a sampling-staleness penalty controlled on the data side.
 
-In many RLHF / online alignment setups, if we view the prompt as context and the response as action while ignoring long-horizon environment evolution, the problem is often well approximated as a contextual bandit. I still start from the discounted-MDP setting because it lets us write multi-version behavior mixing, sampling staleness, and clipping in one unified language. Section 7 returns to which terms disappear, and which conclusions remain, in the bandit limit.
+In many RLHF / online alignment setups, if we view the prompt as context and the response as action while ignoring long-horizon environment evolution, the problem is often well approximated as a contextual bandit. I still start from the discounted-MDP setting because it lets us write multi-version behavior mixing, sampling staleness, and clipping in one unified language. Section 6 returns to which terms disappear, and which conclusions remain, in the bandit limit.
 
 Related work has already touched neighboring parts of this picture: GePPO studies off-policy sample reuse with policy-improvement guarantees, while Decoupled PPO explicitly separates the behavior policy from the proximal policy. The emphasis here is different: I expand the behavior side into a dynamic mixture of historical policy versions and then split the risk into update increment shift and sampling staleness. You can also read this post as a continuation of the earlier three-policy perspective: here the behavior side is no longer a single policy $\mu$, but a mixture over historical policies $\{\pi^{(i)}\}$, while $\pi_k$ and $\pi_{k+1}$ play the roles of the current reference policy and update target. Even without that earlier post, the only principle needed here is to separate what the current update can control from what comes from behavior-distribution mismatch.
 
@@ -297,15 +297,71 @@ Operationally, this leads to a simple **separation of concerns**:
 | $U_k$ (update increment shift) | Optimization algorithm | Policy clipping                |
 | $S_k$ (sampling staleness)     | Sampling system        | Data filtering, version window |
 
-## 6. Theoretical Foundations of Clipping Mechanisms
+## 6. Comparison of Trajectory-Level and Step/Segment-Level Mixture
 
-### 6.1 From TV Distance to Sample-Controllable Quantities
+### 6.1 Mechanism Differences and Estimation Implications
+
+The essential difference between the two mixture mechanisms lies in the structure of the index transition kernel:
+
+- **Trajectory-level mixture**: $q(i'\mid i) = \mathbf{1}\{i'=i\}$, index never changes
+- **Step/segment-level mixture**: $\sigma(i) > 0$, allows within-trajectory switching
+
+The correspondence with common engineering terminology is:
+
+- **Trajectory-level mixture** here can be roughly understood as an idealized abstraction of "**conventional asynchronous training**": data is organized by entire trajectories/episodes belonging to a certain policy version;
+- **Step/segment-level mixture** here can be roughly understood as an abstraction of "**partial rollout**": due to asynchrony between actors and learners, and possible refresh to new policy versions at segment boundaries, using an index transition kernel that allows "within-trajectory version switching" can better approximate this phenomenon. APRIL is a representative systems example of this design pattern, but its main contribution is reducing long-tail rollout bottlenecks rather than providing the monotonic-improvement theory developed here.
+
+The key dividing line is **whether Lemma 4.1's structural simplification holds**: trajectory-level mixture satisfies the advantage reduction, while step/segment-level mixture generally does not because future returns depend on the index transition kernel.
+
+#### Differences in Sampling Staleness $S_k$
+
+**Trajectory-level mixture**'s staleness arises from: mixture weights $\alpha_i^{(k)}$ retaining probability mass on old policies after new policy release.
+
+**Step/segment-level mixture** has an **exponential compression effect** in a simplified model: suppose that once the index switches from an old version to the new version it never switches back, and that the switch happens with probability $\sigma$ at each step. Then the marginal mass on the old index under the discounted visitation distribution is
+
+$$
+(1-\gamma)\sum_{t\ge 0}[\gamma(1-\sigma)]^t = \frac{1-\gamma}{1-\gamma(1-\sigma)}.
+$$
+
+As long as $\sigma \gg 1-\gamma$, the old-policy mass is significantly compressed.
+
+#### Differences in Surrogate Objective Estimation
+
+**Trajectory-level mixture**: The advantage function reduces to $A^{\pi^{(i)}}(s,a)$, with a clear estimation path.
+
+**Advantage substitution bias in step/segment-level mixture**: If single-policy advantage estimates are used, systematic bias will arise. The reason is that $A^{\beta^{(k)}}((s,i),a)$ requires taking expectations over future index switching, while $A^{\pi^{(i)}}(s,a)$ implicitly assumes "the future always follows $\pi^{(i)}$."
+
+#### Unification Under Bandit Setting
+
+In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.
+
+### 6.2 Risks and Applicable Scenarios
+
+Step/segment-level mixture has another hidden concern: even if single-step importance ratios are clipped, multi-step noise accumulation over long trajectories can still amplify gradient estimation variance. When policy changes per update are large, "behavioral discontinuities" within trajectories may induce heavier-tailed ratio distributions. This is also why Table 6.1 recommends trajectory-level mixture for scenarios with large policy change per update.
+
+#### Applicable Scenarios
+
+#### Table 6.1 Applicable Scenarios for Two Mixture Mechanisms
+
+| Scenario Characteristics                                     | Recommended Mechanism | Rationale                                  |
+| ------------------------------------------------------------ | --------------------- | ------------------------------------------ |
+| Long trajectories, high-frequency updates, strong asynchrony | Step/segment-level    | Can significantly compress $S_k$           |
+| Short trajectories (non-bandit)                              | Trajectory-level      | $S_k$ is naturally low                     |
+| Large policy change per update                               | Trajectory-level      | Avoids variance amplification              |
+| Single-step episode (bandit)                                 | Either                | Choose based on implementation convenience |
+| Need for compromise                                          | Segment-level         | Switch at natural boundaries               |
+
+**Core trade-off**: Step/segment-level mixture is stronger on the sampling side (fast staleness removal), while trajectory-level mixture is more stable on the estimation side (easier surrogate objective estimation).
+
+## 7. Theoretical Foundations of Clipping Mechanisms
+
+### 7.1 From TV Distance to Sample-Controllable Quantities
 
 Corollary 5.3 tells us that to guarantee monotonic improvement, we need to control the update increment shift $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$. But TV distance is a distribution-level quantity, so how do we control it with samples?
 
 The bridge from theory to samples is the following identity:
 
-> **Lemma 6.1 (Ratio Difference Representation of TV Distance)**
+> **Lemma 7.1 (Ratio Difference Representation of TV Distance)**
 >
 > Suppose policy $\pi_1$'s support covers the supports of $\pi$ and $\pi_2$. Then for any state distribution $\mu$:
 >
@@ -321,7 +377,7 @@ The left side is the TV distance between two distributions (requiring enumeratio
 
 #### Sample Representation of $U_k$
 
-Using Lemma 6.1, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling-source policy), we obtain:
+Using Lemma 7.1, setting $\pi = \pi_{k+1}$, $\pi_2 = \pi_k$, $\pi_1 = \pi^{(i)}$ (the sampling-source policy), we obtain:
 
 $$
 U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot\mid s)} \left| \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)} - \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} \right|
@@ -335,7 +391,7 @@ $$
 
 This means: **If we can ensure $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$ for each sample, we can guarantee $U_k \leq \epsilon/2$**.
 
-### 6.2 Constraining $U_k$: Two Clipping Options
+### 7.2 Constraining $U_k$: Two Clipping Options
 
 #### Method 1: Direct Constraint on Ratio Difference
 
@@ -375,7 +431,7 @@ For comparison, we present the complete objective functions for three clipping m
 - $\rho_k = \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)}$ (current policy's ratio relative to sampling policy)
 - $r = \frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)}$ (new policy's incremental ratio relative to current policy)
 
-Note: under **trajectory-level mixture** (index fixed), $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$, so per-trajectory advantages from the corresponding old policy are consistent; under **step/segment-level mixture**, replacing $A^{\beta^{(k)}}$ with $A^{\pi^{(i)}}$ introduces advantage-substitution bias (discussed in Section 7), so the advantage/value estimator must reflect future index switching.
+Note: under **trajectory-level mixture** (index fixed), $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$, so per-trajectory advantages from the corresponding old policy are consistent; under **step/segment-level mixture**, replacing $A^{\beta^{(k)}}$ with $A^{\pi^{(i)}}$ introduces advantage-substitution bias (discussed in Section 6), so the advantage/value estimator must reflect future index switching.
 
 #### Standard PPO (Trajectory-Level Mixture)
 
@@ -403,9 +459,9 @@ $$
 
 where $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advantage estimate.
 
-### 6.3 Comparison and Practical Controls
+### 7.3 Method Comparison and Selection
 
-#### Table 6.1 Comparison of Three Clipping Mechanisms
+#### Table 7.1 Comparison of Three Clipping Mechanisms
 
 | Method       | Clipped Variable                   | Clipping Center            | Clipping Interval                    | More Natural Shift Object          |
 | ------------ | ---------------------------------- | -------------------------- | ------------------------------------ | ---------------------------------- |
@@ -448,6 +504,10 @@ Large language models have many tokens having very small probabilities.
 - Method 2 constrains $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$, which is a **multiplicative constraint**: if $\pi_k(a\mid s) = 10^{-6}$, the allowed absolute change is only $\epsilon \times 10^{-6}$.
 - Method 1 constrains $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$, which is an **additive constraint**: if that token has higher probability under the old policy (e.g., $\pi^{(i)}(a\mid s) = 0.1$), even if the current probability is very low, faster improvement is allowed - provided the token still has enough observable mass under the sampling policy.
 
+### 7.4 Staleness Control and Operational Meaning
+
+The discussion so far has focused on optimization-side clipping, but the monotonic-improvement lower bound also contains a sampling-staleness term $S_k$. This subsection handles the sampling side's responsibility and then returns to what clipping, as an overall operation, actually means.
+
 #### Controlling Sampling Staleness
 
 Corollary 5.3 shows that $S_k$ also enters the monotonic-improvement lower bound, but it **cannot be controlled from the optimization side**. It has to be handled by the sampling system:
@@ -474,68 +534,12 @@ The clipping objective can be read as a practical approximation to this constrai
 
 This section established the theoretical foundations of clipping mechanisms:
 
-1. **Lemma 6.1** converts TV distance to sample-level ratio differences, serving as the bridge between theory and implementation
+1. **Lemma 7.1** converts TV distance to sample-level ratio differences, serving as the bridge between theory and implementation
 2. **Two constraint methods**: the hard-constraint versions of Method 1 (adaptive clipping center) and Method 2 (fixed incremental clipping) both imply $U_k \leq \epsilon/2$; the clipped surrogates used in practice are approximations to this idea
 3. **Comparison with standard PPO**: under a single-source trust-region intuition, standard PPO applies optimization pressure around the new-vs-behavior shift; Methods 1/2 redirect that pressure to the current policy $\pi_k$, which avoids the structural difficulty caused by multiple behavior sources
 4. **Method selection**: Method 1 (adaptive) is recommended for high staleness or LLM large vocabulary scenarios; Method 2 (incremental) is attractive when you want the clipping center to avoid depending on the old policy family (but data still needs to provide behavior logprobs to compute $\rho_k$)
 5. **$S_k$ control** is the sampling side's responsibility, implemented through data filtering and version windows
 6. **Clipping is constrained optimization**: Maximize the surrogate objective subject to $U_k$ constraints
-
-## 7. Comparison of Trajectory-Level and Step/Segment-Level Mixture
-
-### 7.1 Mechanism Differences and Estimation Implications
-
-The essential difference between the two mixture mechanisms lies in the structure of the index transition kernel:
-
-- **Trajectory-level mixture**: $q(i'\mid i) = \mathbf{1}\{i'=i\}$, index never changes
-- **Step/segment-level mixture**: $\sigma(i) > 0$, allows within-trajectory switching
-
-The correspondence with common engineering terminology is:
-
-- **Trajectory-level mixture** here can be roughly understood as an idealized abstraction of "**conventional asynchronous training**": data is organized by entire trajectories/episodes belonging to a certain policy version;
-- **Step/segment-level mixture** here can be roughly understood as an abstraction of "**partial rollout**": due to asynchrony between actors and learners, and possible refresh to new policy versions at segment boundaries, using an index transition kernel that allows "within-trajectory version switching" can better approximate this phenomenon. APRIL is a representative systems example of this design pattern, but its main contribution is reducing long-tail rollout bottlenecks rather than providing the monotonic-improvement theory developed here.
-
-The key dividing line is **whether Lemma 4.1's structural simplification holds**: trajectory-level mixture satisfies the advantage reduction, while step/segment-level mixture generally does not because future returns depend on the index transition kernel.
-
-#### Differences in Sampling Staleness $S_k$
-
-**Trajectory-level mixture**'s staleness arises from: mixture weights $\alpha_i^{(k)}$ retaining probability mass on old policies after new policy release.
-
-**Step/segment-level mixture** has an **exponential compression effect** in a simplified model: suppose that once the index switches from an old version to the new version it never switches back, and that the switch happens with probability $\sigma$ at each step. Then the marginal mass on the old index under the discounted visitation distribution is
-
-$$
-(1-\gamma)\sum_{t\ge 0}[\gamma(1-\sigma)]^t = \frac{1-\gamma}{1-\gamma(1-\sigma)}.
-$$
-
-As long as $\sigma \gg 1-\gamma$, the old-policy mass is significantly compressed.
-
-#### Differences in Surrogate Objective Estimation
-
-**Trajectory-level mixture**: The advantage function reduces to $A^{\pi^{(i)}}(s,a)$, with a clear estimation path.
-
-**Advantage substitution bias in step/segment-level mixture**: If single-policy advantage estimates are used, systematic bias will arise. The reason is that $A^{\beta^{(k)}}((s,i),a)$ requires taking expectations over future index switching, while $A^{\pi^{(i)}}(s,a)$ implicitly assumes "the future always follows $\pi^{(i)}$."
-
-#### Unification Under Bandit Setting
-
-In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.
-
-### 7.2 Risks and Applicable Scenarios
-
-Step/segment-level mixture has another hidden concern: even if single-step importance ratios are clipped, multi-step noise accumulation over long trajectories can still amplify gradient estimation variance. When policy changes per update are large, "behavioral discontinuities" within trajectories may induce heavier-tailed ratio distributions. This is also why Table 7.1 recommends trajectory-level mixture for scenarios with large policy change per update.
-
-#### Applicable Scenarios
-
-#### Table 7.1 Applicable Scenarios for Two Mixture Mechanisms
-
-| Scenario Characteristics                                     | Recommended Mechanism | Rationale                                  |
-| ------------------------------------------------------------ | --------------------- | ------------------------------------------ |
-| Long trajectories, high-frequency updates, strong asynchrony | Step/segment-level    | Can significantly compress $S_k$           |
-| Short trajectories (non-bandit)                              | Trajectory-level      | $S_k$ is naturally low                     |
-| Large policy change per update                               | Trajectory-level      | Avoids variance amplification              |
-| Single-step episode (bandit)                                 | Either                | Choose based on implementation convenience |
-| Need for compromise                                          | Segment-level         | Switch at natural boundaries               |
-
-**Core trade-off**: Step/segment-level mixture is stronger on the sampling side (fast staleness removal), while trajectory-level mixture is more stable on the estimation side (easier surrogate objective estimation).
 
 ## 8. Handling Training-Inference Inconsistency
 
@@ -562,12 +566,12 @@ This definition simultaneously covers version staleness and training-inference i
 
 ### 8.2 Actionable Control
 
-By Lemma 6.1, $\hat{S}_k$ can be written in a sample-computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then the effective staleness on the **conditional distribution of retained samples** (which we may denote by $\hat{S}_k^{\mathrm{eff}}$) can be controlled to at most $\epsilon_{\mathrm{stale}}/2$. This controls the filtered training distribution, not the original sampling distribution's $\hat{S}_k$.
+By Lemma 7.1, $\hat{S}_k$ can be written in a sample-computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then the effective staleness on the **conditional distribution of retained samples** (which we may denote by $\hat{S}_k^{\mathrm{eff}}$) can be controlled to at most $\epsilon_{\mathrm{stale}}/2$. This controls the filtered training distribution, not the original sampling distribution's $\hat{S}_k$.
 
 #### Key Implementation Points
 
 1. **Behavior denominator alignment**: The behavior probability in the loss should use the inference-side recorded $\hat{\pi}^{(i)}(a\mid s)$
-2. **Probability smoothing**: If the inference side has truncation (e.g., top-k), ensure ratios are valid and the support-coverage condition required by Lemma 6.1 still holds
+2. **Probability smoothing**: If the inference side has truncation (e.g., top-k), ensure ratios are valid and the support-coverage condition required by Lemma 7.1 still holds
 
 ## 9. Practical Guidelines
 
