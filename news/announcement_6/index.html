@@ -108,7 +108,7 @@
   </head>
 
   <!-- Body -->
-  <body class="fixed-top-nav ">
+  <body class="fixed-top-nav sticky-bottom-footer">
 
     <!-- Header --><header>
 
@@ -266,9 +266,8 @@
 
     </div>
 
-    <!-- Footer -->    
-    <footer class="fixed-bottom">
-      <div class="container mt-0">
+    <!-- Footer -->    <footer class="sticky-bottom mt-5">
+      <div class="container">
         &copy; Copyright 2026 Xihuai Leo Wang. Last updated: April 18, 2026.
       </div>
     </footer>
@@ -302,7 +301,56 @@
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
   <script async src="https://badge.dimensions.ai/badge.js"></script>
 
-    <!-- MathJax 3.x with comprehensive configuration -->
+    <!-- FOUC prevention for math: hide post content until MathJax finishes.
+       Flag `<html class="math-loading">` set synchronously; removed after render. -->
+  <script>
+    (function () {
+      if (!document.querySelector || !document.body && !document.documentElement) return;
+      // Only hide when a post-content area contains raw $ or $$ delimiters.
+      // We can't query DOM here (head), so we always flag and let JS remove it on ready.
+      document.documentElement.classList.add('math-loading');
+      // Hard fallback: remove the flag after 2.5s regardless of MathJax state.
+      setTimeout(function () {
+        document.documentElement.classList.remove('math-loading');
+        document.documentElement.classList.add('math-ready');
+      }, 2500);
+    })();
+  </script>
+  <style>
+    html.math-loading .post-content {
+      opacity: 0;
+      transition: opacity 160ms ease;
+    }
+    html.math-ready .post-content,
+    html:not(.math-loading) .post-content {
+      opacity: 1;
+      transition: opacity 160ms ease;
+    }
+    /* Inherit theme text color so dark mode renders math correctly */
+    .post-content mjx-container,
+    .post-content mjx-container mjx-math {
+      color: inherit;
+    }
+    /* Display math: allow horizontal scroll; fade hint appears only when content overflows */
+    .post-content mjx-container[display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.25rem 0.1rem;
+      margin-top: 1.25rem;
+      margin-bottom: 1.25rem;
+      scrollbar-width: thin;
+    }
+    .post-content mjx-container[display="true"].has-overflow {
+      mask-image: linear-gradient(to right, black 0, black calc(100% - 18px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 18px), transparent 100%);
+    }
+    /* Equation number alignment */
+    .post-content mjx-container[display="true"] mjx-labels {
+      color: var(--global-text-color-light);
+    }
+  </style>
+  <!-- MathJax 3.x with comprehensive configuration -->
   <script type="text/javascript">
     window.MathJax = {
       tex: {
@@ -373,9 +421,28 @@
       startup: {
         ready: function () {
           MathJax.startup.defaultReady();
-          // Fix: restore underscores that might have been converted to <em>
           MathJax.startup.promise.then(() => {
-            console.log('MathJax typesetting complete');
+            // Clear FOUC flag so post-content fades in
+            document.documentElement.classList.remove('math-loading');
+            document.documentElement.classList.add('math-ready');
+            // Detect display-math overflow once, then on resize (debounced)
+            const detectOverflow = () => {
+              try {
+                document.querySelectorAll('.post-content mjx-container[display="true"]').forEach(el => {
+                  if (el.scrollWidth > el.clientWidth + 1) {
+                    el.classList.add('has-overflow');
+                  } else {
+                    el.classList.remove('has-overflow');
+                  }
+                });
+              } catch (_) { /* ignore */ }
+            };
+            detectOverflow();
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+              clearTimeout(resizeTimer);
+              resizeTimer = setTimeout(detectOverflow, 150);
+            }, { passive: true });
           });
         }
       }

@@ -329,6 +329,14 @@ pre code {
 .profile {
   width: 100%;
 }
+@media (max-width: 575.98px) {
+  .profile {
+    max-width: 220px;
+    margin: 0 auto 1rem;
+    float: none !important;
+    display: block;
+  }
+}
 .profile .address {
   margin-bottom: 3px;
   margin-top: 3px;
@@ -351,17 +359,21 @@ pre code {
 
 @media (min-width: 576px) {
   .profile {
-    width: 22%;
-    min-width: 140px;
-    max-width: 180px;
+    width: 24%;
+    min-width: 150px;
+    max-width: 220px;
   }
   .profile .address p {
     display: block;
   }
 }
 .post-description {
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.125rem;
+  color: var(--global-text-color-light);
+  line-height: 1.5;
+  max-width: 60ch;
 }
 .post-description a {
   color: inherit;
@@ -369,6 +381,10 @@ pre code {
 .post-description a:hover {
   color: var(--global-theme-color);
   text-decoration: none;
+}
+.post-description strong {
+  color: var(--global-theme-color);
+  font-weight: 600;
 }
 
 .navbar {
@@ -1206,12 +1222,17 @@ pre:not(.wrapped) pre {
 /*******************************************************************************
  * News
  ******************************************************************************/
+.news {
+  position: relative;
+}
 .news .news-table.news-scrollable {
-  max-height: clamp(180px, 28vh, 350px);
+  max-height: clamp(220px, 32vh, 420px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;
+  mask-image: linear-gradient(to bottom, black 0, black calc(100% - 32px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0, black calc(100% - 32px), transparent 100%);
 }
 .news .news-table.news-scrollable table {
   margin-bottom: 0;
@@ -1291,30 +1312,48 @@ pre:not(.wrapped) pre {
 }
 
 .profile .address {
-  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-family: "SF Mono", "JetBrains Mono", "Menlo", monospace;
+  font-size: 0.75rem;
   color: var(--global-text-color-light);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+  text-align: center;
 }
 .profile .address p {
-  position: relative;
-  padding-left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
 }
 .profile .address p::before {
-  content: "";
+  content: "\f3c5";
+  font-family: "Font Awesome 5 Free", "FontAwesome";
+  font-weight: 900;
+  font-size: 0.85em;
+  color: var(--global-theme-color);
+  opacity: 0.85;
+}
+.profile figure {
+  margin: 0;
 }
 .profile img {
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--global-divider-color);
-  box-shadow: none;
-  transition: transform 0.3s ease;
+  box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.18);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .profile img:hover {
-  transform: scale(1.01);
-  box-shadow: none;
+  transform: translateY(-2px);
+  border-color: var(--global-theme-color);
+  box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.22);
 }
 
 .post-header {
   margin-bottom: 1rem;
+}
+.post-header.hero {
+  text-align: center;
+  padding: 1.25rem 0 1.5rem;
 }
 .post-header .post-title {
   font-weight: 700;
@@ -1322,20 +1361,42 @@ pre:not(.wrapped) pre {
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
+.post-header .post-title.signature-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
 .post-header .post-title.signature-name .name-en {
-  font-family: "Georgia", "Times New Roman", serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1.75rem;
+  font-family: "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 2.5rem;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, var(--global-text-color) 0%, var(--global-theme-color) 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.post-header .post-title.signature-name .name-sep {
+  width: 1px;
+  height: 1.3em;
+  background: var(--global-divider-color);
+  align-self: center;
 }
 .post-header .post-title.signature-name .name-zh {
   font-family: "KaiTi", "STKaiti", "FZKai-Z03", "AR PL UKai CN", serif;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 1.75rem;
+  color: var(--global-text-color-light);
+  letter-spacing: 0.08em;
 }
 .post-header .desc {
   font-size: 1.125rem;
   color: var(--global-text-color-light);
+  margin-bottom: 0.75rem;
 }
 .post-header .desc a {
   color: var(--global-theme-color);
@@ -1347,7 +1408,7 @@ pre:not(.wrapped) pre {
   border-bottom-style: solid;
 }
 
-.post h2 {
+.post > article > h2 {
   font-size: 1.5rem;
   font-weight: 700;
   margin-top: 1.5rem;
@@ -1356,10 +1417,10 @@ pre:not(.wrapped) pre {
   border-bottom: 2px solid var(--global-theme-color);
   display: inline-block;
 }
-.post h2 a {
+.post > article > h2 a {
   color: inherit;
 }
-.post h2 a:hover {
+.post > article > h2 a:hover {
   text-decoration: none;
   opacity: 0.8;
 }
@@ -1417,37 +1478,86 @@ pre:not(.wrapped) pre {
   margin-bottom: 1.5rem;
 }
 .cv .card {
-  background: var(--global-card-bg-color);
+  background: transparent;
   border: none;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  margin-top: 0.75rem !important;
-  padding: 0.75rem 1rem !important;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 1.25rem !important;
+  padding: 0.25rem 0 0.75rem !important;
   transition: none;
 }
 .cv .card:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: none !important;
   transform: none !important;
 }
 .cv .card .card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--global-theme-color);
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.4rem;
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--global-text-color);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
   border-bottom: 1px solid var(--global-divider-color);
+  position: relative;
+  letter-spacing: -0.01em;
+}
+.cv .card .card-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  width: 3px;
+  height: 1em;
+  background: var(--global-theme-color);
+  border-radius: 2px;
 }
 .cv .list-group {
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 0.25rem;
+  position: relative;
+}
+@media (min-width: 768px) {
+  .cv .list-group:has(.cv-year-badge)::before {
+    content: "";
+    position: absolute;
+    left: 155px;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 1px;
+    background: var(--global-divider-color);
+  }
 }
 .cv .list-group .list-group-item {
-  padding: 0.4rem 0;
+  padding: 0.5rem 0;
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  background: transparent;
+  position: relative;
+}
+@media (min-width: 768px) {
+  .cv .list-group .list-group-item:has(.cv-year-badge)::before {
+    content: "";
+    position: absolute;
+    left: 155px;
+    top: 0.95rem;
+    width: 9px;
+    height: 9px;
+    background: var(--global-bg-color);
+    border: 2px solid var(--global-theme-color);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .cv .list-group .list-group-item:has(.cv-year-badge):hover::before {
+    background: var(--global-theme-color);
+    transform: translateX(-50%) scale(1.25);
+  }
+  .cv .list-group .list-group-item:first-child:has(.cv-year-badge)::before {
+    top: 0.45rem;
+  }
 }
 .cv .list-group .list-group-item:last-child {
-  border-bottom: none;
   padding-bottom: 0;
 }
 .cv .list-group .list-group-item:first-child {
@@ -1479,12 +1589,17 @@ pre:not(.wrapped) pre {
   color: var(--global-text-color-light);
 }
 .cv .list-group .list-group-item .items {
-  margin: 0.25rem 0 0 0;
-  padding-left: 0.85rem;
+  margin: 0;
+  padding-left: 0;
   font-size: 1rem;
+  list-style: none;
 }
 .cv .list-group .list-group-item .items li {
   margin-bottom: 0.15rem;
+  padding-left: 0;
+}
+.cv .list-group .list-group-item .items li::marker {
+  content: "";
 }
 .cv .cv-year-badge {
   font-size: 0.875rem;
@@ -1551,11 +1666,37 @@ pre:not(.wrapped) pre {
   margin-top: 0.75rem;
 }
 .publications h2.year {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 0.75rem;
-  margin-bottom: 0.6rem;
-  padding-top: 0.75rem;
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--global-text-color);
+  margin-top: 1.75rem;
+  margin-bottom: 0.9rem;
+  padding-top: 1rem;
+  padding-bottom: 0.4rem;
+  border-top: none;
+  border-bottom: none;
+  text-align: left;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.publications h2.year::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 1.1em;
+  background: var(--global-theme-color);
+  border-radius: 2px;
+}
+.publications h2.year::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--global-divider-color) 0%, transparent 100%);
+  margin-left: 0.5rem;
 }
 .publications ol.bibliography li {
   margin-bottom: 1rem;
@@ -1874,6 +2015,91 @@ pre:not(.wrapped) pre {
   cursor: pointer;
 }
 
+/*******************************************************************************
+ * Venue/Topic Tag — Per-topic accent colors
+ * Applies to both Publications and Selected Papers.
+ * The site uses topic names (not venue names) as the abbr/filter value.
+ ******************************************************************************/
+.venue-tag[data-venue-filter="LLM Reasoning and Agency"] {
+  border-left-color: #8b5cf6;
+}
+.venue-tag[data-venue-filter="LLM Reasoning and Agency"]:hover, .venue-tag[data-venue-filter="LLM Reasoning and Agency"]:focus {
+  background-color: #8b5cf6;
+  border-color: #8b5cf6;
+}
+.venue-tag[data-venue-filter="MARL Efficiency"] {
+  border-left-color: #14b8a6;
+}
+.venue-tag[data-venue-filter="MARL Efficiency"]:hover, .venue-tag[data-venue-filter="MARL Efficiency"]:focus {
+  background-color: #14b8a6;
+  border-color: #14b8a6;
+}
+.venue-tag[data-venue-filter="MARL Generalization"] {
+  border-left-color: #f59e0b;
+}
+.venue-tag[data-venue-filter="MARL Generalization"]:hover, .venue-tag[data-venue-filter="MARL Generalization"]:focus {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+}
+.venue-tag[data-venue-filter^=ACL], .venue-tag[data-venue-filter^=EMNLP], .venue-tag[data-venue-filter^=NAACL] {
+  border-left-color: #dc2626;
+}
+.venue-tag[data-venue-filter^=ACL]:hover, .venue-tag[data-venue-filter^=ACL]:focus, .venue-tag[data-venue-filter^=EMNLP]:hover, .venue-tag[data-venue-filter^=EMNLP]:focus, .venue-tag[data-venue-filter^=NAACL]:hover, .venue-tag[data-venue-filter^=NAACL]:focus {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+.venue-tag[data-venue-filter^=NeurIPS], .venue-tag[data-venue-filter^=ICML] {
+  border-left-color: #8b5cf6;
+}
+.venue-tag[data-venue-filter^=NeurIPS]:hover, .venue-tag[data-venue-filter^=NeurIPS]:focus, .venue-tag[data-venue-filter^=ICML]:hover, .venue-tag[data-venue-filter^=ICML]:focus {
+  background-color: #8b5cf6;
+  border-color: #8b5cf6;
+}
+.venue-tag[data-venue-filter^=ICLR] {
+  border-left-color: #3b82f6;
+}
+.venue-tag[data-venue-filter^=ICLR]:hover, .venue-tag[data-venue-filter^=ICLR]:focus {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/*******************************************************************************
+ * Publication Links — tighter, link-like buttons
+ ******************************************************************************/
+.publications .links a.btn,
+.post ol.bibliography .links a.btn {
+  font-family: "SF Mono", "Fira Code", "Monaco", "Consolas", monospace;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+.publications .links a.btn:hover,
+.post ol.bibliography .links a.btn:hover {
+  background-color: var(--global-theme-color);
+  color: #fff !important;
+  border-color: var(--global-theme-color);
+}
+
+/*******************************************************************************
+ * Subtle scroll-reveal for news rows & paper items (respects reduced-motion)
+ ******************************************************************************/
+@media (prefers-reduced-motion: no-preference) {
+  .news table tr,
+  .post ol.bibliography > li {
+    animation: fadeInUp 0.5s ease both;
+  }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
 /******************************************************************************
  * Sticky / floating Table of Contents with Collapsible Functionality
  ******************************************************************************/
@@ -2756,6 +2982,29 @@ pre:not(.wrapped) pre {
   align-items: center;
   gap: 0.4rem;
   padding-top: 0.5rem;
+}
+.post-list .blog-post-list-item {
+  position: relative;
+  padding-left: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+.post-list .blog-post-list-item::before {
+  content: "";
+  position: absolute;
+  left: -0.5rem;
+  top: 1.4rem;
+  bottom: 1.4rem;
+  width: 2px;
+  background: var(--global-theme-color);
+  opacity: 0;
+  border-radius: 2px;
+  transition: opacity 0.2s ease;
+}
+.post-list .blog-post-list-item:hover::before {
+  opacity: 0.8;
+}
+.post-list .blog-post-list-item h3 a {
+  transition: color 0.2s ease;
 }
 
 .featured-posts .post-meta a {
