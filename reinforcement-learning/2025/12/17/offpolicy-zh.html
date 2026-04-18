@@ -233,30 +233,32 @@
         <blockquote>
   <p>本文研究一个在大规模 LLM 强化学习里反复出现的问题：当一个训练 batch 同时混入多个历史策略版本生成的数据时，能否仍为 PPO 式更新写出显式的单调改进下界？</p>
 
-  <p>先说结论：在动态混合采样下，这个下界可以概括为“代理目标 - 更新偏移惩罚 - 采样陈旧性惩罚”。</p>
+  <p>先说结论：在动态混合采样下，这个下界可以概括为”代理目标 - 更新偏移惩罚 - 采样陈旧性惩罚”。</p>
 </blockquote>
 
-<h2 id="1-引言为什么我们需要关心异策略训练">1. 引言：为什么我们需要关心“异策略”训练？</h2>
+<h2 id="1-引言为什么要关心异策略训练">1. 引言：为什么要关心”异策略”训练？</h2>
 
-<p>用强化学习训练大语言模型时，最直接的做法是同策略（on-policy）训练：模型生成一批数据，立刻用这批数据更新，再用更新后的模型采样下一批。</p>
+<p>用强化学习训练大语言模型，最直接的做法是同策略（on-policy）训练：模型生成一批数据，立刻用这批数据更新，再用更新后的模型采样下一批。</p>
 
-<p>但在大规模分布式训练中，数百个 GPU 并行采样，模型更新本身也有延迟。新版本发布时，旧版本生成的数据往往还留在队列里：直接丢掉太浪费，继续使用又担心数据已经过时。</p>
+<p>但在大规模分布式训练里，数百个 GPU 并行采样，模型更新本身也有延迟。新版本发布时，旧版本生成的数据往往还留在队列里：直接丢掉太浪费，继续使用又担心数据已经过时。</p>
 
-<p>这便是<strong>异策略</strong>（off-policy）训练所面临的核心问题：<strong>用旧策略采集的数据来更新新策略时，什么条件仍足以保证一个可分析的单调提升下界？</strong></p>
+<p>这就是<strong>异策略</strong>（off-policy）训练面对的核心问题：<strong>用旧策略采集的数据来更新新策略，什么条件仍足以保证一个可分析的单调提升下界？</strong></p>
 
-<p>我们最终会看到，这个下界由三部分共同决定：一个可最大化的代理目标、一个由优化侧裁剪控制的更新偏移惩罚、以及一个由采样侧过滤控制的陈旧性惩罚。</p>
+<p>最终会看到，这个下界由三部分共同决定：一个可最大化的代理目标、一个由优化侧裁剪控制的更新偏移惩罚、以及一个由采样侧过滤控制的陈旧性惩罚。</p>
 
-<p>在不少 RLHF / online alignment 设定里，若把 prompt 看作 context、response 看作 action，并忽略长程环境状态演化，问题常被近似为 contextual bandit。本文仍先在一般折扣 MDP 上推导，是为了把“多版本行为策略混合、采样陈旧性、裁剪机制”这些结构一次性写清楚；到第七部分再看 bandit 化之后哪些地方会明显简化、哪些结论会保留。</p>
+<p>在不少 RLHF / online alignment 设定里，若把 prompt 看作 context、response 看作 action，并忽略长程环境状态演化，问题常被近似为 contextual bandit。本文仍先在一般折扣 MDP 上推导，是为了把”多版本行为策略混合、采样陈旧性、裁剪机制”这些结构一次性写清楚；到第六部分再看 bandit 化之后哪些地方会明显简化、哪些结论会保留。</p>
 
-<p>相关工作里，GePPO 讨论了样本复用下的 off-policy policy improvement guarantee，Decoupled PPO 则把 behavior policy 与 proximal policy 显式区分开来。本文的着眼点不同：这里把行为侧进一步展开成多个历史策略版本的动态混合，并把风险拆成“更新增量偏移”与“采样陈旧性”两项。你也可以把这篇文章看成前一篇“三策略视角”文章的延伸：这里只是把行为侧从单一 $\mu$ 显式展开成历史策略混合 $\{\pi^{(i)}\}$，而 $\pi_k$ 与 $\pi_{k+1}$ 则分别扮演当前参考策略与更新目标的角色；不过即使没读过上一篇，也只需要记住这里的核心思想：把当前更新可控的部分和行为分布失配造成的部分分开分析。</p>
+<p>相关工作里，GePPO 讨论了样本复用下的 off-policy policy improvement guarantee，Decoupled PPO 则把 behavior policy 与 proximal policy 显式区分开。本文的着眼点不同：这里把行为侧进一步展开成多个历史策略版本的动态混合，并把风险拆成”更新增量偏移”与”采样陈旧性”两项。</p>
+
+<p>也可以把这篇文章看成前一篇”三策略视角”文章的延伸：这里把行为侧从单一 $\mu$ 显式展开成历史策略混合 $\{\pi^{(i)}\}$，$\pi_k$ 与 $\pi_{k+1}$ 分别扮演当前参考策略与更新目标。即使没读过上一篇，也只需记住这里的核心思路：把当前更新可控的部分，和行为分布失配造成的部分分开分析。</p>
 
 <h2 id="2-理论基础">2. 理论基础</h2>
 
 <h3 id="21-基本设定">2.1 基本设定</h3>
 
-<p>我们考虑一个标准的马尔可夫决策过程（MDP），包含状态空间 $\mathcal{S}$、动作空间 $\mathcal{A}$、转移概率 $p(s'\mid s,a)$、奖励函数 $r(s,a)$、初始状态分布 $\rho_0$ 和折扣因子 $\gamma \in (0,1)$。</p>
+<p>考虑一个标准的马尔可夫决策过程（MDP），包括状态空间 $\mathcal{S}$、动作空间 $\mathcal{A}$、转移概率 $p(s'\mid s,a)$、奖励函数 $r(s,a)$、初始状态分布 $\rho_0$ 和折扣因子 $\gamma \in (0,1)$。</p>
 
-<p>策略 $\pi$ 的期望累计折扣回报为：</p>
+<p>策略 $\pi$ 的期望累计折扣回报：</p>
 
 <p>$$
 J(\pi) := \mathbb{E}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \mid \pi\right]
@@ -264,15 +266,11 @@ $$</p>
 
 <h4 id="折扣状态访问分布">折扣状态访问分布</h4>
 
-<p>定义为：</p>
-
 <p>$$
 d_\pi(s) := (1-\gamma) \sum_{t=0}^{\infty} \gamma^t \Pr(s_t = s \mid \pi)
 $$</p>
 
 <h4 id="优势函数">优势函数</h4>
-
-<p>定义为：</p>
 
 <p>$$
 A^\pi(s,a) := Q^\pi(s,a) - V^\pi(s)
@@ -280,22 +278,20 @@ $$</p>
 
 <h4 id="全变差距离tv-距离">全变差距离（TV 距离）</h4>
 
-<p>定义为：</p>
-
 <p>$$
 D_{\mathrm{TV}}(\pi, \pi'; s) := \frac{1}{2} \sum_{a \in \mathcal{A}} |\pi(a \mid s) - \pi'(a \mid s)|
 $$</p>
 
-<p>本文统一用 $\mid$ 表示条件概率（例如 $\pi(a\mid s)$），并保留 $\|\cdot\|$ 表示范数。</p>
+<p>本文统一用 $\mid$ 表示条件概率（例如 $\pi(a\mid s)$），$\|\cdot\|$ 保留给范数。</p>
 
 <h3 id="22-核心工具性能差分引理">2.2 核心工具：性能差分引理</h3>
 
-<p>全文的起点是经典的 performance difference lemma；它把 $J(\pi)-J(\pi_k)$ 精确写成新策略占据分布下对旧策略优势的期望。这一恒等式可追溯到 Kakade-Langford 的分析，也是 TRPO 推导的起点。</p>
+<p>全文的起点是经典的 performance difference lemma：把 $J(\pi)-J(\pi_k)$ 精确写成新策略占据分布下对旧策略优势的期望。这一恒等式可追溯到 Kakade-Langford 的分析，也是 TRPO 推导的起点。</p>
 
 <blockquote>
   <p><strong>引理 2.1（性能差分引理）</strong></p>
 
-  <p>对于任意旧策略 $\pi_k$ 和新策略 $\pi$，性能差异可表示为：</p>
+  <p>对任意旧策略 $\pi_k$ 和新策略 $\pi$，性能差异可写成：</p>
 
   <p>$$
 J(\pi) - J(\pi_k) = \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_\pi}\left[ \mathbb{E}_{a \sim \pi(\cdot \mid s)}[A^{\pi_k}(s,a)] \right]
@@ -308,9 +304,9 @@ $$</p>
 
 <h3 id="31-分布不匹配与分布差异控制">3.1 分布不匹配与分布差异控制</h3>
 
-<p>性能差分引理存在一个实际问题：右侧的期望是在新策略的状态分布 $d_\pi$ 下计算的，而我们只能从旧策略的分布 $d_{\pi_k}$ 中采样。</p>
+<p>性能差分引理有一个实际难题：右侧的期望是在新策略的状态分布 $d_\pi$ 下计算的，而我们只能从旧策略的分布 $d_{\pi_k}$ 中采样。</p>
 
-<p>解决思路是：将期望分解为“旧分布下的期望”与“偏差项”两部分，然后对偏差项加以控制。关键问题在于：<strong>状态分布的差异与策略的差异之间存在怎样的定量关系？</strong></p>
+<p>思路是：把期望分解成”旧分布下的期望”与”偏差项”两部分，再对偏差项加以控制。关键问题是：<strong>状态分布的差异与策略的差异之间有怎样的定量关系？</strong></p>
 
 <h4 id="状态分布差异的控制">状态分布差异的控制</h4>
 
@@ -322,15 +318,15 @@ $$</p>
 $$</p>
 </blockquote>
 
-<p>这里直接采用的是 <strong>average-divergence / average-TV</strong> 风格的写法。它不是 TRPO 中更常见的 $\max_s D_{\mathrm{TV}}$ 版本，而更接近 CPO / Achiam et al. (2017) 那类“用平均散度刻画性能差距”的表述；这样写更容易落到样本平均，也更方便后文处理多源采样与陈旧性。关于从 $\|d_\pi-d_{\pi_k}\|_1$ 到 average TV 的 proof sketch，见附录 A。</p>
+<p>这里采用的是 <strong>average-divergence / average-TV</strong> 风格的写法。它不是 TRPO 里更常见的 $\max_s D_{\mathrm{TV}}$ 版本，而更接近 CPO / Achiam et al. (2017) 那类”用平均散度刻画性能差距”的表述；这样写更容易落到样本平均，也更方便后文处理多源采样与陈旧性。关于从 $\|d_\pi-d_{\pi_k}\|_1$ 到 average TV 的 proof sketch 见附录 A。</p>
 
 <h4 id="物理意义">物理意义</h4>
 
-<p>策略在动作空间上的微小差异，会通过环境动力学被“放大”为状态访问分布的差异。上式中的系数 $\frac{2\gamma}{1-\gamma}$ 反映了<strong>时间累积效应</strong>——在长时域任务中（$\gamma$ 接近1），放大效应更为显著。</p>
+<p>策略在动作空间上的微小差异，会被环境动力学”放大”成状态访问分布的差异。上式中的系数 $\frac{2\gamma}{1-\gamma}$ 反映了<strong>时间累积效应</strong>——在长时域任务里（$\gamma$ 接近 1），放大效应更明显。</p>
 
 <h4 id="证明思路">证明思路</h4>
 
-<p>证明通常从折扣访问分布的不动点方程出发，再配合 average-divergence 风格的性能界来完成。由于本文重点不在复现这条证明链，而在于如何把它推广到多源采样与陈旧数据场景，正文只保留思路，附录 A 给出一个简短的 proof sketch。</p>
+<p>证明通常从折扣访问分布的不动点方程出发，再配合 average-divergence 风格的性能界完成。本文的重点不在复现这条证明链，而在于如何把它推广到多源采样与陈旧数据场景，所以正文只保留思路，附录 A 给出一个简短的 proof sketch。</p>
 
 <h3 id="32-策略性能改进下界">3.2 策略性能改进下界</h3>
 
@@ -350,26 +346,26 @@ L_{\pi_k}(\pi) := \frac{1}{1-\gamma} \mathbb{E}_{s \sim d_{\pi_k}, a \sim \pi_k}
 $$</p>
 </blockquote>
 
-<p>这里的 $L_{\pi_k}(\pi)$ 省略了与 $\pi$ 无关的常数项 $J(\pi_k)$；若写成更接近 TRPO 教科书的形式，就是 $J(\pi_k)+L_{\pi_k}(\pi)$。另外，$C_{\pi,\pi_k}$ 本身依赖新策略 $\pi$，所以它更像一个出现在下界表达式中的结构性系数，而不是实践里可以直接当作固定超参数的量。</p>
+<p>这里的 $L_{\pi_k}(\pi)$ 省略了与 $\pi$ 无关的常数项 $J(\pi_k)$；若写成更接近 TRPO 教科书的形式，就是 $J(\pi_k)+L_{\pi_k}(\pi)$。另外，$C_{\pi,\pi_k}$ 本身依赖新策略 $\pi$，所以它更像一个出现在下界表达式中的结构性系数，不宜在实践里直接当作固定超参数。</p>
 
 <p>这个下界由两部分组成：</p>
 
 <ol>
   <li>
-    <p><strong>代理目标</strong> $L_{\pi_k}(\pi)$：可通过旧策略数据利用重要性采样直接估计，它是 TRPO 的经典 surrogate，也是 PPO clipped / penalized 目标的出发点。</p>
+    <p><strong>代理目标</strong> $L_{\pi_k}(\pi)$：可通过旧策略数据用重要性采样直接估计，它是 TRPO 的经典 surrogate，也是 PPO clipped / penalized 目标的出发点。</p>
   </li>
   <li>
-    <p><strong>策略偏移惩罚</strong>：随着新旧策略的 TV 距离增大而增加，这解释了为何 PPO 等算法需要限制更新幅度。</p>
+    <p><strong>策略偏移惩罚</strong>：随着新旧策略 TV 距离的增大而增加，这解释了为何 PPO 等算法需要限制更新幅度。</p>
   </li>
 </ol>
 
-<p><strong>核心结论</strong>：该定理给出了一个显式的改进下界；当右侧为正时，就能保证性能改进。</p>
+<p><strong>核心结论</strong>：这条定理给出了一个显式的改进下界；当右侧为正时，就能保证性能改进。</p>
 
 <h2 id="4-多策略静态混合采样">4. 多策略静态混合采样</h2>
 
 <h3 id="41-问题设定与统一建模静态混合">4.1 问题设定与统一建模（静态混合）</h3>
 
-<p>在实际训练中，一个批次的数据可能来自多个策略版本 $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$，各版本占比为 $\alpha_1, \ldots, \alpha_M$。如何将定理 3.2 推广到这种情形？</p>
+<p>实际训练中，一个批次的数据可能来自多个策略版本 $\{\pi^{(1)}, \ldots, \pi^{(M)}\}$，各版本占比分别为 $\alpha_1, \ldots, \alpha_M$。如何把定理 3.2 推广到这种情形？</p>
 
 <p><strong>核心思想：扩展状态空间</strong></p>
 
@@ -377,15 +373,15 @@ $$</p>
 
 <p>定义扩展状态空间 $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$，其中 $\mathcal{I} = \{1, \ldots, M\}$ 是策略索引集合。在扩展状态 $(s, i)$ 下，<strong>混合行为策略</strong>定义为 $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$。</p>
 
-<p>索引的演化由<strong>索引转移核</strong> $q(i' \mid i)$ 刻画。扩展MDP继承原始MDP的奖励和环境转移，索引按 $q(i'\mid i)$ 独立演化。</p>
+<p>索引的演化由<strong>索引转移核</strong> $q(i' \mid i)$ 刻画。扩展 MDP 继承原始 MDP 的奖励和环境转移，索引按 $q(i'\mid i)$ 独立演化。</p>
 
-<p>这个技巧之所以有效，是因为新策略 $\pi$ 在扩展MDP上的回报与在原始MDP中的回报相同，从而可以直接应用定理 3.2。</p>
+<p>这个技巧之所以有效，是因为新策略 $\pi$ 在扩展 MDP 上的回报与原始 MDP 中的回报相同，因此可直接套用定理 3.2。</p>
 
 <h3 id="42-轨迹级混合结构简化与改进下界">4.2 轨迹级混合：结构简化与改进下界</h3>
 
-<p>最常见的情形是<strong>每条轨迹仅使用一个旧策略</strong>：在轨迹开始时采样索引 $I_0 \sim \alpha$，随后整条轨迹都使用策略 $\pi^{(I_0)}$。此时索引转移核为恒等转移：$q(i' \mid i) = \mathbf{1}_{i'=i}$。</p>
+<p>最常见的情形是<strong>每条轨迹只使用一个旧策略</strong>：在轨迹开始时采样索引 $I_0 \sim \alpha$，整条轨迹都用策略 $\pi^{(I_0)}$。此时索引转移核为恒等转移：$q(i' \mid i) = \mathbf{1}_{i'=i}$。</p>
 
-<p>从工程实现的角度看，在许多异步 actor-learner 架构中，采样端若按“整条轨迹归属于某个策略快照”的方式组织数据，而 learner 再混合使用不同版本的整条轨迹进行更新，这可以近似对应这里的<strong>轨迹级混合</strong>。之所以说“近似”，是因为不同系统对“轨迹/采样单元”的切分边界可能不完全一致。</p>
+<p>工程上，许多异步 actor-learner 架构中，采样端若按”整条轨迹归属于某个策略快照”的方式组织数据，learner 再混合使用不同版本的整条轨迹更新，这就大致对应这里的<strong>轨迹级混合</strong>。之所以说”大致”，是因为不同系统对”轨迹 / 采样单元”的切分边界未必完全一致。</p>
 
 <blockquote>
   <p><strong>引理 4.1（轨迹级混合的结构简化）</strong></p>
@@ -395,9 +391,9 @@ $$</p>
   <p>(b) 优势函数还原为：$A^{\beta}((s, i), a) = A^{\pi^{(i)}}(s, a)$</p>
 </blockquote>
 
-<p><strong>(b) 的直观理解</strong>：由于索引永不改变，从扩展状态 $(s,i)$ 出发的<strong>所有未来轨迹</strong>都由同一个策略 $\pi^{(i)}$ 生成。因此，未来的累计回报完全由 $\pi^{(i)}$ 决定，价值函数和优势函数自然还原为 $\pi^{(i)}$ 的对应量。</p>
+<p><strong>(b) 的直观理解</strong>：由于索引永不变，从扩展状态 $(s,i)$ 出发的<strong>所有未来轨迹</strong>都由同一个策略 $\pi^{(i)}$ 生成。因此未来的累计回报完全由 $\pi^{(i)}$ 决定，价值函数和优势函数自然还原为 $\pi^{(i)}$ 的对应量。</p>
 
-<p>因此，混合策略的回报等于各旧策略回报的加权平均：$J_{\mathrm{mix}} = \sum_{i=1}^{M} \alpha_i J(\pi^{(i)})$。</p>
+<p>混合策略的回报也就是各旧策略回报的加权平均：$J_{\mathrm{mix}} = \sum_{i=1}^{M} \alpha_i J(\pi^{(i)})$。</p>
 
 <p><strong>改进下界</strong></p>
 
@@ -409,17 +405,17 @@ J(\pi) - \sum_{i=1}^{M} \alpha_i J(\pi^{(i)}) \geq \sum_{i=1}^{M} \alpha_i L_{\p
 $$</p>
 </blockquote>
 
-<p>这里取 $\max_i C_{\pi,\pi^{(i)}}$ 只是为了把表达写得更紧凑；更细的写法是让每个分量各自带自己的 $C_i$ 再加权求和。也就是说，这里额外牺牲了一些紧度，换来更统一的展示形式。</p>
+<p>这里取 $\max_i C_{\pi,\pi^{(i)}}$ 只是为了写得更紧凑；更细致的写法是让每个分量各自带自己的 $C_i$ 再加权求和。也就是说，这里牺牲了一点紧度，换来更统一的展示形式。</p>
 
-<p>这说明：只要对每条轨迹用对应旧策略的重要性比率构造损失，并控制新策略与各旧策略之间的偏移，混合训练仍然有明确的改进下界。</p>
+<p>结论是：只要对每条轨迹用对应旧策略的重要性比率构造损失，并控制新策略与各旧策略的偏移，混合训练就仍有明确的改进下界。</p>
 
 <h2 id="5-动态混合采样与单调提升条件">5. 动态混合采样与单调提升条件</h2>
 
 <h3 id="51-问题与统一建模动态混合">5.1 问题与统一建模（动态混合）</h3>
 
-<p>上一部分讨论的是<strong>静态混合</strong>——混合权重 $\alpha_i$ 固定不变。本节考虑更一般的<strong>动态混合</strong>——即新策略发布后，采样逐步由新策略接管的过程。</p>
+<p>上一节讨论的是<strong>静态混合</strong>——混合权重 $\alpha_i$ 固定不变。本节考虑更一般的<strong>动态混合</strong>——新策略发布后，采样逐步由新策略接管的过程。</p>
 
-<p>前面的结论刻画了“新策略相对于混合行为策略”的改进。但在实际训练中，我们真正关心的是：<strong>每轮更新后的最新策略 $\pi_{k+1}$ 相对于上一轮最新策略 $\pi_k$ 是否具有单调提升性？</strong></p>
+<p>前面的结论刻画了”新策略相对于混合行为策略”的改进。但实际训练中真正关心的是：<strong>每轮更新后的最新策略 $\pi_{k+1}$ 相对于上一轮的 $\pi_k$ 是否单调提升？</strong></p>
 
 <p>$$
 J(\pi_{k+1}) \geq J(\pi_k)
@@ -429,21 +425,21 @@ $$</p>
 
 <p>动态混合采样的两种典型形式都可以用索引转移核 $q(i'\mid i)$ 统一刻画：</p>
 
-<p><strong>轨迹级混合</strong>（可类比为常规异步训练的一个抽象；索引恒等转移）：$q(i'\mid i) = \mathbf{1}\{i'=i\}$</p>
+<p><strong>轨迹级混合</strong>（对应常规异步训练的一种抽象；索引恒等转移）：$q(i'\mid i) = \mathbf{1}\{i'=i\}$</p>
 
-<p><strong>步/段级混合</strong>（partial rollout，也可理解为段式采样的一个抽象；允许切换）：$q(i'\mid i) = (1-\sigma(i))\mathbf{1}\{i'=i\} + \sigma(i)\kappa(i'\mid i)$</p>
+<p><strong>步/段级混合</strong>（partial rollout，也可理解为段式采样的一种抽象；允许切换）：$q(i'\mid i) = (1-\sigma(i))\mathbf{1}\{i'=i\} + \sigma(i)\kappa(i'\mid i)$</p>
 
-<p>其中 $\sigma(i)$ 为切换概率，$\kappa(\cdot\mid i)$ 为目标索引分布。</p>
+<p>其中 $\sigma(i)$ 是切换概率，$\kappa(\cdot\mid i)$ 是目标索引分布。</p>
 
 <h3 id="52-分解与单调提升下界">5.2 分解与单调提升下界</h3>
 
-<p>通过引入混合回报 $J_{\mathrm{mix}}^{(k)}$ 作为中间桥梁，性能差异可分解为：</p>
+<p>引入混合回报 $J_{\mathrm{mix}}^{(k)}$ 作为中间桥梁，性能差异可以分解为：</p>
 
 <p>$$
 J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{相对混合策略的改进}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{混合偏差项}}
 $$</p>
 
-<p>第一项可用定理 3.2 处理。第二项是<strong>混合偏差项</strong>，处理思路是：先把 $J_{\mathrm{mix}}^{(k)} - J(\pi_k)$ 写成各个 $J(\pi^{(i)}) - J(\pi_k)$ 的加权和，再对每一项应用基于 TV 距离的两策略下界，最后用 $\|A^{\pi_k}\|_\infty$ 统一收口。于是有：</p>
+<p>第一项可用定理 3.2 处理。第二项是<strong>混合偏差项</strong>：先把 $J_{\mathrm{mix}}^{(k)} - J(\pi_k)$ 写成各个 $J(\pi^{(i)}) - J(\pi_k)$ 的加权和，再对每一项套用基于 TV 距离的两策略下界，最后用 $\|A^{\pi_k}\|_\infty$ 统一收口，得到：</p>
 
 <p>$$
 J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
@@ -451,7 +447,7 @@ $$</p>
 
 <h4 id="单调提升下界">单调提升下界</h4>
 
-<p>合并上述结果，我们得到核心定理：</p>
+<p>合并以上结果，得到核心定理：</p>
 
 <blockquote>
   <p><strong>定理 5.1（动态混合采样下的单调提升下界）</strong></p>
@@ -465,7 +461,7 @@ J(\pi_{k+1}) - J(\pi_k) \geq\;& L_{\beta^{(k)}}(\pi_{k+1}) \\
 $$</p>
 </blockquote>
 
-<p>其中 $L_{\beta^{(k)}}(\pi_{k+1})$ 表示“相对行为策略 $\beta^{(k)}$ 的代理目标”（与第三部分的 $L_{\pi_k}(\pi)$ 同形，只是把行为策略从单一 $\pi_k$ 推广到混合 $\beta^{(k)}$）。</p>
+<p>其中 $L_{\beta^{(k)}}(\pi_{k+1})$ 表示”相对行为策略 $\beta^{(k)}$ 的代理目标”（与第三部分的 $L_{\pi_k}(\pi)$ 同形，只是把行为策略从单一 $\pi_k$ 推广到混合 $\beta^{(k)}$）。</p>
 
 <p>更具体地，可写为</p>
 
@@ -479,46 +475,46 @@ $$</p>
 C_{\pi_{k+1},\beta^{(k)}} := \max_{(s,i)}\left|\mathbb{E}_{a\sim \pi_{k+1}(\cdot\mid s)}\big[A^{\beta^{(k)}}((s,i),a)\big]\right|.
 $$</p>
 
-<p>这个下界里有两个惩罚项，对应<strong>双重控制</strong>：</p>
+<p>下界里有两个惩罚项，对应<strong>双重控制</strong>：</p>
 
 <ul>
-  <li><strong>更新偏移惩罚</strong>：新策略 $\pi_{k+1}$ 相对于采样来源策略 $\pi^{(i)}$ 的偏移</li>
-  <li><strong>采样陈旧性惩罚</strong>：采样来源策略 $\pi^{(i)}$ 相对于当前策略 $\pi_k$ 的陈旧性</li>
+  <li><strong>更新偏移惩罚</strong>：新策略 $\pi_{k+1}$ 相对于采样来源策略 $\pi^{(i)}$ 的偏移；</li>
+  <li><strong>采样陈旧性惩罚</strong>：采样来源策略 $\pi^{(i)}$ 相对于当前策略 $\pi_k$ 的陈旧性。</li>
 </ul>
 
 <h3 id="53-直接约束为何不可行三角不等式分解">5.3 直接约束为何不可行：三角不等式分解</h3>
 
-<p>这里先加一句限定：下面讨论的不可行性，针对的是“试图对每个历史来源都施加统一硬 trust-region 约束”这种解释；它并不等价于说 PPO-Clip 本身显式实现了这样的约束。</p>
+<p>先加一句限定：下面讨论的不可行性针对的是”试图对每个历史来源都施加统一硬 trust-region 约束”这种解释，并不等于说 PPO-Clip 本身显式实现了这样的约束。</p>
 
-<p>定理 5.1 中的更新偏移惩罚项看似可以通过约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s)$ 来控制；但如果把它理解成上述统一硬约束，就会遇到一个实际上的不可行性问题：</p>
+<p>定理 5.1 中的更新偏移惩罚项看起来可以通过约束 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s)$ 控制；但若把它理解成上述统一硬约束，就会撞上一个实际的不可行性问题：</p>
 
 <blockquote>
   <p><strong>观察 5.2（统一硬 trust-region 的不可行性）</strong></p>
 
-  <p>假设混合采样包含两个旧策略 $\pi^{(1)}$ 和 $\pi^{(2)}$，若存在某个状态 $s$ 使得 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) > 2\delta$，则不存在任何策略 $\pi_{k+1}$ 能够同时满足 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ 与 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$。</p>
+  <p>设混合采样包含两个旧策略 $\pi^{(1)}$ 和 $\pi^{(2)}$，若存在某个状态 $s$ 使得 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) > 2\delta$，则不存在任何策略 $\pi_{k+1}$ 能同时满足 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(1)}; s) \leq \delta$ 和 $D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(2)}; s) \leq \delta$。</p>
 </blockquote>
 
 <h4 id="证明">证明</h4>
 
-<p>由三角不等式，若同时满足两个约束，则 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) \leq 2\delta$，矛盾。</p>
+<p>由三角不等式，若同时满足这两个约束，则 $D_{\mathrm{TV}}(\pi^{(1)}, \pi^{(2)}; s) \leq 2\delta$，矛盾。</p>
 
 <h4 id="问题根源">问题根源</h4>
 
-<p>更新偏移惩罚项将 $\pi_{k+1}$ 与历史策略族 $\{\pi^{(i)}\}$ 直接耦合，而后者的内部结构是历史训练的产物，不受当前更新控制。</p>
+<p>更新偏移惩罚项把 $\pi_{k+1}$ 与历史策略族 $\{\pi^{(i)}\}$ 直接耦合，而后者的内部结构是历史训练的产物，不受当前更新控制。</p>
 
 <h4 id="三角不等式分解">三角不等式分解</h4>
 
-<p>解决方案是利用 TV 距离的三角不等式：</p>
+<p>解法是利用 TV 距离的三角不等式：</p>
 
 <p>$$
 D_{\mathrm{TV}}(\pi_{k+1}, \pi^{(i)}; s) \leq D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s) + D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)
 $$</p>
 
-<p>这将耦合约束拆分为两个独立部分：</p>
+<p>把耦合约束拆成两个独立部分：</p>
 
 <ul>
-  <li><strong>更新增量偏移</strong> $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)$：新策略相对于当前策略的偏离，<strong>可由优化侧控制</strong></li>
-  <li><strong>采样陈旧性</strong> $D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)$：当前策略相对于各旧策略的偏离，<strong>需由采样侧控制</strong></li>
+  <li><strong>更新增量偏移</strong> $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)$：新策略相对于当前策略的偏离，<strong>由优化侧控制</strong>；</li>
+  <li><strong>采样陈旧性</strong> $D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)$：当前策略相对于各旧策略的偏离，<strong>由采样侧控制</strong>。</li>
 </ul>
 
 <p>定义：</p>
@@ -535,9 +531,9 @@ J(\pi_{k+1}) - J(\pi_k) \geq L_{\beta^{(k)}}(\pi_{k+1}) - \frac{2\gamma C_{\pi_{
 $$</p>
 </blockquote>
 
-<h4 id="为何分解能解决问题">为何分解能解决问题？</h4>
+<h4 id="为什么分解能解决问题">为什么分解能解决问题？</h4>
 
-<p>关键在于：分解后的 $U_k$ 只涉及新策略 $\pi_{k+1}$ 和当前策略 $\pi_k$，<strong>与旧策略族 $\{\pi^{(i)}\}$ 的结构完全无关</strong>。因此，无论旧策略之间差异多大，约束 $U_k$ 都是可行的——这正是观察 5.2 所揭示的不可行性问题的解决之道。</p>
+<p>关键在于：分解后的 $U_k$ 只涉及新策略 $\pi_{k+1}$ 和当前策略 $\pi_k$，<strong>与旧策略族 $\{\pi^{(i)}\}$ 的结构完全无关</strong>。因此无论旧策略之间差异多大，约束 $U_k$ 都是可行的——这正是观察 5.2 不可行性问题的解法。</p>
 
 <p>对应的工程原则就是<strong>职责分离</strong>：</p>
 
@@ -563,295 +559,55 @@ $$</p>
   </tbody>
 </table>
 
-<h2 id="6-裁剪机制的理论基础">6. 裁剪机制的理论基础</h2>
+<h2 id="6-轨迹级与步段级混合的比较">6. 轨迹级与步/段级混合的比较</h2>
 
-<h3 id="61-从-tv-距离到样本可控量">6.1 从 TV 距离到样本可控量</h3>
-
-<p>推论 5.3 告诉我们，要保证单调提升，需要控制更新增量偏移 $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$。但 TV 距离是分布层面的量，如何用样本来控制它？</p>
-
-<p>连接理论和样本的是下面这个恒等式：</p>
-
-<blockquote>
-  <p><strong>引理 6.1（TV 距离的比值差表示）</strong></p>
-
-  <p>设策略 $\pi_1$ 的支撑覆盖 $\pi$ 和 $\pi_2$ 的支撑，则对任意状态分布 $\mu$：</p>
-
-  <p>$$
-\mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot\mid s)} \left| \frac{\pi(a\mid s)}{\pi_1(a\mid s)} - \frac{\pi_2(a\mid s)}{\pi_1(a\mid s)} \right|
-$$</p>
-</blockquote>
-
-<p>注意：这里默认作为分母的行为策略在参与训练的动作上具有支撑覆盖。对 LLM 来说，这意味着若推理端使用带硬截断的 top-k / top-p 采样而不做平滑，一些比值可能根本无定义；第 8 节会回到这个问题。</p>
-
-<h4 id="直观理解">直观理解</h4>
-
-<p>左侧是两个分布之间的 TV 距离（需要遍历所有动作），右侧是在 $\pi_1$ 下采样时两个重要性比值的差的绝对值。这使我们能够通过样本来估计和控制 TV 距离。</p>
-
-<h4 id="inlmath133mathend-的样本表示">$U_k$ 的样本表示</h4>
-
-<p>利用引理 6.1，取 $\pi = \pi_{k+1}$，$\pi_2 = \pi_k$，$\pi_1 = \pi^{(i)}$（采样来源策略），可得：</p>
-
-<p>$$
-U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot\mid s)} \left| \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)} - \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} \right|
-$$</p>
-
-<p>记 $\rho_{k+1} := \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}$ 和 $\rho_k := \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)}$，则：</p>
-
-<p>$$
-U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{训练数据}} \big| \rho_{k+1} - \rho_k \big|
-$$</p>
-
-<p>这意味着：<strong>如果我们在理论上硬性要求每个样本都满足 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，就能保证 $U_k \leq \epsilon/2$</strong>。</p>
-
-<h3 id="62-约束-inlmath141mathend两种裁剪方式">6.2 约束 $U_k$：两种裁剪方式</h3>
-
-<h4 id="方法一直接约束比值差">方法一：直接约束比值差</h4>
-
-<p>对每个样本 $(s, i, a)$，要求满足：</p>
-
-<p>$$
-\left| \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)} - \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} \right| \leq \epsilon
-$$</p>
-
-<p>即裁剪区间为 $\left[\frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} - \epsilon, \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} + \epsilon\right]$，<strong>裁剪中心是 $\rho_k$ 而非 1</strong>。</p>
-
-<h4 id="方法二约束增量比值">方法二：约束增量比值</h4>
-
-<p>注意到 $\rho_{k+1} - \rho_k = \rho_k \cdot \left(\frac{\pi_{k+1}}{\pi_k} - 1\right)$，因此有：</p>
-
-<p>$$
-|\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right|
-$$</p>
-
-<p>如果进一步在理论上硬性约束 $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$，由于 $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$，可以证明 $U_k \leq \epsilon/2$。</p>
-
-<p>这种方法直接对 $\pi_{k+1}/\pi_k$ 以 1 为中心进行裁剪，<strong>裁剪约束本身不依赖旧策略 $\pi^{(i)}$</strong>。但如果采用后文的 $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$，仍需要每条样本的行为概率 $\pi^{(i)}(a\mid s)$（或记录的 logprob）来计算 $\rho_k$。</p>
-
-<p>先强调一点：上面两条都是<strong>理论上的逐样本硬约束</strong>。下面写出的 clipped surrogate 只是实践中的近似实现，目的是把 $U_k$ 控制在一个可接受的范围内，而不是让每一步优化都自动满足严格保证。设当前样本来自旧策略 $\pi^{(i)}$，记：</p>
-
-<ul>
-  <li>$\rho_{k+1} = \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}$（新策略相对采样策略的比值）</li>
-  <li>$\rho_k = \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)}$（当前策略相对采样策略的比值）</li>
-  <li>$r = \frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)}$（新策略相对当前策略的增量比值）</li>
-</ul>
-
-<p>说明：若采用<strong>轨迹级混合</strong>（索引不变），则 $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$，可直接用每条轨迹对应旧策略的优势估计；若为<strong>步/段级混合</strong>，直接用 $A^{\pi^{(i)}}$ 代替 $A^{\beta^{(k)}}$ 会引入优势替代偏差（第七部分详述），需要使用能反映未来索引切换的优势/价值估计。</p>
-
-<h4 id="标准-ppo轨迹级混合时">标准 PPO（轨迹级混合时）</h4>
-
-<p>以 1 为中心裁剪 $\rho_{k+1}$</p>
-
-<p>$$
-L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]
-$$</p>
-
-<h4 id="方法一">方法一</h4>
-
-<p>以 $\rho_k$ 为中心裁剪 $\rho_{k+1}$</p>
-
-<p>$$
-L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]
-$$</p>
-
-<h4 id="方法二">方法二</h4>
-
-<p>以 1 为中心裁剪增量比值 $r$</p>
-
-<p>$$
-L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]
-$$</p>
-
-<p>其中 $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ 是经过重要性加权的优势估计。</p>
-
-<h3 id="63-对比与落地选型与采样侧控制">6.3 对比与落地：选型与采样侧控制</h3>
-
-<h4 id="表-61三种裁剪机制的对比">表 6.1　三种裁剪机制的对比</h4>
-
-<table>
-  <thead>
-    <tr>
-      <th>方法</th>
-      <th>裁剪变量</th>
-      <th>裁剪中心</th>
-      <th>裁剪区间</th>
-      <th>更自然对应的偏移对象</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>标准PPO</td>
-      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
-      <td>$1$</td>
-      <td>$[1-\epsilon, 1+\epsilon]$</td>
-      <td>$\pi_{k+1}$ 相对 $\pi^{(i)}$ 的偏移</td>
-    </tr>
-    <tr>
-      <td>方法一</td>
-      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
-      <td>$\rho_k = \pi_k/\pi^{(i)}$</td>
-      <td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td>
-      <td>$\pi_{k+1}$ 相对 $\pi_k$ 的偏移</td>
-    </tr>
-    <tr>
-      <td>方法二</td>
-      <td>$r = \pi_{k+1}/\pi_k$</td>
-      <td>$1$</td>
-      <td>$[1-\epsilon, 1+\epsilon]$</td>
-      <td>$\pi_{k+1}$ 相对 $\pi_k$ 的偏移</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>对前文的逐样本硬约束版本来说，方法一/二确实直接控制 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$；而这里的 clipped surrogate 对应的是更温和的说法：它们分别对不同的偏移对象施加主要的优化压力。</p>
-
-<h4 id="标准-ppo-的根本问题多策略混合">标准 PPO 的根本问题（多策略混合）</h4>
-
-<p>如果沿用单源 PPO 的一种 trust-region 直觉，标准 PPO 的 clip 目标最自然地会被解读为：它试图抑制新策略相对每个采样来源策略 $\pi^{(i)}$ 的继续偏离。但 PPO-Clip 本身并不显式施加 TV / KL 约束，而是通过裁剪移除继续远离行为策略的收益；当各旧策略 $\pi^{(1)}, \pi^{(2)}, \ldots$ 之间差异显著时，这种优化压力容易被最陈旧的策略所牵制。</p>
-
-<h4 id="方法一与方法二的共同优势">方法一与方法二的共同优势</h4>
-
-<p>对前文的逐样本硬约束版本来说，方法一和方法二直接控制的是 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$。若落到 clipped surrogate 的实践版本，更准确的说法是：它们把主要的优化压力从“同时贴近每个采样来源策略”改成“围绕当前策略 $\pi_k$ 控制更新增量”。由于 $\pi_k$ 是唯一确定的，这个目标对所有来源样本一致，从而规避了统一硬 trust-region 约束不可行的结构性困难。</p>
-
-<h4 id="方法一-vs-方法二">方法一 vs 方法二</h4>
-
-<table>
-  <thead>
-    <tr>
-      <th>比较维度</th>
-      <th>方法一（自适应裁剪）</th>
-      <th>方法二（增量裁剪）</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>陈旧样本（$\rho_k \gg 1$）</td>
-      <td>自动收紧约束，更保守</td>
-      <td>可能产生大梯度方差</td>
-    </tr>
-    <tr>
-      <td>LLM大词表低概率token</td>
-      <td>允许较大绝对变化（加法型）</td>
-      <td>绝对变化受限（乘法型）</td>
-    </tr>
-    <tr>
-      <td>实现复杂度</td>
-      <td>需存储 $\pi^{(i)}(a\mid s)$ 和 $\pi_k(a\mid s)$</td>
-      <td>需 $\pi_k(a\mid s)$ 与 $\pi^{(i)}(a\mid s)$（或存储的 logprob）以计算 $\rho_k$；裁剪本身仅用 $\pi_{k+1}/\pi_k$</td>
-    </tr>
-    <tr>
-      <td>优势函数</td>
-      <td>使用 $A^{\beta^{(k)}}$</td>
-      <td>使用加权优势 $\rho_k \cdot A^{\beta^{(k)}}$</td>
-    </tr>
-  </tbody>
-</table>
-
-<h4 id="详细解释">详细解释</h4>
-
-<h4 id="维度一陈旧样本处理">维度一：陈旧样本处理</h4>
-
-<p>当样本来自很旧的策略时，$\rho_k = \pi_k/\pi^{(i)}$ 可能很大。</p>
-
-<ul>
-  <li>方法二的被积函数为 $\rho_k \cdot \lvert r - 1\rvert$，即便 $\lvert r-1\rvert \leq \epsilon$，被积函数仍可达 $\epsilon \cdot \rho_k$，产生尖峰。</li>
-  <li>方法一直接约束 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，被积函数上界恒为 $\epsilon$，不受 $\rho_k$ 放大。</li>
-</ul>
-
-<h4 id="维度二llm-大词表问题">维度二：LLM 大词表问题</h4>
-
-<p>大语言模型词表规模巨大，大量token的概率极小。</p>
-
-<ul>
-  <li>方法二约束 $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$，这是<strong>乘法型约束</strong>：若 $\pi_k(a\mid s) = 10^{-6}$，允许的绝对变化仅为 $\epsilon \times 10^{-6}$。</li>
-  <li>方法一约束 $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$，这是<strong>尺度由采样策略概率 $\pi^{(i)}$ 决定的约束</strong>：若该 token 在旧策略下概率较高（例如 $\pi^{(i)}(a\mid s) = 0.1$），即便当前概率很低，也允许较快提升；当然，这仍以该 token 在采样分布中有足够可观测质量为前提。</li>
-</ul>
-
-<h4 id="采样陈旧性的控制">采样陈旧性的控制</h4>
-
-<p>推论 5.3 表明，$S_k$ 同样影响单调提升下界，但它<strong>无法通过优化侧的裁剪来控制</strong>，需要由采样系统实现：</p>
-
-<h4 id="一-丢弃陈旧数据">(一) 丢弃陈旧数据</h4>
-
-<p>设定阈值 $\epsilon_{\mathrm{stale}}$，对每个样本计算 $\lvert\rho_k - 1\rvert = \lvert\pi_k(a\mid s)/\pi^{(i)}(a\mid s) - 1\rvert$，丢弃超过该阈值的样本。</p>
-
-<h4 id="二-控制策略版本窗口">(二) 控制策略版本窗口</h4>
-
-<p>限制混合采样的旧策略版本数量，例如仅使用最近 $W$ 个版本的数据。</p>
-
-<h4 id="裁剪的操作含义">裁剪的操作含义</h4>
-
-<p>最后，需要澄清裁剪与理论下界的关系。</p>
-
-<p>推论 5.3 中，$U_k$ 的系数 $C_{\pi_{k+1},\beta^{(k)}}$ 依赖于新策略 $\pi_{k+1}$，因此惩罚项<strong>不能简单地替换为常数</strong>。正确的操作含义是：</p>
-
-<blockquote>
-  <p><strong>在 $U_k \leq \epsilon/2$ 的约束下，最大化代理目标 $L_{\beta^{(k)}}(\pi_{k+1})$</strong></p>
-</blockquote>
-
-<p>裁剪目标函数可以被理解为这一约束优化的<strong>近似实现</strong>——通过裁剪近似限制更新幅度，促使 $U_k$ 保持可控；在此前提下，再通过梯度上升提升代理目标，从而尽量贴近前述单调改进分析。</p>
-
-<h4 id="本节小结">本节小结</h4>
-
-<p>本节建立了裁剪机制的理论基础：</p>
-
-<ol>
-  <li><strong>引理 6.1</strong>将 TV 距离转化为样本层面的比值差，是连接理论与实现的桥梁</li>
-  <li><strong>两种约束方法</strong>：方法一（自适应裁剪中心）和方法二（固定增量裁剪）的<strong>硬约束版本</strong>都能保证 $U_k \leq \epsilon/2$；实践中的 clipped surrogate 则是对这一思路的近似实现</li>
-  <li><strong>与标准 PPO 对比</strong>：若沿用单源 trust-region 的直觉，标准 PPO 的裁剪更自然地围绕“新策略相对行为策略的偏移”施加优化压力；方法一/二则把这个压力改为围绕当前策略 $\pi_k$ 控制更新增量，从而规避多来源样本带来的结构性困难</li>
-  <li><strong>方法选择</strong>：陈旧性高或 LLM 大词表场景推荐方法一；若更关注“裁剪中心不再依赖旧策略族”，可选方法二（但仍需数据侧提供行为 logprob 以计算 $\rho_k$）</li>
-  <li><strong>$S_k$ 的控制</strong>由采样侧负责，通过数据过滤和版本窗口实现</li>
-  <li><strong>裁剪是约束优化</strong>：在 $U_k$ 约束下最大化代理目标</li>
-</ol>
-
-<h2 id="7-轨迹级与步段级混合的比较">7. 轨迹级与步/段级混合的比较</h2>
-
-<h3 id="71-机制差异与估计影响">7.1 机制差异与估计影响</h3>
+<h3 id="61-机制差异与估计影响">6.1 机制差异与估计影响</h3>
 
 <p>两类混合机制的本质区别在于索引转移核的结构：</p>
 
 <ul>
-  <li><strong>轨迹级混合</strong>：$q(i'\mid i) = \mathbf{1}\{i'=i\}$，索引永不改变</li>
-  <li><strong>步/段级混合</strong>：$\sigma(i) > 0$，允许轨迹内切换</li>
+  <li><strong>轨迹级混合</strong>：$q(i'\mid i) = \mathbf{1}\{i'=i\}$，索引永不改变；</li>
+  <li><strong>步/段级混合</strong>：$\sigma(i) > 0$，允许轨迹内切换。</li>
 </ul>
 
-<p>与常见工程术语的对应关系如下：</p>
+<p>与常见工程术语的对应关系：</p>
 
 <ul>
-  <li>这里的<strong>轨迹级混合</strong>可以大致理解为<strong>常规异步训练</strong>的一个理想化抽象：数据按整条轨迹/episode 归属于某个策略版本；</li>
-  <li>这里的<strong>步/段级混合</strong>可以大致理解为<strong>partial rollout（段式采样）</strong>的一个抽象：由于 actor 与 learner 异步，且段边界处可能刷新到新策略版本，使用索引转移核允许“轨迹内部版本切换”，可以更好地近似刻画这种现象。APRIL 提供了这类系统设计的一个代表性例子，但它的主要贡献是缓解长尾 rollout 的系统瓶颈，而不是给出本文所需的单调改进理论。</li>
+  <li><strong>轨迹级混合</strong>可大致理解为<strong>常规异步训练</strong>的理想化抽象：数据按整条轨迹 / episode 归属于某个策略版本；</li>
+  <li><strong>步/段级混合</strong>可大致理解为 <strong>partial rollout（段式采样）</strong> 的抽象：由于 actor 与 learner 异步，段边界处可能刷新到新策略版本，用索引转移核允许”轨迹内部版本切换”，可以更贴切地刻画这种现象。APRIL 提供了这类系统设计的一个代表性例子，但它的主要贡献是缓解长尾 rollout 的系统瓶颈，而不是给出本文所需的单调改进理论。</li>
 </ul>
 
-<p>关键分水岭在于<strong>引理 4.1 的结构简化是否成立</strong>：轨迹级混合满足优势函数还原；步/段级混合一般不满足，因为未来回报受索引转移核影响。</p>
+<p>关键分水岭在于<strong>引理 4.1 的结构简化是否成立</strong>：轨迹级混合满足优势函数还原；步/段级混合一般不满足，因为未来回报会受索引转移核影响。</p>
 
-<h4 id="采样陈旧性-inlmath227mathend-的差异">采样陈旧性 $S_k$ 的差异</h4>
+<h4 id="采样陈旧性-inlmath129mathend-的差异">采样陈旧性 $S_k$ 的差异</h4>
 
-<p><strong>轨迹级混合</strong>的陈旧性来源于：混合权重 $\alpha_i^{(k)}$ 在新策略发布后仍对旧策略保留一定的比例。</p>
+<p><strong>轨迹级混合</strong>的陈旧性来源于：混合权重 $\alpha_i^{(k)}$ 在新策略发布后仍对旧策略保留一定比例。</p>
 
-<p><strong>步/段级混合</strong>在一个简化模型下具有<strong>指数压缩效应</strong>：设索引一旦从旧版本切到新版本就不再切回，且每一步以概率 $\sigma$ 完成切换，则折扣访问分布下旧索引的边缘质量为</p>
+<p><strong>步/段级混合</strong>在一个简化模型下具有<strong>指数压缩效应</strong>：设索引一旦从旧版本切到新版本就不再切回，每一步以概率 $\sigma$ 完成切换，则折扣访问分布下旧索引的边缘质量为</p>
 
 <p>$$
 (1-\gamma)\sum_{t=0}^{\infty}[\gamma(1-\sigma)]^t = \frac{1-\gamma}{1-\gamma(1-\sigma)}.
 $$</p>
 
-<p>只要 $\sigma \gg 1-\gamma$，旧策略的权重即可被显著压缩。</p>
+<p>只要 $\sigma \gg 1-\gamma$，旧策略的权重就会被明显压缩。</p>
 
 <h4 id="代理目标估计的差异">代理目标估计的差异</h4>
 
 <p><strong>轨迹级混合</strong>：优势函数还原为 $A^{\pi^{(i)}}(s,a)$，估计路径清晰。</p>
 
-<p><strong>步/段级混合的优势替代偏差</strong>：若沿用单策略优势估计，将产生系统性偏差。原因是 $A^{\beta^{(k)}}((s,i),a)$ 需要对未来索引切换取期望，而 $A^{\pi^{(i)}}(s,a)$ 隐含了“未来始终沿用 $\pi^{(i)}$”的假设。</p>
+<p><strong>步/段级混合的优势替代偏差</strong>：若沿用单策略优势估计，会产生系统性偏差。原因是 $A^{\beta^{(k)}}((s,i),a)$ 需要对未来索引切换取期望，而 $A^{\pi^{(i)}}(s,a)$ 隐含了”未来始终沿用 $\pi^{(i)}$”的假设。</p>
 
 <h4 id="bandit-设定下的统一">Bandit 设定下的统一</h4>
 
-<p>在单步 episode 的 LLM 训练中，无后续状态转移，两类机制的估计问题统一，无上述偏差。</p>
+<p>在单步 episode 的 LLM 训练中没有后续状态转移，两类机制的估计问题就此统一，不存在上述偏差。</p>
 
-<h3 id="72-风险与适用场景">7.2 风险与适用场景</h3>
+<h3 id="62-风险与适用场景">6.2 风险与适用场景</h3>
 
-<p>步/段级混合还有一个隐患：即便单步重要性比值被裁剪，长轨迹下多步噪声叠加仍会放大梯度估计方差。当每次更新的策略变化幅度较大时，轨迹内部的“行为突变”可能引发更重尾的比值分布。这也是表 7.1 中“每次更新策略变化幅度大”场景推荐轨迹级混合的原因。</p>
+<p>步/段级混合还有一个隐患：即使单步重要性比值被裁剪，长轨迹下多步噪声叠加仍会放大梯度估计方差。每次更新的策略变化幅度较大时，轨迹内部的”行为突变”可能引出更重尾的比值分布。这也是表 6.1 中”每次更新策略变化幅度大”场景推荐轨迹级混合的原因。</p>
 
 <h4 id="适用场景">适用场景</h4>
 
-<h4 id="表-71两类混合机制的适用场景">表 7.1　两类混合机制的适用场景</h4>
+<h4 id="表-61两类混合机制的适用场景">表 6.1　两类混合机制的适用场景</h4>
 
 <table>
   <thead>
@@ -890,22 +646,261 @@ $$</p>
   </tbody>
 </table>
 
-<p><strong>核心权衡</strong>：步/段级混合在采样侧更强（快速去陈旧），轨迹级混合在估计侧更稳（代理目标易于估计）。</p>
+<p><strong>核心权衡</strong>：步/段级混合在采样侧更强（快速去陈旧），轨迹级混合在估计侧更稳（代理目标更容易估计）。</p>
+
+<h2 id="7-裁剪机制的理论基础">7. 裁剪机制的理论基础</h2>
+
+<h3 id="71-从-tv-距离到样本可控量">7.1 从 TV 距离到样本可控量</h3>
+
+<p>推论 5.3 告诉我们，要保证单调提升，需要控制更新增量偏移 $U_k = \mathbb{E}[D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)]$。但 TV 距离是分布层面的量，如何用样本来控制？</p>
+
+<p>连接理论和样本的是下面这个恒等式：</p>
+
+<blockquote>
+  <p><strong>引理 7.1（TV 距离的比值差表示）</strong></p>
+
+  <p>设策略 $\pi_1$ 的支撑覆盖 $\pi$ 和 $\pi_2$ 的支撑，则对任意状态分布 $\mu$：</p>
+
+  <p>$$
+\mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot\mid s)} \left| \frac{\pi(a\mid s)}{\pi_1(a\mid s)} - \frac{\pi_2(a\mid s)}{\pi_1(a\mid s)} \right|
+$$</p>
+</blockquote>
+
+<p>注意：这里默认作为分母的行为策略在参与训练的动作上具有支撑覆盖。对 LLM 来说，这意味着若推理端使用带硬截断的 top-k / top-p 采样而不做平滑，一些比值可能根本无定义；第 8 节会回到这个问题。</p>
+
+<h4 id="直观理解">直观理解</h4>
+
+<p>左侧是两个分布之间的 TV 距离（要遍历所有动作），右侧是在 $\pi_1$ 下采样时两个重要性比值之差的绝对值。这样就能用样本估计和控制 TV 距离。</p>
+
+<h4 id="inlmath145mathend-的样本表示">$U_k$ 的样本表示</h4>
+
+<p>利用引理 7.1，取 $\pi = \pi_{k+1}$，$\pi_2 = \pi_k$，$\pi_1 = \pi^{(i)}$（采样来源策略），可得：</p>
+
+<p>$$
+U_k = \frac{1}{2} \mathbb{E}_{(s,i) \sim d_{\beta^{(k)}}, a \sim \pi^{(i)}(\cdot\mid s)} \left| \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)} - \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} \right|
+$$</p>
+
+<p>记 $\rho_{k+1} := \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}$ 和 $\rho_k := \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)}$，则：</p>
+
+<p>$$
+U_k = \frac{1}{2} \mathbb{E}_{(s,i,a) \sim \text{训练数据}} \big| \rho_{k+1} - \rho_k \big|
+$$</p>
+
+<p>这意味着：<strong>若在理论上硬性要求每个样本都满足 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，就能保证 $U_k \leq \epsilon/2$</strong>。</p>
+
+<h3 id="72-约束-inlmath153mathend两种裁剪方式">7.2 约束 $U_k$：两种裁剪方式</h3>
+
+<h4 id="方法一直接约束比值差">方法一：直接约束比值差</h4>
+
+<p>对每个样本 $(s, i, a)$ 要求：</p>
+
+<p>$$
+\left| \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)} - \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} \right| \leq \epsilon
+$$</p>
+
+<p>即裁剪区间为 $\left[\frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} - \epsilon, \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} + \epsilon\right]$，<strong>裁剪中心是 $\rho_k$ 而不是 1</strong>。</p>
+
+<h4 id="方法二约束增量比值">方法二：约束增量比值</h4>
+
+<p>注意到 $\rho_{k+1} - \rho_k = \rho_k \cdot \left(\frac{\pi_{k+1}}{\pi_k} - 1\right)$，所以</p>
+
+<p>$$
+|\rho_{k+1} - \rho_k| = \rho_k \cdot \left|\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right|
+$$</p>
+
+<p>如果进一步在理论上硬性约束 $\left\lvert\frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)} - 1\right\rvert \leq \epsilon$，由于 $\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = 1$，可以证明 $U_k \leq \epsilon/2$。</p>
+
+<p>这种方法直接对 $\pi_{k+1}/\pi_k$ 以 1 为中心裁剪，<strong>裁剪约束本身不依赖旧策略 $\pi^{(i)}$</strong>。但若采用后文的 $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$，仍需要每条样本的行为概率 $\pi^{(i)}(a\mid s)$（或记录的 logprob）来计算 $\rho_k$。</p>
+
+<p>先强调一点：上面两条都是<strong>理论上的逐样本硬约束</strong>。下面写出的 clipped surrogate 只是实践中的近似实现，目的是把 $U_k$ 控制在可接受的范围内，而不是让每一步优化都自动满足严格保证。设当前样本来自旧策略 $\pi^{(i)}$，记：</p>
+
+<ul>
+  <li>$\rho_{k+1} = \frac{\pi_{k+1}(a\mid s)}{\pi^{(i)}(a\mid s)}$（新策略相对采样策略的比值）；</li>
+  <li>$\rho_k = \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)}$（当前策略相对采样策略的比值）；</li>
+  <li>$r = \frac{\pi_{k+1}(a\mid s)}{\pi_k(a\mid s)}$（新策略相对当前策略的增量比值）。</li>
+</ul>
+
+<p>说明：若是<strong>轨迹级混合</strong>（索引不变），则 $A^{\beta^{(k)}}((s,i),a)=A^{\pi^{(i)}}(s,a)$，可直接用每条轨迹对应旧策略的优势估计；若是<strong>步/段级混合</strong>，直接用 $A^{\pi^{(i)}}$ 代替 $A^{\beta^{(k)}}$ 会引入优势替代偏差（第六部分详述），需要用能反映未来索引切换的优势 / 价值估计。</p>
+
+<h4 id="标准-ppo轨迹级混合时">标准 PPO（轨迹级混合时）</h4>
+
+<p>以 1 为中心裁剪 $\rho_{k+1}$</p>
+
+<p>$$
+L^{\mathrm{PPO}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\pi^{(i)}}, \; \mathrm{clip}(\rho_{k+1}, 1-\epsilon, 1+\epsilon) \cdot A^{\pi^{(i)}} \right) \right]
+$$</p>
+
+<h4 id="方法一">方法一</h4>
+
+<p>以 $\rho_k$ 为中心裁剪 $\rho_{k+1}$</p>
+
+<p>$$
+L^{\mathrm{M1}} = \mathbb{E} \left[ \min\left( \rho_{k+1} \cdot A^{\beta^{(k)}}, \; \mathrm{clip}(\rho_{k+1}, \rho_k-\epsilon, \rho_k+\epsilon) \cdot A^{\beta^{(k)}} \right) \right]
+$$</p>
+
+<h4 id="方法二">方法二</h4>
+
+<p>以 1 为中心裁剪增量比值 $r$</p>
+
+<p>$$
+L^{\mathrm{M2}} = \mathbb{E} \left[ \min\left( r \cdot \hat{A}, \; \mathrm{clip}(r, 1-\epsilon, 1+\epsilon) \cdot \hat{A} \right) \right]
+$$</p>
+
+<p>其中 $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ 是经过重要性加权的优势估计。</p>
+
+<h3 id="73-方法对比与选型">7.3 方法对比与选型</h3>
+
+<h4 id="表-71三种裁剪机制的对比">表 7.1　三种裁剪机制的对比</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>方法</th>
+      <th>裁剪变量</th>
+      <th>裁剪中心</th>
+      <th>裁剪区间</th>
+      <th>更自然对应的偏移对象</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>标准PPO</td>
+      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
+      <td>$1$</td>
+      <td>$[1-\epsilon, 1+\epsilon]$</td>
+      <td>$\pi_{k+1}$ 相对 $\pi^{(i)}$ 的偏移</td>
+    </tr>
+    <tr>
+      <td>方法一</td>
+      <td>$\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$</td>
+      <td>$\rho_k = \pi_k/\pi^{(i)}$</td>
+      <td>$[\rho_k-\epsilon, \rho_k+\epsilon]$</td>
+      <td>$\pi_{k+1}$ 相对 $\pi_k$ 的偏移</td>
+    </tr>
+    <tr>
+      <td>方法二</td>
+      <td>$r = \pi_{k+1}/\pi_k$</td>
+      <td>$1$</td>
+      <td>$[1-\epsilon, 1+\epsilon]$</td>
+      <td>$\pi_{k+1}$ 相对 $\pi_k$ 的偏移</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>对前文的逐样本硬约束版本而言，方法一 / 二确实直接控制 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$；而这里的 clipped surrogate 对应的是更温和的说法：它们分别对不同的偏移对象施加主要的优化压力。</p>
+
+<h4 id="标准-ppo-的根本问题多策略混合">标准 PPO 的根本问题（多策略混合）</h4>
+
+<p>沿用单源 PPO 的 trust-region 直觉，标准 PPO 的 clip 目标最自然的解读是：它试图抑制新策略相对每个采样来源策略 $\pi^{(i)}$ 的继续偏离。但 PPO-Clip 本身并不显式施加 TV / KL 约束，而是通过裁剪移除”继续远离行为策略”的收益；当各旧策略 $\pi^{(1)}, \pi^{(2)}, \ldots$ 之间差异显著时，这种优化压力容易被最陈旧的策略所牵制。</p>
+
+<h4 id="方法一与方法二的共同优势">方法一与方法二的共同优势</h4>
+
+<p>对前文的逐样本硬约束版本而言，方法一和方法二直接控制的是 $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$。落到 clipped surrogate 的实践版本时，更准确的说法是：它们把主要优化压力从”同时贴近每个采样来源策略”改成”围绕当前策略 $\pi_k$ 控制更新增量”。由于 $\pi_k$ 是唯一确定的，这个目标对所有来源样本都一致，就绕开了统一硬 trust-region 约束的结构性困难。</p>
+
+<h4 id="方法一-vs-方法二">方法一 vs 方法二</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>比较维度</th>
+      <th>方法一（自适应裁剪）</th>
+      <th>方法二（增量裁剪）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>陈旧样本（$\rho_k \gg 1$）</td>
+      <td>自动收紧约束，更保守</td>
+      <td>可能产生大梯度方差</td>
+    </tr>
+    <tr>
+      <td>LLM大词表低概率token</td>
+      <td>允许较大绝对变化（加法型）</td>
+      <td>绝对变化受限（乘法型）</td>
+    </tr>
+    <tr>
+      <td>实现复杂度</td>
+      <td>需存储 $\pi^{(i)}(a\mid s)$ 和 $\pi_k(a\mid s)$</td>
+      <td>需 $\pi_k(a\mid s)$ 与 $\pi^{(i)}(a\mid s)$（或存储的 logprob）以计算 $\rho_k$；裁剪本身仅用 $\pi_{k+1}/\pi_k$</td>
+    </tr>
+    <tr>
+      <td>优势函数</td>
+      <td>使用 $A^{\beta^{(k)}}$</td>
+      <td>使用加权优势 $\rho_k \cdot A^{\beta^{(k)}}$</td>
+    </tr>
+  </tbody>
+</table>
+
+<h5 id="维度一陈旧样本处理">维度一：陈旧样本处理</h5>
+
+<p>样本来自很旧的策略时，$\rho_k = \pi_k/\pi^{(i)}$ 可能很大。</p>
+
+<ul>
+  <li>方法二的被积函数为 $\rho_k \cdot \lvert r - 1\rvert$，即便 $\lvert r-1\rvert \leq \epsilon$，被积函数仍可能达到 $\epsilon \cdot \rho_k$，产生尖峰。</li>
+  <li>方法一直接约束 $\lvert\rho_{k+1} - \rho_k\rvert \leq \epsilon$，被积函数上界恒为 $\epsilon$，不会被 $\rho_k$ 放大。</li>
+</ul>
+
+<h5 id="维度二llm-大词表问题">维度二：LLM 大词表问题</h5>
+
+<p>大语言模型词表规模巨大，大量 token 的概率极小。</p>
+
+<ul>
+  <li>方法二约束 $\pi_{k+1} \in [(1-\epsilon)\pi_k, (1+\epsilon)\pi_k]$，这是<strong>乘法型约束</strong>：若 $\pi_k(a\mid s) = 10^{-6}$，允许的绝对变化仅 $\epsilon \times 10^{-6}$。</li>
+  <li>方法一约束 $\lvert\pi_{k+1} - \pi_k\rvert \leq \epsilon \cdot \pi^{(i)}$，<strong>尺度由采样策略概率 $\pi^{(i)}$ 决定</strong>：若该 token 在旧策略下概率较高（例如 $\pi^{(i)}(a\mid s) = 0.1$），即便当前概率很低，也允许较快提升；当然，前提是该 token 在采样分布中有足够可观测的质量。</li>
+</ul>
+
+<h3 id="74-采样陈旧性控制与操作含义">7.4 采样陈旧性控制与操作含义</h3>
+
+<p>前面讨论的都是优化侧的裁剪，但单调提升下界还含有采样陈旧性 $S_k$ 一项。本节处理采样侧的职责，并回到裁剪作为整体操作的准确含义。</p>
+
+<h4 id="采样陈旧性的控制">采样陈旧性的控制</h4>
+
+<p>推论 5.3 表明 $S_k$ 同样影响单调提升下界，但它<strong>无法通过优化侧的裁剪来控制</strong>，需要由采样系统实现：</p>
+
+<ul>
+  <li><strong>丢弃陈旧数据</strong>：设阈值 $\epsilon_{\mathrm{stale}}$，对每个样本计算 $\lvert\rho_k - 1\rvert = \lvert\pi_k(a\mid s)/\pi^{(i)}(a\mid s) - 1\rvert$，丢弃超过阈值的样本。</li>
+  <li><strong>控制策略版本窗口</strong>：限制混合采样的旧策略版本数，例如只使用最近 $W$ 个版本的数据。</li>
+</ul>
+
+<h4 id="裁剪的操作含义">裁剪的操作含义</h4>
+
+<p>最后要澄清裁剪与理论下界的关系。</p>
+
+<p>推论 5.3 里，$U_k$ 的系数 $C_{\pi_{k+1},\beta^{(k)}}$ 依赖于新策略 $\pi_{k+1}$，所以惩罚项<strong>不能简单地换成常数</strong>。正确的操作含义是：</p>
+
+<blockquote>
+  <p><strong>在 $U_k \leq \epsilon/2$ 的约束下，最大化代理目标 $L_{\beta^{(k)}}(\pi_{k+1})$</strong></p>
+</blockquote>
+
+<p>裁剪目标函数可以看作这一约束优化的<strong>近似实现</strong>——通过裁剪近似限制更新幅度，让 $U_k$ 保持可控；在此基础上再通过梯度上升提升代理目标，尽量贴近前述单调改进分析。</p>
+
+<h4 id="本节小结">本节小结</h4>
+
+<p>本节建立了裁剪机制的理论基础：</p>
+
+<ol>
+  <li><strong>引理 7.1</strong> 把 TV 距离转化为样本层面的比值差，是连接理论与实现的桥梁；</li>
+  <li><strong>两种约束方法</strong>：方法一（自适应裁剪中心）和方法二（固定增量裁剪）的<strong>硬约束版本</strong>都能保证 $U_k \leq \epsilon/2$；实践中的 clipped surrogate 是对这一思路的近似实现；</li>
+  <li><strong>与标准 PPO 对比</strong>：沿用单源 trust-region 直觉，标准 PPO 的裁剪最自然地围绕”新策略相对行为策略的偏移”施加优化压力；方法一 / 二则把压力改为围绕当前策略 $\pi_k$ 控制更新增量，由此绕开多来源样本带来的结构性困难；</li>
+  <li><strong>方法选择</strong>：陈旧性高或 LLM 大词表场景推荐方法一；若更希望”裁剪中心不再依赖旧策略族”，可选方法二（但仍需数据侧提供行为 logprob 来计算 $\rho_k$）；</li>
+  <li><strong>$S_k$ 的控制</strong>由采样侧负责，通过数据过滤和版本窗口实现；</li>
+  <li><strong>裁剪是约束优化</strong>：在 $U_k$ 约束下最大化代理目标。</li>
+</ol>
 
 <h2 id="8-训推不一致的处理">8. 训推不一致的处理</h2>
 
 <h3 id="81-背景与有效陈旧性">8.1 背景与有效陈旧性</h3>
 
-<p>在大规模分布式训练中，推理端和训练端的策略可能存在不一致：</p>
+<p>在大规模分布式训练中，推理端和训练端的策略可能不一致：</p>
 
 <ul>
-  <li><strong>数值实现差异</strong>：softmax归一化、量化、核融合等</li>
-  <li><strong>解码规则差异</strong>：温度缩放、top-p/top-k采样等</li>
+  <li><strong>数值实现差异</strong>：softmax 归一化、量化、核融合等；</li>
+  <li><strong>解码规则差异</strong>：温度缩放、top-p / top-k 采样等。</li>
 </ul>
 
-<p>设训练侧建模的行为策略为 $\pi^{(i)}$，而推理端实际采样的策略为 $\hat{\pi}^{(i)}$。</p>
+<p>设训练侧建模的行为策略为 $\pi^{(i)}$，推理端实际采样的策略为 $\hat{\pi}^{(i)}$。</p>
 
-<p>这里讨论的是“行为策略 vs. 当前训练策略”的失配，而不是 RLHF 中常见的“当前策略 vs. reference model”的 KL 正则；后者是另一条正则化轴线。</p>
+<p>这里讨论的是”行为策略 vs. 当前训练策略”的失配，而不是 RLHF 里常见的”当前策略 vs. reference model”的 KL 正则——后者是另一条正则化轴线。</p>
 
 <h4 id="有效陈旧性">有效陈旧性</h4>
 
@@ -915,17 +910,17 @@ $$</p>
 \hat{S}_k := \mathbb{E}_{(s,i) \sim d_{\hat{\beta}^{(k)}}} \big[ D_{\mathrm{TV}}(\pi_k, \hat{\pi}^{(i)}; s) \big]
 $$</p>
 
-<p>该定义同时覆盖了版本陈旧性与训推实现差异。</p>
+<p>这个定义同时涵盖了版本陈旧性与训推实现差异。</p>
 
 <h3 id="82-可操作控制">8.2 可操作控制</h3>
 
-<p>由引理 6.1，$\hat{S}_k$ 可表示为样本级可计算形式。给定阈值 $\epsilon_{\mathrm{stale}}$，若训练仅使用满足 $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则<strong>被保留样本的条件分布</strong>上的有效陈旧性（可记为 $\hat{S}_k^{\mathrm{eff}}$）可被控制在 $\epsilon_{\mathrm{stale}}/2$ 以内。换言之，这里控制的是过滤后的训练分布，而不是原始采样分布上的 $\hat{S}_k$。</p>
+<p>由引理 7.1，$\hat{S}_k$ 可写成样本级可计算的形式。给定阈值 $\epsilon_{\mathrm{stale}}$，若训练只使用满足 $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$ 的样本，则<strong>被保留样本的条件分布</strong>上的有效陈旧性（记为 $\hat{S}_k^{\mathrm{eff}}$）可被控制在 $\epsilon_{\mathrm{stale}}/2$ 以内。换言之，这里控制的是过滤后的训练分布，而不是原始采样分布上的 $\hat{S}_k$。</p>
 
 <h4 id="关键实现要点">关键实现要点</h4>
 
 <ol>
-  <li><strong>行为分母对齐</strong>：损失中的行为概率应使用推理端记录的 $\hat{\pi}^{(i)}(a\mid s)$</li>
-  <li><strong>概率平滑</strong>：若推理端有截断（如 top-k），需通过平滑等方式确保比值合法，并满足引理 6.1 所需的支撑覆盖条件</li>
+  <li><strong>行为分母对齐</strong>：损失中的行为概率要使用推理端记录的 $\hat{\pi}^{(i)}(a\mid s)$；</li>
+  <li><strong>概率平滑</strong>：若推理端有截断（如 top-k），需通过平滑等方式保证比值合法，并满足引理 7.1 所需的支撑覆盖条件。</li>
 </ol>
 
 <h2 id="9-总结实践指南">9. 总结：实践指南</h2>
@@ -938,7 +933,7 @@ $$</p>
 J(\pi_{k+1}) - J(\pi_k) \geq \underbrace{L_{\beta^{(k)}}(\pi_{k+1})}_{\text{代理目标}} - \underbrace{C_1 \cdot U_k}_{\text{更新偏移惩罚}} - \underbrace{C_2 \cdot S_k}_{\text{采样陈旧性惩罚}}
 $$</p>
 
-<p>这里的 $C_1, C_2$ 只是对前文理论常数的压缩记号，用来概括下界结构。更具体地，可把它们理解为</p>
+<p>这里的 $C_1, C_2$ 只是对前文理论常数的压缩记号，用来概括下界结构。具体来说，</p>
 
 <p>$$
 C_1 = \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2},
@@ -946,7 +941,7 @@ C_1 = \frac{2\gamma C_{\pi_{k+1},\beta^{(k)}}}{(1-\gamma)^2},
 C_2 = C_1 + \frac{2\|A^{\pi_k}\|_\infty}{1-\gamma},
 $$</p>
 
-<p>只是在正文里为了突出结构，把记号压缩成了 $C_1, C_2$。它们不是实践里可自由调节的超参数。</p>
+<p>正文为了突出结构，把记号压缩成了 $C_1, C_2$。它们不是实践里可以自由调节的超参数。</p>
 
 <h4 id="职责分离原则">职责分离原则</h4>
 
@@ -1013,15 +1008,15 @@ $$</p>
 <h4 id="训推不一致的处理">训推不一致的处理</h4>
 
 <ul>
-  <li>使用推理端记录的 $\hat{\pi}^{(i)}$ 作为行为分母</li>
-  <li>通过样本过滤压缩参与训练数据上的有效陈旧性</li>
+  <li>用推理端记录的 $\hat{\pi}^{(i)}$ 作为行为分母；</li>
+  <li>通过样本过滤压缩参与训练数据上的有效陈旧性。</li>
 </ul>
 
 <h2 id="附录">附录</h2>
 
 <h3 id="a-从状态分布差异到-average-tv-的-proof-sketch">A. 从状态分布差异到 average TV 的 proof sketch</h3>
 
-<p>证明引理 3.1 的常见起点，是折扣状态访问分布的不动点方程：</p>
+<p>证明引理 3.1 的常见起点是折扣状态访问分布的不动点方程：</p>
 
 <p>$$
 d_\pi = (1-\gamma)\rho_0 + \gamma P_\pi^\top d_\pi,
@@ -1029,13 +1024,13 @@ d_\pi = (1-\gamma)\rho_0 + \gamma P_\pi^\top d_\pi,
 d_{\pi_k} = (1-\gamma)\rho_0 + \gamma P_{\pi_k}^\top d_{\pi_k}.
 $$</p>
 
-<p>两式相减并整理，可把 $d_\pi-d_{\pi_k}$ 写成“策略诱导转移核差异”作用在旧分布上的结果。随后对 $\ell_1$ 范数取上界，利用马尔可夫核在 $\ell_1$ 下的不扩张性，以及</p>
+<p>两式相减并整理，就可以把 $d_\pi-d_{\pi_k}$ 写成”策略诱导转移核差异”作用在旧分布上的结果。随后对 $\ell_1$ 范数取上界，利用马尔可夫核在 $\ell_1$ 下的不扩张性，以及</p>
 
 <p>$$
 \|(P_\pi-P_{\pi_k})(\cdot\mid s)\|_1 \le 2D_{\mathrm{TV}}(\pi,\pi_k;s),
 $$</p>
 
-<p>即可把状态分布差异控制到旧分布下的 average TV 上，得到</p>
+<p>就能把状态分布差异控制到旧分布下的 average TV 上：</p>
 
 <p>$$
 \|d_\pi-d_{\pi_k}\|_1 \le \frac{2\gamma}{1-\gamma}\,\mathbb{E}_{s\sim d_{\pi_k}}\big[D_{\mathrm{TV}}(\pi,\pi_k;s)\big].

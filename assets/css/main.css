@@ -1512,34 +1512,67 @@ pre:not(.wrapped) pre {
   background: var(--global-theme-color);
   border-radius: 2px;
 }
-.cv .list-group {
+.cv {
+  --cv-year-column-width: 120px;
+  --cv-timeline-gap: 2rem;
+}
+.cv .cv-timeline {
   margin: 0;
-  padding: 0 0 0 0.25rem;
+  padding: 0;
   position: relative;
 }
-@media (min-width: 768px) {
-  .cv .list-group:has(.cv-year-badge)::before {
-    content: "";
-    position: absolute;
-    left: 155px;
-    top: 0.4rem;
-    bottom: 0.4rem;
-    width: 1px;
-    background: var(--global-divider-color);
-  }
-}
-.cv .list-group .list-group-item {
+.cv .cv-timeline .list-group-item {
   padding: 0.5rem 0;
   border: none;
   background: transparent;
   position: relative;
 }
+.cv .cv-timeline .list-group-item:last-child {
+  padding-bottom: 0;
+}
+.cv .cv-timeline .list-group-item:first-child {
+  padding-top: 0;
+}
+.cv .cv-timeline .list-group-item .cv-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
 @media (min-width: 768px) {
-  .cv .list-group .list-group-item:has(.cv-year-badge)::before {
+  .cv .cv-timeline .list-group-item .cv-entry {
+    display: grid;
+    grid-template-columns: var(--cv-year-column-width) 2rem minmax(0, 1fr);
+    column-gap: 0;
+    align-items: start;
+  }
+}
+.cv .cv-timeline .list-group-item .cv-entry-year {
+  min-width: 0;
+}
+.cv .cv-timeline .list-group-item .cv-entry-marker {
+  display: none;
+}
+@media (min-width: 768px) {
+  .cv .cv-timeline .list-group-item .cv-entry-marker {
+    display: block;
+    position: relative;
+    min-height: 100%;
+  }
+  .cv .cv-timeline .list-group-item .cv-entry-marker::before {
     content: "";
     position: absolute;
-    left: 155px;
-    top: 0.95rem;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--global-divider-color);
+    transform: translateX(-50%);
+  }
+  .cv .cv-timeline .list-group-item .cv-entry-marker::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0.65rem;
     width: 9px;
     height: 9px;
     background: var(--global-bg-color);
@@ -1549,25 +1582,15 @@ pre:not(.wrapped) pre {
     z-index: 1;
     transition: background 0.2s ease, transform 0.2s ease;
   }
-  .cv .list-group .list-group-item:has(.cv-year-badge):hover::before {
-    background: var(--global-theme-color);
-    transform: translateX(-50%) scale(1.25);
-  }
-  .cv .list-group .list-group-item:first-child:has(.cv-year-badge)::before {
-    top: 0.45rem;
-  }
 }
-.cv .list-group .list-group-item:last-child {
-  padding-bottom: 0;
+.cv .cv-timeline .list-group-item:hover .cv-entry-marker::after {
+  background: var(--global-theme-color);
+  transform: translateX(-50%) scale(1.25);
 }
-.cv .list-group .list-group-item:first-child {
-  padding-top: 0;
+.cv .cv-timeline .list-group-item .cv-entry-body {
+  min-width: 0;
 }
-.cv .list-group .list-group-item .row {
-  margin: 0;
-  align-items: flex-start;
-}
-.cv .list-group .list-group-item .badge {
+.cv .cv-timeline .list-group-item .badge {
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0;
@@ -1576,30 +1599,33 @@ pre:not(.wrapped) pre {
   color: var(--global-theme-color) !important;
   border: none;
 }
-.cv .list-group .list-group-item h6.title {
+.cv .cv-timeline .list-group-item h6.title {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 0.15rem 0;
   color: var(--global-text-color);
 }
-.cv .list-group .list-group-item h6:not(.title) {
+.cv .cv-timeline .list-group-item h6:not(.title) {
   font-size: 0.9375rem;
   font-weight: 400;
   margin: 0;
   color: var(--global-text-color-light);
 }
-.cv .list-group .list-group-item .items {
+.cv .cv-timeline .list-group-item .items {
   margin: 0;
   padding-left: 0;
   font-size: 1rem;
   list-style: none;
 }
-.cv .list-group .list-group-item .items li {
+.cv .cv-timeline .list-group-item .items li {
   margin-bottom: 0.15rem;
   padding-left: 0;
 }
-.cv .list-group .list-group-item .items li::marker {
+.cv .cv-timeline .list-group-item .items li::marker {
   content: "";
+}
+.cv .cv-timeline .list-group-item .cv-entry-list {
+  margin-top: 0.15rem;
 }
 .cv .cv-year-badge {
   font-size: 0.875rem;
