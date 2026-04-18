@@ -233,6 +233,14 @@ pre code {
 .profile {
   width: 100%;
 
+  // On mobile: center the profile and cap image size so portrait doesn't dominate
+  @media (max-width: 575.98px) {
+    max-width: 220px;
+    margin: 0 auto 1rem;
+    float: none !important;
+    display: block;
+  }
+
   .address {
     margin-bottom: 3px;
     margin-top: 3px;
@@ -257,9 +265,9 @@ pre code {
 
 @media (min-width: 576px) {
   .profile {
-    width: 22%;
-    min-width: 140px;
-    max-width: 180px;
+    width: 24%;
+    min-width: 150px;
+    max-width: 220px;
 
     .address {
       p {
@@ -270,8 +278,12 @@ pre code {
 }
 
 .post-description {
-  margin-bottom: 1rem;
-  font-size: $font-size-sm;
+  margin-top: 0.25rem;
+  margin-bottom: 1.25rem;
+  font-size: $font-size-md;
+  color: var(--global-text-color-light);
+  line-height: 1.5;
+  max-width: 60ch;
 
   a {
     color: inherit;
@@ -280,6 +292,11 @@ pre code {
       color: var(--global-theme-color);
       text-decoration: none;
     }
+  }
+
+  strong {
+    color: var(--global-theme-color);
+    font-weight: 600;
   }
 }
 
@@ -1295,12 +1312,16 @@ pre {
  ******************************************************************************/
 
 .news {
+  position: relative;
+
   .news-table.news-scrollable {
-    max-height: clamp(180px, 28vh, 350px);
+    max-height: clamp(220px, 32vh, 420px);
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scrollbar-gutter: stable;
+    mask-image: linear-gradient(to bottom, black 0, black calc(100% - 32px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0, black calc(100% - 32px), transparent 100%);
   }
 
   .news-table.news-scrollable table {
@@ -1400,29 +1421,44 @@ pre {
 // Enhanced Profile Section
 .profile {
   .address {
-    font-size: $font-size-sm;
+    margin-top: 0.5rem;
+    font-family: 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: $font-size-xs;
     color: var(--global-text-color-light);
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
+    text-align: center;
 
     p {
-      position: relative;
-      padding-left: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin: 0;
 
       &::before {
-        content: "";
+        content: "\f3c5"; // fa-map-marker-alt
+        font-family: 'Font Awesome 5 Free', 'FontAwesome';
+        font-weight: 900;
+        font-size: 0.85em;
+        color: var(--global-theme-color);
+        opacity: 0.85;
       }
     }
   }
 
+  figure {
+    margin: 0;
+  }
+
   img {
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid var(--global-divider-color);
-    box-shadow: none;
-    transition: transform 0.3s ease;
+    box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.18);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 
     &:hover {
-      transform: scale(1.01);
-      box-shadow: none;
+      transform: translateY(-2px);
+      border-color: var(--global-theme-color);
+      box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.22);
     }
   }
 }
@@ -1431,24 +1467,52 @@ pre {
 .post-header {
   margin-bottom: 1rem;
 
+  // Hero section — center everything for classic academic look
+  &.hero {
+    text-align: center;
+    padding: 1.25rem 0 1.5rem;
+  }
+
   .post-title {
     font-weight: 700;
     font-size: $font-size-2xl;
     letter-spacing: -0.02em;
     line-height: 1.2;
 
-    // Signature-style name fonts
+    // Signature-style name: modern EN + classical CN, separated by a vertical bar
     &.signature-name {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.65rem;
+      margin-bottom: 0.35rem;
+
       .name-en {
-        font-family: 'Georgia', 'Times New Roman', serif;
-        font-style: italic;
-        font-weight: 400;
-        font-size: $font-size-2xl;
+        font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', sans-serif;
+        font-style: normal;
+        font-weight: 700;
+        font-size: $font-size-3xl;
+        letter-spacing: -0.025em;
+        background: linear-gradient(135deg, var(--global-text-color) 0%, var(--global-theme-color) 120%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
+
+      .name-sep {
+        width: 1px;
+        height: 1.3em;
+        background: var(--global-divider-color);
+        align-self: center;
+      }
+
       .name-zh {
         font-family: 'KaiTi', 'STKaiti', 'FZKai-Z03', 'AR PL UKai CN', serif;
-        font-weight: 400;
+        font-weight: 500;
         font-size: $font-size-2xl;
+        color: var(--global-text-color-light);
+        letter-spacing: 0.08em;
       }
     }
   }
@@ -1456,6 +1520,7 @@ pre {
   .desc {
     font-size: $font-size-md;
     color: var(--global-text-color-light);
+    margin-bottom: 0.75rem;
 
     a {
       color: var(--global-theme-color);
@@ -1468,10 +1533,11 @@ pre {
       }
     }
   }
+
 }
 
-// Section Headers with subtle accent
-.post h2 {
+// Section Headers with subtle accent — scoped to about-page article (not blog post content)
+.post > article > h2 {
   font-size: $font-size-xl;
   font-weight: 700;
   margin-top: 1.5rem;
@@ -1550,41 +1616,98 @@ pre {
   margin-bottom: 1.5rem;
 
   .card {
-    background: var(--global-card-bg-color);
+    background: transparent;
     border: none;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-    margin-top: 0.75rem !important;
-    padding: 0.75rem 1rem !important;
+    border-radius: 0;
+    box-shadow: none;
+    margin-top: 1.25rem !important;
+    padding: 0.25rem 0 0.75rem !important;
     transition: none;
 
     &:hover {
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+      box-shadow: none !important;
       transform: none !important;
     }
 
     .card-title {
-      font-size: $font-size-base;  // 1rem - section title
-      font-weight: 600;
-      color: var(--global-theme-color);
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.4rem;
+      font-family: 'Inter', 'Helvetica Neue', sans-serif;
+      font-size: $font-size-lg;
+      font-weight: 700;
+      color: var(--global-text-color);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      padding-left: 0.75rem;
       border-bottom: 1px solid var(--global-divider-color);
+      position: relative;
+      letter-spacing: -0.01em;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.15em;
+        width: 3px;
+        height: 1em;
+        background: var(--global-theme-color);
+        border-radius: 2px;
+      }
     }
   }
 
-  // Compact Time Table
+  // Compact Time Table — Timeline style (desktop only)
+  // Only applies to list-groups that contain a year badge (time_table type).
   .list-group {
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 0.25rem;
+    position: relative;
+
+    // Vertical timeline line — only show for time_table content on md+ viewports
+    @media (min-width: 768px) {
+      &:has(.cv-year-badge)::before {
+        content: '';
+        position: absolute;
+        left: 155px;
+        top: 0.4rem;
+        bottom: 0.4rem;
+        width: 1px;
+        background: var(--global-divider-color);
+      }
+    }
 
     .list-group-item {
-      padding: 0.4rem 0;
+      padding: 0.5rem 0;
       border: none;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      background: transparent;
+      position: relative;
+
+      @media (min-width: 768px) {
+        // Timeline dot — only for items that have a year badge
+        &:has(.cv-year-badge)::before {
+          content: '';
+          position: absolute;
+          left: 155px;
+          top: 0.95rem;
+          width: 9px;
+          height: 9px;
+          background: var(--global-bg-color);
+          border: 2px solid var(--global-theme-color);
+          border-radius: 50%;
+          transform: translateX(-50%);
+          z-index: 1;
+          transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        &:has(.cv-year-badge):hover::before {
+          background: var(--global-theme-color);
+          transform: translateX(-50%) scale(1.25);
+        }
+
+        &:first-child:has(.cv-year-badge)::before {
+          top: 0.45rem;
+        }
+      }
 
       &:last-child {
-        border-bottom: none;
         padding-bottom: 0;
       }
 
@@ -1622,12 +1745,18 @@ pre {
       }
 
       .items {
-        margin: 0.25rem 0 0 0;
-        padding-left: 0.85rem;
-        font-size: $font-size-base;  // 1rem (16px) - list items
+        margin: 0;
+        padding-left: 0;
+        font-size: $font-size-base;
+        list-style: none;
 
         li {
           margin-bottom: 0.15rem;
+          padding-left: 0;
+
+          &::marker {
+            content: '';
+          }
         }
       }
     }
@@ -1720,11 +1849,40 @@ pre {
   margin-top: 0.75rem;
 
   h2.year {
-    font-size: $font-size-base;
-    font-weight: 600;
-    margin-top: 0.75rem;
-    margin-bottom: 0.6rem;
-    padding-top: 0.75rem;
+    font-family: 'Inter', 'Helvetica Neue', sans-serif;
+    font-size: $font-size-xl;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--global-text-color);
+    margin-top: 1.75rem;
+    margin-bottom: 0.9rem;
+    padding-top: 1rem;
+    padding-bottom: 0.4rem;
+    border-top: none;
+    border-bottom: none;
+    text-align: left;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.1em;
+      background: var(--global-theme-color);
+      border-radius: 2px;
+    }
+
+    // Subtle background divider line extending to the right
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--global-divider-color) 0%, transparent 100%);
+      margin-left: 0.5rem;
+    }
   }
 
   ol.bibliography {
@@ -2112,5 +2270,87 @@ pre {
         cursor: pointer;
       }
     }
+  }
+}
+
+/*******************************************************************************
+ * Venue/Topic Tag — Per-topic accent colors
+ * Applies to both Publications and Selected Papers.
+ * The site uses topic names (not venue names) as the abbr/filter value.
+ ******************************************************************************/
+
+.venue-tag {
+  // LLM Reasoning and Agency — purple
+  &[data-venue-filter="LLM Reasoning and Agency"] {
+    border-left-color: #8b5cf6;
+    &:hover, &:focus { background-color: #8b5cf6; border-color: #8b5cf6; }
+  }
+
+  // MARL Efficiency — teal
+  &[data-venue-filter="MARL Efficiency"] {
+    border-left-color: #14b8a6;
+    &:hover, &:focus { background-color: #14b8a6; border-color: #14b8a6; }
+  }
+
+  // MARL Generalization — amber
+  &[data-venue-filter="MARL Generalization"] {
+    border-left-color: #f59e0b;
+    &:hover, &:focus { background-color: #f59e0b; border-color: #f59e0b; }
+  }
+
+  // Fallback for real conference venues if added later
+  &[data-venue-filter^="ACL"],
+  &[data-venue-filter^="EMNLP"],
+  &[data-venue-filter^="NAACL"] {
+    border-left-color: #dc2626;
+    &:hover, &:focus { background-color: #dc2626; border-color: #dc2626; }
+  }
+  &[data-venue-filter^="NeurIPS"],
+  &[data-venue-filter^="ICML"] {
+    border-left-color: #8b5cf6;
+    &:hover, &:focus { background-color: #8b5cf6; border-color: #8b5cf6; }
+  }
+  &[data-venue-filter^="ICLR"] {
+    border-left-color: #3b82f6;
+    &:hover, &:focus { background-color: #3b82f6; border-color: #3b82f6; }
+  }
+}
+
+/*******************************************************************************
+ * Publication Links — tighter, link-like buttons
+ ******************************************************************************/
+
+.publications,
+.post ol.bibliography {
+  .links {
+    a.btn {
+      font-family: $font-family-monospace;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+
+      &:hover {
+        background-color: var(--global-theme-color);
+        color: #fff !important;
+        border-color: var(--global-theme-color);
+      }
+    }
+  }
+}
+
+/*******************************************************************************
+ * Subtle scroll-reveal for news rows & paper items (respects reduced-motion)
+ ******************************************************************************/
+
+@media (prefers-reduced-motion: no-preference) {
+  .news table tr,
+  .post ol.bibliography > li {
+    animation: fadeInUp 0.5s ease both;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 }

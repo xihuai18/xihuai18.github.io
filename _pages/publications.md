@@ -2,7 +2,7 @@
 layout: page
 permalink: /publications/
 title: Publications
-description:
+description: Research works organized by year. <strong>*</strong> denotes equal contribution.
 years: [2025, 2024, 2023, 2022, 2021]
 nav: true
 nav_order: 1

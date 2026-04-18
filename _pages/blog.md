@@ -12,7 +12,7 @@ twitter_card: summary
 
   <header class="post-header">
     <h1 class="post-title">Xihuai's Blog</h1>
-    <p class="post-description"></p>
+    <p class="post-description">Notes on reinforcement learning, multi-agent systems, and LLM reasoning &mdash; written to clarify my own thinking, shared in case they help yours.</p>
   </header>
 
 {% assign uv_enabled = site.data.post_uv_meta.generated_at %}

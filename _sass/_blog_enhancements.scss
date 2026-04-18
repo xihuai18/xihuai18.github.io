@@ -693,7 +693,7 @@
         white-space: nowrap;
       }
     }
-    
+
     // Adjust spacing for inline elements
     .post-meta {
       display: flex;
@@ -701,13 +701,41 @@
       align-items: center;
       gap: 0.4rem;
     }
-    
+
     .post-tags {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 0.4rem;
       padding-top: 0.5rem;
+    }
+  }
+
+  // Item hover lift & left accent
+  .blog-post-list-item {
+    position: relative;
+    padding-left: 0.25rem;
+    transition: background-color 0.2s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.5rem;
+      top: 1.4rem;
+      bottom: 1.4rem;
+      width: 2px;
+      background: var(--global-theme-color);
+      opacity: 0;
+      border-radius: 2px;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover::before {
+      opacity: 0.8;
+    }
+
+    h3 a {
+      transition: color 0.2s ease;
     }
   }
 }
