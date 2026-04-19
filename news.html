@@ -1,8 +1,57 @@
 ---
 layout: page
 title: News
+display_title: '<span class="blog-title__dropcap">N</span>ews'
 permalink: /news/
-description: Recent milestones &mdash; publications, talks, and announcements.
+description: Recent milestones &mdash; publications, talks, writing, and announcements.
+eyebrow: News
+lead: What's happened, in chronological order.
 ---
 
-{% include news.html %}
+<!-- _news/ full page — grouped by year, editorial 3-column rows per design system -->
+<div class="news-full">
+{%- assign all_news = site.news | sort: "date" | reverse -%}
+
+{%- comment -%} Build unique year list (desc) {%- endcomment -%}
+{%- assign years_raw = "" -%}
+{%- for item in all_news -%}
+  {%- assign y = item.date | date: "%Y" -%}
+  {%- assign years_raw = years_raw | append: y | append: "," -%}
+{%- endfor -%}
+{%- assign years_list = years_raw | split: "," | uniq -%}
+
+{%- for year in years_list -%}
+  {%- if year == "" -%}{%- continue -%}{%- endif -%}
+  {%- assign count_in_year = 0 -%}
+  {%- for item in all_news -%}
+    {%- assign yy = item.date | date: "%Y" -%}
+    {%- if yy == year -%}{%- assign count_in_year = count_in_year | plus: 1 -%}{%- endif -%}
+  {%- endfor -%}
+  <section class="news-year">
+    <h2 class="news-year-title">
+      <span class="news-year-num">{{ year }}</span>
+      <span class="news-year-rule" aria-hidden="true"></span>
+      <span class="news-year-count">{{ count_in_year }} {% if count_in_year == 1 %}entry{% else %}entries{% endif %}</span>
+    </h2>
+    <ol class="news-full-list">
+    {%- for item in all_news -%}
+      {%- assign y = item.date | date: "%Y" -%}
+      {%- if y == year -%}
+      <li>
+        <time datetime="{{ item.date | date_to_xmlschema }}">{{ item.date | date: "%b %-d, %Y" }}</time>
+        {%- assign cat = item.category | default: "note" -%}
+        <span class="news-tag news-tag--{{ cat }}">{{ cat | capitalize }}</span>
+        <div class="news-body">
+          {%- if item.inline -%}
+            {{ item.content | remove: '<p>' | remove: '</p>' | emojify }}
+          {%- else -%}
+            <a class="news-title" href="{{ item.url | relative_url }}">{{ item.title }}</a>
+          {%- endif -%}
+        </div>
+      </li>
+      {%- endif -%}
+    {%- endfor -%}
+    </ol>
+  </section>
+{%- endfor -%}
+</div>

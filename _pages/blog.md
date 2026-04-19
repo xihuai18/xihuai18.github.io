@@ -8,214 +8,174 @@ disable_share_image: true
 twitter_card: summary
 ---
 
-<div class="post">
+<div class="post blog-index">
 
   <header class="post-header">
-    <h1 class="post-title">Xihuai's Blog</h1>
-    <p class="post-description">Notes on reinforcement learning, multi-agent systems, and LLM reasoning &mdash; written to clarify my own thinking, shared in case they help yours.</p>
+    <p class="eyebrow">The Blog</p>
+    <h1 class="post-title has-dropcap">Xihuai&rsquo;s <span class="blog-title__dropcap">B</span>log</h1>
+    <p class="lead">Notes on reinforcement learning, multi-agent systems, and LLM reasoning &mdash; written to clarify my own thinking, shared in case they help yours.</p>
   </header>
 
-{% assign uv_enabled = site.data.post_uv_meta.generated_at %}
-{% assign uv_data_all = site.data.post_uv.all %}
-{% assign uv_data_d30 = site.data.post_uv.d30 %}
-{% assign uv_has_modes = uv_data_all.size | plus: 0 %}
+  {% assign uv_enabled = site.data.post_uv_meta.generated_at %}
+  {% assign uv_data_all = site.data.post_uv.all %}
+  {% assign uv_data_d30 = site.data.post_uv.d30 %}
+  {% assign uv_has_modes = uv_data_all.size | plus: 0 %}
 
-{% assign blog_name_size = site.blog_name | size %}
-{% assign blog_description_size = site.blog_description | size %}
+  {%- comment -%} Build dedup post list — when an EN post has a zh_url, skip the ZH version on the index.
+    Pair zh back onto EN via candidate loop. {%- endcomment -%}
+  {%- assign postlist = site.posts -%}
 
-{% if blog_name_size > 0 or blog_description_size > 0 %}
+  {%- comment -%} Count posts + collect categories with counts {%- endcomment -%}
+  {%- assign visible_count = 0 -%}
+  {%- assign cat_slug_list = "" -%}
+  {%- assign cat_name_list = "" -%}
+  {%- assign cat_count_str = "" -%}
+  {%- for post in postlist -%}
+    {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
+    {%- assign visible_count = visible_count | plus: 1 -%}
+    {%- for category in post.categories -%}
+      {%- assign cat_slug = category | slugify -%}
+      {%- unless cat_slug_list contains cat_slug -%}
+        {%- if cat_slug_list == "" -%}
+          {%- assign cat_slug_list = cat_slug -%}
+          {%- assign cat_name_list = category -%}
+        {%- else -%}
+          {%- assign cat_slug_list = cat_slug_list | append: "|" | append: cat_slug -%}
+          {%- assign cat_name_list = cat_name_list | append: "|" | append: category -%}
+        {%- endif -%}
+      {%- endunless -%}
+    {%- endfor -%}
+  {%- endfor -%}
+  {%- assign cat_slugs = cat_slug_list | split: "|" -%}
+  {%- assign cat_names = cat_name_list | split: "|" -%}
 
-  <div class="header-bar">
-    <h1>{{ site.blog_name }}</h1>
-    <h2>{{ site.blog_description }}</h2>
-  </div>
-  {% endif %}
+  <nav class="blog-controls" role="group" aria-label="Filter posts by category" markdown="0">
+    <button type="button" class="blog-pill is-active" data-filter-link data-filter-type="category" data-filter-value="">
+      All posts <span class="blog-pill__count">{{ visible_count }}</span>
+    </button>
+    {%- for i in (0..cat_slugs.size) -%}
+      {%- if i >= cat_slugs.size -%}{%- break -%}{%- endif -%}
+      {%- assign this_slug = cat_slugs[i] -%}
+      {%- assign this_name = cat_names[i] -%}
+      {%- assign this_count = 0 -%}
+      {%- for post in postlist -%}
+        {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
+        {%- for c in post.categories -%}
+          {%- if c | slugify == this_slug -%}{%- assign this_count = this_count | plus: 1 -%}{%- break -%}{%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {%- assign display_name = this_name | replace: "-", " " | capitalize -%}
+      <button type="button" class="blog-pill" data-filter-link data-filter-type="category" data-filter-value="{{ this_slug }}">
+        {{ display_name }} <span class="blog-pill__count">{{ this_count }}</span>
+      </button>
+    {%- endfor -%}
 
-{% if site.display_tags and site.display_tags.size > 0 or site.display_categories and site.display_categories.size > 0 %}
+    {% if uv_enabled and uv_has_modes > 0 %}
+    <span class="blog-controls__spacer"></span>
+    <span class="blog-views-toggle mono-meta">
+      Views:
+      <a href="#" class="uv-toggle" data-uv-mode="all">All time</a>
+      /
+      <a href="#" class="uv-toggle" data-uv-mode="d30">30 days</a>
+    </span>
+    {% endif %}
+  </nav>
 
-  <div class="tag-category-list">
-    <ul class="p-0 m-0">
-      {% for tag in site.display_tags %}
-        <li>
-          #️⃣ <a href="{{ tag | slugify | prepend: '/blog/tag/' | relative_url }}">{{ tag }}</a>
-        </li>
-        {% unless forloop.last %}
-          <p>&bull;</p>
-        {% endunless %}
-      {% endfor %}
-      {% if site.display_categories.size > 0 and site.display_tags.size > 0 %}
-        <p>&bull;</p>
-      {% endif %}
-      {% for category in site.display_categories %}
-        {% assign category_slug = category | slugify %}
-        <li>
-          🏷️ <a href="{{ '/blog/' | relative_url }}?category={{ category_slug }}" data-filter-link data-filter-type="category" data-filter-value="{{ category_slug }}">{{ category }}</a>
-        </li>
-        {% unless forloop.last %}
-          <p>&bull;</p>
-        {% endunless %}
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
+  <ol class="post-rows">
+    {%- for post in postlist -%}
+      {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
 
-{% if uv_enabled and uv_has_modes > 0 %}
-  <p class="post-meta mb-2">
-    Views:
-    <a href="#" class="uv-toggle" data-uv-mode="all">All time</a>
-    /
-    <a href="#" class="uv-toggle" data-uv-mode="d30">Last 30 days</a>
-  </p>
-{% endif %}
+      {%- assign post_year = post.date | date: "%Y" -%}
+      {%- assign post_categories_slug = "" -%}
+      {%- for category in post.categories -%}
+        {%- assign cs = category | slugify -%}
+        {%- if post_categories_slug == "" -%}
+          {%- assign post_categories_slug = cs -%}
+        {%- else -%}
+          {%- assign post_categories_slug = post_categories_slug | append: " " | append: cs -%}
+        {%- endif -%}
+      {%- endfor -%}
 
-{% assign featured_posts = site.posts | where: "featured", "true" %}
-{% if featured_posts.size > 0 %}
-<br>
+      {%- assign zh_post = nil -%}
+      {%- if post.lang == 'en' and post.zh_url -%}
+        {%- for candidate in postlist -%}
+          {%- if candidate.lang == 'zh' and candidate.en_url == post.url -%}
+            {%- assign zh_post = candidate -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
 
-<div class="container featured-posts">
-{% assign is_even = featured_posts.size | modulo: 2 %}
-<div class="row row-cols-1">
-{% for post in featured_posts %}
-<div class="col mb-4">
-<a href="{{ post.url | relative_url }}" class="featured-card-link">
-<div class="card hoverable featured-card">
-<div class="row g-0">
-<div class="col-md-4 featured-card-img-wrapper">
-{% if post.og_image %}
-<img src="{{ post.og_image | relative_url }}" class="featured-card-img" alt="{{ post.title }}">
-{% elsif post.thumbnail %}
-<img src="{{ post.thumbnail | relative_url }}" class="featured-card-img" alt="{{ post.title }}">
-{% else %}
-<div class="featured-card-placeholder">
-<span>📝</span>
-</div>
-{% endif %}
-</div>
-<div class="col-md-8">
-<div class="card-body">
-<div class="float-right">
-📌
-</div>
-<h3 class="card-title text-lowercase">{{ post.title }}</h3>
-<p class="card-text featured-description">{{ post.description }}</p>
+      {%- if post.external_source == blank -%}
+        {%- assign read_time = post.content | number_of_words | divided_by: 180 | plus: 1 -%}
+      {%- else -%}
+        {%- assign read_time = post.feed_content | strip_html | number_of_words | divided_by: 180 | plus: 1 -%}
+      {%- endif -%}
 
-                    {% if post.external_source == blank %}
-                      {% assign read_time = post.content | number_of_words | divided_by: 180 | plus: 1 %}
-                    {% else %}
-                      {% assign read_time = post.feed_content | strip_html | number_of_words | divided_by: 180 | plus: 1 %}
-                    {% endif %}
-                    {% assign year = post.date | date: "%Y" %}
-
-                    <p class="post-meta">
-                      {{ read_time }} min read &nbsp; &middot; &nbsp;
-                      <span class="post-year">📅 {{ year }}</span>
-                      {% if uv_enabled and uv_has_modes > 0 %}
-                        {% include post_uv.html url=post.url %}
-                        &nbsp; &middot; &nbsp;
-                        <span class="post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">{{ uv_all }} views</span>
-                      {% endif %}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
+    <li class="post-row blog-post-list-item" data-year="{{ post_year }}" data-categories="{{ post_categories_slug }}">
+      <time class="post-row__date mono-meta" datetime="{{ post.date | date_to_xmlschema }}">
+        {{ post.date | date: "%b %-d, %Y" }}
+      </time>
+      <div class="post-row__body">
+        {%- if zh_post -%}
+        {%- assign pair_id = post.id | slugify -%}
+        <div class="post-row__langbar" role="tablist" aria-label="Language">
+          <button type="button" class="post-row__langtab is-active" data-lang-pair="{{ pair_id }}" data-lang-target="en" role="tab" aria-selected="true">EN</button>
+          <button type="button" class="post-row__langtab" data-lang-pair="{{ pair_id }}" data-lang-target="zh" role="tab" aria-selected="false">中</button>
         </div>
-      {% endfor %}
-      </div>
-    </div>
-    <hr>
-
-{% endif %}
-
-  <ul class="post-list">
-
-    {% if page.pagination.enabled %}
-      {% assign postlist = paginator.posts %}
-    {% else %}
-      {% assign postlist = site.posts %}
-    {% endif %}
-
-    {% for post in postlist %}
-
-    {% assign post_year = post.date | date: "%Y" %}
-    {% assign post_categories_slug = "" %}
-    {% for category in post.categories %}
-      {% assign category_slug = category | slugify %}
-      {% if post_categories_slug == "" %}
-        {% assign post_categories_slug = category_slug %}
-      {% else %}
-        {% assign post_categories_slug = post_categories_slug | append: " " | append: category_slug %}
-      {% endif %}
-    {% endfor %}
-
-    {% if post.lang == 'zh' and post.en_url %}
-      {% continue %}
-    {% endif %}
-
-    {% comment %}
-      Find matching Chinese post for English posts with zh_url.
-      Match by directly comparing candidate.en_url with post.url.
-      Performance: O(n) lookup per English post, acceptable for small-medium blogs.
-      The {% break %} tag exits the loop early once a match is found.
-    {% endcomment %}
-    {% assign zh_post = nil %}
-    {% if post.lang == 'en' and post.zh_url %}
-      {% for candidate in site.posts %}
-        {% if candidate.lang == 'zh' and candidate.en_url == post.url %}
-          {% assign zh_post = candidate %}
-          {% break %}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-
-    <li class="blog-post-list-item" data-year="{{ post_year }}" data-categories="{{ post_categories_slug }}">
-
-{% if post.thumbnail %}
-
-<div class="row">
-          <div class="col-sm-9">
-{% endif %}
-
-    {% if zh_post %}
-      {% assign post_slug = post.id | slugify %}
-      <div class="lang-switcher">
-        <ul class="nav" id="myTab-{{ post_slug }}" role="tablist">
-          <li class="nav-item">
-            <a class="nav-link active" id="en-tab-{{ post_slug }}" href="#en-{{ post_slug }}" role="tab" aria-controls="en-{{ post_slug }}" aria-selected="true" aria-label="View English version">English</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="zh-tab-{{ post_slug }}" href="#zh-{{ post_slug }}" role="tab" aria-controls="zh-{{ post_slug }}" aria-selected="false" aria-label="查看简体中文版本">简体中文</a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="tab-content" id="myTabContent-{{ post_slug }}">
-        <div class="tab-pane fade show active" id="en-{{ post_slug }}" role="tabpanel" aria-labelledby="en-tab-{{ post_slug }}">
-          {% include blog_post_body.html post=post uv_enabled=uv_enabled uv_has_modes=uv_has_modes %}
+        <div class="post-row__lang-pane is-active" data-lang-pair="{{ pair_id }}" data-lang="en">
+          <h3 class="post-row__title">
+            {%- if post.redirect == blank -%}
+              <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+            {%- elsif post.redirect contains '://' -%}
+              <a href="{{ post.redirect }}" target="_blank" rel="noopener">{{ post.title }} <span class="post-row__external" aria-hidden="true">↗</span></a>
+            {%- else -%}
+              <a href="{{ post.redirect | relative_url }}">{{ post.title }}</a>
+            {%- endif -%}
+          </h3>
+          {%- if post.description -%}
+          <p class="post-row__desc">{{ post.description }}</p>
+          {%- endif -%}
         </div>
-        <div class="tab-pane fade" id="zh-{{ post_slug }}" role="tabpanel" aria-labelledby="zh-tab-{{ post_slug }}">
-          {% include blog_post_body.html post=zh_post uv_enabled=uv_enabled uv_has_modes=uv_has_modes %}
+        <div class="post-row__lang-pane" data-lang-pair="{{ pair_id }}" data-lang="zh" hidden>
+          <h3 class="post-row__title">
+            <a href="{{ zh_post.url | relative_url }}">{{ zh_post.title }}</a>
+          </h3>
+          {%- if zh_post.description -%}
+          <p class="post-row__desc">{{ zh_post.description }}</p>
+          {%- endif -%}
         </div>
+        {%- else -%}
+        <h3 class="post-row__title">
+          {%- if post.redirect == blank -%}
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+          {%- elsif post.redirect contains '://' -%}
+            <a href="{{ post.redirect }}" target="_blank" rel="noopener">{{ post.title }} <span class="post-row__external" aria-hidden="true">↗</span></a>
+          {%- else -%}
+            <a href="{{ post.redirect | relative_url }}">{{ post.title }}</a>
+          {%- endif -%}
+        </h3>
+        {%- if post.description -%}
+        <p class="post-row__desc">{{ post.description }}</p>
+        {%- endif -%}
+        {%- endif -%}
+
+        <p class="post-row__meta mono-meta">
+          <span class="post-row__read">{{ read_time }} min read</span>
+          {%- for category in post.categories -%}
+          <span class="post-row__sep" aria-hidden="true">·</span>
+          <a class="post-row__cat" href="{{ '/blog/' | relative_url }}?category={{ category | slugify }}" data-filter-link data-filter-type="category" data-filter-value="{{ category | slugify }}">{{ category | replace: "-", " " | capitalize }}</a>
+          {%- endfor -%}
+          {%- if uv_enabled and uv_has_modes > 0 -%}
+          {%- include post_uv.html url=post.url -%}
+          <span class="post-row__sep" aria-hidden="true">·</span>
+          <span class="post-row__views post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">{{ uv_all }} views</span>
+          {%- endif -%}
+        </p>
       </div>
-    {% else %}
-      {% include blog_post_body.html post=post uv_enabled=uv_enabled uv_has_modes=uv_has_modes %}
-    {% endif %}
-
-{% if post.thumbnail %}
-
-</div>
-
-  <div class="col-sm-3">
-    <img class="card-img" src="{{ post.thumbnail | relative_url }}" style="object-fit: cover; height: 90%" alt="image">
-  </div>
-</div>
-{% endif %}
     </li>
-
-    {% endfor %}
-
-  </ul>
+    {%- endfor -%}
+  </ol>
 
 {% if page.pagination.enabled %}
 {% include pagination.html %}
