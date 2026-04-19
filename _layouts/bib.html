@@ -17,7 +17,70 @@
         {%- endif -%}
 
         <!-- Entry bib key -->
-        <div id="{{entry.key}}" class="{% if entry.preview %}col-sm-10{% else %}col-sm-12{% endif %}" data-venue="{% if entry.abbr %}{{entry.abbr}}{% endif %}">
+        {%- assign topic_label = entry.abbr | default: "" | replace: " and ", " & " -%}
+        <div id="{{entry.key}}" class="{% if entry.preview %}col-sm-10{% else %}col-sm-12{% endif %}" data-venue="{% if topic_label != "" %}{{topic_label}}{% endif %}">
+
+        {%- comment -%} Pre-title meta row — kit Publications.jsx calls for chip / venue / selected
+          to sit above the title as a single inline row. Compute is_selected here so we can
+          render it inline; jekyll-scholar passes `selected` as a string, hence the explicit compare. {%- endcomment -%}
+        {%- assign is_selected = false -%}
+        {%- if entry.selected == true or entry.selected == "true" -%}
+          {%- assign is_selected = true -%}
+        {%- endif -%}
+
+        <!-- Journal/Book title and date -->
+        {% assign proceedings = "inproceedings,incollection" | split: ','%}
+        {% assign thesis = "thesis,mastersthesis,phdthesis" | split: ','%}
+        {% if entry.type == "article" -%}
+          {%- capture entrytype -%}<em>{{entry.journal}}</em>{%- endcapture -%}
+        {%- elsif proceedings contains entry.type -%}
+          {%- capture entrytype -%}<em>In {{entry.booktitle}}</em> {%- endcapture -%}
+        {%- elsif thesis contains entry.type -%}
+          {%- capture entrytype -%}<em>{{entry.school}}</em> {%- endcapture -%}
+        {%- else -%}
+          {%- capture entrytype -%}{%- endcapture -%}
+        {%- endif -%}
+        {%- if entry.month -%}
+          {%- capture entrymonth -%}{{ " " }}{{ entry.month | capitalize }}{%- endcapture -%}
+        {%- endif -%}
+        {%- if entry.year -%}
+          {%- capture entryyear -%}{{ " " }}{{entry.year}}{%- endcapture -%}
+        {%- endif -%}
+        {% assign entrytype_text = entrytype | strip_html | strip %}
+        {%- capture periodical -%}{{ entrytype }}{%- if entrytype_text != "" and entryyear != "" -%}, {%- endif -%}{{ entrymonth }}{{ entryyear }}{%- endcapture -%}
+        {% assign periodical_text = periodical | strip_html | strip %}
+
+        {%- assign show_selected = false -%}
+        {%- if is_selected and page.url contains "/publications" -%}
+          {%- assign show_selected = true -%}
+        {%- endif -%}
+
+        {%- if topic_label != "" or periodical_text != "" or show_selected -%}
+        <div class="pub-meta-row">
+          {%- if topic_label != "" -%}
+          <div class="venue-tag" data-venue-filter="{{topic_label}}" onclick="filterByVenue('{{topic_label}}')" title="Click to filter papers from {{topic_label}}" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('{{topic_label}}')">
+            {%- if site.data.venues[topic_label] -%}
+              <a href="{{site.data.venues[topic_label].url}}" class="venue-link" onclick="event.stopPropagation();" title="Visit {{topic_label}} website">{{topic_label}}</a>
+            {%- else -%}
+              <span class="venue-name">{{topic_label}}</span>
+            {%- endif -%}
+          </div>
+          {%- endif -%}
+          {%- if topic_label != "" and periodical_text != "" -%}
+          <span class="pub-meta-sep kicker" aria-hidden="true">·</span>
+          {%- endif -%}
+          {%- if periodical_text != "" -%}
+          <span class="pub-meta-venue mono-meta">{{ periodical | strip }}</span>
+          {%- endif -%}
+          {%- if show_selected -%}
+          {%- if topic_label != "" or periodical_text != "" -%}
+          <span class="pub-meta-sep kicker" aria-hidden="true">·</span>
+          {%- endif -%}
+          <span class="selected-mark eyebrow">★ Selected</span>
+          {%- endif -%}
+        </div>
+        {%- endif -%}
+
         <!-- Title -->
         <div class="title">
           {{entry.title}}
@@ -98,54 +161,22 @@
 
         </div>
 
-        <!-- Journal/Book title and date -->
-        {% assign proceedings = "inproceedings,incollection" | split: ','%}
-        {% assign thesis = "thesis,mastersthesis,phdthesis" | split: ','%}
-        {% if entry.type == "article" -%}
-          {%- capture entrytype -%}<em>{{entry.journal}}</em>{%- endcapture -%}
-        {%- elsif proceedings contains entry.type -%}
-          {%- capture entrytype -%}<em>In {{entry.booktitle}}</em> {%- endcapture -%}
-        {%- elsif thesis contains entry.type -%}
-          {%- capture entrytype -%}<em>{{entry.school}}</em> {%- endcapture -%}
-        {%- else -%}
-          {%- capture entrytype -%}{%- endcapture -%}
-        {%- endif -%}
-        {%- if entry.month -%}
-          {%- capture entrymonth -%}{{ " " }}{{ entry.month | capitalize }}{%- endcapture -%}
-        {%- endif -%}
-        {%- if entry.year -%}
-          {%- capture entryyear -%}{{ " " }}{{entry.year}}{%- endcapture -%}
-        {%- endif -%}
-        {% assign entrytype_text = entrytype | strip_html | strip %}
-        {%- capture periodical -%}{{ entrytype }}{%- if entrytype_text != "" and entryyear != "" -%}, {%- endif -%}{{ entrymonth }}{{ entryyear }}{%- endcapture -%}
-        <div class="periodical">
-          {{ periodical | strip }}
-        </div>
+        {%- if entry.note and entry.note != "" -%}
         <div class="periodical">
           {{ entry.note | strip }}
         </div>
-
-          <!-- Conference/Venue Tag -->
-          {%- if entry.abbr -%}
-          <div class="venue-tag" data-venue-filter="{{entry.abbr}}" onclick="filterByVenue('{{entry.abbr}}')" title="Click to filter papers from {{entry.abbr}}" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('{{entry.abbr}}')">
-            {%- if site.data.venues[entry.abbr] -%}
-              <a href="{{site.data.venues[entry.abbr].url}}" class="venue-link" onclick="event.stopPropagation();" title="Visit {{entry.abbr}} website">{{entry.abbr}}</a>
-            {%- else -%}
-              <span class="venue-name">{{entry.abbr}}</span>
-            {%- endif -%}
-          </div>
-          {%- endif -%}
+        {%- endif -%}
 
           <!-- Links/Buttons -->
           <div class="links">
-          {%- if entry.abstract %}
-            <a class="abstract btn btn-sm z-depth-0" role="button">Abs</a>
-          {%- endif %}
           {%- if entry.arxiv %}
             <a href="http://arxiv.org/abs/{{ entry.arxiv }}" class="btn btn-sm z-depth-0" role="button">arXiv</a>
           {%- endif %}
           {%- if entry.bibtex_show %}
-            <a class="bibtex btn btn-sm z-depth-0" role="button">Bib</a>
+            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="bibtex-copy-label">Copy Bib</span>
+            </a>
           {%- endif %}
           {%- if entry.html %}
             <a href="{{ entry.html }}" class="btn btn-sm z-depth-0" role="button">HTML</a>
@@ -220,18 +251,11 @@
           </div>
           {%- endif %}
 
-          {% if entry.abstract -%}
-          <!-- Hidden abstract block -->
-          <div class="abstract hidden">
-            <p>{{ entry.abstract }}</p>
-          </div>
-          {%- endif -%}
+          {%- comment -%} Abstract block intentionally omitted — user prefers no Abs surfacing on publications. {%- endcomment -%}
 
           {% if entry.bibtex_show -%}
-          <!-- Hidden bibtex block -->
-          <div class="bibtex hidden">
-            {% highlight bibtex %}{{ entry.bibtex | hideCustomBibtex }}{% endhighlight %}
-          </div>
+          <!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
+          <div class="bibtex-source" data-entry-key="{{ entry.key }}" hidden aria-hidden="true">{{ entry.bibtex | hideCustomBibtex }}</div>
           {%- endif %}
         </div>
       </div>

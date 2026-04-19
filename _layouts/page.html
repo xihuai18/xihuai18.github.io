@@ -5,8 +5,23 @@ layout: default
         <div class="post">
 
           <header class="post-header">
-            <h1 class="post-title">{{ page.title }}</h1>
+            {%- if page.eyebrow -%}
+            <p class="eyebrow">{{ page.eyebrow }}</p>
+            {%- endif -%}
+            {%- comment -%} `display_title` (raw HTML, can include `<span class="blog-title__dropcap">X</span>`)
+              overrides plain page.title in the H1 when set. Falls back to page.title otherwise. {%- endcomment -%}
+            {%- if page.display_title -%}
+              <h1 class="post-title has-dropcap">{{ page.display_title }}</h1>
+            {%- else -%}
+              <h1 class="post-title">{{ page.title }}</h1>
+            {%- endif -%}
+            {%- comment -%} `lead` is the canonical editorial subtitle; `description` is fallback
+              (also used for <meta description>). Render only one to avoid stacked meta. {%- endcomment -%}
+            {%- if page.lead -%}
+            <p class="lead">{{ page.lead }}</p>
+            {%- elsif page.description -%}
             <p class="post-description">{{ page.description }}</p>
+            {%- endif -%}
           </header>
 
           <article>

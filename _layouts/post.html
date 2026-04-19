@@ -16,6 +16,9 @@ layout: default
 <div class="post toc-layout{% if page.sidenotes %} post--sidenotes{% endif %}">
   <header class="post-header">
     <h1 class="post-title">{{ page.title }}</h1>
+    {%- if page.description -%}
+    <p class="lead post-lead">{{ page.description }}</p>
+    {%- endif -%}
     <div class="post-meta-container">
       <div class="post-meta-row">
         <span class="post-date">
@@ -33,6 +36,13 @@ layout: default
           <i class="far fa-clock"></i>
           {{ page.meta }}
         </span>
+        {%- endif -%}
+        {%- comment -%} BlogPost.jsx:18 — language switch lives inline with meta {%- endcomment -%}
+        {%- if page.zh_url -%}
+        <a class="post-lang-switch" href="{{ page.zh_url | relative_url }}">中文版本 →</a>
+        {%- endif -%}
+        {%- if page.en_url -%}
+        <a class="post-lang-switch" href="{{ page.en_url | relative_url }}">English Version →</a>
         {%- endif -%}
       </div>
       <div class="post-tags-row">
@@ -81,6 +91,56 @@ layout: default
         {{ content }}
       </article>
 
+      {%- comment -%} "Cite this post" footer — BlogPost.jsx:63-71. Emits a misc BibTeX
+        entry so readers can drop the reference into their own bibliography. Auto-built
+        from page metadata; suppressible per-post via `cite_this_post: false`. {%- endcomment -%}
+      {%- unless page.cite_this_post == false -%}
+        {%- assign cite_key = page.cite_key -%}
+        {%- if cite_key == nil or cite_key == "" -%}
+          {%- assign _slug = page.slug | default: page.title | slugify | replace: "-", "" -%}
+          {%- assign _author_key = site.scholar.last_name | downcase | default: "wang" -%}
+          {%- assign cite_key = _author_key | append: page.date | date: "%Y" | append: _slug -%}
+        {%- endif -%}
+        {%- assign cite_author = page.author | default: site.author.name | default: "Xihuai Wang" -%}
+        {%- assign cite_year = page.date | date: "%Y" -%}
+        {%- assign cite_url = page.url | absolute_url -%}
+        {%- assign _lang = page.lang | default: site.lang -%}
+        {%- if _lang == 'zh' or _lang == 'zh-CN' or _lang == 'cn' -%}
+          {%- assign cite_label = '引用本文' -%}
+          {%- assign cite_copy_label = '复制 BibTeX' -%}
+          {%- assign cite_copy_ok = '已复制' -%}
+        {%- else -%}
+          {%- assign cite_label = 'Cite this post' -%}
+          {%- assign cite_copy_label = 'Copy BibTeX' -%}
+          {%- assign cite_copy_ok = 'Copied' -%}
+        {%- endif -%}
+        {%- comment -%} Build the BibTeX entry as a single string with `&#123;` / `&#125;` html entities,
+          then drop it into the <code> block via `{{ cite_bib }}`. This sidesteps Liquid's greedy
+          `{{ … }}` tokenizer, which used to trip over literal-brace escapes when they sat
+          adjacent to `{{ cite_key }}` (see Jekyll docker build failure on 2026-04-19). {%- endcomment -%}
+        {%- comment -%} Wrap BibTeX tokens in syntax-highlighting spans so the block reads
+          as code rather than a grey panel. `textContent` copy stays valid BibTeX because
+          the spans drop out — see assets/js/post_cite.js. {%- endcomment -%}
+        {%- capture cite_bib -%}
+<span class="bib-type">@misc</span>&#123;<span class="bib-key">{{ cite_key }}</span>,
+  <span class="bib-field">author</span> = &#123;<span class="bib-value">{{ cite_author }}</span>&#125;,
+  <span class="bib-field">title</span>  = &#123;<span class="bib-value">{{ page.title }}</span>&#125;,
+  <span class="bib-field">year</span>   = &#123;<span class="bib-value">{{ cite_year }}</span>&#125;,
+  <span class="bib-field">url</span>    = &#123;<span class="bib-value">{{ cite_url }}</span>&#125;
+&#125;
+        {%- endcapture -%}
+        <aside class="post-cite">
+          <div class="post-cite__head">
+            <span class="eyebrow">{{ cite_label }}</span>
+            <button type="button" class="post-cite__copy" data-copy-target="#post-cite-bib" data-copied-label="{{ cite_copy_ok }}">
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="post-cite__copy-label">{{ cite_copy_label }}</span>
+            </button>
+          </div>
+          <pre class="post-cite__bib" id="post-cite-bib"><code>{{ cite_bib | strip }}</code></pre>
+        </aside>
+      {%- endunless -%}
+
       {% if page.distill_citations or page.distill_footnotes %}
         <script defer src="{{ '/assets/js/distillpub/template.v2.js' | relative_url }}"></script>
         <script defer src="{{ '/assets/js/distillpub/overrides.js' | relative_url }}"></script>
@@ -122,7 +182,11 @@ layout: default
     </div>
 
     <div class="col-lg-3 d-none d-lg-block toc-sidebar-col">
-      {% include toc_sidebar.html headings="h2,h3" content=".toc-content" %}
+      {%- comment -%} Design kit uses a flat section list (BlogPost.jsx:74); restricting
+        to h2 mirrors that and avoids the al-folio h3-under-h2 chevron toggles.
+        Leave `title` unset so the include picks the bilingual default
+        ("Contents" / "目录") from `page.lang`. {%- endcomment -%}
+      {% include toc_sidebar.html headings="h2" content=".toc-content" %}
     </div>
   </div>
 </div>
