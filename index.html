@@ -66,7 +66,10 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&display=swap">
+    <!-- Material Icons kept (used by MDB); refined type system replaces Roboto entirely -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Material+Icons&display=swap">
+    <!-- Refined type system: Fraunces (display), Source Serif 4 (body), Inter (UI), JetBrains Mono (meta), Noto Serif SC (CJK) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&display=swap">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" /><!-- Pseudocode -->
@@ -100,21 +103,18 @@
   <body class="fixed-top-nav sticky-bottom-footer">
 
     <!-- Header --><header>
+  <a class="skip-to-content" href="#main-content">Skip to content</a>
 
   <!-- Nav Bar -->
-  <nav id="navbar"
+  <nav id="navbar" aria-label="Primary"
     class="navbar navbar-light navbar-expand-sm fixed-top">
-    <div class="container">
-      <!-- Social Icons in Navbar for About Page -->
-      <div class="navbar-brand navbar-social-icons">
+    <div class="container"><div class="navbar-brand navbar-social-icons">
         <a href="mailto:%6C%65%6F%78%68%77%61%6E%67@%73%6A%74%75.%65%64%75.%63%6E" title="email"><i class="fas fa-envelope"></i></a>
             <a href="https://scholar.google.com/citations?user=hy6v3qUAAAAJ" title="Google Scholar"><i class="ai ai-google-scholar"></i></a>
             <a href="https://github.com/xihuai18" title="GitHub"><i class="fab fa-github"></i></a>
             
 
-      </div>
-      
-      <!-- Navbar Toggle -->
+      </div><!-- Navbar Toggle -->
       <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="sr-only">Toggle navigation</span>
@@ -151,9 +151,16 @@
           </li>
           <!-- Toggle theme mode -->
           <li class="nav-item toggle-container">
-            <button id="light-toggle" class="nav-link" title="Change theme">
-              <i class="fas fa-moon"></i>
-              <i class="fas fa-sun"></i>
+            <button id="light-toggle" class="nav-link theme-toggle" title="Change theme" aria-label="Toggle dark mode">
+              <span class="theme-toggle__icons" aria-hidden="true">
+                <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+                </svg>
+                <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+              </span>
             </button>
           </li>
         </ul>
@@ -171,12 +178,12 @@
 
 
     <!-- Content -->
-    <div class="container mt-5">
+    <main id="main-content" class="container mt-5" tabindex="-1">
       <!-- about.html -->
       <div class="post">
         <header class="post-header hero">
           <h1 class="post-title signature-name">
-           <span class="name-en">Xihuai Wang</span><span class="name-sep" aria-hidden="true"></span><span class="name-zh">王锡淮</span>
+           <span class="name-zh">王锡淮</span><span class="name-sep" aria-hidden="true">|</span><span class="name-en">Xihuai Wang</span>
           </h1>
           <p class="desc">Ph.D. @ <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.</p>
         </header>
@@ -257,10 +264,10 @@
                 <tr >
                   <th scope="row">Jan 13, 2026</th>
                   <td>
-                    <div style="display: flex; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-  <span style="flex: 1 1 200px;">I have successfully defended my Ph.D. thesis and graduated from Shanghai Jiao Tong University! 🎉</span>
-<img src="/assets/img/phd-graduation.png" class="img-fluid rounded z-depth-1" alt="Ph.D. Graduation" style="max-height: 180px; width: auto; flex: 0 0 auto;" />
-</div>
+                    <img src="/assets/img/phd-graduation.png" class="news-photo rounded z-depth-1" alt="Ph.D. Graduation" />
+
+I have successfully defended my Ph.D. thesis and graduated from Shanghai Jiao Tong University! 🎉
+
 
                   </td>
                 </tr>
@@ -270,7 +277,7 @@
                     A blog post sharing my perspective on KL estimators in reinforcement learning.
 
 <ul>
-  <li><a href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">English Version</a> | <a href="reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎 <img src="/assets/img/icons/zhihu.ico" style="height: 1em; vertical-align: middle;" alt="Zhihu" /></a> | <a href="https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw">青稞 AI 公众号 <img src="/assets/img/icons/wechat.png" style="height: 1em; vertical-align: middle;" alt="WeChat" /></a></li>
+  <li><a href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">English Version</a> | <a href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版本</a> | <a href="https://zhuanlan.zhihu.com/p/1978993413425763764">知乎 <img src="/assets/img/icons/zhihu.ico" style="height: 1em; vertical-align: middle;" alt="Zhihu" /></a> | <a href="https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw">青稞 AI 公众号 <img src="/assets/img/icons/wechat.png" style="height: 1em; vertical-align: middle;" alt="WeChat" /></a></li>
 </ul>
 
                   </td>
@@ -304,6 +311,23 @@
 
                   </td>
                 </tr>
+                <tr >
+                  <th scope="row">Aug 8, 2023</th>
+                  <td>
+                    Give a talk about cooperative multi-agent reinforcement learning (<a href="/assets/pdf/CoordinatingAgents-RLChina.pdf">Coordinate Agents vis Policy Optimization</a>) at RLChina
+<ul>
+  <li><a href="https://www.bilibili.com/video/BV15V41137pA/?share_source=copy_web&amp;vd_source=eecbb5055f668ec99c7c940f35a591c6">BiliBili 视频 <img src="/assets/img/icons/bilibili.png" style="height: 1em; vertical-align: middle;" alt="BiliBili" /></a></li>
+</ul>
+
+                  </td>
+                </tr>
+                <tr >
+                  <th scope="row">Mar 25, 2023</th>
+                  <td>
+                    Our work about policy optimization in cooperative multi-agent scenarios <a href="https://openreview.net/forum?id=Q-neeWNVv1">Order Matters: Agent-by-agent Policy Optimization</a> is accepted by ICLR 2023!
+
+                  </td>
+                </tr>
               </table>
             </div>
           </div>
@@ -323,9 +347,10 @@
               </div>
           <div class="publications">
             <ol class="bibliography"><li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key -->
-        <div id="zhang2025dpt" class="col-sm-12" data-venue="LLM Reasoning and Agency">
-        <!-- Title -->
+      <div class="row"><!-- Entry bib key --><div id="zhang2025dpt" class="col-sm-12" data-venue="LLM Reasoning & Agency"><!-- Journal/Book title and date -->
+        
+        
+        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="LLM Reasoning & Agency" onclick="filterByVenue('LLM Reasoning & Agency')" title="Click to filter papers from LLM Reasoning & Agency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('LLM Reasoning & Agency')"><span class="venue-name">LLM Reasoning & Agency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>63rd ACL</em>, 2025</span></div><!-- Title -->
         <div class="title">
           Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration
         </div>
@@ -333,21 +358,12 @@
         <div class="author">
         
 
-        <a href="https://shaozhang.info/">Shao Zhang*</a>,&nbsp;<em>Xihuai Wang*</em>,&nbsp;Wenhao Zhang,&nbsp;Chaoran Li,&nbsp;Junru Song,&nbsp;Tingyu Li,&nbsp;Lin Qiu,&nbsp;Xuezhi Cao,&nbsp;Xunliang Cai,&nbsp;Wen Yao,&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;Xinbing Wang,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></div>
-
-        <!-- Journal/Book title and date -->
-        
-        
-        <div class="periodical">
-          <em>63rd ACL</em>, 2025
-        </div>
-        <div class="periodical">
-          
-        </div>
-
-          <!-- Conference/Venue Tag --><div class="venue-tag" data-venue-filter="LLM Reasoning and Agency" onclick="filterByVenue('LLM Reasoning and Agency')" title="Click to filter papers from LLM Reasoning and Agency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('LLM Reasoning and Agency')"><span class="venue-name">LLM Reasoning and Agency</span></div><!-- Links/Buttons -->
+        <a href="https://shaozhang.info/">Shao Zhang*</a>,&nbsp;<em>Xihuai Wang*</em>,&nbsp;Wenhao Zhang,&nbsp;Chaoran Li,&nbsp;Junru Song,&nbsp;Tingyu Li,&nbsp;Lin Qiu,&nbsp;Xuezhi Cao,&nbsp;Xunliang Cai,&nbsp;Wen Yao,&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;Xinbing Wang,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></div><!-- Links/Buttons -->
           <div class="links">
-            <a class="bibtex btn btn-sm z-depth-0" role="button">Bib</a>
+            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="zhang2025dpt" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="bibtex-copy-label">Copy Bib</span>
+            </a>
             <a href="https://arxiv.org/abs/2502.11882.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
             <a href="https://github.com/sjtu-marl/DPT-Agent" class="btn btn-sm z-depth-0" role="button">Code</a>
           </div>
@@ -362,24 +378,22 @@
                 data-pmid=""
               
               data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div>
-
-          <!-- Hidden bibtex block -->
-          <div class="bibtex hidden">
-            <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@article</span><span class="p">{</span><span class="nl">zhang2025dpt</span><span class="p">,</span>
-  <span class="na">author</span> <span class="p">=</span> <span class="s">{Zhang*, Shao and Wang*, Xihuai and Zhang, Wenhao and Li, Chaoran and Song, Junru and Li, Tingyu and Qiu, Lin and Cao, Xuezhi and Cai, Xunliang and Yao, Wen and Zhang, Weinan and Wang, Xinbing and Wen, Ying}</span><span class="p">,</span>
-  <span class="na">title</span> <span class="p">=</span> <span class="s">{Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration}</span><span class="p">,</span>
-  <span class="na">journal</span> <span class="p">=</span> <span class="s">{63rd ACL}</span><span class="p">,</span>
-  <span class="na">year</span> <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
-<span class="p">}</span></code></pre></figure>
-          </div>
+          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
+          <div class="bibtex-source" data-entry-key="zhang2025dpt" hidden aria-hidden="true">@article{zhang2025dpt,
+  author = {Zhang*, Shao and Wang*, Xihuai and Zhang, Wenhao and Li, Chaoran and Song, Junru and Li, Tingyu and Qiu, Lin and Cao, Xuezhi and Cai, Xunliang and Yao, Wen and Zhang, Weinan and Wang, Xinbing and Wen, Ying},
+  title = {Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration},
+  journal = {63rd ACL},
+  year = {2025},
+}
+</div>
         </div>
       </div>
 </li>
 <li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key -->
-        <div id="wang2023zsceval" class="col-sm-12" data-venue="MARL Generalization">
-        <!-- Title -->
+      <div class="row"><!-- Entry bib key --><div id="wang2023zsceval" class="col-sm-12" data-venue="MARL Generalization"><!-- Journal/Book title and date -->
+        
+        
+        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Generalization" onclick="filterByVenue('MARL Generalization')" title="Click to filter papers from MARL Generalization" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Generalization')"><span class="venue-name">MARL Generalization</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>38th NeurIPS</em>, 2024</span></div><!-- Title -->
         <div class="title">
           ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination
         </div>
@@ -387,21 +401,12 @@
         <div class="author">
         
 
-        <em>Xihuai Wang</em>,&nbsp;<a href="https://shaozhang.info/">Shao Zhang</a>,&nbsp;Wenhao Zhang,&nbsp;Wentao Dong,&nbsp;Jingxiao Chen,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></div>
-
-        <!-- Journal/Book title and date -->
-        
-        
-        <div class="periodical">
-          <em>38th NeurIPS</em>, 2024
-        </div>
-        <div class="periodical">
-          
-        </div>
-
-          <!-- Conference/Venue Tag --><div class="venue-tag" data-venue-filter="MARL Generalization" onclick="filterByVenue('MARL Generalization')" title="Click to filter papers from MARL Generalization" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Generalization')"><span class="venue-name">MARL Generalization</span></div><!-- Links/Buttons -->
+        <em>Xihuai Wang</em>,&nbsp;<a href="https://shaozhang.info/">Shao Zhang</a>,&nbsp;Wenhao Zhang,&nbsp;Wentao Dong,&nbsp;Jingxiao Chen,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></div><!-- Links/Buttons -->
           <div class="links">
-            <a class="bibtex btn btn-sm z-depth-0" role="button">Bib</a>
+            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="wang2023zsceval" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="bibtex-copy-label">Copy Bib</span>
+            </a>
             <a href="https://arxiv.org/pdf/2310.05208.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
             <a href="https://github.com/sjtu-marl/zsc-eval" class="btn btn-sm z-depth-0" role="button">Code</a>
           </div>
@@ -416,24 +421,22 @@
                 data-pmid=""
               
               data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div>
-
-          <!-- Hidden bibtex block -->
-          <div class="bibtex hidden">
-            <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@article</span><span class="p">{</span><span class="nl">wang2023zsceval</span><span class="p">,</span>
-  <span class="na">author</span> <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao and Zhang, Wenhao and Dong, Wentao and Chen, Jingxiao and Wen, Ying and Zhang, Weinan}</span><span class="p">,</span>
-  <span class="na">title</span> <span class="p">=</span> <span class="s">{ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination}</span><span class="p">,</span>
-  <span class="na">journal</span> <span class="p">=</span> <span class="s">{38th NeurIPS}</span><span class="p">,</span>
-  <span class="na">year</span> <span class="p">=</span> <span class="s">{2024}</span><span class="p">,</span>
-<span class="p">}</span></code></pre></figure>
-          </div>
+          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
+          <div class="bibtex-source" data-entry-key="wang2023zsceval" hidden aria-hidden="true">@article{wang2023zsceval,
+  author = {Wang, Xihuai and Zhang, Shao and Zhang, Wenhao and Dong, Wentao and Chen, Jingxiao and Wen, Ying and Zhang, Weinan},
+  title = {ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
+  journal = {38th NeurIPS},
+  year = {2024},
+}
+</div>
         </div>
       </div>
 </li>
 <li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key -->
-        <div id="wang2023order" class="col-sm-12" data-venue="MARL Efficiency">
-        <!-- Title -->
+      <div class="row"><!-- Entry bib key --><div id="wang2023order" class="col-sm-12" data-venue="MARL Efficiency"><!-- Journal/Book title and date -->
+        
+        
+        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>11th ICLR</em>, 2023</span></div><!-- Title -->
         <div class="title">
           Order Matters: Agent-by-agent Policy Optimization
         </div>
@@ -441,21 +444,12 @@
         <div class="author">
         
 
-        <em>Xihuai Wang</em>,&nbsp;Zheng Tian,&nbsp;Ziyu Wan,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;<a href="http://www0.cs.ucl.ac.uk/staff/jun.wang">Jun Wang</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></div>
-
-        <!-- Journal/Book title and date -->
-        
-        
-        <div class="periodical">
-          <em>11th ICLR</em>, 2023
-        </div>
-        <div class="periodical">
-          
-        </div>
-
-          <!-- Conference/Venue Tag --><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><!-- Links/Buttons -->
+        <em>Xihuai Wang</em>,&nbsp;Zheng Tian,&nbsp;Ziyu Wan,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;<a href="http://www0.cs.ucl.ac.uk/staff/jun.wang">Jun Wang</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></div><!-- Links/Buttons -->
           <div class="links">
-            <a class="bibtex btn btn-sm z-depth-0" role="button">Bib</a>
+            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="wang2023order" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="bibtex-copy-label">Copy Bib</span>
+            </a>
             <a href="https://arxiv.org/pdf/2302.06205.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
             <a href="https://github.com/xihuai18/A2PO-ICLR2023" class="btn btn-sm z-depth-0" role="button">Code</a>
           </div>
@@ -470,25 +464,23 @@
                 data-pmid=""
               
               data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div>
-
-          <!-- Hidden bibtex block -->
-          <div class="bibtex hidden">
-            <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@article</span><span class="p">{</span><span class="nl">wang2023order</span><span class="p">,</span>
-  <span class="na">author</span> <span class="p">=</span> <span class="s">{Wang, Xihuai and Tian, Zheng and Wan, Ziyu and Wen, Ying and Wang, Jun and Zhang, Weinan}</span><span class="p">,</span>
-  <span class="na">title</span> <span class="p">=</span> <span class="s">{Order Matters: Agent-by-agent Policy Optimization}</span><span class="p">,</span>
-  <span class="na">journal</span> <span class="p">=</span> <span class="s">{11th ICLR}</span><span class="p">,</span>
-  <span class="na">year</span> <span class="p">=</span> <span class="s">{2023}</span><span class="p">,</span>
-  <span class="na">url</span> <span class="p">=</span> <span class="s">{https://openreview.net/forum?id=Q-neeWNVv1}</span><span class="p">,</span>
-<span class="p">}</span></code></pre></figure>
-          </div>
+          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
+          <div class="bibtex-source" data-entry-key="wang2023order" hidden aria-hidden="true">@article{wang2023order,
+  author = {Wang, Xihuai and Tian, Zheng and Wan, Ziyu and Wen, Ying and Wang, Jun and Zhang, Weinan},
+  title = {Order Matters: Agent-by-agent Policy Optimization},
+  journal = {11th ICLR},
+  year = {2023},
+  url = {https://openreview.net/forum?id=Q-neeWNVv1},
+}
+</div>
         </div>
       </div>
 </li>
 <li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key -->
-        <div id="zhang2021modelbased" class="col-sm-12" data-venue="MARL Efficiency">
-        <!-- Title -->
+      <div class="row"><!-- Entry bib key --><div id="zhang2021modelbased" class="col-sm-12" data-venue="MARL Efficiency"><!-- Journal/Book title and date -->
+        
+        
+        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>30th IJCAI</em>, 2021</span></div><!-- Title -->
         <div class="title">
           Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts
         </div>
@@ -496,21 +488,12 @@
         <div class="author">
         
 
-        <a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;<em>Xihuai Wang</em>,&nbsp;Jian Shen,&nbsp;and&nbsp;<a href="https://www.mingzak.com">Ming Zhou</a></div>
-
-        <!-- Journal/Book title and date -->
-        
-        
-        <div class="periodical">
-          <em>30th IJCAI</em>, 2021
-        </div>
-        <div class="periodical">
-          
-        </div>
-
-          <!-- Conference/Venue Tag --><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><!-- Links/Buttons -->
+        <a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;<em>Xihuai Wang</em>,&nbsp;Jian Shen,&nbsp;and&nbsp;<a href="https://www.mingzak.com">Ming Zhou</a></div><!-- Links/Buttons -->
           <div class="links">
-            <a class="bibtex btn btn-sm z-depth-0" role="button">Bib</a>
+            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="zhang2021modelbased" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="bibtex-copy-label">Copy Bib</span>
+            </a>
             <a href="https://arxiv.org/pdf/2105.03363.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
             <a href="https://github.com/xihuai18/AORPO" class="btn btn-sm z-depth-0" role="button">Code</a>
           </div>
@@ -525,17 +508,14 @@
                 data-pmid=""
               
               data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div>
-
-          <!-- Hidden bibtex block -->
-          <div class="bibtex hidden">
-            <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@article</span><span class="p">{</span><span class="nl">zhang2021modelbased</span><span class="p">,</span>
-  <span class="na">author</span> <span class="p">=</span> <span class="s">{Zhang, Weinan and Wang, Xihuai and Shen, Jian and Zhou, Ming}</span><span class="p">,</span>
-  <span class="na">title</span> <span class="p">=</span> <span class="s">{Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts}</span><span class="p">,</span>
-  <span class="na">journal</span> <span class="p">=</span> <span class="s">{30th IJCAI}</span><span class="p">,</span>
-  <span class="na">year</span> <span class="p">=</span> <span class="s">{2021}</span><span class="p">,</span>
-<span class="p">}</span></code></pre></figure>
-          </div>
+          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
+          <div class="bibtex-source" data-entry-key="zhang2021modelbased" hidden aria-hidden="true">@article{zhang2021modelbased,
+  author = {Zhang, Weinan and Wang, Xihuai and Shen, Jian and Zhou, Ming},
+  title = {Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts},
+  journal = {30th IJCAI},
+  year = {2021},
+}
+</div>
         </div>
       </div>
 </li></ol>
@@ -546,9 +526,11 @@
 
 </div>
 
-<script type='text/javascript' id='mapmyvisitors' src='https://mapmyvisitors.com/map.js?cl=080808&w=300&t=tt&d=pEDbbduWzxLH8VXgpfAvKxOvBaKBukQJUKFJjcYVd1w&co=ffffff&cmo=3acc3a&cmn=ff5353&ct=808080'></script>
+<div class="mapmyvisitors-wrap">
+<script type='text/javascript' id='mapmyvisitors' src='https://mapmyvisitors.com/map.js?cl=080808&w=600&t=tt&d=pEDbbduWzxLH8VXgpfAvKxOvBaKBukQJUKFJjcYVd1w&co=ffffff&cmo=3acc3a&cmn=ff5353&ct=808080'></script>
+</div>
 
-    </div>
+    </main>
 
     <!-- Footer -->    <footer class="sticky-bottom mt-5">
       <div class="container">
@@ -580,6 +562,8 @@
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
   <script defer src="/assets/js/toc.js" type="text/javascript"></script>
   <script defer src="/assets/js/venue_filter.js" type="text/javascript"></script>
+  <script defer src="/assets/js/bibtex_copy.js" type="text/javascript"></script>
+  <script defer src="/assets/js/post_cite.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

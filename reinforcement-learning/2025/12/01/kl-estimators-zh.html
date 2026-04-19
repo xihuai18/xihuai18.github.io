@@ -77,7 +77,10 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&display=swap">
+    <!-- Material Icons kept (used by MDB); refined type system replaces Roboto entirely -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Material+Icons&display=swap">
+    <!-- Refined type system: Fraunces (display), Source Serif 4 (body), Inter (UI), JetBrains Mono (meta), Noto Serif SC (CJK) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&display=swap">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" /><!-- Pseudocode -->
@@ -111,13 +114,18 @@
   <body class="fixed-top-nav sticky-bottom-footer">
 
     <!-- Header --><header>
+  <a class="skip-to-content" href="#main-content">Skip to content</a>
 
   <!-- Nav Bar -->
-  <nav id="navbar"
+  <nav id="navbar" aria-label="Primary"
     class="navbar navbar-light navbar-expand-sm fixed-top">
-    <div class="container">
-      <a class="navbar-brand title font-weight-lighter" href="/">Xihuai Wang's Page</a>
-      <!-- Navbar Toggle -->
+    <div class="container"><div class="navbar-brand navbar-social-icons">
+        <a href="mailto:%6C%65%6F%78%68%77%61%6E%67@%73%6A%74%75.%65%64%75.%63%6E" title="email"><i class="fas fa-envelope"></i></a>
+            <a href="https://scholar.google.com/citations?user=hy6v3qUAAAAJ" title="Google Scholar"><i class="ai ai-google-scholar"></i></a>
+            <a href="https://github.com/xihuai18" title="GitHub"><i class="fab fa-github"></i></a>
+            
+
+      </div><!-- Navbar Toggle -->
       <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="sr-only">Toggle navigation</span>
@@ -154,9 +162,16 @@
           </li>
           <!-- Toggle theme mode -->
           <li class="nav-item toggle-container">
-            <button id="light-toggle" class="nav-link" title="Change theme">
-              <i class="fas fa-moon"></i>
-              <i class="fas fa-sun"></i>
+            <button id="light-toggle" class="nav-link theme-toggle" title="Change theme" aria-label="Toggle dark mode">
+              <span class="theme-toggle__icons" aria-hidden="true">
+                <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+                </svg>
+                <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+              </span>
             </button>
           </li>
         </ul>
@@ -174,18 +189,17 @@
 
 
     <!-- Content -->
-    <div class="container mt-5">
+    <main id="main-content" class="container mt-5" tabindex="-1">
       <!-- _layouts/post.html -->
 
 <div class="post toc-layout">
   <header class="post-header">
-    <h1 class="post-title">RL 中的 KL 估计器选型：从数值无偏到梯度正确</h1>
-    <div class="post-meta-container">
+    <h1 class="post-title">RL 中的 KL 估计器选型：从数值无偏到梯度正确</h1><p class="lead post-lead">在强化学习中，KL 估计器不能只看数值估得准不准，还要看它在 loss 或 reward 写法下究竟优化了谁。本文比较 k1、k2、k3 在 on-policy 与 off-policy 场景中的差异，并给出可直接落地的选型建议。</p><div class="post-meta-container">
       <div class="post-meta-row">
         <span class="post-date">
           <i class="far fa-calendar-alt"></i>
           December 1, 2025
-        </span></div>
+        </span><a class="post-lang-switch" href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">English Version →</a></div>
       <div class="post-tags-row">
         <a href="/blog/?year=2025" data-filter-link data-filter-type="year" data-filter-value="2025">
           📅 2025
@@ -202,13 +216,6 @@
   </header>
 
   <div class="post-links">
-  
-
-  <!-- Bilingual Links -->
-  
-
-  
-
   <!-- External Platform Links -->
   
 
@@ -218,8 +225,6 @@
   
 
   <!-- Output links -->
-  
-    <a href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">English Version</a>
   
     <a href="https://zhuanlan.zhihu.com/p/1978993413425763764" target="_blank">知乎 <img src="/assets/img/icons/zhihu.ico" style="height: 1em; vertical-align: middle;"></a>
   
@@ -304,6 +309,45 @@ $$</p>
     <li>其余常见配置的问题通常不是”数值偏差稍大”，而是梯度目标已经变了。</li>
   </ul>
 </blockquote>
+
+<h3 id="13-先用三问把问题定下来">1.3 先用三问把问题定下来</h3>
+
+<p>为了降低阅读负担，可以先不看公式，先回答三个问题：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>问题</th>
+      <th>如果答案是……</th>
+      <th>需要警惕什么</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>KL 是否直接反传？</td>
+      <td>直接反传：KL 是 loss；不直接反传：KL 是 reward shaping 或监控量</td>
+      <td>同一个 $k_i$ 放进 loss 和 reward，梯度语义不同</td>
+    </tr>
+    <tr>
+      <td>样本来自哪里？</td>
+      <td>来自 $q_\theta$ 是 on-policy；来自 $\mu$ 是 off-policy</td>
+      <td>off-policy 下必须区分目标分布与采样分布</td>
+    </tr>
+    <tr>
+      <td>想约束哪个方向？</td>
+      <td>反向 KL、正向 KL，或某个局部 surrogate</td>
+      <td>数值估计的 KL 方向不一定等于 loss 的梯度方向</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>这三问决定了后文所有选型结论。尤其要记住：</p>
+
+<p>$$
+\text{KL 数值估计器} \neq \text{KL 优化目标} \neq \text{代码实际回传的梯度}.
+$$</p>
+
+<p>本文后面的表格和推导，都是在反复检查这三个对象是否一致。</p>
 
 <h2 id="2-选型速查表可跳读">2. 选型速查表（可跳读）</h2>
 
@@ -430,14 +474,14 @@ $$</p>
     <tr>
       <td style="text-align: center">$k_3$</td>
       <td style="text-align: center">数值无偏，低方差</td>
-      <td style="text-align: center"><strong>诱导的策略梯度有偏</strong>，偏差项为 $-\nabla D_{\mathrm{KL}}(p\|q)$，实践中可能显著不稳定甚至崩溃</td>
+      <td style="text-align: center"><strong>诱导的策略梯度有偏</strong>，偏差项为 $-\nabla D_{\mathrm{KL}}(p\|q)$，会额外引入并非目标反向 KL 的梯度项</td>
       <td style="text-align: center">✗✗</td>
     </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p><strong>注</strong>：在本文讨论的 stop-grad reward shaping 场景下，<strong>只有 $k_1$ 能保持与反向 KL 正则一致的无偏策略梯度主项</strong>。$k_2$ 和 $k_3$ 都会引入偏差；其中 $k_3$ 虽然数值无偏且方差低，但实践中曾观察到显著不稳定甚至崩溃。</p>
+  <p><strong>注</strong>：在本文讨论的 stop-grad reward shaping 场景下，<strong>只有 $k_1$ 能保持与反向 KL 正则一致的无偏策略梯度主项</strong>。$k_2$ 和 $k_3$ 都会引入偏差；其中 $k_3$ 虽然数值无偏且方差低，但理论上已经偏离目标梯度。</p>
 </blockquote>
 
 <p><strong>图例</strong>：✓✓ 强烈推荐；✓ 推荐（实现稍复杂或有小缺点）；△ 可用需谨慎；✗✗ 与目标不匹配。</p>
@@ -448,7 +492,7 @@ $$</p>
 
 <p>在进入正文前，先统一符号，并把后文反复要用的两个基础结论写清楚。</p>
 
-<h3 id="31-符号采样分布与解析梯度">3.1 符号、采样分布与解析梯度</h3>
+<h3 id="31-符号采样分布与目标函数的真梯度">3.1 符号、采样分布与目标函数的真梯度</h3>
 
 <p><strong>符号约定</strong></p>
 
@@ -461,7 +505,7 @@ $$</p>
   <li>$\text{sg}(\cdot)$：stop-gradient 操作（在代码中对应 <code class="language-plaintext highlighter-rouge">.detach()</code>）</li>
 </ul>
 
-<h4 id="统一的采样策略视角引入-inlmath127mathend-记号">统一的采样策略视角：引入 $\rho$ 记号</h4>
+<h4 id="统一的采样策略视角引入-inlmath131mathend-记号">统一的采样策略视角：引入 $\rho$ 记号</h4>
 
 <p>分析 KL 估计器的梯度性质时，on-policy 和 off-policy 看起来像要分开处理，但其实可以放进同一个框架。</p>
 
@@ -484,11 +528,11 @@ $$</p>
 
 <p>有了这个记号，后面的推导就不必再分 on-policy 和 off-policy 两套写法。</p>
 
-<h4 id="得分函数与-kl-散度的解析梯度">得分函数与 KL 散度的解析梯度</h4>
+<h4 id="得分函数与-kl-散度的目标函数的真梯度">得分函数与 KL 散度的目标函数的真梯度</h4>
 
 <p>得分函数有一个重要性质：$\mathbb{E}_{q_\theta}[s_\theta] = 0$（由 $\int \nabla_\theta q_\theta dx = \nabla_\theta \int q_\theta dx = \nabla_\theta 1 = 0$ 可得）。</p>
 
-<p>基于这一性质，可以推导出正向与反向 KL 散度关于参数 $\theta$ 的<strong>解析梯度</strong>。</p>
+<p>基于这一性质，可以推导出正向与反向 KL 散度关于参数 $\theta$ 的<strong>目标函数的真梯度</strong>。</p>
 
 <p><strong>反向 KL 的梯度</strong>：</p>
 
@@ -549,7 +593,7 @@ $$</p>
   <p><strong>注</strong>：后文将推导 $\nabla_\theta k_3 = (1-\frac{p}{q_\theta}) s_\theta$，因此 $\mathbb{E}_{q_\theta}[\nabla_\theta k_3] = \nabla_\theta D_{\mathrm{KL}}(p \| q_\theta)$（正向 KL）——这解释了为何直接对 $k_3$ 反向传播会给出”错误”的梯度方向。</p>
 </blockquote>
 
-<p>有了这两个结果，后续就能判断各个估计器的梯度期望各自对应哪种 KL 散度的解析梯度。</p>
+<p>有了这两个结果，后续就能判断各个估计器的梯度期望各自对应哪种 KL 散度的目标函数的真梯度。</p>
 
 <h2 id="4-三种估计器的定义与设计原理">4. 三种估计器的定义与设计原理</h2>
 
@@ -663,6 +707,37 @@ $$</p>
       </tbody>
     </table>
 
+    <p>在进入偏差、方差和梯度推导前，先把 $k_i$ 的三种使用语义分开：</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>使用语义</th>
+          <th>关心的问题</th>
+          <th>最容易犯的错误</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>KL 数值监控量</td>
+          <td>期望是否等于目标 KL？方差是否低？</td>
+          <td>看到 $k_3$ 数值好，就默认它适合所有位置</td>
+        </tr>
+        <tr>
+          <td>KL 可微 loss</td>
+          <td>反向传播的梯度是否等于目标正则的梯度？</td>
+          <td>忽略 score-function 路径或 importance ratio</td>
+        </tr>
+        <tr>
+          <td>KL reward shaping</td>
+          <td>KL sample 是否只通过 policy-gradient 主项起作用？</td>
+          <td>把 detached reward 中的 estimator 当成可微 loss 来理解</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>后文说某个写法”对”或”不对”时，指的不是这个样本值能否估计 KL，而是它在给定用法下是否产生目标函数需要的梯度。</p>
+
     <h2 id="section">5. 数值估计：偏差与方差</h2>
 
     <p>假设从 $q_\theta$ 采样来估计反向 KL $D_{\mathrm{KL}}(q_\theta \| p)$：</p>
@@ -683,7 +758,7 @@ $$</p>
 
     <h3 id="section-2">5.2 方差特性分析</h3>
 
-    <p>John Schulman 的实验（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）显示：</p>
+    <p>John Schulman 笔记中的数值例子（$q = \mathcal{N}(0,1)$，$p = \mathcal{N}(0.1,1)$，真实 KL = 0.005）显示：</p>
 
     <table>
       <thead>
@@ -824,7 +899,7 @@ $$</p>
 
     <h2 id="section-3">7. 作为损失项时的梯度分析</h2>
 
-    <p>当 KL 散度作为损失函数参与反向传播时，不同估计器对应的优化目标并不相同。这里也是实践中最容易踩坑的地方。</p>
+    <p>当 KL 散度作为损失函数参与反向传播时，不同估计器对应的优化目标并不相同。这里也是实现语义上最容易混淆的地方。</p>
 
     <p>下面沿用前文的统一框架，把 on-policy 与 off-policy 放进同一套推导。回顾比率定义：</p>
 
@@ -905,7 +980,7 @@ $$</p>
 
     <p>这些基本梯度会在后续的统一框架分析中反复出现。</p>
 
-    <h4 id="vs-">“先期望后梯度” vs “先梯度后期望”：一个重要警示</h4>
+    <h4 id="vs-">“数学目标的梯度” vs “代码实际回传的梯度”：一个重要警示</h4>
 
     <p>分析 KL 估计器的梯度时，有一个容易混淆的陷阱：<strong>“先期望后梯度”和”先梯度后期望”可能给出不同结果</strong>。</p>
 
@@ -996,7 +1071,7 @@ $$</p>
 \end{aligned}
 $$</p>
 
-    <p>也就是说，$\rho k_2$ 的梯度期望对应的是”最小化 $\mathbb{E}_{q_\theta}[k_2]$”（一个与 KL 共享局部二阶行为的 surrogate），而<strong>不是</strong>反向 KL $D_{\mathrm{KL}}(q_\theta\|p)$ 的解析梯度。因此若目标是<strong>精确优化反向 KL</strong>，不建议直接使用 $\rho k_2$。</p>
+    <p>也就是说，$\rho k_2$ 的梯度期望对应的是”最小化 $\mathbb{E}_{q_\theta}[k_2]$”（一个与 KL 共享局部二阶行为的 surrogate），而<strong>不是</strong>反向 KL $D_{\mathrm{KL}}(q_\theta\|p)$ 的目标函数的真梯度。因此若目标是<strong>精确优化反向 KL</strong>，不建议直接使用 $\rho k_2$。</p>
 
     <p><strong>$\mathbb{E}_\mu[\nabla_\theta(\text{sg}(\rho) k_2)]$</strong>：</p>
 
@@ -1183,7 +1258,7 @@ $$</p>
 
     <p>当 $\mu$ 与 $q_\theta$ 差异很大时——例如 $\mu$ 在 $q_\theta$ 的高密度区域几乎没有采样，或 $\rho = q_\theta / \mu$ 在尾部爆炸——任何基于 $\rho$ 的方法都会遇到严重的方差问题。此时 $\rho k_3$（或 $\text{sg}(\rho) k_2$）相对于 $\rho k_1$ 的优势就不再有理论保证，需要结合 clipping、正则化等手段综合处理。</p>
 
-    <p>不过在 RL 实践中，通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 $\mu = q_{\theta_\text{old}}$）。在这种常见场景下，可以比较有信心地说：</p>
+    <p>在近策略更新的理论设定中，通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 $\mu = q_{\theta_\text{old}}$）。在这种局部近似场景下，可以比较有信心地说：</p>
 
     <blockquote>
       <p><strong>一旦决定用重要性采样优化反向 KL，推荐使用 $\rho k_3$ 或 $\text{sg}(\rho) k_2$（两者梯度等价且方差低）；相比之下，$\rho k_1$ 方差更高。</strong></p>
@@ -1282,7 +1357,7 @@ $$</p>
 J(\theta) = \mathbb{E}_{q_\theta}[R] - \beta \cdot D_{\mathrm{KL}}(q_\theta \| p)
 $$</p>
 
-    <p>其解析梯度为：</p>
+    <p>其目标函数的真梯度为：</p>
 
     <p>$$
 \nabla_\theta J = \mathbb{E}_{q_\theta}[s_\theta \cdot R] - \beta \cdot \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p)
@@ -1300,7 +1375,7 @@ $$</p>
 \nabla_\theta J = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(R - \beta \cdot k_1\right)\right]
 $$</p>
 
-    <h4 id="inlmath434mathend-">使用估计器 $\hat{k}$ 时的梯度形式</h4>
+    <h4 id="inlmath440mathend-">使用估计器 $\hat{k}$ 时的梯度形式</h4>
 
     <p>下文只讨论<strong>策略梯度主项本身</strong>，暂不把 baseline、critic 拟合误差、GAE 与额外归一化一并纳入。此时若把某个估计器 $\hat{k}$（加 stop-gradient）放进奖励塑形，塑形后的奖励为 $\tilde{R} = R - \beta \cdot \text{sg}(\hat{k})$，策略梯度变为：</p>
 
@@ -1314,7 +1389,7 @@ $$</p>
 \mathbb{E}_{q_\theta}[s_\theta \cdot \hat{k}] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
 $$</p>
 
-    <h4 id="inlmath438mathend-">使用 $k_1$ 作为惩罚：梯度无偏</h4>
+    <h4 id="inlmath444mathend-">使用 $k_1$ 作为惩罚：梯度无偏</h4>
 
     <p>当 $\hat{k} = k_1$ 时，条件自动成立：</p>
 
@@ -1324,7 +1399,7 @@ $$</p>
 
     <p>所以就该策略梯度主项而言，<strong>把 $k_1$ 放进奖励塑形诱导的是无偏梯度</strong>。</p>
 
-    <h4 id="inlmath441mathend-">使用 $k_3$ 作为惩罚：梯度有偏</h4>
+    <h4 id="inlmath447mathend-">使用 $k_3$ 作为惩罚：梯度有偏</h4>
 
     <p>当 $\hat{k} = k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 时：</p>
 
@@ -1358,18 +1433,9 @@ $$</p>
 
     <p><strong>把 $k_3$ 放进奖励塑形时，梯度是有偏的</strong>，偏差项正好等于正向 KL 梯度的负值。</p>
 
-    <p>更严格地讲，把 $k_3$ 放进奖励塑形时，实际更新会在反向 KL 梯度之外额外混入一个与正向 KL 梯度相关的偏差项，因此不再对应纯粹的反向 KL 正则目标。这也是它在实践中容易变得不稳定的原因。</p>
+    <p>更严格地讲，把 $k_3$ 放进奖励塑形时，实际更新会在反向 KL 梯度之外额外混入一个与正向 KL 梯度相关的偏差项，因此不再对应纯粹的反向 KL 正则目标。这里的结论完全来自梯度分解本身，不依赖任何具体实验设定。</p>
 
-    <p><strong>实验现象</strong>：Shah et al. (2025) 的实验表明，在其 on-policy LLM-RL 设定下：</p>
-
-    <ul>
-      <li><strong>$k_1$ in reward</strong>：训练稳定；</li>
-      <li><strong>$k_3$ in reward</strong>：出现显著不稳定，甚至训练崩溃。</li>
-    </ul>
-
-    <p>这与本文给出的偏差分析方向一致。</p>
-
-    <h4 id="inlmath449mathend-">使用 $k_2$ 作为惩罚：同样有偏</h4>
+    <h4 id="inlmath453mathend-">使用 $k_2$ 作为惩罚：同样有偏</h4>
 
     <p>当 $\hat{k} = k_2 = \frac{1}{2}k_1^2$ 时，奖励塑形项对应的梯度项为</p>
 
@@ -1409,7 +1475,7 @@ $$</p>
       <p><strong>注</strong>：这里默认的是当前样本 / 当前 token 级的 reward shaping 写法；若回到一般多步 MDP 的严格 off-policy 推导，还需要配合逐步重要性采样或相应的值函数修正。</p>
     </blockquote>
 
-    <h3 id="inlmath461mathend-">8.2 这一节的结论：只有 $k_1$ 保持无偏</h3>
+    <h3 id="inlmath465mathend-">8.2 这一节的结论：只有 $k_1$ 保持无偏</h3>
 
     <table>
       <thead>
@@ -1457,7 +1523,7 @@ $$</p>
 
     <p>下面就来解释两者并不冲突：就”KL 正则项对应的 policy-gradient 随机变量”而言，它们甚至可以做到<strong>样本级完全等价</strong>；差异主要来自 KL 是否进入 advantage / baseline、以及信用分配（credit assignment）的路径。</p>
 
-    <h3 id="inlmath470mathend--kl-">8.3 $k_1$ 奖励塑形与低方差 KL 损失项：等价性与差异</h3>
+    <h3 id="inlmath474mathend--kl-">8.3 $k_1$ 奖励塑形与低方差 KL 损失项：等价性与差异</h3>
 
     <p>说到这里，很容易追问一句：<strong>KL 写进 loss 和 KL 写进 reward，到底在什么意义上等价，又在什么意义上不是一回事？</strong></p>
 
@@ -1614,9 +1680,9 @@ $$</p>
       </li>
     </ol>
 
-    <p>基于上面”数值无偏 vs 梯度正确”以及”Loss 与 Reward 实现差异”的结论，下面给出可直接照抄到代码里的选型速查与常见踩坑点。</p>
+    <p>基于上面”数值无偏 vs 梯度正确”以及”Loss 与 Reward 实现差异”的结论，下面给出一份理论选型速查与常见误区。</p>
 
-    <h2 id="section-14">9. 实践指南与常见陷阱</h2>
+    <h2 id="section-14">9. 理论选型指南与常见误区</h2>
 
     <h3 id="section-15">9.1 三种估计器定义速查</h3>
 
@@ -1659,7 +1725,7 @@ $$</p>
       <li><strong>On-policy 下用 $k_1 = \log \frac{q_\theta}{p}$ 作为损失项</strong>：梯度期望为零，完全无效。</li>
       <li><strong>On-policy 下用 $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 作为损失项来优化反向 KL</strong>：若目标是反向 KL，其梯度实际对应的是正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$。</li>
       <li><strong>Off-policy 下用 $\frac{q_\theta}{\mu} k_2$（重要性权重不 detach）</strong>：梯度对应一个只在局部二阶行为上与 KL 一致的 surrogate，而非反向 KL。</li>
-      <li><strong>在奖励塑形项里使用 $k_3$</strong>：虽然数值无偏，但诱导的策略梯度有偏，实践中可能显著不稳定甚至崩溃。</li>
+      <li><strong>在奖励塑形项里使用 $k_3$</strong>：虽然数值无偏，但诱导的策略梯度有偏，会额外引入并非目标反向 KL 的梯度项。</li>
       <li><strong>On-policy 时把 $\rho$ 简单设为常数 1</strong>：必须显式构造 $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$（或等价地 $\exp(\log q_\theta - \text{sg}(\log q_\theta))$），否则会丢掉 score-function 梯度路径，使 $\rho k_1$ 和 $\rho k_3$ 退化为朴素形式，不再对应前文的无偏结论。</li>
       <li><strong>混淆”数值无偏”与”梯度正确”</strong>：$k_3$ 对反向 KL 数值无偏，但作为奖励塑形项时诱导的策略梯度有偏；选择估计器时必须同时考虑这两个维度。</li>
     </ol>
@@ -1675,7 +1741,7 @@ $$</p>
       <li><strong>低方差 KL loss 与 $k_1$ in reward 在 KL 那一项上可以样本级等价，但整体算法语义并不相同。</strong> 前者把 KL 当作独立正则项；后者会把 KL 带进 advantage、baseline 和信用分配路径里。</li>
     </ol>
 
-    <h2 id="section-19">11. 参考文献</h2>
+    <h2 id="section-19">参考文献</h2>
 
     <ol>
       <li>Dibya Ghosh. “KL Divergence for Machine Learning”. <a href="https://dibyaghosh.com/blog/probability/kldivergence">https://dibyaghosh.com/blog/probability/kldivergence</a></li>
@@ -1686,29 +1752,30 @@ $$</p>
       <li>Yifan Zhang, Yiping Ji, Gavin Brown, et al. “On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning”. arXiv:2505.17508. <a href="https://arxiv.org/abs/2505.17508">https://arxiv.org/abs/2505.17508</a></li>
       <li>Vedant Shah, Johan Obando-Ceron, Vineet Jain, Brian Bartoldson, Bhavya Kailkhura, Sarthak Mittal, Glen Berseth, Pablo Samuel Castro. “A Comedy of Estimators: On KL Regularization in RL Training of LLMs”. arXiv:2512.21852. <a href="https://arxiv.org/abs/2512.21852">https://arxiv.org/abs/2512.21852</a></li>
     </ol>
-
-    <div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
-  <span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
-  <span class="na">title</span>        <span class="p">=</span> <span class="s">{Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness}</span><span class="p">,</span>
-  <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
-  <span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
-  <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
-  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
   </summary>
 </details>
 
-      </article>
-
-      
+      </article><aside class="post-cite">
+          <div class="post-cite__head">
+            <span class="eyebrow">引用本文</span>
+            <button type="button" class="post-cite__copy" data-copy-target="#post-cite-bib" data-copied-label="已复制">
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="post-cite__copy-label">复制 BibTeX</span>
+            </button>
+          </div>
+          <pre class="post-cite__bib" id="post-cite-bib"><code><span class="bib-type">@misc</span>&#123;<span class="bib-key">2025klestimatorszh</span>,
+  <span class="bib-field">author</span> = &#123;<span class="bib-value">Xihuai Wang</span>&#125;,
+  <span class="bib-field">title</span>  = &#123;<span class="bib-value">RL 中的 KL 估计器选型：从数值无偏到梯度正确</span>&#125;,
+  <span class="bib-field">year</span>   = &#123;<span class="bib-value">2025</span>&#125;,
+  <span class="bib-field">url</span>    = &#123;<span class="bib-value">https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html</span>&#125;
+&#125;</code></pre>
+        </aside>
 
       
         
       </div>
 
-    <div class="col-lg-3 d-none d-lg-block toc-sidebar-col">
-      <aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
+    <div class="col-lg-3 d-none d-lg-block toc-sidebar-col"><aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
   <div class="toc-sidebar__header">
     <div class="toc-sidebar__title">目录</div>
     <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
@@ -1720,7 +1787,7 @@ $$</p>
     class="toc js-page-toc"
     data-toc
     data-toc-content=".toc-content"
-    data-toc-headings="h2,h3"
+    data-toc-headings="h2"
     data-toc-min-items="2"
     aria-label="目录"
   ></nav>
@@ -1736,7 +1803,7 @@ $$</p>
   </div>
 </div>
 
-    </div>
+    </main>
 
     <!-- Footer -->    <footer class="sticky-bottom mt-5">
       <div class="container">
@@ -1768,6 +1835,8 @@ $$</p>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
   <script defer src="/assets/js/toc.js" type="text/javascript"></script>
   <script defer src="/assets/js/venue_filter.js" type="text/javascript"></script>
+  <script defer src="/assets/js/bibtex_copy.js" type="text/javascript"></script>
+  <script defer src="/assets/js/post_cite.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

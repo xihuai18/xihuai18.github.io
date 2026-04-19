@@ -77,7 +77,10 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&display=swap">
+    <!-- Material Icons kept (used by MDB); refined type system replaces Roboto entirely -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Material+Icons&display=swap">
+    <!-- Refined type system: Fraunces (display), Source Serif 4 (body), Inter (UI), JetBrains Mono (meta), Noto Serif SC (CJK) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&display=swap">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light" /><!-- Pseudocode -->
@@ -111,13 +114,18 @@
   <body class="fixed-top-nav sticky-bottom-footer">
 
     <!-- Header --><header>
+  <a class="skip-to-content" href="#main-content">Skip to content</a>
 
   <!-- Nav Bar -->
-  <nav id="navbar"
+  <nav id="navbar" aria-label="Primary"
     class="navbar navbar-light navbar-expand-sm fixed-top">
-    <div class="container">
-      <a class="navbar-brand title font-weight-lighter" href="/">Xihuai Wang's Page</a>
-      <!-- Navbar Toggle -->
+    <div class="container"><div class="navbar-brand navbar-social-icons">
+        <a href="mailto:%6C%65%6F%78%68%77%61%6E%67@%73%6A%74%75.%65%64%75.%63%6E" title="email"><i class="fas fa-envelope"></i></a>
+            <a href="https://scholar.google.com/citations?user=hy6v3qUAAAAJ" title="Google Scholar"><i class="ai ai-google-scholar"></i></a>
+            <a href="https://github.com/xihuai18" title="GitHub"><i class="fab fa-github"></i></a>
+            
+
+      </div><!-- Navbar Toggle -->
       <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="sr-only">Toggle navigation</span>
@@ -154,9 +162,16 @@
           </li>
           <!-- Toggle theme mode -->
           <li class="nav-item toggle-container">
-            <button id="light-toggle" class="nav-link" title="Change theme">
-              <i class="fas fa-moon"></i>
-              <i class="fas fa-sun"></i>
+            <button id="light-toggle" class="nav-link theme-toggle" title="Change theme" aria-label="Toggle dark mode">
+              <span class="theme-toggle__icons" aria-hidden="true">
+                <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+                </svg>
+                <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+              </span>
             </button>
           </li>
         </ul>
@@ -174,18 +189,17 @@
 
 
     <!-- Content -->
-    <div class="container mt-5">
+    <main id="main-content" class="container mt-5" tabindex="-1">
       <!-- _layouts/post.html -->
 
 <div class="post toc-layout">
   <header class="post-header">
-    <h1 class="post-title">Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness</h1>
-    <div class="post-meta-container">
+    <h1 class="post-title">Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness</h1><p class="lead post-lead">In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares k1, k2, k3 in on-policy and off-policy settings, and turns the result into a practical selection guide.</p><div class="post-meta-container">
       <div class="post-meta-row">
         <span class="post-date">
           <i class="far fa-calendar-alt"></i>
           December 1, 2025
-        </span></div>
+        </span><a class="post-lang-switch" href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版本 →</a></div>
       <div class="post-tags-row">
         <a href="/blog/?year=2025" data-filter-link data-filter-type="year" data-filter-value="2025">
           📅 2025
@@ -202,13 +216,6 @@
   </header>
 
   <div class="post-links">
-  
-
-  <!-- Bilingual Links -->
-  
-
-  
-
   <!-- External Platform Links -->
   
 
@@ -218,8 +225,6 @@
   
 
   <!-- Output links -->
-  
-    <a href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">中文版本</a>
   
     <a href="https://zhuanlan.zhihu.com/p/1978993413425763764" target="_blank">知乎 <img src="/assets/img/icons/zhihu.ico" style="height: 1em; vertical-align: middle;"></a>
   
@@ -304,6 +309,45 @@ $$</p>
     <li>In the other common configurations, the issue is often not a slightly worse value estimate, but that the gradient is optimizing a different objective.</li>
   </ul>
 </blockquote>
+
+<h3 id="13-first-fix-the-problem-with-three-questions">1.3 First Fix the Problem With Three Questions</h3>
+
+<p>To make the post easier to read, start with three questions before looking at any derivation:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Question</th>
+      <th>If the answer is…</th>
+      <th>What can go wrong?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Does KL backpropagate directly?</td>
+      <td>Directly: KL is a loss; not directly: KL is reward shaping or a metric</td>
+      <td>The same $k_i$ has different gradient semantics in loss and reward form</td>
+    </tr>
+    <tr>
+      <td>Where do samples come from?</td>
+      <td>From $q_\theta$ means on-policy; from $\mu$ means off-policy</td>
+      <td>Off-policy requires separating the target distribution from the sampling distribution</td>
+    </tr>
+    <tr>
+      <td>Which direction is being regularized?</td>
+      <td>Reverse KL, forward KL, or a local surrogate</td>
+      <td>The KL value being estimated need not match the gradient direction of the loss</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>These three questions determine all recommendations below. The main mental model is:</p>
+
+<p>$$
+\text{KL value estimator} \neq \text{KL optimization objective} \neq \text{gradient actually returned by code}.
+$$</p>
+
+<p>The rest of the post repeatedly checks whether these three objects coincide.</p>
 
 <h2 id="2-cheat-sheet-skim-and-go">2. Cheat Sheet (Skim-and-Go)</h2>
 
@@ -430,14 +474,14 @@ $$</p>
     <tr>
       <td style="text-align: center">$k_3$</td>
       <td style="text-align: center">Value unbiased, low variance</td>
-      <td style="text-align: center"><strong>Policy-gradient term biased</strong>, bias term is $-\nabla D_{\mathrm{KL}}(p\|q)$, may cause <strong>training collapse</strong></td>
+      <td style="text-align: center"><strong>Policy-gradient term biased</strong>, bias term is $-\nabla D_{\mathrm{KL}}(p\|q)$, adds non-target gradient terms</td>
       <td style="text-align: center">✗✗</td>
     </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p><strong>Note</strong>: For the stop-gradient reward-shaping setup analyzed here, <strong>only $k_1$ keeps the policy-gradient term aligned with reverse-KL regularization</strong>. Both $k_2$ and $k_3$ introduce bias in that term; $k_3$ is especially treacherous because it looks attractive at the value-estimation level yet can still destabilize training.</p>
+  <p><strong>Note</strong>: For the stop-gradient reward-shaping setup analyzed here, <strong>only $k_1$ keeps the policy-gradient term aligned with reverse-KL regularization</strong>. Both $k_2$ and $k_3$ introduce bias in that term; even though $k_3$ is value-unbiased with low variance, it theoretically already deviates from the target gradient.</p>
 </blockquote>
 
 <p><strong>Legend</strong>: ✓✓ strongly recommended; ✓ recommended (slightly more complex or minor drawback); △ usable with caution; ✗✗ does not match the objective discussed here.</p>
@@ -448,7 +492,7 @@ $$</p>
 
 <p>Before getting into the analysis, let’s fix the notation and write down two basic results that will be used throughout.</p>
 
-<h3 id="31-notation-sampling-distribution-and-true-gradients">3.1 Notation, Sampling Distribution, and True Gradients</h3>
+<h3 id="31-notation-sampling-distribution-and-the-true-gradient-of-the-objective">3.1 Notation, Sampling Distribution, and the True Gradient of the Objective</h3>
 
 <p><strong>Notation:</strong></p>
 
@@ -461,7 +505,7 @@ $$</p>
   <li>$\text{sg}(\cdot)$: Stop-gradient operation (<code class="language-plaintext highlighter-rouge">.detach()</code> in code)</li>
 </ul>
 
-<h4 id="a-unified-perspective-on-sampling-policies-introducing-the-inlmath129mathend-notation">A Unified Perspective on Sampling Policies: Introducing the $\rho$ Notation</h4>
+<h4 id="a-unified-perspective-on-sampling-policies-introducing-the-inlmath133mathend-notation">A Unified Perspective on Sampling Policies: Introducing the $\rho$ Notation</h4>
 
 <p>When analyzing KL-estimator gradients, on-policy and off-policy may look like separate cases, but they can be handled in one framework.</p>
 
@@ -660,6 +704,37 @@ $$</p>
       </tbody>
     </table>
 
+    <p>Before discussing bias, variance, and gradients, separate three ways in which the same $k_i$ may be used:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Usage semantics</th>
+          <th>Question being asked</th>
+          <th>Typical mistake</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>KL value metric</td>
+          <td>Is the expectation the target KL? Is the variance low?</td>
+          <td>Seeing good value-estimation behavior for $k_3$ and using it everywhere</td>
+        </tr>
+        <tr>
+          <td>Differentiable KL loss</td>
+          <td>Is the backpropagated gradient the gradient of the intended regularizer?</td>
+          <td>Dropping score-function paths or importance ratios</td>
+        </tr>
+        <tr>
+          <td>KL reward shaping</td>
+          <td>Does the KL sample affect the update only through the policy-gradient term?</td>
+          <td>Reading a detached reward estimator as if it were a differentiable loss</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>When the post says a configuration is “correct” or “incorrect,” it is about the gradient induced under that usage, not merely about whether the scalar sample can estimate a KL value.</p>
+
     <h2 id="value-estimation-bias-and-variance">5. Value Estimation: Bias and Variance</h2>
 
     <p>Assume we sample from $q_\theta$ to estimate reverse KL $D_{\mathrm{KL}}(q_\theta \| p)$:</p>
@@ -680,7 +755,7 @@ $$</p>
 
     <h3 id="variance-characteristics">5.2 Variance Characteristics</h3>
 
-    <p>John Schulman’s experiments ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005) show:</p>
+    <p>John Schulman’s numerical examples ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005) show:</p>
 
     <table>
       <thead>
@@ -821,7 +896,7 @@ $$</p>
 
     <h2 id="gradient-analysis-for-differentiable-kl-losses">7. Gradient Analysis for Differentiable KL Losses</h2>
 
-    <p>When KL serves as a differentiable loss term, the key question is which objective each estimator actually optimizes through its gradient. This is subtle but central in practice.</p>
+    <p>When KL serves as a differentiable loss term, the key question is which objective each estimator actually optimizes through its gradient. This is subtle but central to the theory.</p>
 
     <p>We will keep using the same unified framework, so on-policy and off-policy can be handled in one derivation. Recall the ratio</p>
 
@@ -902,7 +977,7 @@ $$</p>
 
     <p>These basic gradients will be used repeatedly in the unified framework analysis that follows.</p>
 
-    <h4 id="expect-then-differentiate-vs-differentiate-then-expect">“Expect-then-Differentiate” vs. “Differentiate-then-Expect”</h4>
+    <h4 id="the-gradient-of-the-mathematical-objective-vs-the-gradient-returned-by-code">“The Gradient of the Mathematical Objective” vs. “The Gradient Returned by Code”</h4>
 
     <p>When analyzing estimator gradients, there is a common pitfall: <strong>“expect-then-differentiate” and “differentiate-then-expect” need not agree</strong>.</p>
 
@@ -1180,7 +1255,7 @@ $$</p>
 
     <p>When $\mu$ differs greatly from $q_\theta$ — for example, when $\mu$ has almost no samples in high-density regions of $q_\theta$, or when $\rho = q_\theta / \mu$ explodes in the tails — any $\rho$-based method will suffer from severe variance issues. In such cases, the advantage of $\rho k_3$ (or $\text{sg}(\rho) k_2$) over $\rho k_1$ is no longer theoretically guaranteed, and strategies like clipping and regularization must be combined.</p>
 
-    <p>However, in RL practice we typically control KL constraints and limit the degree of off-policy sampling (e.g., using a nearby policy $\mu = q_{\theta_\text{old}}$). In this common regime, we can say with confidence:</p>
+    <p>In the local-policy-update theory usually assumed here, we control the KL constraint and limit the degree of off-policy sampling (e.g., using a nearby policy $\mu = q_{\theta_\text{old}}$). In this local regime, we can say with confidence:</p>
 
     <blockquote>
       <p><strong>If you’ve decided to use importance sampling to optimize reverse KL, we recommend using $\rho k_3$ or $\text{sg}(\rho) k_2$ (both have equivalent gradients and low variance); in comparison, $\rho k_1$ has higher variance.</strong></p>
@@ -1300,7 +1375,7 @@ $$</p>
 \nabla_\theta J = \mathbb{E}_{q_\theta}\left[s_\theta \cdot \left(R - \beta \cdot k_1\right)\right]
 $$</p>
 
-    <h4 id="gradient-form-when-using-estimator-inlmath429mathend">Gradient Form When Using Estimator $\hat{k}$</h4>
+    <h4 id="gradient-form-when-using-estimator-inlmath435mathend">Gradient Form When Using Estimator $\hat{k}$</h4>
 
     <p>For the next few paragraphs, focus only on the <strong>policy-gradient term itself</strong>. I am not folding in extra effects from learned critics, GAE, baseline fitting error, or normalization. In that simplified setting, when we use some estimator $\hat{k}$ (with stop-gradient) inside reward shaping, the shaped reward is $\tilde{R} = R - \beta \cdot \text{sg}(\hat{k})$, and the policy gradient becomes:</p>
 
@@ -1314,7 +1389,7 @@ $$</p>
 \mathbb{E}_{q_\theta}[s_\theta \cdot \hat{k}] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1]
 $$</p>
 
-    <h4 id="using-inlmath433mathend-as-penalty-gradient-unbiased">Using $k_1$ as Penalty: Gradient Unbiased</h4>
+    <h4 id="using-inlmath439mathend-as-penalty-gradient-unbiased">Using $k_1$ as Penalty: Gradient Unbiased</h4>
 
     <p>When $\hat{k} = k_1$, the condition is automatically satisfied:</p>
 
@@ -1324,7 +1399,7 @@ $$</p>
 
     <p>Therefore, <strong>when $k_1$ is used in reward shaping, the induced policy gradient is unbiased</strong>.</p>
 
-    <h4 id="using-inlmath436mathend-as-penalty-gradient-biased">Using $k_3$ as Penalty: Gradient Biased</h4>
+    <h4 id="using-inlmath442mathend-as-penalty-gradient-biased">Using $k_3$ as Penalty: Gradient Biased</h4>
 
     <p>When $\hat{k} = k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$:</p>
 
@@ -1358,18 +1433,9 @@ $$</p>
 
     <p><strong>When $k_3$ is used in reward shaping, the gradient is biased</strong>, with the bias term equal to the negative of the forward KL gradient.</p>
 
-    <p>More precisely, using $k_3$ inside reward shaping mixes an extra bias term related to the forward-KL gradient into the reverse-KL update. So the resulting update no longer corresponds to pure reverse-KL regularization, which helps explain why it can become unstable.</p>
+    <p>More precisely, using $k_3$ inside reward shaping mixes an extra bias term related to the forward-KL gradient into the reverse-KL update. The resulting update therefore no longer corresponds to pure reverse-KL regularization. This conclusion follows from the gradient decomposition itself and does not depend on any particular experiment.</p>
 
-    <p><strong>Empirical evidence</strong>: Shah et al. (2025) report that in on-policy RL fine-tuning of LLMs:</p>
-
-    <ul>
-      <li><strong>$k_1$ in reward</strong>: Training is stable</li>
-      <li><strong>$k_3$ in reward</strong>: <strong>Training becomes unstable and can collapse</strong></li>
-    </ul>
-
-    <p>This is consistent with the theoretical analysis above.</p>
-
-    <h4 id="using-inlmath444mathend-as-penalty-also-biased">Using $k_2$ as Penalty: Also Biased</h4>
+    <h4 id="using-inlmath448mathend-as-penalty-also-biased">Using $k_2$ as Penalty: Also Biased</h4>
 
     <p>When $\hat{k} = k_2 = \frac{1}{2}k_1^2$, the KL part of the induced policy-gradient term becomes</p>
 
@@ -1409,7 +1475,7 @@ $$</p>
       <p><strong>Note</strong>: This discussion assumes the usual current-sample / current-token reward-shaping form. In a general multi-step MDP, a fully rigorous off-policy derivation also needs per-step importance weighting or the corresponding value-function correction.</p>
     </blockquote>
 
-    <h3 id="the-conclusion-of-this-section-only-inlmath457mathend-stays-unbiased">8.2 The Conclusion of This Section: Only $k_1$ Stays Unbiased</h3>
+    <h3 id="the-conclusion-of-this-section-only-inlmath461mathend-stays-unbiased">8.2 The Conclusion of This Section: Only $k_1$ Stays Unbiased</h3>
 
     <table>
       <thead>
@@ -1437,12 +1503,12 @@ $$</p>
           <td style="text-align: center">$k_3$</td>
           <td style="text-align: center">✓</td>
           <td style="text-align: center">✗</td>
-          <td style="text-align: center">Can collapse</td>
+          <td style="text-align: center">Notably unstable</td>
         </tr>
       </tbody>
     </table>
 
-    <p>Stepping back, value unbiasedness and gradient correctness are two separate axes. For the stop-gradient reward-shaping setup discussed here, <strong>only $k_1$ gives the correct policy-gradient term for reverse-KL regularization</strong>. Even though $k_3$ is value-unbiased and often lower variance, using it in reward shaping introduces a biased update and can destabilize training.</p>
+    <p>Stepping back, value unbiasedness and gradient correctness are two separate axes. For the stop-gradient reward-shaping setup discussed here, <strong>only $k_1$ gives the correct policy-gradient term for reverse-KL regularization</strong>. Even though $k_3$ is value-unbiased and often lower variance, using it in reward shaping introduces a biased update and is indeed more prone to instability in practice.</p>
 
     <blockquote>
       <p><strong>Scope reminder</strong>: once you add a learned critic, GAE, baseline normalization, and other implementation details, additional bias sources appear. The conclusion here is intentionally about the policy-gradient term itself.</p>
@@ -1457,7 +1523,7 @@ $$</p>
 
     <p>Let me explain why these are not contradictory: for the KL regularization term’s contribution to the policy-gradient update, the two implementations can be <strong>sample-wise equivalent</strong>. The practical differences arise mainly from whether the KL term enters the advantage/baseline and from the resulting credit-assignment pathway.</p>
 
-    <h3 id="inlmath466mathend-in-reward-shaping-vs-low-variance-kl-losses">8.3 $k_1$ in Reward Shaping vs. Low-Variance KL Losses</h3>
+    <h3 id="inlmath470mathend-in-reward-shaping-vs-low-variance-kl-losses">8.3 $k_1$ in Reward Shaping vs. Low-Variance KL Losses</h3>
 
     <p>At this point the natural question is: <strong>in what sense is “KL in loss” equivalent to “KL in reward”, and in what sense is it not?</strong></p>
 
@@ -1616,7 +1682,7 @@ $$</p>
 
     <p>Based on the above conclusions about “value unbiasedness vs. gradient correctness” and “differences between Loss and Reward implementations”, we now proceed to the quick reference guide and common pitfalls that can be directly applied to code.</p>
 
-    <h2 id="practical-guide-and-common-pitfalls">9. Practical Guide and Common Pitfalls</h2>
+    <h2 id="theoretical-selection-guide-and-common-pitfalls">9. Theoretical Selection Guide and Common Pitfalls</h2>
 
     <h3 id="quick-reference-for-the-three-estimator-definitions">9.1 Quick Reference for the Three Estimator Definitions</h3>
 
@@ -1659,7 +1725,7 @@ $$</p>
       <li><strong>Using $k_1 = \log \frac{q_\theta}{p}$ directly as a loss term (on-policy)</strong>: Gradient expectation is zero, completely ineffective.</li>
       <li><strong>Using $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ as a loss term to optimize reverse KL (on-policy)</strong>: Its gradient corresponds to forward KL $D_{\mathrm{KL}}(p \| q_\theta)$, i.e. the wrong direction.</li>
       <li><strong>Using $\frac{q_\theta}{\mu} k_2$ (importance weight not detached) off-policy</strong>: Gradient corresponds to a local second-order surrogate, not reverse KL.</li>
-      <li><strong>Using $k_3$ inside reward shaping</strong>: Although it is value-unbiased, it induces a biased policy-gradient update and may lead to training collapse.</li>
+      <li><strong>Using $k_3$ inside reward shaping</strong>: Although it is value-unbiased, it induces a biased policy-gradient update and introduces extra gradient terms outside the intended reverse-KL update.</li>
       <li><strong>Simply setting $\rho$ to constant 1 in on-policy</strong>: Must explicitly construct $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$ (or equivalently $\exp(\log q_\theta - \text{sg}(\log q_\theta))$), otherwise the score-function gradient path is lost, causing $\rho k_1$ and $\rho k_3$ to degenerate to naive forms and fail.</li>
       <li><strong>Confusing “value unbiasedness” with “gradient correctness”</strong>: $k_3$ is value-unbiased for reverse KL, but when used in reward shaping, the induced policy gradient is biased; both dimensions matter.</li>
     </ol>
@@ -1675,7 +1741,7 @@ $$</p>
       <li><strong>A low-variance KL loss and $k_1$ in reward shaping can be sample-wise equivalent on the KL term, but the two algorithms still have different semantics.</strong> In the former, KL is an explicit regularizer; in the latter, KL flows through advantage, baselines, and credit assignment.</li>
     </ol>
 
-    <h2 id="references">11. References</h2>
+    <h2 id="references">References</h2>
 
     <ol>
       <li>Dibya Ghosh. “KL Divergence for Machine Learning”. <a href="https://dibyaghosh.com/blog/probability/kldivergence">https://dibyaghosh.com/blog/probability/kldivergence</a></li>
@@ -1686,29 +1752,30 @@ $$</p>
       <li>Yifan Zhang, Yiping Ji, Gavin Brown, et al. “On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning”. arXiv:2505.17508. <a href="https://arxiv.org/abs/2505.17508">https://arxiv.org/abs/2505.17508</a></li>
       <li>Vedant Shah, Johan Obando-Ceron, Vineet Jain, Brian Bartoldson, Bhavya Kailkhura, Sarthak Mittal, Glen Berseth, Pablo Samuel Castro. “A Comedy of Estimators: On KL Regularization in RL Training of LLMs”. arXiv:2512.21852. <a href="https://arxiv.org/abs/2512.21852">https://arxiv.org/abs/2512.21852</a></li>
     </ol>
-
-    <div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">WangZhang2025KLEstimators</span><span class="p">,</span>
-  <span class="na">author</span>       <span class="p">=</span> <span class="s">{Wang, Xihuai and Zhang, Shao}</span><span class="p">,</span>
-  <span class="na">title</span>        <span class="p">=</span> <span class="s">{Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness}</span><span class="p">,</span>
-  <span class="na">year</span>         <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
-  <span class="na">month</span>        <span class="p">=</span> <span class="nv">dec</span><span class="p">,</span>
-  <span class="na">day</span>          <span class="p">=</span> <span class="s">{01}</span><span class="p">,</span>
-  <span class="na">url</span>          <span class="p">=</span> <span class="s">{https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html}</span>
-<span class="p">}</span>
-</code></pre></div>    </div>
   </summary>
 </details>
 
-      </article>
-
-      
+      </article><aside class="post-cite">
+          <div class="post-cite__head">
+            <span class="eyebrow">Cite this post</span>
+            <button type="button" class="post-cite__copy" data-copy-target="#post-cite-bib" data-copied-label="Copied">
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="post-cite__copy-label">Copy BibTeX</span>
+            </button>
+          </div>
+          <pre class="post-cite__bib" id="post-cite-bib"><code><span class="bib-type">@misc</span>&#123;<span class="bib-key">2025klestimatorsen</span>,
+  <span class="bib-field">author</span> = &#123;<span class="bib-value">Xihuai Wang</span>&#125;,
+  <span class="bib-field">title</span>  = &#123;<span class="bib-value">Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness</span>&#125;,
+  <span class="bib-field">year</span>   = &#123;<span class="bib-value">2025</span>&#125;,
+  <span class="bib-field">url</span>    = &#123;<span class="bib-value">https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-en.html</span>&#125;
+&#125;</code></pre>
+        </aside>
 
       
         
       </div>
 
-    <div class="col-lg-3 d-none d-lg-block toc-sidebar-col">
-      <aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
+    <div class="col-lg-3 d-none d-lg-block toc-sidebar-col"><aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
   <div class="toc-sidebar__header">
     <div class="toc-sidebar__title">Contents</div>
     <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
@@ -1720,7 +1787,7 @@ $$</p>
     class="toc js-page-toc"
     data-toc
     data-toc-content=".toc-content"
-    data-toc-headings="h2,h3"
+    data-toc-headings="h2"
     data-toc-min-items="2"
     aria-label="Contents"
   ></nav>
@@ -1736,7 +1803,7 @@ $$</p>
   </div>
 </div>
 
-    </div>
+    </main>
 
     <!-- Footer -->    <footer class="sticky-bottom mt-5">
       <div class="container">
@@ -1768,6 +1835,8 @@ $$</p>
   <script defer src="/assets/js/copy_code.js" type="text/javascript"></script>
   <script defer src="/assets/js/toc.js" type="text/javascript"></script>
   <script defer src="/assets/js/venue_filter.js" type="text/javascript"></script>
+  <script defer src="/assets/js/bibtex_copy.js" type="text/javascript"></script>
+  <script defer src="/assets/js/post_cite.js" type="text/javascript"></script>
 
     
   <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>

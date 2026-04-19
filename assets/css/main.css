@@ -1,34 +1,148 @@
 @charset "UTF-8";
 /*******************************************************************************
  * Variables used throughout the theme.
- * To adjust anything, simply edit the variables below and rebuild the theme.
+ * Palette and type tokens now follow the Xihuai Wang Refined Design System:
+ * deep moss green accent, pure-paper background, serif display + body,
+ * Inter for UI chrome, JetBrains Mono for metadata, Noto Serif SC for CJK.
  ******************************************************************************/
 /*******************************************************************************
  * Reusable mixins
  ******************************************************************************/
 /*******************************************************************************
- * Themes
+ * Themes — Xihuai Wang Refined Design System
+ * Pure paper / deep ink palette with moss-green accent. Shadow system uses
+ * warm-tungsten lows and long softs. All tokens are CSS custom properties so
+ * legacy al-folio rules keep rendering while the design-system layer builds
+ * on a consistent foundation.
  ******************************************************************************/
 :root {
-  --global-bg-color: #ffffff;
-  --global-code-bg-color: rgba(0, 0, 0, 0.05);
-  --global-text-color: #000000;
-  --global-text-color-light: #252525;
-  --global-theme-color: #00ab37;
-  --global-hover-color: #00ab37;
-  --global-footer-bg-color: #1C1C1D;
-  --global-footer-text-color: #8b8b8b;
-  --global-footer-link-color: #ffffff;
-  --global-distill-app-color: #252525;
-  --global-divider-color: rgba(0,0,0,.3);
-  --global-card-bg-color: #ffffff;
-  --global-shadow-color: rgba(0, 0, 0, 0.1);
+  /* ---- Paper / ink scale ------------------------------------------------- */
+  --paper: #FFFFFF;
+  --paper-2: #F6F5F1; /* colors_and_type.css:16 — canonical paper-2 */
+  /* Post body prose width — uses --prose-max as the floor, grows responsively.
+     See _design_system.scss blog post block for usage. */
+  --post-prose-max: var(--prose-max);
+  --ink: #111418;
+  --ink-2: #3A3F47;
+  --ink-3: #6B7078;
+  --ink-4: #A6A8AC;
+  --rule: rgba(17, 20, 24, 0.10);
+  --rule-strong: rgba(17, 20, 24, 0.22);
+  /* ---- Moss scale (exposed for components) ------------------------------- */
+  --moss-50: #EEF6ED;
+  --moss-100: #D9E9D5;
+  --moss-200: #B4D3AC;
+  --moss-300: #7FB273;
+  --moss-400: #4F9143;
+  --moss-500: #2F7A2A;
+  --moss-600: #215C1F;
+  --moss-700: #16401A;
+  /* ---- Supporting accents ------------------------------------------------ */
+  --ink-blue: #1E3A8A;
+  --ink-wine: #8E1B3A;
+  --ink-ochre: #B5791F;
+  --ink-cyan: #1F6F7A;
+  --ink-plum: #5B2A7C;
+  /* ---- Semantic ---------------------------------------------------------- */
+  --accent: var(--moss-500);
+  --accent-hover: var(--moss-600);
+  --accent-deep: var(--moss-700);
+  --accent-wash: var(--moss-50);
+  --bg: var(--paper);
+  --bg-raised: #FFFFFF;
+  --bg-sunken: var(--paper-2);
+  --fg: var(--ink);
+  --fg-2: var(--ink-2);
+  --fg-3: var(--ink-3);
+  --fg-4: var(--ink-4);
+  --link: var(--moss-600);
+  --link-hover: var(--moss-700);
+  --code-bg: rgba(17, 20, 24, 0.05);
+  --selection: #D6EACF;
+  /* ---- Shadows (warm tungsten) ------------------------------------------ */
+  --shadow-xs: 0 1px 0 rgba(17,20,24,0.04);
+  --shadow-sm: 0 1px 2px rgba(17,20,24,0.06), 0 1px 1px rgba(17,20,24,0.04);
+  --shadow-md: 0 8px 24px -10px rgba(17,20,24,0.14), 0 2px 6px rgba(17,20,24,0.06);
+  --shadow-lg: 0 24px 60px -20px rgba(17,20,24,0.20), 0 6px 16px rgba(17,20,24,0.08);
+  /* ---- Radii ------------------------------------------------------------ */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+  /* ---- Spacing (4px base) ------------------------------------------------ */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  /* ---- Layout ----------------------------------------------------------- */
+  --page-max: 1120px;
+  --prose-max: 68ch;
+  --gutter: 24px;
+  /* ---- Type tokens (quoted so multi-word names parse as CSS strings) ---- */
+  --font-display: "Fraunces", "Noto Serif SC", "Source Serif 4", Georgia, serif;
+  --font-serif: "Source Serif 4", "Noto Serif SC", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-zh: "Noto Serif SC", "Songti SC", "STSong", serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base:0.9375rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+  --fs-3xl: 2.25rem;
+  --fs-4xl: clamp(2.5rem, 4.5vw, 3.75rem);
+  --fs-5xl: clamp(3rem, 6vw, 5rem);
+  --lh-tight: 1.15;
+  --lh-snug: 1.3;
+  --lh-body: 1.62;
+  --lh-loose: 1.8;
+  /* ---- Transitions ------------------------------------------------------ */
+  --e-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --e-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 140ms var(--e-out);
+  --t-med: 240ms var(--e-out);
+  --t-slow: 480ms var(--e-out);
+  /* ---- Legacy al-folio custom properties (map onto design tokens) ------- */
+  --global-bg-color: var(--paper);
+  --global-code-bg-color: var(--code-bg);
+  --global-text-color: var(--ink);
+  --global-text-color-light: var(--ink-3);
+  --global-theme-color: var(--accent);
+  --global-hover-color: var(--accent-hover);
+  --global-footer-bg-color: var(--paper-2);
+  --global-footer-text-color: var(--ink-3);
+  --global-footer-link-color: var(--accent);
+  --global-distill-app-color: var(--ink-3);
+  --global-divider-color: var(--rule);
+  --global-card-bg-color: var(--paper);
+  --global-shadow-color: rgba(17,20,24,0.10);
+  --global-shadow-sm: var(--shadow-sm);
+  --global-shadow-md: var(--shadow-md);
+  --global-shadow-lg: var(--shadow-lg);
 }
 :root .fa-sun {
   display: none;
 }
 :root .fa-moon {
   display: block;
+}
+:root .theme-toggle__sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+  pointer-events: none;
+}
+:root .theme-toggle__moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
 }
 :root .repo-img-light {
   display: block;
@@ -38,25 +152,68 @@
 }
 
 html[data-theme=dark] {
-  --global-bg-color: #1C1C1D;
-  --global-code-bg-color: #2c3237;
-  --global-text-color: #8b8b8b;
-  --global-text-color-light: #8b8b8b;
-  --global-theme-color: #009f06;
-  --global-hover-color: #009f06;
-  --global-footer-bg-color: #8b8b8b;
-  --global-footer-text-color: #1C1C1D;
-  --global-footer-link-color: #000000;
-  --global-distill-app-color: #8b8b8b;
-  --global-divider-color: #424246;
-  --global-card-bg-color: #212529;
-  --global-shadow-color: rgba(0, 0, 0, 0.3);
+  --paper: #0E1013;
+  --paper-2: #151921;
+  --ink: #E8E5DC;
+  --ink-2: #C2C0B8;
+  --ink-3: #8A8880;
+  --ink-4: #5A5852;
+  --rule: rgba(232, 229, 220, 0.10);
+  --rule-strong: rgba(232, 229, 220, 0.22);
+  --moss-500: #6FB366;
+  --moss-600: #8FC987;
+  --moss-700: #B4DDA9;
+  --moss-50: #1A2619;
+  --accent: var(--moss-500);
+  --accent-hover: var(--moss-600);
+  --accent-deep: var(--moss-700);
+  --accent-wash: var(--moss-50);
+  --bg: var(--paper);
+  --bg-raised: #1A1E25;
+  --bg-sunken: var(--paper-2);
+  --fg: var(--ink);
+  --fg-2: var(--ink-2);
+  --fg-3: var(--ink-3);
+  --fg-4: var(--ink-4);
+  --link: var(--moss-500);
+  --link-hover: var(--moss-600);
+  --code-bg: rgba(232, 229, 220, 0.06);
+  --selection: #2D4529;
+  --shadow-xs: 0 1px 0 rgba(0,0,0,0.30);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.40), 0 1px 1px rgba(0,0,0,0.30);
+  --shadow-md: 0 8px 24px -10px rgba(0,0,0,0.50), 0 2px 6px rgba(0,0,0,0.25);
+  --shadow-lg: 0 24px 60px -20px rgba(0,0,0,0.60), 0 6px 16px rgba(0,0,0,0.35);
+  --global-bg-color: var(--paper);
+  --global-code-bg-color: var(--code-bg);
+  --global-text-color: var(--ink);
+  --global-text-color-light: var(--ink-3);
+  --global-theme-color: var(--accent);
+  --global-hover-color: var(--accent-hover);
+  --global-footer-bg-color: var(--paper-2);
+  --global-footer-text-color: var(--ink-3);
+  --global-footer-link-color: var(--accent);
+  --global-distill-app-color: var(--ink-3);
+  --global-divider-color: var(--rule);
+  --global-card-bg-color: var(--bg-raised);
+  --global-shadow-color: rgba(0,0,0,0.45);
+  --global-shadow-sm: var(--shadow-sm);
+  --global-shadow-md: var(--shadow-md);
+  --global-shadow-lg: var(--shadow-lg);
 }
 html[data-theme=dark] .fa-sun {
   display: block;
 }
 html[data-theme=dark] .fa-moon {
   display: none;
+}
+html[data-theme=dark] .theme-toggle__sun {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+html[data-theme=dark] .theme-toggle__moon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+  pointer-events: none;
 }
 html[data-theme=dark] .repo-img-light {
   display: none;
@@ -226,19 +383,19 @@ figure,
 img {
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease;
 }
 
 blockquote {
-  background: var(--global-code-bg-color);
-  border-left: 4px solid var(--global-theme-color);
+  background: none;
+  border-left: 2px solid var(--global-theme-color);
   margin: 1.5em 0;
-  padding: 1em 1.5em;
-  font-size: 1rem;
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 0.75em 0 0.75em 1.5em;
+  font-family: "Fraunces", "Noto Serif SC", "Source Serif 4", Georgia, serif;
+  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--global-text-color-light);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .job-ad {
@@ -264,7 +421,7 @@ blockquote {
 }
 
 .caption {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   margin-top: 0.75rem;
   margin-bottom: 1.5rem;
   text-align: center;
@@ -357,6 +514,13 @@ pre code {
   margin-right: 0.75rem;
 }
 
+@media (max-width: 575.98px) {
+  .profile.float-right,
+  .profile.float-left {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
 @media (min-width: 576px) {
   .profile {
     width: 24%;
@@ -385,6 +549,22 @@ pre code {
 .post-description strong {
   color: var(--global-theme-color);
   font-weight: 600;
+}
+
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  z-index: 1101;
+  padding: 0.65rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+}
+.skip-to-content:focus, .skip-to-content:focus-visible {
+  top: 0;
+  color: #fff;
+  text-decoration: none;
 }
 
 .navbar {
@@ -473,7 +653,7 @@ pre code {
 }
 .navbar.navbar-light .navbar-nav .nav-item .nav-link {
   color: var(--global-text-color);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
@@ -788,13 +968,13 @@ footer.sticky-bottom {
 }
 .post-list li .post-meta {
   color: var(--global-text-color-light);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   margin-bottom: 0;
   line-height: 1.4;
 }
 .post-list li .post-tags {
   color: var(--global-text-color-light);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   padding-top: 0.1rem;
   padding-bottom: 0;
   line-height: 1.4;
@@ -823,10 +1003,10 @@ footer.sticky-bottom {
   color: var(--global-text-color);
 }
 .pagination .page-item .page-link:hover {
-  color: #000000;
+  color: #111418;
 }
 .pagination .page-item.active .page-link {
-  color: #ffffff;
+  color: #FFFFFF;
   background-color: var(--global-theme-color);
 }
 .pagination .page-item.active .page-link:hover {
@@ -869,169 +1049,6 @@ footer.sticky-bottom {
   text-align: right;
 }
 
-.publications {
-  margin-top: 1rem;
-}
-.publications h1 {
-  color: var(--global-theme-color);
-  font-size: 1.5rem;
-  text-align: center;
-  margin-top: 0.75em;
-  margin-bottom: 0.75em;
-}
-.publications h2 {
-  margin-bottom: 0.75rem;
-}
-.publications h2 span {
-  font-size: 1.25rem;
-}
-.publications h2.year {
-  color: var(--global-text-color);
-  border-top: 1px solid var(--global-divider-color);
-  border-bottom: none;
-  padding-top: 0.75rem;
-  margin-top: 1.25rem;
-  margin-bottom: -1.25rem;
-  text-align: right;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-.publications ol.bibliography {
-  list-style: none;
-  padding: 0;
-  margin-top: 0;
-}
-.publications ol.bibliography li {
-  margin-bottom: 0.65rem;
-}
-.publications ol.bibliography li .preview {
-  width: 100%;
-  min-width: 60px;
-  max-width: 160px;
-}
-.publications ol.bibliography li .abbr {
-  height: auto;
-  margin-bottom: 0.5rem;
-}
-.publications ol.bibliography li .abbr abbr {
-  display: inline-block;
-  background-color: transparent;
-  padding: 0;
-  font-size: 0.75rem;
-  border-radius: 0;
-  font-weight: 400;
-  box-shadow: none;
-  border: none;
-  white-space: normal;
-  line-height: 1.2;
-  text-align: left;
-  color: var(--global-text-color-light);
-}
-.publications ol.bibliography li .abbr abbr a {
-  color: var(--global-text-color-light);
-}
-.publications ol.bibliography li .abbr abbr a:hover {
-  text-decoration: underline;
-  color: var(--global-theme-color);
-}
-.publications ol.bibliography li .abbr .award {
-  color: var(--global-theme-color) !important;
-  border: 1px solid var(--global-theme-color);
-}
-.publications ol.bibliography li .title {
-  font-weight: bolder;
-  font-size: 1rem;
-  line-height: 1.4;
-}
-.publications ol.bibliography li .author {
-  font-size: 1rem;
-  line-height: 1.4;
-}
-.publications ol.bibliography li .author a {
-  border-bottom: 1px dashed var(--global-theme-color);
-}
-.publications ol.bibliography li .author a:hover {
-  border-bottom-style: solid;
-  text-decoration: none;
-}
-.publications ol.bibliography li .author > em {
-  border-bottom: 1px solid;
-  font-style: normal;
-}
-.publications ol.bibliography li .author > span.more-authors {
-  color: var(--global-text-color-light);
-  border-bottom: 1px dashed var(--global-text-color-light);
-  cursor: pointer;
-}
-.publications ol.bibliography li .author > span.more-authors:hover {
-  color: var(--global-text-color);
-  border-bottom: 1px dashed var(--global-text-color);
-}
-.publications ol.bibliography li .periodical {
-  font-size: 1rem;
-}
-.publications ol.bibliography li .links a.btn {
-  color: var(--global-text-color);
-  border: 1px solid var(--global-text-color);
-  padding: 0.2rem 0.6rem;
-  font-size: 0.75rem;
-  margin-right: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-.publications ol.bibliography li .links a.btn:hover {
-  color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  background-color: var(--global-code-bg-color);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  text-decoration: none;
-}
-.publications ol.bibliography li .badges span {
-  display: inline-block;
-  color: #000000;
-  height: 100%;
-  padding-left: 0.5rem;
-  vertical-align: middle;
-}
-.publications ol.bibliography li .badges span:hover {
-  text-decoration: underline;
-}
-.publications ol.bibliography li .hidden {
-  font-size: 1rem;
-  max-height: 0px;
-  overflow: hidden;
-  text-align: justify;
-  transition-property: 0.15s ease;
-  -moz-transition: 0.15s ease;
-  -ms-transition: 0.15s ease;
-  -o-transition: 0.15s ease;
-  transition: all 0.15s ease;
-}
-.publications ol.bibliography li .hidden p {
-  line-height: 1.4em;
-  margin: 10px;
-}
-.publications ol.bibliography li .hidden pre {
-  font-size: 0.875rem;
-  line-height: 1.4em;
-  padding: 10px;
-}
-.publications ol.bibliography li .hidden.open {
-  max-height: 100em;
-  transition-property: 0.15s ease;
-  -moz-transition: 0.15s ease;
-  -ms-transition: 0.15s ease;
-  -o-transition: 0.15s ease;
-  transition: all 0.15s ease;
-}
-.publications ol.bibliography li div.abstract.hidden {
-  border: dashed 1px var(--global-bg-color);
-}
-.publications ol.bibliography li div.abstract.hidden.open {
-  border-color: var(--global-text-color);
-}
-
 figure.highlight {
   margin: 0 0 1rem;
 }
@@ -1068,12 +1085,12 @@ html.transition *:after {
 
 .post .post-meta {
   color: var(--global-text-color-light);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   margin-bottom: 0;
 }
 .post .post-tags {
   color: var(--global-text-color-light);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   padding-top: 0.25rem;
   padding-bottom: 1rem;
   display: flex;
@@ -1242,7 +1259,7 @@ pre:not(.wrapped) pre {
   font-size: 0.75rem;
 }
 .news td {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   padding: 0.3rem 0 !important;
   line-height: 1.5;
 }
@@ -1280,7 +1297,7 @@ pre:not(.wrapped) pre {
 .navbar-social-icons {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 4px;
   padding: 5px 0;
   margin: 0;
   min-height: 35px;
@@ -1289,8 +1306,8 @@ pre:not(.wrapped) pre {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   background: transparent;
   transition: all 0.2s ease;
@@ -1298,22 +1315,23 @@ pre:not(.wrapped) pre {
   text-decoration: none !important;
 }
 .navbar-social-icons a i, .navbar-social-icons a i::before {
-  font-size: 1.5rem;
+  font-size: 1.125rem;
   color: var(--global-text-color);
   transition: all 0.2s ease;
 }
 .navbar-social-icons a:hover {
-  background: transparent;
-  transform: none;
-  box-shadow: none;
+  background: var(--accent-wash);
 }
 .navbar-social-icons a:hover i, .navbar-social-icons a:hover i::before {
-  color: var(--global-theme-color);
+  color: var(--accent);
+}
+.navbar-social-icons a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .profile .address {
   margin-top: 0.5rem;
-  font-family: "SF Mono", "JetBrains Mono", "Menlo", monospace;
   font-size: 0.75rem;
   color: var(--global-text-color-light);
   letter-spacing: 0.02em;
@@ -1348,83 +1366,6 @@ pre:not(.wrapped) pre {
   box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.22);
 }
 
-.post-header {
-  margin-bottom: 1rem;
-}
-.post-header.hero {
-  text-align: center;
-  padding: 1.25rem 0 1.5rem;
-}
-.post-header .post-title {
-  font-weight: 700;
-  font-size: 1.75rem;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-.post-header .post-title.signature-name {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.65rem;
-  margin-bottom: 0.35rem;
-}
-.post-header .post-title.signature-name .name-en {
-  font-family: "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 2.5rem;
-  letter-spacing: -0.025em;
-  background: linear-gradient(135deg, var(--global-text-color) 0%, var(--global-theme-color) 120%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.post-header .post-title.signature-name .name-sep {
-  width: 1px;
-  height: 1.3em;
-  background: var(--global-divider-color);
-  align-self: center;
-}
-.post-header .post-title.signature-name .name-zh {
-  font-family: "KaiTi", "STKaiti", "FZKai-Z03", "AR PL UKai CN", serif;
-  font-weight: 500;
-  font-size: 1.75rem;
-  color: var(--global-text-color-light);
-  letter-spacing: 0.08em;
-}
-.post-header .desc {
-  font-size: 1.125rem;
-  color: var(--global-text-color-light);
-  margin-bottom: 0.75rem;
-}
-.post-header .desc a {
-  color: var(--global-theme-color);
-  text-decoration: none;
-  border-bottom: 1px dashed var(--global-theme-color);
-  transition: border-bottom-style 0.2s;
-}
-.post-header .desc a:hover {
-  border-bottom-style: solid;
-}
-
-.post > article > h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.3rem;
-  border-bottom: 2px solid var(--global-theme-color);
-  display: inline-block;
-}
-.post > article > h2 a {
-  color: inherit;
-}
-.post > article > h2 a:hover {
-  text-decoration: none;
-  opacity: 0.8;
-}
-
 .news, .publications {
   background-color: transparent;
   border-radius: 0;
@@ -1456,7 +1397,7 @@ pre:not(.wrapped) pre {
   border-bottom: none;
 }
 .news table th[scope=row] {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--global-text-color);
   padding: 1.2rem 1rem !important;
@@ -1472,425 +1413,11 @@ pre:not(.wrapped) pre {
 }
 
 /*******************************************************************************
- * CV Page - Compact & Professional
+ * CV Page — see _sass/_design_system.scss section 13 for current styling.
+ * (Legacy `.cv { ... }` block removed; it conflicted with the dissolved-card
+ * design-system treatment and left a full-width green rule under each section
+ * heading plus a timeline dot marker that the new layout doesn't use.)
  ******************************************************************************/
-.cv {
-  margin-bottom: 1.5rem;
-}
-.cv .card {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  margin-top: 1.25rem !important;
-  padding: 0.25rem 0 0.75rem !important;
-  transition: none;
-}
-.cv .card:hover {
-  box-shadow: none !important;
-  transform: none !important;
-}
-.cv .card .card-title {
-  font-family: "Inter", "Helvetica Neue", sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--global-text-color);
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  padding-left: 0.75rem;
-  border-bottom: 1px solid var(--global-divider-color);
-  position: relative;
-  letter-spacing: -0.01em;
-}
-.cv .card .card-title::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.15em;
-  width: 3px;
-  height: 1em;
-  background: var(--global-theme-color);
-  border-radius: 2px;
-}
-.cv {
-  --cv-year-column-width: 120px;
-  --cv-timeline-gap: 2rem;
-}
-.cv .cv-timeline {
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-.cv .cv-timeline .list-group-item {
-  padding: 0.5rem 0;
-  border: none;
-  background: transparent;
-  position: relative;
-}
-.cv .cv-timeline .list-group-item:last-child {
-  padding-bottom: 0;
-}
-.cv .cv-timeline .list-group-item:first-child {
-  padding-top: 0;
-}
-.cv .cv-timeline .list-group-item .cv-entry {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-@media (min-width: 768px) {
-  .cv .cv-timeline .list-group-item .cv-entry {
-    display: grid;
-    grid-template-columns: var(--cv-year-column-width) 2rem minmax(0, 1fr);
-    column-gap: 0;
-    align-items: start;
-  }
-}
-.cv .cv-timeline .list-group-item .cv-entry-year {
-  min-width: 0;
-}
-.cv .cv-timeline .list-group-item .cv-entry-marker {
-  display: none;
-}
-@media (min-width: 768px) {
-  .cv .cv-timeline .list-group-item .cv-entry-marker {
-    display: block;
-    position: relative;
-    min-height: 100%;
-  }
-  .cv .cv-timeline .list-group-item .cv-entry-marker::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--global-divider-color);
-    transform: translateX(-50%);
-  }
-  .cv .cv-timeline .list-group-item .cv-entry-marker::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 0.65rem;
-    width: 9px;
-    height: 9px;
-    background: var(--global-bg-color);
-    border: 2px solid var(--global-theme-color);
-    border-radius: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-    transition: background 0.2s ease, transform 0.2s ease;
-  }
-}
-.cv .cv-timeline .list-group-item:hover .cv-entry-marker::after {
-  background: var(--global-theme-color);
-  transform: translateX(-50%) scale(1.25);
-}
-.cv .cv-timeline .list-group-item .cv-entry-body {
-  min-width: 0;
-}
-.cv .cv-timeline .list-group-item .badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0;
-  min-width: auto;
-  background-color: transparent !important;
-  color: var(--global-theme-color) !important;
-  border: none;
-}
-.cv .cv-timeline .list-group-item h6.title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 0.15rem 0;
-  color: var(--global-text-color);
-}
-.cv .cv-timeline .list-group-item h6:not(.title) {
-  font-size: 0.9375rem;
-  font-weight: 400;
-  margin: 0;
-  color: var(--global-text-color-light);
-}
-.cv .cv-timeline .list-group-item .items {
-  margin: 0;
-  padding-left: 0;
-  font-size: 1rem;
-  list-style: none;
-}
-.cv .cv-timeline .list-group-item .items li {
-  margin-bottom: 0.15rem;
-  padding-left: 0;
-}
-.cv .cv-timeline .list-group-item .items li::marker {
-  content: "";
-}
-.cv .cv-timeline .list-group-item .cv-entry-list {
-  margin-top: 0.15rem;
-}
-.cv .cv-year-badge {
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--global-text-color);
-  white-space: nowrap;
-  letter-spacing: 0.02em;
-}
-.cv .table {
-  margin: 0;
-  font-size: 1rem;
-}
-.cv .table tr td {
-  padding: 0.4rem 0.6rem;
-  border: none;
-}
-.cv .table tr td:first-child {
-  font-weight: 600;
-  color: var(--global-text-color);
-  width: 120px;
-}
-.cv .list-group-item {
-  font-size: 1rem;
-}
-.cv .list-group-item h5.font-italic {
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-.cv .list-group-item .subitems {
-  font-size: 1rem;
-  margin-top: 0.2rem;
-  padding-left: 1rem;
-  color: var(--global-text-color);
-}
-.cv .list-group-item .subitems li {
-  margin-bottom: 0.15rem;
-}
-.cv .list-group-item .nested-content {
-  font-size: 1rem;
-  color: var(--global-text-color);
-}
-
-.toc-layout .col-lg-3 aside {
-  position: sticky;
-  top: 70px;
-  font-size: 0.75rem;
-}
-.toc-layout .col-lg-3 aside .nav-link {
-  padding: 0.2rem 0.4rem;
-  color: var(--global-text-color-light);
-  transition: color 0.2s, padding-left 0.2s;
-}
-.toc-layout .col-lg-3 aside .nav-link:hover, .toc-layout .col-lg-3 aside .nav-link.active {
-  color: var(--global-theme-color);
-  padding-left: 0.6rem;
-}
-
-/*******************************************************************************
- * Publications Page - Compact & Organized
- ******************************************************************************/
-.publications {
-  margin-top: 0.75rem;
-}
-.publications h2.year {
-  font-family: "Inter", "Helvetica Neue", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: var(--global-text-color);
-  margin-top: 1.75rem;
-  margin-bottom: 0.9rem;
-  padding-top: 1rem;
-  padding-bottom: 0.4rem;
-  border-top: none;
-  border-bottom: none;
-  text-align: left;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.publications h2.year::before {
-  content: "";
-  display: inline-block;
-  width: 4px;
-  height: 1.1em;
-  background: var(--global-theme-color);
-  border-radius: 2px;
-}
-.publications h2.year::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, var(--global-divider-color) 0%, transparent 100%);
-  margin-left: 0.5rem;
-}
-.publications ol.bibliography li {
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-radius: 0;
-  background: transparent;
-  border-bottom: 1px solid var(--global-divider-color);
-  transition: none;
-}
-.publications ol.bibliography li:last-child {
-  border-bottom: none;
-}
-.publications ol.bibliography li:hover {
-  box-shadow: none !important;
-  border: none !important;
-  background-color: transparent !important;
-  border-bottom: 1px solid var(--global-divider-color) !important;
-}
-.publications ol.bibliography li:last-child:hover {
-  border-bottom: none !important;
-}
-.publications ol.bibliography li.single-pub-in-year {
-  border-bottom: none !important;
-}
-.publications ol.bibliography li.single-pub-in-year:hover {
-  border-bottom: none !important;
-}
-.publications ol.bibliography li .row {
-  margin: 0;
-  padding: 0;
-}
-.publications ol.bibliography li .col-sm-10,
-.publications ol.bibliography li .col-sm-12 {
-  padding-left: 0;
-}
-.publications ol.bibliography li .col-sm-2 {
-  padding: 0 0.4rem 0 0;
-}
-.publications ol.bibliography li .col-sm-2.abbr {
-  height: auto;
-  margin-bottom: 0;
-}
-.publications ol.bibliography li .col-sm-8 {
-  padding: 0;
-}
-.publications ol.bibliography li .title {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.35;
-  margin-bottom: 0.2rem;
-}
-.publications ol.bibliography li .title abbr.badge {
-  font-size: 0.75rem;
-  padding: 0;
-  border-radius: 0;
-  line-height: 1.2;
-  text-align: left;
-  display: inline;
-  width: auto;
-  margin-bottom: 0;
-  background-color: transparent;
-  color: var(--global-text-color-light);
-  border: none;
-  font-weight: 400;
-}
-.publications ol.bibliography li .title abbr.badge a {
-  color: var(--global-text-color-light);
-}
-.publications ol.bibliography li .title abbr.badge a:hover {
-  text-decoration: underline;
-  color: var(--global-theme-color);
-}
-.publications ol.bibliography li .author {
-  font-size: 1rem;
-  line-height: 1.35;
-  margin-bottom: 0.15rem;
-}
-.publications ol.bibliography li .periodical {
-  font-size: 1rem;
-  color: var(--global-text-color-light);
-  margin-bottom: 0.2rem;
-}
-.publications ol.bibliography li .links {
-  margin-top: 0.25rem;
-  margin-left: 0;
-}
-.publications ol.bibliography li .links a.btn {
-  font-size: 0.75rem;
-  padding: 0.15rem 0.4rem;
-  margin-right: 0.2rem;
-  margin-left: 0;
-  border-radius: 3px;
-}
-.publications ol.bibliography li .links a.btn:first-child {
-  margin-left: 0;
-}
-.publications ol.bibliography li .venue-tag {
-  margin-top: 0.4rem;
-  font-size: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--global-code-bg-color);
-  padding: 0.15rem 0.5rem 0.15rem 0.35rem;
-  border-radius: 0 3px 3px 0;
-  border: 1px solid var(--global-divider-color);
-  border-left: 3px solid var(--global-theme-color);
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.publications ol.bibliography li .venue-tag:hover, .publications ol.bibliography li .venue-tag:focus {
-  background-color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  transform: translateX(2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  outline: none;
-}
-.publications ol.bibliography li .venue-tag:focus {
-  box-shadow: 0 0 0 2px var(--global-bg-color), 0 0 0 4px var(--global-theme-color);
-}
-.publications ol.bibliography li .venue-tag.active-filter {
-  background-color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-}
-.publications ol.bibliography li .venue-tag.active-filter .venue-link, .publications ol.bibliography li .venue-tag.active-filter .venue-name {
-  color: white;
-}
-.publications ol.bibliography li .venue-tag.active-filter::after {
-  content: "✓";
-  margin-left: 0.3rem;
-  color: white;
-  font-weight: bold;
-}
-.publications ol.bibliography li .venue-tag::before {
-  content: "";
-  position: absolute;
-  left: 0.35rem;
-  width: 4px;
-  height: 4px;
-  background-color: white;
-  border-radius: 50%;
-  border: 1px solid var(--global-divider-color);
-}
-.publications ol.bibliography li .venue-tag .venue-link, .publications ol.bibliography li .venue-tag .venue-name {
-  color: var(--global-text-color-light);
-  text-decoration: none;
-  font-weight: 400;
-  margin-left: 0.4rem;
-  transition: color 0.2s ease;
-}
-.publications ol.bibliography li .venue-tag:hover .venue-link, .publications ol.bibliography li .venue-tag:hover .venue-name, .publications ol.bibliography li .venue-tag:focus .venue-link, .publications ol.bibliography li .venue-tag:focus .venue-name {
-  color: white;
-}
-.publications ol.bibliography li .venue-tag .venue-name {
-  cursor: pointer;
-}
-.publications ol.bibliography li .hidden {
-  font-size: 0.75rem;
-  margin-top: 0;
-}
-.publications ol.bibliography li .hidden pre {
-  font-size: 0.75rem;
-  padding: 0.4rem;
-}
-.publications ol.bibliography li .hidden.open {
-  margin-top: 0.35rem;
-}
-
 .post .publications {
   padding-left: 0;
   margin-left: 0;
@@ -1925,186 +1452,6 @@ pre:not(.wrapped) pre {
 .about-selected-papers .publications ol.bibliography {
   padding-left: 0;
   margin-left: 0;
-}
-
-.post ol.bibliography {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-.publications .post ol.bibliography {
-  padding-left: 0;
-  margin-left: 0;
-}
-@media (max-width: 768px) {
-  .post ol.bibliography {
-    padding-left: 0;
-  }
-}
-.post ol.bibliography li {
-  margin-bottom: 1rem;
-  padding-bottom: 0.3rem;
-  padding-left: 0;
-  background: transparent;
-  border-bottom: 1px solid var(--global-divider-color);
-  transition: none;
-}
-.post ol.bibliography li .row {
-  margin: 0;
-  padding: 0;
-}
-.post ol.bibliography li .col-sm-10,
-.post ol.bibliography li .col-sm-12 {
-  padding-left: 0;
-}
-.post ol.bibliography li:last-child {
-  border-bottom: none;
-}
-.post ol.bibliography li:hover {
-  box-shadow: none !important;
-  background: transparent !important;
-  border-bottom: 1px solid var(--global-divider-color) !important;
-}
-.post ol.bibliography li:last-child:hover {
-  border-bottom: none !important;
-}
-.post ol.bibliography li.single-pub-in-year {
-  border-bottom: none !important;
-}
-.post ol.bibliography li.single-pub-in-year:hover {
-  border-bottom: none !important;
-}
-.post ol.bibliography li .title {
-  font-size: 1rem;
-}
-.post ol.bibliography li .author {
-  font-size: 1rem;
-}
-.post ol.bibliography li .periodical {
-  font-size: 1rem;
-}
-.post ol.bibliography li .links a.btn {
-  font-size: 0.75rem;
-  padding: 0.12rem 0.35rem;
-  margin-left: 0;
-}
-.post ol.bibliography li .links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem;
-  margin-top: 0.35rem;
-  padding-left: 0;
-  margin-left: 0;
-}
-.post ol.bibliography li .venue-tag {
-  margin-top: 0.4rem;
-  font-size: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--global-code-bg-color);
-  padding: 0.15rem 0.5rem 0.15rem 0.35rem;
-  border-radius: 0 3px 3px 0;
-  border: 1px solid var(--global-divider-color);
-  border-left: 3px solid var(--global-theme-color);
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.post ol.bibliography li .venue-tag:hover, .post ol.bibliography li .venue-tag:focus {
-  background-color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  transform: translateX(2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  outline: none;
-}
-.post ol.bibliography li .venue-tag::before {
-  content: "";
-  position: absolute;
-  left: 0.35rem;
-  width: 4px;
-  height: 4px;
-  background-color: white;
-  border-radius: 50%;
-  border: 1px solid var(--global-divider-color);
-}
-.post ol.bibliography li .venue-tag .venue-link, .post ol.bibliography li .venue-tag .venue-name {
-  color: var(--global-text-color-light);
-  text-decoration: none;
-  font-weight: 400;
-  margin-left: 0.4rem;
-  transition: color 0.2s ease;
-}
-.post ol.bibliography li .venue-tag:hover .venue-link, .post ol.bibliography li .venue-tag:hover .venue-name, .post ol.bibliography li .venue-tag:focus .venue-link, .post ol.bibliography li .venue-tag:focus .venue-name {
-  color: white;
-}
-.post ol.bibliography li .venue-tag .venue-name {
-  cursor: pointer;
-}
-
-/*******************************************************************************
- * Venue/Topic Tag — Per-topic accent colors
- * Applies to both Publications and Selected Papers.
- * The site uses topic names (not venue names) as the abbr/filter value.
- ******************************************************************************/
-.venue-tag[data-venue-filter="LLM Reasoning and Agency"] {
-  border-left-color: #8b5cf6;
-}
-.venue-tag[data-venue-filter="LLM Reasoning and Agency"]:hover, .venue-tag[data-venue-filter="LLM Reasoning and Agency"]:focus {
-  background-color: #8b5cf6;
-  border-color: #8b5cf6;
-}
-.venue-tag[data-venue-filter="MARL Efficiency"] {
-  border-left-color: #14b8a6;
-}
-.venue-tag[data-venue-filter="MARL Efficiency"]:hover, .venue-tag[data-venue-filter="MARL Efficiency"]:focus {
-  background-color: #14b8a6;
-  border-color: #14b8a6;
-}
-.venue-tag[data-venue-filter="MARL Generalization"] {
-  border-left-color: #f59e0b;
-}
-.venue-tag[data-venue-filter="MARL Generalization"]:hover, .venue-tag[data-venue-filter="MARL Generalization"]:focus {
-  background-color: #f59e0b;
-  border-color: #f59e0b;
-}
-.venue-tag[data-venue-filter^=ACL], .venue-tag[data-venue-filter^=EMNLP], .venue-tag[data-venue-filter^=NAACL] {
-  border-left-color: #dc2626;
-}
-.venue-tag[data-venue-filter^=ACL]:hover, .venue-tag[data-venue-filter^=ACL]:focus, .venue-tag[data-venue-filter^=EMNLP]:hover, .venue-tag[data-venue-filter^=EMNLP]:focus, .venue-tag[data-venue-filter^=NAACL]:hover, .venue-tag[data-venue-filter^=NAACL]:focus {
-  background-color: #dc2626;
-  border-color: #dc2626;
-}
-.venue-tag[data-venue-filter^=NeurIPS], .venue-tag[data-venue-filter^=ICML] {
-  border-left-color: #8b5cf6;
-}
-.venue-tag[data-venue-filter^=NeurIPS]:hover, .venue-tag[data-venue-filter^=NeurIPS]:focus, .venue-tag[data-venue-filter^=ICML]:hover, .venue-tag[data-venue-filter^=ICML]:focus {
-  background-color: #8b5cf6;
-  border-color: #8b5cf6;
-}
-.venue-tag[data-venue-filter^=ICLR] {
-  border-left-color: #3b82f6;
-}
-.venue-tag[data-venue-filter^=ICLR]:hover, .venue-tag[data-venue-filter^=ICLR]:focus {
-  background-color: #3b82f6;
-  border-color: #3b82f6;
-}
-
-/*******************************************************************************
- * Publication Links — tighter, link-like buttons
- ******************************************************************************/
-.publications .links a.btn,
-.post ol.bibliography .links a.btn {
-  font-family: "SF Mono", "Fira Code", "Monaco", "Consolas", monospace;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1.2;
-}
-.publications .links a.btn:hover,
-.post ol.bibliography .links a.btn:hover {
-  background-color: var(--global-theme-color);
-  color: #fff !important;
-  border-color: var(--global-theme-color);
 }
 
 /*******************************************************************************
@@ -2168,81 +1515,100 @@ pre:not(.wrapped) pre {
 }
 
 .toc-sidebar {
-  border-left: 1px solid var(--global-divider-color);
-  padding-left: 1rem;
   position: sticky;
-  top: 6rem;
-  max-height: calc(100vh - 7rem);
-  overflow: auto;
+  top: 5rem;
+  align-self: start;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
 }
 @media (prefers-reduced-motion: no-preference) {
   .toc-sidebar {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.2s ease;
   }
 }
 .toc-sidebar.is-empty {
   display: none;
 }
 .toc-sidebar.is-collapsed {
-  opacity: 0;
-  transform: translateX(20px);
-  pointer-events: none;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.toc-layout.toc-collapsed .toc-sidebar-col {
+  display: block;
+}
+
+.toc-layout.toc-collapsed .toc-content {
+  flex: 1 1 0%;
+  max-width: 100%;
+}
+
+.post.toc-layout > .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.post.toc-layout > .row > .toc-sidebar-col {
+  align-self: stretch;
 }
 
 .toc-sidebar__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--global-divider-color);
+  margin: 0 0 10px;
+  padding: 0;
+  border: none;
+  gap: var(--s-2);
 }
 
 .toc-sidebar__title {
-  font-size: 0.875rem;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--global-text-color-light);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .toc-toggle-btn {
-  display: flex;
+  display: none;
+}
+
+.toc-sidebar--foldable .toc-toggle-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: none;
-  background-color: transparent;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  background: transparent;
   color: var(--global-text-color-light);
   cursor: pointer;
-  border-radius: 4px;
+  transition: color var(--t-fast, 140ms ease);
 }
-@media (prefers-reduced-motion: no-preference) {
-  .toc-toggle-btn {
-    transition: all 0.2s ease;
-  }
-}
-.toc-toggle-btn:hover {
-  background-color: var(--global-code-bg-color);
+.toc-sidebar--foldable .toc-toggle-btn:hover {
   color: var(--global-theme-color);
 }
-.toc-toggle-btn i {
-  font-size: 0.75rem;
+.toc-sidebar--foldable .toc-toggle-btn i {
+  font-size: 0.7rem;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .toc-toggle-btn i {
-    transition: transform 0.3s ease;
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .toc-toggle-btn.is-collapsed i {
+  .toc-sidebar--foldable .toc-toggle-btn.is-collapsed i {
     transform: rotate(180deg);
+    transition: transform 0.2s ease;
   }
 }
 
 .toc-collapsed-toggle {
+  display: none !important;
+}
+
+.toc-collapsed-toggle--foldable {
   position: fixed;
   right: 30px;
   bottom: 104px;
@@ -2261,33 +1627,33 @@ pre:not(.wrapped) pre {
   justify-content: center;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .toc-collapsed-toggle {
+  .toc-collapsed-toggle--foldable {
     transition: all 0.2s ease;
   }
 }
-.toc-collapsed-toggle.toc-collapsed-toggle--visible {
+.toc-collapsed-toggle--foldable.toc-collapsed-toggle--visible {
   display: flex;
 }
-.toc-collapsed-toggle.toc-collapsed-toggle--hidden {
+.toc-collapsed-toggle--foldable.toc-collapsed-toggle--hidden {
   display: none;
 }
-.toc-collapsed-toggle:hover {
+.toc-collapsed-toggle--foldable:hover {
   background-color: var(--global-theme-color);
   color: white;
   border-color: var(--global-theme-color);
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
-.toc-collapsed-toggle i {
+.toc-collapsed-toggle--foldable i {
   font-size: 1.25rem;
 }
 @media (max-width: 991px) {
-  .toc-collapsed-toggle {
+  .toc-collapsed-toggle--foldable {
     display: none !important;
   }
 }
 @media (max-width: 768px) {
-  .toc-collapsed-toggle {
+  .toc-collapsed-toggle--foldable {
     right: 20px;
     bottom: 70px;
     width: 40px;
@@ -2296,86 +1662,74 @@ pre:not(.wrapped) pre {
 }
 
 .toc {
-  font-size: 0.875rem;
-  line-height: 1.35;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
 }
 .toc ul {
   list-style: none;
   margin: 0;
-  padding-left: 0;
+  padding: 0;
+  border-left: 2px solid var(--global-divider-color);
 }
 .toc li {
-  margin: 0.25rem 0;
-}
-.toc li.has-children {
-  position: relative;
+  margin: 0;
 }
 .toc li.has-children > .toc-section-toggle {
-  position: absolute;
-  left: -1rem;
-  top: 0.1rem;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--global-text-color-light);
-  cursor: pointer;
-  padding: 0;
-  font-size: 0.6rem;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .toc li.has-children > .toc-section-toggle {
-    transition: transform 0.2s ease;
-  }
-  .toc li.has-children > .toc-section-toggle.is-collapsed {
-    transform: rotate(-90deg);
-  }
-}
-.toc li.has-children > .toc-section-toggle:hover {
-  color: var(--global-theme-color);
+  display: none;
 }
 .toc li.section-collapsed > ul {
   display: none;
 }
 .toc ul ul {
-  margin-top: 0.25rem;
-  margin-left: 0.25rem;
-  padding-left: 0.75rem;
-  border-left: 1px solid var(--global-divider-color);
+  margin-top: 0;
+  margin-left: 6px;
+  padding-left: 0;
 }
 .toc a {
+  display: block;
+  padding: 6px 14px;
+  margin-left: -2px;
+  border-left: 2px solid transparent;
   color: var(--global-text-color-light);
   text-decoration: none;
-  display: inline-block;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color 0.2s ease;
+  transition: color 0.14s cubic-bezier(0.22, 1, 0.36, 1), border-left-color 0.14s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.toc a:hover {
+.toc a:hover, .toc a.is-active {
   color: var(--global-theme-color);
+  border-left-color: var(--global-theme-color);
 }
 .toc a.is-active {
-  color: var(--global-theme-color);
   font-weight: 600;
 }
 
+/* --- Responsive: narrow columns (992-1200) and tablet/mobile ------------- */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .toc a {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: visible;
+    font-size: var(--fs-xs);
+    line-height: 1.35;
+    padding: 5px 12px;
+  }
+}
 /*******************************************************************************
  * Enhancements for regular blog posts (non-distill).
  ******************************************************************************/
 /*******************************************************************************
  * Enhanced Post Header Styles
  ******************************************************************************/
-.post-header {
+.post:has(.post-content) .post-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--global-divider-color);
 }
-.post-header .post-title {
+.post:has(.post-content) .post-header .post-title {
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.3;
@@ -2393,28 +1747,35 @@ pre:not(.wrapped) pre {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 14px;
   color: var(--global-text-color-light);
-  font-size: 0.875rem;
+  font-family: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
 }
 .post-meta-row > span {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 .post-meta-row > span i {
   font-size: 0.9em;
-  opacity: 0.8;
+  opacity: 0.7;
 }
-.post-meta-row .post-date {
-  color: var(--global-text-color);
-  font-weight: 500;
-}
-.post-meta-row .post-author {
-  color: var(--global-text-color-light);
-}
+.post-meta-row .post-date,
+.post-meta-row .post-author,
 .post-meta-row .post-reading-time {
   color: var(--global-text-color-light);
+}
+.post-meta-row .post-lang-switch {
+  margin-left: auto;
+  color: var(--global-theme-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.post-meta-row .post-lang-switch:hover {
+  border-bottom-color: var(--global-theme-color);
 }
 
 .post-tags-row {
@@ -2517,12 +1878,12 @@ pre:not(.wrapped) pre {
 }
 .post-content h2 {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-top: 2.5rem;
   margin-bottom: 1rem;
   line-height: 1.3;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--global-theme-color);
+  padding-bottom: 0;
+  border-bottom: none; /* design kit: no decorative rule under h2 */
   color: var(--global-text-color);
 }
 .post-content h3 {
@@ -2577,7 +1938,7 @@ pre:not(.wrapped) pre {
   margin: 1.5rem 0;
   border-collapse: collapse;
   border-spacing: 0;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--global-text-color);
   background-color: var(--global-bg-color);
@@ -2593,7 +1954,7 @@ pre:not(.wrapped) pre {
 }
 .post-content table thead {
   background-color: var(--global-code-bg-color);
-  border-bottom: 2px solid var(--global-theme-color);
+  border-bottom: 1px solid var(--global-divider-color);
 }
 .post-content table thead th {
   padding: 0.85rem 1rem;
@@ -2601,7 +1962,7 @@ pre:not(.wrapped) pre {
   text-align: left;
   white-space: nowrap;
   color: var(--global-text-color);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   text-transform: none;
   letter-spacing: 0.01em;
   border-color: var(--global-divider-color);
@@ -2647,7 +2008,7 @@ pre:not(.wrapped) pre {
   background-color: var(--global-code-bg-color);
 }
 .post-content table.compact {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 .post-content table.compact th, .post-content table.compact td {
   padding: 0.4rem 0.75rem;
@@ -2668,7 +2029,7 @@ pre:not(.wrapped) pre {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid var(--global-divider-color);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 .post-content .footnotes ol {
   padding-left: 1.25rem;
@@ -2789,7 +2150,7 @@ pre:not(.wrapped) pre {
   box-shadow: none !important;
   text-decoration: none !important;
   color: var(--global-text-color) !important;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   opacity: 0.7;
   transition: opacity 160ms ease, color 160ms ease;
 }
@@ -2844,7 +2205,7 @@ pre:not(.wrapped) pre {
   .post.post--sidenotes .sidenote {
     position: absolute;
     left: 0;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     line-height: 1.35;
     color: var(--global-text-color-light);
     padding-right: 0.75rem;
@@ -2878,7 +2239,7 @@ pre:not(.wrapped) pre {
   background-color: transparent;
   border: 1px solid var(--global-divider-color);
   border-radius: 5px;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   text-decoration: none;
   color: var(--global-text-color);
@@ -2939,7 +2300,7 @@ pre:not(.wrapped) pre {
   background-color: var(--global-bg-color);
   border: 1px solid var(--global-divider-color);
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   text-decoration: none;
   color: var(--global-text-color);
@@ -2966,7 +2327,7 @@ pre:not(.wrapped) pre {
 .tag-category-list ul p {
   margin: 0;
   color: var(--global-text-color-light);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .post-list li .post-meta a,
@@ -3010,27 +2371,13 @@ pre:not(.wrapped) pre {
   padding-top: 0.5rem;
 }
 .post-list .blog-post-list-item {
-  position: relative;
-  padding-left: 0.25rem;
-  transition: background-color 0.2s ease;
-}
-.post-list .blog-post-list-item::before {
-  content: "";
-  position: absolute;
-  left: -0.5rem;
-  top: 1.4rem;
-  bottom: 1.4rem;
-  width: 2px;
-  background: var(--global-theme-color);
-  opacity: 0;
-  border-radius: 2px;
-  transition: opacity 0.2s ease;
-}
-.post-list .blog-post-list-item:hover::before {
-  opacity: 0.8;
+  padding-left: 0;
 }
 .post-list .blog-post-list-item h3 a {
-  transition: color 0.2s ease;
+  transition: color 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.post-list .blog-post-list-item:hover h3 a {
+  color: var(--global-theme-color);
 }
 
 .featured-posts .post-meta a {
@@ -3095,7 +2442,7 @@ a[data-filter-link].active-filter:hover {
   padding-top: 2.5rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.7;
 }
 .post-content .highlight pre::-webkit-scrollbar {
@@ -3117,7 +2464,7 @@ a[data-filter-link].active-filter:hover {
   padding: 0;
   font-size: inherit;
   border-radius: 0;
-  font-family: "SF Mono", "Fira Code", "Monaco", "Consolas", monospace;
+  font-family: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
 }
 .post-content .highlight[data-lang]::before {
   content: attr(data-lang);
@@ -3140,7 +2487,7 @@ a[data-filter-link].active-filter:hover {
   background-color: var(--global-code-bg-color);
   border-radius: 12px;
   overflow-x: auto;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.6;
   border: 1px solid var(--global-divider-color);
   box-shadow: var(--global-shadow-sm);
@@ -3247,22 +2594,14 @@ a[data-filter-link].active-filter:hover {
 .post-content figure img {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
-  box-shadow: var(--global-shadow-md);
+  border-radius: var(--r-sm);
+  box-shadow: var(--global-shadow-sm);
   cursor: zoom-in;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .post-content figure img {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .post-content figure img:hover {
-    transform: scale(1.02);
-    box-shadow: var(--global-shadow-lg);
-  }
+  /* design: no scroll-linked parallax, no entrance choreography */
 }
 .post-content figure figcaption {
   margin-top: 1rem;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--global-text-color-light);
   font-style: italic;
   line-height: 1.6;
@@ -3284,24 +2623,14 @@ a[data-filter-link].active-filter:hover {
   max-width: 100%;
   height: auto;
   margin: 2.5rem auto;
-  border-radius: 12px;
-  box-shadow: var(--global-shadow-md);
+  border-radius: var(--r-sm);
+  box-shadow: var(--global-shadow-sm);
   cursor: zoom-in;
-}
-.post-content p > img:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .post-content p > img {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .post-content p > img:hover {
-    transform: scale(1.01);
-  }
+  /* design: flat paper; no hover scale */
 }
 .post-content .img-caption {
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--global-text-color-light);
   font-style: italic;
   margin-top: -1rem;
@@ -3311,59 +2640,25 @@ a[data-filter-link].active-filter:hover {
   position: relative;
   cursor: zoom-in;
 }
-.post-content figure:has(img[data-zoomable]),
-.post-content p:has(> img[data-zoomable]) {
-  position: relative;
-}
-.post-content figure:has(img[data-zoomable])::after,
-.post-content p:has(> img[data-zoomable])::after {
-  content: "🔍";
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  font-size: 1.25rem;
-  background: var(--global-bg-color);
-  border-radius: 50%;
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  box-shadow: var(--global-shadow-sm);
-  transition: opacity 0.2s ease;
-}
-.post-content figure:has(img[data-zoomable]):hover::after,
-.post-content p:has(> img[data-zoomable]):hover::after {
-  opacity: 0.85;
-}
 
 /*******************************************************************************
  * Blockquote Enhancements
  ******************************************************************************/
 .post-content blockquote {
   margin: 2rem 0;
-  padding: 1.25rem 1.5rem;
-  border-left: 4px solid var(--global-theme-color);
-  background-color: var(--global-code-bg-color);
-  border-radius: 0 8px 8px 0;
+  padding: 0.75rem 0 0.75rem 1.5rem;
+  border-left: 2px solid var(--global-theme-color);
+  background: none; /* design: flat paper, no fill */
+  border-radius: 0;
+  font-family: "Fraunces", "Noto Serif SC", "Source Serif 4", Georgia, serif;
   font-style: italic;
-  color: var(--global-text-color);
-  position: relative;
+  font-size: 1.125rem;
+  color: var(--global-text-color-light);
 }
 .post-content blockquote::before {
-  content: '"';
-  position: absolute;
-  top: -0.5rem;
-  left: 0.75rem;
-  font-size: 3rem;
-  color: var(--global-theme-color);
-  opacity: 0.3;
-  font-family: Georgia, serif;
-  line-height: 1;
-  pointer-events: none;
+  content: none;
 }
+.post-content blockquote { /* kill giant Georgia quote mark */ }
 .post-content blockquote p {
   margin: 0;
   font-style: italic;
@@ -3375,39 +2670,19 @@ a[data-filter-link].active-filter:hover {
 .post-content blockquote blockquote {
   margin: 1rem 0;
   border-left-color: var(--global-text-color-light);
-  background-color: transparent;
-  padding: 0.75rem 1rem;
-}
-.post-content blockquote blockquote::before {
-  display: none;
+  padding: 0.5rem 0 0.5rem 1rem;
 }
 .post-content blockquote.note, .post-content blockquote.info {
   border-left-color: #3498db;
-  background-color: rgba(52, 152, 219, 0.08);
-}
-.post-content blockquote.note::before, .post-content blockquote.info::before {
-  color: #3498db;
 }
 .post-content blockquote.warning {
   border-left-color: #f39c12;
-  background-color: rgba(243, 156, 18, 0.08);
-}
-.post-content blockquote.warning::before {
-  color: #f39c12;
 }
 .post-content blockquote.danger, .post-content blockquote.error {
   border-left-color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.08);
-}
-.post-content blockquote.danger::before, .post-content blockquote.error::before {
-  color: #e74c3c;
 }
 .post-content blockquote.success, .post-content blockquote.tip {
   border-left-color: #2ecc71;
-  background-color: rgba(46, 204, 113, 0.08);
-}
-.post-content blockquote.success::before, .post-content blockquote.tip::before {
-  color: #2ecc71;
 }
 
 /*******************************************************************************
@@ -3547,12 +2822,12 @@ a[data-filter-link].active-filter:hover {
 .post-content kbd {
   display: inline-block;
   padding: 0.2rem 0.5rem;
-  font-family: "SF Mono", "Fira Code", "Monaco", "Consolas", monospace;
+  font-family: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
   font-size: 0.85em;
   color: var(--global-text-color);
   background-color: var(--global-code-bg-color);
   border: 1px solid var(--global-divider-color);
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -3578,7 +2853,7 @@ pre button.copy {
   color: var(--global-text-color-light);
   background-color: var(--global-bg-color);
   border: 1px solid var(--global-divider-color);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   opacity: 0;
   z-index: 10;
@@ -3610,7 +2885,7 @@ pre button.wrap-toggle {
   color: var(--global-text-color-light);
   background-color: var(--global-bg-color);
   border: 1px solid var(--global-divider-color);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   opacity: 0;
   z-index: 10;
@@ -3710,7 +2985,7 @@ select:focus-visible {
 .post-content :not(pre) > code {
   padding: 0.2em 0.4em;
   font-size: 0.875em;
-  font-family: "SF Mono", "Fira Code", "Monaco", "Consolas", monospace;
+  font-family: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
   background-color: var(--global-code-bg-color);
   border-radius: 4px;
   border: 1px solid var(--global-divider-color);
@@ -3770,7 +3045,7 @@ select:focus-visible {
 }
 .featured-posts .featured-description {
   color: var(--global-text-color-light);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.6;
   margin-bottom: 0.75rem;
   display: -webkit-box;
@@ -3963,8 +3238,2467 @@ d-appendix a:hover, d-appendix a.footnote-backlink:hover {
     grid-column: none;
   }
 }
-:root {
-  --max-content-width: 960px;
+/*******************************************************************************
+ * Xihuai Wang — Refined Design System (site implementation)
+ *
+ * This file is intentionally imported LAST in main.scss so it wins against
+ * the legacy al-folio styles. It reworks the visual language into an
+ * editorial/academic-journal feel while keeping the existing Jekyll
+ * layouts intact.
+ ******************************************************************************/
+/* ============================================================================
+ * 1. Typography base
+ * ========================================================================== */
+html {
+  color-scheme: light dark;
 }
+
+body {
+  font-family: var(--font-serif);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: var(--lh-body);
+  font-feature-settings: "kern", "liga", "onum";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--selection);
+  color: var(--fg);
+}
+
+/* Headings — serif display with optical sizing */
+h1, .h1, h2, .h2, h3, .h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--fg);
+  letter-spacing: -0.015em;
+}
+
+h1, .h1 {
+  font-size: var(--fs-4xl);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  margin: 0 0 var(--s-5); /* colors_and_type.css:183 */
+}
+
+h2, .h2 {
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-snug);
+  font-variation-settings: "opsz" 72;
+  margin: var(--s-7) 0 var(--s-4); /* colors_and_type.css:192 */
+}
+
+h3, .h3 {
+  font-size: var(--fs-xl);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.01em;
+  margin: var(--s-6) 0 var(--s-3); /* colors_and_type.css:200 */
+}
+
+h4, .h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.005em;
+  color: var(--fg);
+  margin: var(--s-5) 0 var(--s-2); /* colors_and_type.css:208 */
+}
+
+h5, .h5 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-md);
+  color: var(--fg);
+  margin: var(--s-4) 0 var(--s-2); /* colors_and_type.css:214 */
+}
+
+h6, .h6 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-3);
+  margin: var(--s-4) 0 var(--s-2); /* colors_and_type.css:223 */
+}
+
+/* Body copy — colors_and_type.css:251-278 */
+p {
+  margin: 0 0 var(--s-4);
+  text-wrap: pretty;
+  max-width: var(--prose-max);
+}
+
+/* Post content gets its own wider prose cap (--post-prose-max). The global
+   p max-width above was clamping individual paragraphs to 68ch even when the
+   container had grown to 86ch, so widen it inside .post-content. */
+.post-content p,
+.post-content ul,
+.post-content ol {
+  max-width: var(--post-prose-max);
+}
+
+p.lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-body);
+  color: var(--fg-2);
+}
+
+small, .caption {
+  font-size: var(--fs-sm);
+  color: var(--fg-3);
+}
+
+/* Links — understated underline */
+a {
+  color: var(--link);
+  text-decoration: none;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color var(--t-fast);
+}
+
+a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+/* Inline code */
+code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--code-bg);
+  padding: 0.12em 0.4em;
+  border-radius: var(--r-xs);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ============================================================================
+ * 2. Utilities (match kit)
+ * ========================================================================== */
+.text-display {
+  font-family: var(--font-display);
+}
+
+.text-serif {
+  font-family: var(--font-serif);
+}
+
+.text-sans {
+  font-family: var(--font-sans);
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+.text-zh {
+  font-family: var(--font-zh);
+}
+
+.muted {
+  color: var(--fg-3);
+}
+
+.very-muted {
+  color: var(--fg-4);
+}
+
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--fg-3);
+}
+
+.kicker,
+.mono-meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.04em;
+  color: var(--fg-3);
+}
+
+.mono-meta {
+  text-transform: lowercase;
+}
+
+/* ============================================================================
+ * 3. Hero / signature name (homepage)
+ * ========================================================================== */
+.post-header.hero {
+  text-align: center;
+  padding: 48px 0 36px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--s-6);
+}
+
+.signature-name {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25em;
+  margin: 0 0 var(--s-5);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.25rem, 4.8vw, 3.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+}
+
+.signature-name .name-en,
+.signature-name .name-zh {
+  white-space: nowrap;
+}
+
+.signature-name .name-en {
+  color: var(--fg);
+  font-size: 0.85em; /* EN slightly smaller so both read weight-balanced */
+}
+
+.signature-name .name-zh {
+  font-family: var(--font-zh);
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+/* Respect prefers-reduced-motion for the medium-zoom library (loaded from CDN
+   with its own CSS). Kill the transitions on overlay/image swap so there's no
+   distracting zoom animation. */
+@media (prefers-reduced-motion: reduce) {
+  .medium-zoom-overlay,
+  .medium-zoom-image,
+  .medium-zoom-image--opened {
+    transition-duration: 0ms !important;
+    animation: none !important;
+  }
+}
+/* Theme toggle — animated moon/sun cross-fade with rotation. Single stroke SVGs
+   give a cleaner feel than FontAwesome solid. The data-theme override lives in
+   _themes.scss; this just provides the layout and motion. */
+.theme-toggle {
+  padding: 8px 12px !important;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  background: var(--accent-wash);
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  outline: none;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.theme-toggle__icons {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  color: var(--fg-2);
+}
+
+.theme-toggle:hover .theme-toggle__icons {
+  color: var(--accent);
+}
+
+.theme-toggle__moon,
+.theme-toggle__sun {
+  position: absolute;
+  inset: 0;
+  transition: opacity var(--t-med), transform var(--t-med);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__moon,
+  .theme-toggle__sun {
+    transition: none;
+  }
+}
+/* mapmyvisitors embed at bottom of home page — centered, larger visual
+   presence (kit doesn't spec; user requested bigger map). Caps at viewport
+   width so mobile doesn't overflow. */
+.mapmyvisitors-wrap {
+  display: flex;
+  justify-content: center;
+  margin: var(--s-7) auto var(--s-5);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.mapmyvisitors-wrap img,
+.mapmyvisitors-wrap canvas,
+#mapmyvisitorsimg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Decorative separator "|" between 王锡淮 and Xihuai Wang */
+.signature-name .name-sep {
+  color: var(--fg-4);
+  font-weight: 300;
+  font-size: 0.8em;
+  margin: 0 0.1em;
+}
+
+.post-header.hero .desc,
+.post-header.hero .subtitle {
+  margin: var(--s-4) auto 0;
+  max-width: 640px;
+  font-family: var(--font-serif);
+  font-size: var(--fs-lg);
+  color: var(--fg-2);
+  line-height: var(--lh-body);
+}
+
+.post-header.hero .desc a,
+.post-header.hero .subtitle a {
+  color: var(--link);
+}
+
+/* ============================================================================
+ * 4. Profile portrait + address (homepage)
+ * ========================================================================== */
+.profile {
+  /* keep al-folio float layout but restyle photo/address */
+}
+.profile img.img-fluid {
+  border-radius: var(--r-md) !important;
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-sm);
+}
+.profile img.rounded-circle {
+  border-radius: var(--r-pill) !important;
+}
+.profile .address {
+  margin-top: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.profile .address p {
+  margin: 0;
+}
+
+/* ============================================================================
+ * 5. About prose (homepage body) — scoped to home layout only (uses .post-header.hero).
+ * Single blog posts live under _layouts/post.html and are styled in section 15.
+ * ========================================================================== */
+.post:has(.post-header.hero) > article {
+  /* Two-column grid at ≥992px: bio (1fr) + portrait (260px), tight gap.
+     Profile floats are overridden below; News/SelectedPapers span both cols.
+     At <992px, grid collapses to one column so portrait stacks naturally. */
+}
+@media (min-width: 992px) {
+  .post:has(.post-header.hero) > article {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    grid-column-gap: var(--s-6);
+    align-items: start;
+  }
+  .post:has(.post-header.hero) > article > .profile {
+    grid-column: 2;
+    grid-row: 1;
+    float: none !important;
+    margin: 0 !important;
+    max-width: 260px;
+    width: 260px;
+  }
+  .post:has(.post-header.hero) > article > .clearfix {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0; /* allow shrink inside grid */
+  }
+  .post:has(.post-header.hero) > article {
+    /* Anything else in article (News h2, Selected Papers h2, tables) spans
+       both columns and drops below the bio+portrait row. */
+  }
+  .post:has(.post-header.hero) > article > h2, .post:has(.post-header.hero) > article > .news, .post:has(.post-header.hero) > article > .about-selected-papers, .post:has(.post-header.hero) > article > hr, .post:has(.post-header.hero) > article > div:not(.profile):not(.clearfix) {
+    grid-column: 1/-1;
+  }
+}
+.post:has(.post-header.hero) > article {
+  /* Global paragraph caps apply only outside the bio grid (news summaries etc.) */
+}
+.post:has(.post-header.hero) > article > p, .post:has(.post-header.hero) > article > ul, .post:has(.post-header.hero) > article > ol {
+  max-width: var(--prose-max);
+}
+.post:has(.post-header.hero) > article > p {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+  font-size: 1rem;
+  line-height: var(--lh-body);
+}
+.post:has(.post-header.hero) > article > p strong, .post:has(.post-header.hero) > article > ul strong, .post:has(.post-header.hero) > article > ol strong {
+  color: var(--fg);
+}
+.post:has(.post-header.hero) > article > .clearfix > p {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+  font-size: 1rem;
+  line-height: var(--lh-body);
+}
+.post:has(.post-header.hero) > article > .clearfix > p,
+.post:has(.post-header.hero) > article > .clearfix > ul,
+.post:has(.post-header.hero) > article > .clearfix > ol {
+  max-width: none;
+}
+.post:has(.post-header.hero) > article > h2 {
+  margin-top: var(--s-7);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--rule);
+}
+.post:has(.post-header.hero) > article > h2 a {
+  color: inherit;
+}
+.post:has(.post-header.hero) > article > h2 a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ============================================================================
+ * 6. Chips / pills
+ * ========================================================================== */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 4px 10px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--rule-strong);
+  color: var(--fg-2);
+  background: transparent;
+  text-decoration: none;
+}
+
+.chip::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.chip.no-dot::before {
+  display: none;
+}
+
+.chip.is-accent {
+  color: var(--accent-deep);
+  background: var(--accent-wash);
+  border-color: transparent;
+}
+
+html[data-theme=dark] .chip.is-accent {
+  color: var(--moss-700);
+}
+
+.chip:hover {
+  border-color: var(--rule-strong);
+  color: var(--fg);
+}
+
+.chip.is-accent:hover {
+  color: var(--accent);
+}
+
+/* ============================================================================
+ * 7. Buttons
+ * ========================================================================== */
+.btn,
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 10px 18px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--t-fast);
+}
+
+.btn-primary,
+.ds-btn-primary {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}
+
+.btn-primary:hover,
+.ds-btn-primary:hover {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:active,
+.ds-btn-primary:active {
+  transform: translateY(0);
+}
+
+.ds-btn-ghost,
+.btn-ghost { /* colors_and_type.css:387 — design class name */
+  color: var(--fg);
+  background: transparent;
+  border-color: var(--rule-strong);
+}
+
+.ds-btn-ghost:hover,
+.btn-ghost:hover {
+  background: var(--bg-sunken);
+  color: var(--fg);
+}
+
+/* btn-link — colors_and_type.css:393-398 */
+.btn-link,
+.ds-btn-link {
+  color: var(--link);
+  background: transparent;
+  padding: 6px 0;
+  border-color: transparent;
+}
+
+.btn-link:hover,
+.ds-btn-link:hover {
+  color: var(--link-hover);
+}
+
+/* ============================================================================
+ * 8. Cards
+ * ========================================================================== */
+.ds-card,
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-xs);
+}
+
+.ds-card-hover,
+.card-hover {
+  transition: transform var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
+}
+
+.ds-card-hover:hover,
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--rule-strong);
+}
+
+/* ============================================================================
+ * 9. Navbar (fixed top, blurred paper)
+ * ========================================================================== */
+.navbar {
+  background: rgba(255, 255, 255, 0.85) !important;
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  backdrop-filter: saturate(140%) blur(12px);
+  border-bottom: 1px solid var(--rule) !important;
+  box-shadow: none !important;
+  font-family: var(--font-sans);
+}
+
+html[data-theme=dark] .navbar {
+  background: rgba(14, 16, 19, 0.82) !important;
+  border-bottom-color: var(--rule) !important;
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link {
+  font-family: var(--font-sans);
+  font-size: 13px; /* kit.css:26 — explicit */
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--fg) !important;
+  padding: 8px 12px !important; /* kit.css:27 — override bootstrap default */
+  transition: color var(--t-fast), background var(--t-fast);
+  border-radius: var(--r-sm);
+}
+
+.navbar.navbar-light .navbar-nav .nav-item .nav-link:hover,
+.navbar .nav-link:hover {
+  color: var(--accent) !important;
+  background: var(--bg-sunken) !important;
+}
+
+.navbar .nav-item.active .nav-link,
+.navbar .nav-item .nav-link.active {
+  color: var(--accent) !important;
+  font-weight: 600;
+  position: relative;
+}
+
+/* Active nav underline — 18×2 moss pill, kit.css:33-37 */
+.navbar .nav-item.active .nav-link::after,
+.navbar .nav-item .nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 18px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  transform: translateX(-50%);
+}
+
+/* theme toggle rotate */
+#light-toggle,
+.contact-icon .fa-sun,
+.contact-icon .fa-moon {
+  transition: transform var(--t-fast), color var(--t-fast);
+}
+
+#light-toggle:hover {
+  color: var(--accent) !important;
+  transform: rotate(15deg);
+}
+
+/* social icons — al-folio colors via i::before */
+.social .contact-icons a,
+.social .contact-icons a i,
+.social .contact-icons a i::before {
+  color: var(--fg-2) !important;
+  transition: color var(--t-fast);
+}
+
+.social .contact-icons a:hover i,
+.social .contact-icons a:hover i::before {
+  color: var(--accent) !important;
+}
+
+/* ============================================================================
+ * 10. News list (ruled)
+ * ========================================================================== */
+.news,
+.news-container,
+.news table {
+  font-family: var(--font-serif);
+}
+
+.news table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  margin: 0;
+}
+
+.news table th,
+.news table td {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  border-top: none !important;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+.news table tr:last-child th,
+.news table tr:last-child td {
+  border-bottom: none;
+}
+
+.news table th[scope=row] {
+  width: 130px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  padding-right: 24px;
+}
+
+.news table td {
+  color: var(--fg);
+  font-size: 14px; /* components-news.html */
+  line-height: 1.55;
+}
+
+.news a.news-title {
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.news a.news-title:hover {
+  color: var(--accent);
+}
+
+.news tr.clickable-row:hover td {
+  color: var(--accent);
+}
+
+/* ============================================================================
+ * 10b. News full page — year-grouped, 3-col rows with category tag
+ *      Matches design kit pages.css `.uk-news-full`, 4-color category chips
+ * ========================================================================== */
+.news-full {
+  max-width: 820px; /* pages.css:261 */
+  margin: 0 auto;
+  padding: 56px var(--gutter) 80px; /* pages.css:261 */
+}
+
+.news-year {
+  margin-top: 44px;
+} /* pages.css:262 */
+.news-year:first-of-type {
+  margin-top: 32px;
+} /* pages.css:263 */
+.news-year-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin: 0 0 var(--s-3);
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+}
+
+.news-year-num {
+  flex: 0 0 auto;
+}
+
+.news-year-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  align-self: center;
+}
+
+.news-year-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+
+.news-full-list {
+  list-style: none;
+  padding: 14px 0 0; /* pages.css:264 */
+  margin: 0;
+}
+
+.news-full-list > li {
+  display: grid;
+  grid-template-columns: 130px 80px 1fr;
+  gap: 18px; /* pages.css:269 */
+  padding: 18px 0; /* pages.css:270 */
+  border-bottom: 1px solid var(--rule);
+  align-items: baseline;
+}
+
+.news-full-list > li:last-child {
+  border-bottom: none;
+}
+
+.news-full-list time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.news-full-list .news-body {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--fg);
+  line-height: 1.55;
+  max-width: none; /* pages.css:298 — grid column already constrains */
+}
+
+.news-full-list .news-body a {
+  color: var(--link);
+}
+
+.news-full-list .news-body a:hover {
+  color: var(--link-hover);
+}
+
+/* Inline platform icons (Zhihu/WeChat/BiliBili) scale to body-line height.
+   Real photos (img-fluid) get the usual rounded-card treatment and retain natural size. */
+.news-full-list img[src*="/icons/"] {
+  max-width: 1.1em;
+  height: 1em;
+  vertical-align: middle;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* News images render as an inline chip-style accent (float-right thumbnail)
+   per kit, not a full-width block below the text. Text wraps around it. */
+.news-full-list .news-body img.news-photo {
+  max-width: 140px;
+  height: auto;
+  margin-left: var(--s-4);
+  margin-bottom: var(--s-2);
+  float: right;
+  border-radius: var(--r-sm);
+  outline: 1px solid var(--rule);
+}
+
+.news-full-list li {
+  overflow: hidden;
+} /* clear float within each entry */
+@media (max-width: 767px) {
+  .news-full-list .news-body img.news-photo {
+    float: none;
+    margin: var(--s-3) 0 0;
+    width: auto;
+    max-width: 100%;
+  }
+}
+/* Homepage news list (table rendered by _includes/news.html):
+   a `.news-photo` image floats LEFT at thumbnail size so the text wraps beside it. */
+.news table td img.news-photo {
+  float: left;
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  margin: 4px 14px 6px 0;
+  border-radius: var(--r-xs);
+  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--rule);
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* ensure the row clears the floated image so the next news item isn't pulled up */
+.news table td::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+/* Category chip — 4 semantic colors per kit */
+.news-tag {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  justify-self: start;
+  align-self: start;
+  line-height: 1.4;
+}
+
+.news-tag--paper {
+  color: var(--accent-deep);
+  background: var(--accent-wash);
+}
+
+.news-tag--writing {
+  color: var(--ink-ochre);
+  background: #F7EEDE;
+}
+
+.news-tag--talk {
+  color: var(--ink-blue);
+  background: #E6ECF8;
+}
+
+.news-tag--milestone {
+  color: var(--ink-wine);
+  background: #F7E5EB;
+}
+
+.news-tag--note {
+  color: var(--fg-3);
+  background: var(--bg-sunken);
+}
+
+html[data-theme=dark] .news-tag--paper {
+  color: var(--moss-600);
+  background: rgba(111, 179, 102, 0.15);
+}
+
+html[data-theme=dark] .news-tag--writing {
+  color: #E0B977;
+  background: rgba(224, 185, 119, 0.14);
+}
+
+html[data-theme=dark] .news-tag--talk {
+  color: #8AA6E4;
+  background: rgba(138, 166, 228, 0.14);
+}
+
+html[data-theme=dark] .news-tag--milestone {
+  color: #E08FA0;
+  background: rgba(224, 143, 160, 0.14);
+}
+
+html[data-theme=dark] .news-tag--note {
+  color: var(--fg-3);
+  background: var(--bg-raised);
+}
+
+@media (max-width: 900px) { /* pages.css:413 — design breakpoint */
+  .news-full-list > li {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+/* ============================================================================
+ * 10c. Venue-filter status banner (lives above the first year header on /publications/)
+ * ========================================================================== */
+.venue-filter-status {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  margin: var(--s-5) 0;
+  padding: var(--s-3) var(--s-4);
+  background: var(--accent-wash);
+  border: 1px solid transparent;
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-sm);
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  color: var(--fg);
+}
+
+html[data-theme=dark] .venue-filter-status {
+  background: rgba(111, 179, 102, 0.12);
+  border-left-color: var(--accent);
+  color: var(--fg);
+}
+
+.venue-filter-status[hidden] {
+  display: none !important;
+}
+
+.venue-filter-status__label strong {
+  font-weight: 600;
+  color: var(--accent-deep);
+}
+
+html[data-theme=dark] .venue-filter-status__label strong {
+  color: var(--moss-700);
+}
+
+.venue-filter-status__clear {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.venue-filter-status__clear:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+html[data-theme=dark] .venue-filter-status__clear:hover {
+  color: var(--paper);
+}
+
+/* ============================================================================
+ * 11. Publications (year groups, ruled rows)
+ * ========================================================================== */
+.publications h1.title {
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--s-6);
+}
+.publications {
+  /* Year header — num | hairline rule | count mono-meta (Publications.jsx:90-93) */
+}
+.publications h2.year,
+.publications h2.category {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin: var(--s-7) 0 var(--s-4);
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.publications h2.year .year-num,
+.publications h2.category .year-num {
+  flex: 0 0 auto;
+}
+.publications h2.year .year-rule,
+.publications h2.category .year-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  align-self: center;
+}
+.publications h2.year .year-count,
+.publications h2.category .year-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+.publications {
+  /* Fallback for legacy markup without the inner spans */
+}
+.publications h2.year:not(:has(.year-num))::after,
+.publications h2.category:not(:has(.year-num))::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  align-self: center;
+}
+.publications ol.bibliography,
+.publications ul.bibliography {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+.publications ol.bibliography > li,
+.publications ul.bibliography > li {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 0 !important;
+  display: block;
+}
+.publications ol.bibliography > li:last-child,
+.publications ul.bibliography > li:last-child {
+  border-bottom: none;
+}
+.publications .bibliography .abbr {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-family: var(--font-sans);
+  font-size: 10px; /* components-paper-card.html:34 */
+  font-weight: 500;
+  letter-spacing: 0.02em; /* kit.css:338 .chip */
+  text-transform: uppercase;
+  border-radius: var(--r-pill);
+  color: var(--accent-deep);
+  background: var(--accent-wash);
+  margin-right: var(--s-2);
+}
+.publications .bibliography .abbr abbr {
+  border: none !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  cursor: help;
+}
+
+html[data-theme=dark] .publications .bibliography .abbr {
+  color: var(--moss-700);
+  background: rgba(111, 179, 102, 0.15); /* kit.css:354 dark chip.is-accent */
+}
+
+.publications .bibliography .title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+  color: var(--fg);
+  display: block;
+  margin: 6px 0;
+}
+.publications .bibliography .author,
+.publications .bibliography .periodical {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: block;
+  margin: 2px 0;
+}
+.publications .bibliography .author em,
+.publications .bibliography .author .author-highlight,
+.publications .bibliography em[class*=author-highlight] {
+  color: var(--fg);
+  font-style: normal;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--moss-400);
+}
+.publications .bibliography .links {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+}
+.publications .bibliography .links a, .publications .bibliography .links .btn {
+  background: transparent !important;
+  border: 1px solid var(--rule-strong) !important;
+  color: var(--fg-2) !important;
+  padding: 4px 10px !important;
+  border-radius: var(--r-pill) !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  transition: all var(--t-fast);
+}
+.publications .bibliography .links a:hover, .publications .bibliography .links .btn:hover {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background: var(--accent-wash) !important;
+  text-decoration: none !important;
+}
+.publications .bibliography .links {
+  /* Copy-BibTeX pill — distinct icon + label, confirms on click */
+}
+.publications .bibliography .links .bibtex-copy {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+.publications .bibliography .links .bibtex-copy:hover {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}
+.publications .bibliography .links html[data-theme=dark] .bibtex-copy:hover {
+  color: var(--paper) !important;
+}
+.publications .bibliography .links .bibtex-copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.publications .bibliography .links .bibtex-copy .bibtex-copy-icon {
+  flex-shrink: 0;
+}
+.publications .bibliography .links .bibtex-copy.is-copied {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}
+.publications .bibliography .links html[data-theme=dark] .bibtex-copy.is-copied {
+  color: var(--paper) !important;
+}
+.publications .bibliography .links .bibtex-copy.is-failed {
+  background: var(--ink-wine) !important;
+  color: #fff !important;
+  border-color: var(--ink-wine) !important;
+}
+.publications .bibliography .links html[data-theme=dark] .bibtex-copy.is-failed {
+  color: var(--paper) !important;
+}
+.publications {
+  /* BibTeX source is kept in DOM (hidden) so JS can copy; never renders. */
+}
+.publications .bibtex-source {
+  display: none !important;
+}
+.publications .bibliography .selected,
+.publications .bibliography li.selected {
+  /* highlight rail for "selected" papers (ochre per kit) */
+  box-shadow: inset 2px 0 0 var(--ink-ochre);
+  padding-left: 14px !important;
+}
+.publications {
+  /* "★ Selected" label — kit.css:194-197 */
+}
+.publications .selected-mark {
+  display: inline-block;
+  margin-right: var(--s-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-ochre);
+}
+
+/* Pre-title meta row — inline row of venue-tag + ★ Selected sitting above the
+   paper title per kit Publications.jsx. `.venue-tag` below already styles the
+   chip; this wrapper just lays them out inline with right breathing. */
+.publications .pub-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-bottom: var(--s-2);
+}
+
+.publications .pub-meta-row .venue-tag {
+  margin-top: 0;
+} /* reset default */
+.publications .pub-meta-row .pub-meta-sep {
+  margin: 0 var(--s-2);
+  color: var(--fg-4);
+}
+
+.publications .pub-meta-row .pub-meta-venue {
+  text-transform: none;
+  white-space: normal;
+}
+
+.publications .pub-meta-row .selected-mark {
+  margin-right: 0;
+}
+
+/* Venue badges inside periodical line */
+.publications .bibliography .periodical em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--fg-2);
+}
+
+.publications .bibliography .periodical {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+  font-size: 0.95rem;
+}
+
+/* Venue tag (topic chip sitting beside entries) — filled pill with clear hover/active feedback */
+.publications .venue-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--s-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  cursor: pointer;
+  outline: none;
+}
+
+html[data-theme=dark] .publications .venue-tag {
+  color: var(--moss-700);
+}
+
+html[data-theme=dark] .publications .venue-tag a.venue-link,
+html[data-theme=dark] .publications .venue-tag .venue-name {
+  background: rgba(111, 179, 102, 0.15); /* kit.css:354 dark chip.is-accent */
+}
+
+.publications .venue-tag a.venue-link,
+.publications .venue-tag .venue-name {
+  color: inherit;
+  background: var(--accent-wash);
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  padding: 3px 11px;
+  text-decoration: none;
+  transition: background var(--t-fast), border-color var(--t-fast), transform 80ms var(--e-out), box-shadow var(--t-fast);
+  user-select: none;
+}
+
+/* hover — darker wash */
+.publications .venue-tag:hover a.venue-link,
+.publications .venue-tag:hover .venue-name {
+  background: var(--moss-100);
+  border-color: var(--accent);
+}
+
+html[data-theme=dark] .publications .venue-tag:hover a.venue-link,
+html[data-theme=dark] .publications .venue-tag:hover .venue-name {
+  background: rgba(111, 179, 102, 0.22);
+}
+
+/* pressed — scales slightly and inverts so the click is unmistakable */
+.publications .venue-tag:active a.venue-link,
+.publications .venue-tag:active .venue-name {
+  transform: scale(0.96);
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+html[data-theme=dark] .publications .venue-tag:active a.venue-link,
+html[data-theme=dark] .publications .venue-tag:active .venue-name {
+  color: var(--paper);
+}
+
+/* keyboard-focus ring */
+.publications .venue-tag:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.publications .venue-tag:focus-visible a.venue-link,
+.publications .venue-tag:focus-visible .venue-name {
+  box-shadow: 0 0 0 3px var(--accent-wash), 0 0 0 4px var(--accent);
+}
+
+/* active filter on Publications page — clearly "pressed" + tooltip-like hint via aria */
+.publications .venue-tag.active-filter a.venue-link,
+.publications .venue-tag.active-filter .venue-name {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-theme=dark] .publications .venue-tag.active-filter a.venue-link,
+html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
+  color: var(--paper);
+}
+
+.publications .venue-tag.active-filter::after {
+  content: " · click again to clear";
+  margin-left: var(--s-2);
+  color: var(--fg-3);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: var(--fs-xs);
+}
+
+/* Narrow screens: let long active-filter hint wrap instead of overflowing */
+@media (max-width: 575.98px) {
+  .publications .venue-tag.active-filter::after {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+  }
+  .venue-filter-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-2);
+  }
+}
+/* Preview thumbnail inside a bib entry */
+.publications .row {
+  margin: 0;
+}
+
+.publications .col-sm-2.preview img.preview {
+  border-radius: var(--r-sm) !important;
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-xs);
+  width: 100%;
+  height: auto;
+}
+
+/* Equal-contribution highlight uses <em>Xihuai Wang</em> in rendered author list */
+.publications .bibliography .author em {
+  color: var(--fg);
+  font-style: normal;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--moss-400);
+}
+
+/* ============================================================================
+ * 12. Selected papers (homepage) — ruled cards
+ * ========================================================================== */
+.about-selected-papers__intro, .about-selected-papers .about-selected-papers__intro,
+.selected-papers__intro,
+.selected-papers .about-selected-papers__intro {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+  font-size: 1rem;
+  max-width: var(--prose-max);
+  margin-bottom: var(--s-4);
+}
+.about-selected-papers__intro ol, .about-selected-papers__intro ul, .about-selected-papers .about-selected-papers__intro ol, .about-selected-papers .about-selected-papers__intro ul,
+.selected-papers__intro ol,
+.selected-papers__intro ul,
+.selected-papers .about-selected-papers__intro ol,
+.selected-papers .about-selected-papers__intro ul {
+  padding-left: 22px;
+  margin: 6px 0 0;
+}
+.about-selected-papers__intro li, .about-selected-papers .about-selected-papers__intro li,
+.selected-papers__intro li,
+.selected-papers .about-selected-papers__intro li {
+  margin: 2px 0;
+}
+
+/* ============================================================================
+ * 13. CV page — aligned to design kit Pages.jsx / pages.css `.uk-cv-*`
+ *    * inline Fraunces moss-underline section headings (no card shells)
+ *    * grid rows with dotted dividers (no timeline dots or vertical rail)
+ *    * entry title Fraunces, institution serif, year mono
+ * ========================================================================== */
+.cv {
+  font-family: var(--font-serif);
+}
+.cv h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  letter-spacing: -0.02em;
+}
+.cv {
+  /* Card shell dissolves — become transparent section blocks with space. */
+}
+.cv .card {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: var(--s-7) 0 var(--s-4) !important;
+}
+.cv .card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+.cv {
+  /* Section heading: inline Fraunces small caps with accent underline,
+     replacing both al-folio's `.card-title` and legacy left-bar decoration. */
+}
+.cv .card .card-title,
+.cv h2 {
+  font-family: var(--font-display) !important;
+  font-variation-settings: "opsz" 72;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.16em !important;
+  color: var(--accent-deep) !important;
+  padding: 0 0 10px !important; /* pages.css:16 */
+  border: none !important;
+  border-bottom: 2px solid var(--accent) !important;
+  display: inline-block !important;
+  width: fit-content !important; /* underline hugs text, not full row */
+  margin: 0 0 18px !important; /* pages.css */
+}
+.cv .card .card-title::before {
+  content: none !important;
+}
+.cv { /* kill legacy moss left bar */
+  /* Timeline rows — clean grid, dotted divider, no dot marker, no vertical rail. */
+}
+.cv .cv-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cv .cv-timeline .list-group-item {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px dotted var(--rule) !important;
+  padding: var(--s-4) 0 !important;
+}
+.cv .cv-timeline .list-group-item:last-child {
+  border-bottom: none !important;
+}
+.cv .cv-timeline .list-group-item:hover {
+  background: transparent !important;
+}
+.cv {
+  /* Fallback for non-timeline lists (Honors, Other interests, General Info):
+     `.cv .card { padding:0 }` removed their breathing room, so restore it
+     directly on the list items. */
+}
+.cv .card .list-group-item {
+  background: transparent !important;
+  border: none !important;
+  padding: var(--s-3) 0 !important; /* 12px — more breath than s-2 */
+  font-family: var(--font-serif);
+  color: var(--fg);
+}
+.cv .card .list-group-item + .list-group-item {
+  border-top: 1px dotted var(--rule) !important;
+}
+.cv .card .list-group-item h5.font-italic {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 72;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: -0.005em;
+  color: var(--fg);
+  margin: 0 0 var(--s-1);
+}
+.cv .card .list-group-item .subitems {
+  padding-left: var(--s-5);
+  margin: var(--s-1) 0 0;
+}
+.cv .card .list-group-item .subitem {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--fg-2);
+}
+.cv .card .list-group-item .nested-content {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+}
+.cv .cv-entry {
+  display: grid !important;
+  grid-template-columns: 160px 1fr !important;
+  gap: 24px !important; /* pages.css:47 single-value gap */
+  align-items: baseline !important;
+}
+.cv .cv-entry-marker {
+  display: none !important;
+}
+.cv { /* kill dot + vertical line */ }
+.cv .cv-entry-marker::before, .cv .cv-entry-marker::after {
+  content: none !important;
+}
+.cv .cv-entry-year {
+  min-width: 0;
+}
+.cv .cv-year-badge {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+}
+.cv .cv-entry-body {
+  min-width: 0;
+}
+.cv .cv-entry-body h6.title,
+.cv .cv-entry-body .title {
+  font-family: var(--font-display) !important;
+  font-variation-settings: "opsz" 72;
+  font-weight: 600 !important;
+  font-size: 1.125rem !important; /* 18px — pages.css .uk-tl-title */
+  letter-spacing: -0.005em;
+  color: var(--fg) !important;
+  text-transform: none !important;
+  margin: 0 0 2px !important;
+}
+.cv .cv-entry-body h6:not(.title) {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 15px; /* pages.css:71 — explicit */
+  line-height: 1.45; /* pages.css:72 */
+  color: var(--fg-2);
+  letter-spacing: 0;
+  text-transform: none;
+  margin: 0;
+}
+.cv {
+  /* General Information table — serif, no inner borders */
+}
+.cv .table {
+  margin: 0;
+}
+.cv .table tr td {
+  padding: var(--s-2) 0 !important;
+  border: none !important;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+.cv .table tr td:first-child {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-3);
+  width: 160px;
+}
+.cv {
+  /* Narrow: stack year above entry body — pages.css:413-418 uses 900 */
+}
+@media (max-width: 900px) {
+  .cv .cv-entry {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+  .cv .table tr td:first-child {
+    width: 120px;
+  }
+}
+@media (max-width: 575.98px) {
+  .cv .table tr td:first-child {
+    width: auto;
+  }
+}
+.cv {
+  /* Page header rule — pages.css:175-177 `.uk-page-head` */
+}
+.cv .post-header {
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--s-6);
+}
+
+html[data-theme=dark] .cv .card .card-title,
+html[data-theme=dark] .cv h2 {
+  color: var(--moss-600) !important;
+}
+
+/* ============================================================================
+ * 14. Blog index / post list
+ * ========================================================================== */
+/* ---- Blog hero / generic page hero ---- */
+.blog-index {
+  max-width: var(--page-max);
+  margin: 0 auto;
+}
+
+.blog-index .post-header {
+  padding: 56px 0 var(--s-5);
+  margin-bottom: var(--s-6);
+  border-bottom: 1px solid var(--rule);
+}
+
+.blog-index .post-header .eyebrow {
+  margin-bottom: var(--s-3);
+}
+
+.blog-index .post-header .post-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 500;
+  margin: 0 0 var(--s-4);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+
+/* Dropcap emphasis — used on any page via `display_title` HTML wrapping one
+   letter in this span, or inline in blog.md directly. */
+.blog-title__dropcap {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+  font-size: 1.4em;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+  margin: 0 0.04em 0 0.02em;
+  vertical-align: -0.02em;
+}
+
+.blog-index .post-header .lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-body);
+  color: var(--fg-2);
+  margin: 0;
+  max-width: 62ch;
+}
+
+/* ---- Pill filter + inline views toggle ---- */
+.blog-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-6);
+}
+
+.blog-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+}
+
+.blog-pill:hover {
+  color: var(--accent-deep);
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.blog-pill:focus-visible {
+  color: var(--accent-deep);
+  background: var(--accent-wash);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.blog-pill.is-active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.blog-pill.is-active .blog-pill__count {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.blog-pill__count {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--fg-3);
+  text-transform: none;
+}
+
+.blog-controls__spacer {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.blog-views-toggle {
+  color: var(--fg-3);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.02em;
+}
+
+.blog-views-toggle .uv-toggle {
+  color: var(--fg-3);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.blog-views-toggle .uv-toggle.is-active,
+.blog-views-toggle .uv-toggle:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ---- Post row (2-col: 150px date | 1fr body) ---- */
+.post-rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.post-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: var(--s-5);
+  padding: var(--s-5) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.post-row:last-child {
+  border-bottom: none;
+}
+
+.post-row__date {
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  padding-top: 0.3em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.post-row__title {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 500;
+  line-height: var(--lh-snug);
+  letter-spacing: -0.01em;
+}
+
+.post-row__title a {
+  color: var(--fg);
+  text-decoration: none;
+  transition: color var(--t-fast);
+}
+
+.post-row__title a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.post-row__external {
+  font-size: 0.75em;
+  color: var(--fg-3);
+  vertical-align: 0.3em;
+}
+
+.post-row__desc {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  margin: 0 0 var(--s-3);
+  max-width: 74ch;
+}
+
+.post-row__meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.post-row__meta a {
+  color: var(--fg-3);
+}
+
+.post-row__meta a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.post-row__sep {
+  color: var(--fg-4);
+}
+
+.post-row__cat {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.post-row__lang {
+  color: var(--accent);
+}
+
+/* Per-row EN/中 tab bar for bilingual posts. Text toggles inline without
+   navigating; clicking the title still opens the respective post page. */
+.post-row__langbar {
+  display: inline-flex;
+  gap: 2px;
+  margin-bottom: var(--s-2);
+  padding: 2px;
+  background: var(--bg-sunken);
+  border-radius: var(--r-pill);
+}
+
+.post-row__langtab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 3px 12px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  cursor: pointer;
+  transition: color var(--t-fast), background var(--t-fast);
+}
+
+.post-row__langtab:hover {
+  color: var(--accent-deep);
+}
+
+.post-row__langtab:focus-visible {
+  color: var(--accent-deep);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.post-row__langtab.is-active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.post-row__lang-pane[hidden] {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .post-row {
+    grid-template-columns: 1fr;
+    gap: var(--s-2);
+  }
+  .post-row__date {
+    padding-top: 0;
+  }
+  .blog-controls__spacer {
+    flex-basis: 100%;
+  }
+  .blog-views-toggle {
+    margin-top: var(--s-2);
+  }
+}
+/* ---- Legacy .post-list kept for any remaining consumers ---- */
+.post-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.post-list > li {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--rule);
+  display: block;
+}
+
+.post-list > li:last-child {
+  border-bottom: none;
+}
+
+.post-list > li h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin: 0 0 6px;
+}
+
+.post-list > li h3 a,
+.post-list > li .post-title {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.post-list > li h3 a:hover,
+.post-list > li .post-title:hover {
+  color: var(--accent);
+}
+
+.post-list > li > p {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--fg-2);
+  margin: 6px 0 8px;
+  line-height: 1.55;
+  max-width: 70ch;
+}
+
+.post-list > li .post-meta,
+.post-list > li .post-tags {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+  margin: 0 0 4px;
+}
+
+.post-list > li .post-tags a {
+  color: var(--fg-3);
+}
+
+.post-list > li .post-tags a:hover {
+  color: var(--accent);
+}
+
+/* ============================================================================
+ * 15. Blog post (single) — prose
+ * ========================================================================== */
+.post:has(.post-content) .post-header {
+  margin-bottom: var(--s-6);
+  padding-bottom: var(--s-5) !important;
+  border-bottom: 1px solid var(--rule) !important;
+}
+.post:has(.post-content) .post-header .post-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--fs-4xl);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  color: var(--fg);
+}
+.post:has(.post-content) .post-header .post-description {
+  font-family: var(--font-serif);
+  color: var(--fg-2);
+  font-size: var(--fs-lg);
+  max-width: 62ch;
+}
+.post:has(.post-content) .post-header .post-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-3);
+  letter-spacing: 0.04em;
+}
+.post:has(.post-content) .post-content,
+.post:has(.post-content) article .post-content {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.72;
+  color: var(--fg);
+  /* Responsive prose width — grows with viewport so wide desktops aren't
+     cramped into a 68ch ribbon. Floor keeps line length readable on tablet. */
+  max-width: var(--post-prose-max, 68ch);
+  margin-right: auto; /* left-align the article inside its col */
+}
+.post:has(.post-content) .post-content h2,
+.post:has(.post-content) article .post-content h2 {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: var(--s-7);
+}
+.post:has(.post-content) .post-content h3,
+.post:has(.post-content) article .post-content h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+.post:has(.post-content) .post-content blockquote,
+.post:has(.post-content) article .post-content blockquote {
+  margin: var(--s-5) 0;
+  padding: var(--s-3) 0 var(--s-3) var(--s-5);
+  border-left: 2px solid var(--accent);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-lg);
+  color: var(--fg-2);
+  font-variation-settings: "opsz" 48;
+}
+.post:has(.post-content) .post-content pre,
+.post:has(.post-content) article .post-content pre {
+  background: var(--bg-sunken);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+}
+
+/* ============================================================================
+ * 15b. Projects page (hidden for now; layout ready per design kit Pages.jsx)
+ * ========================================================================== */
+.projects-page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+}
+
+.projects-grid {
+  list-style: none;
+  padding: 0;
+  margin: var(--s-6) 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-5);
+}
+
+.project-card {
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+}
+
+.project-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  letter-spacing: 0.02em;
+}
+
+.project-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.project-lang-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-3);
+  display: inline-block;
+}
+
+.project-lang-dot--python {
+  background: #3572A5;
+}
+
+.project-lang-dot--typescript {
+  background: #3178C6;
+}
+
+.project-lang-dot--javascript {
+  background: #F1E05A;
+}
+
+.project-lang-dot--rust {
+  background: #DEA584;
+}
+
+.project-lang-dot--cpp {
+  background: #F34B7D;
+}
+
+.project-lang-dot--go {
+  background: #00ADD8;
+}
+
+.project-stars {
+  color: var(--fg-3);
+}
+
+.project-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--s-2);
+  line-height: 1.25;
+}
+
+.project-title a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.project-title a:hover {
+  color: var(--accent);
+}
+
+.project-blurb {
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--fg-2);
+  line-height: 1.55;
+  margin: 0 0 var(--s-3);
+  flex: 1;
+}
+
+.project-repo {
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-3);
+  border-bottom: 1px dotted var(--rule);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+}
+
+.project-repo::before {
+  content: "↗ ";
+  color: var(--accent);
+}
+
+.project-repo a {
+  color: inherit;
+}
+
+.project-repo a:hover {
+  color: var(--accent);
+}
+
+.project-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ============================================================================
+ * 15c. "Cite this post" footer — BlogPost.jsx:63-71 `.uk-post-footer`
+ * ========================================================================== */
+.post-cite {
+  margin-top: var(--s-7);
+  padding: var(--s-5) 0 0;
+  border-top: 1px solid var(--rule);
+  /* 100% lets it fill the parent .post-content — using 96ch here would compute
+     against the cite's mono font ('0' narrower than serif) and shrink the block. */
+  max-width: 100%;
+}
+
+.post-cite__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: var(--s-2);
+}
+
+.post-cite .eyebrow {
+  display: inline-block;
+  margin: 0;
+}
+
+.post-cite__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+}
+
+.post-cite__copy:hover {
+  color: var(--accent-deep);
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.post-cite__copy:focus-visible {
+  color: var(--accent-deep);
+  border-color: var(--accent);
+  background: var(--accent-wash);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.post-cite__copy.is-copied {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.post-cite__bib {
+  background: var(--accent-wash); /* moss-tinted panel so it reads "colored", not grey */
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--fg-2);
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+}
+
+.post-cite__bib code {
+  background: transparent;
+  padding: 0;
+  color: var(--fg);
+  font-size: inherit;
+}
+
+/* Light syntax highlighting — @misc / cite-key / field-name / value ink colors.
+   Spans are emitted by _layouts/post.html around the captured BibTeX entry. */
+.post-cite__bib .bib-type {
+  color: var(--ink-wine);
+  font-weight: 600;
+}
+
+.post-cite__bib .bib-key {
+  color: var(--ink-ochre);
+}
+
+.post-cite__bib .bib-field {
+  color: var(--ink-blue);
+}
+
+.post-cite__bib .bib-value {
+  color: var(--fg);
+}
+
+html[data-theme=dark] .post-cite__bib .bib-type {
+  color: #E6A8B6;
+}
+
+html[data-theme=dark] .post-cite__bib .bib-key {
+  color: #E6C391;
+}
+
+html[data-theme=dark] .post-cite__bib .bib-field {
+  color: #9BB8E6;
+}
+
+/* ============================================================================
+ * 15d. Blog post responsive width — let prose grow with viewport rather than
+ *      cram every desktop into a 68ch ribbon. Floor keeps line length readable
+ *      on tablet; ceilings stop at comfortable reading width on large screens.
+ * ========================================================================== */
+:root {
+  --post-prose-max: 68ch;
+}
+
+@media (min-width: 992px) {
+  :root {
+    --post-prose-max: 80ch;
+  }
+}
+@media (min-width: 1200px) {
+  :root {
+    --post-prose-max: 88ch;
+  }
+}
+@media (min-width: 1440px) {
+  :root {
+    --post-prose-max: 96ch;
+  }
+}
+/* Narrow the outer .container for post pages so prose + TOC sit close together
+   instead of opening a 240px gap between them. Tiered to viewport so the TOC
+   never crowds prose on narrow screens or drifts far away on wide ones. */
+.post.toc-layout {
+  max-width: none;
+}
+
+body:has(.post.toc-layout) > .container.mt-5 {
+  max-width: min(960px, 100% - 2 * var(--gutter));
+}
+
+@media (min-width: 1200px) {
+  body:has(.post.toc-layout) > .container.mt-5 {
+    max-width: min(1120px, 100% - 2 * var(--gutter));
+  }
+}
+@media (min-width: 1440px) {
+  body:has(.post.toc-layout) > .container.mt-5 {
+    max-width: min(1200px, 100% - 2 * var(--gutter));
+  }
+}
+/* Content column shrinks to prose + breathing so TOC sits immediately to its
+   right instead of floating behind a wide internal margin. TOC col grows to
+   fill remaining container width; the sticky sidebar inside stays at 260px. */
+@media (min-width: 992px) {
+  .post.toc-layout:not(.post--sidenotes) > .row > .toc-content {
+    flex: 0 1 auto;
+    max-width: calc(80ch + 70px);
+  }
+  .post.toc-layout:not(.post--sidenotes) > .row > .toc-sidebar-col {
+    flex: 1 1 0;
+    max-width: none;
+  }
+  .post.toc-layout:not(.post--sidenotes) .toc-sidebar {
+    max-width: 260px;
+    margin-left: auto; /* right-align within its col so TOC hugs the same
+   right edge as the language-switch / post-header */
+  }
+}
+@media (min-width: 1200px) {
+  .post.toc-layout:not(.post--sidenotes) > .row > .toc-content {
+    max-width: calc(88ch + 70px);
+  }
+}
+@media (min-width: 1440px) {
+  .post.toc-layout:not(.post--sidenotes) > .row > .toc-content {
+    max-width: calc(96ch + 70px);
+  }
+}
+/* ============================================================================
+ * 16. Footer
+ * ========================================================================== */
+footer.fixed-bottom,
+footer.sticky-bottom,
+footer {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--fg-3);
+  background: var(--paper) !important;
+  border-top: 1px solid var(--rule);
+}
+footer.fixed-bottom a,
+footer.sticky-bottom a,
+footer a {
+  color: var(--accent) !important;
+}
+footer.fixed-bottom a:hover,
+footer.sticky-bottom a:hover,
+footer a:hover {
+  color: var(--accent-hover) !important;
+}
+
+/* flex split: left copyright, right mono-meta last-updated — kit.css:167-171 */
+.uk-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.uk-footer-updated {
+  color: var(--fg-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+  .uk-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-2);
+  }
+}
+/* ============================================================================
+ * 17. Horizontal rule / dividers
+ * ========================================================================== */
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--s-6) 0;
+}
+
+/* ============================================================================
+ * 18. Responsive
+ * ========================================================================== */
+@media (max-width: 768px) {
+  .post-header.hero {
+    padding: 32px 0 24px;
+  }
+  .signature-name {
+    font-size: clamp(2rem, 8vw, 3rem) !important;
+  }
+}
+:root {
+  --max-content-width: 1120px;
+}
+
+/* cache bust */
 
 /*# sourceMappingURL=main.css.map */

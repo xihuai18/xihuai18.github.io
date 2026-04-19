@@ -1,6 +1,23 @@
 // Venue filter functionality for publications
 let currentVenueFilter = null;
 
+// Public: clear the active filter (used by the "All papers" topic chip).
+// If no filter is active, this is a no-op.
+function clearVenueFilter() {
+  if (currentVenueFilter) filterByVenue(currentVenueFilter);
+}
+
+// Update topic pill active state to mirror the venue-tag state. Kept separate
+// from filterByVenue's venue-tag loop so chip-bar styling stays self-contained.
+function syncTopicPills(activeAbbr) {
+  document.querySelectorAll('.pub-topic-pill').forEach(pill => {
+    const v = pill.getAttribute('data-topic-filter') || '';
+    const isAll = v === '';
+    const isActive = isAll ? !activeAbbr : (v === activeAbbr);
+    pill.classList.toggle('is-active', isActive);
+  });
+}
+
 function filterByVenue(venue) {
   // Check if we're on the about page - if so, redirect to publications page with filter
   const isAboutPage = document.querySelector('.post') !== null && document.querySelector('.publications') === null;
@@ -48,10 +65,13 @@ function filterByVenue(venue) {
     
     // Hide filter status
     updateFilterStatus(null, 0, publications.length);
-    
+
+    // Sync topic-pill chip bar
+    syncTopicPills(null);
+
     // Update URL
     updateURL(null);
-    
+
     return;
   }
   
@@ -95,14 +115,18 @@ function filterByVenue(venue) {
   
   // Show filter status
   updateFilterStatus(venue, visibleCount, publications.length);
-  
+
+  // Sync topic-pill chip bar
+  syncTopicPills(venue);
+
   // Update URL
   updateURL(venue);
   
-  // Scroll to top of publications section
+  // Scroll to top of publications section — respect reduced-motion preference.
   const pubSection = document.querySelector('.publications');
   if (pubSection) {
-    pubSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    pubSection.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
   }
 }
 
@@ -206,20 +230,12 @@ function updateFilterStatus(venue, visibleCount, totalCount) {
   let statusElement = document.getElementById('venue-filter-status');
   
   if (!statusElement) {
-    // Create status element
     statusElement = document.createElement('div');
     statusElement.id = 'venue-filter-status';
-    statusElement.style.cssText = `
-      display: none;
-      margin: 1rem 0;
-      padding: 0.5rem 1rem;
-      background-color: var(--global-code-bg-color);
-      border-left: 3px solid var(--global-theme-color);
-      border-radius: 0 4px 4px 0;
-      font-size: 0.875rem;
-      color: var(--global-text-color);
-    `;
-    
+    statusElement.className = 'venue-filter-status';
+    statusElement.setAttribute('role', 'status');
+    statusElement.setAttribute('aria-live', 'polite');
+
     const pubSection = document.querySelector('.publications, .post');
     if (pubSection) {
       const firstH2 = pubSection.querySelector('h2.year, h2');
@@ -230,24 +246,17 @@ function updateFilterStatus(venue, visibleCount, totalCount) {
       }
     }
   }
-  
+
   if (venue) {
-    statusElement.style.display = 'block';
-    statusElement.innerHTML = `
-      Filtering by <strong>${venue}</strong>: showing ${visibleCount} of ${totalCount} publications
-      <button onclick="filterByVenue('${venue}')" style="
-        margin-left: 1rem;
-        padding: 0.2rem 0.5rem;
-        background: var(--global-theme-color);
-        color: white;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 0.75rem;
-      ">Clear Filter</button>
-    `;
+    statusElement.hidden = false;
+    statusElement.innerHTML =
+      '<span class="venue-filter-status__label">Filtering by ' +
+      '<strong>' + venue + '</strong> — showing ' + visibleCount + ' of ' + totalCount + ' papers</span>' +
+      '<button type="button" class="venue-filter-status__clear" aria-label="Clear filter">Clear ×</button>';
+    const clearBtn = statusElement.querySelector('.venue-filter-status__clear');
+    if (clearBtn) clearBtn.addEventListener('click', function () { filterByVenue(venue); });
   } else {
-    statusElement.style.display = 'none';
+    statusElement.hidden = true;
   }
 }
 
