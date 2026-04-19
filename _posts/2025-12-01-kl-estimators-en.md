@@ -72,6 +72,24 @@ Unlike classic notes that mainly discuss KL approximation as a value-estimation 
 > - If KL is used as stop-gradient reward shaping: for the policy-gradient term itself, only $k_1$ stays aligned with reverse-KL regularization.
 > - In the other common configurations, the issue is often not a slightly worse value estimate, but that the gradient is optimizing a different objective.
 
+### 1.3 First Fix the Problem With Three Questions
+
+To make the post easier to read, start with three questions before looking at any derivation:
+
+| Question | If the answer is… | What can go wrong? |
+| --- | --- | --- |
+| Does KL backpropagate directly? | Directly: KL is a loss; not directly: KL is reward shaping or a metric | The same $k_i$ has different gradient semantics in loss and reward form |
+| Where do samples come from? | From $q_\theta$ means on-policy; from $\mu$ means off-policy | Off-policy requires separating the target distribution from the sampling distribution |
+| Which direction is being regularized? | Reverse KL, forward KL, or a local surrogate | The KL value being estimated need not match the gradient direction of the loss |
+
+These three questions determine all recommendations below. The main mental model is:
+
+$$
+\text{KL value estimator} \neq \text{KL optimization objective} \neq \text{gradient actually returned by code}.
+$$
+
+The rest of the post repeatedly checks whether these three objects coincide.
+
 ## 2. Cheat Sheet (Skim-and-Go)
 
 The three tables below condense the entire operational guidance of the post. A minimal notation primer is given first so you can read them, pick the recommended writing for your setting, and dive back into the derivations later.
@@ -110,9 +128,9 @@ The three tables below condense the entire operational guidance of the post. A m
 | :-------: | :-----------------------------------------------: | :------------------------------------------------------------------------------------------------------------: | :--: |
 |   $k_1$   | Value unbiased, **policy-gradient term unbiased** |                                                Higher variance                                                 |  ✓✓  |
 |   $k_2$   |                   Value biased                    |                                          Policy-gradient term biased                                           |  ✗✗  |
-|   $k_3$   |           Value unbiased, low variance            | **Policy-gradient term biased**, bias term is $-\nabla D_{\mathrm{KL}}(p\|q)$, may cause **training collapse** |  ✗✗  |
+|   $k_3$   |           Value unbiased, low variance            | **Policy-gradient term biased**, bias term is $-\nabla D_{\mathrm{KL}}(p\|q)$, adds non-target gradient terms |  ✗✗  |
 
-> **Note**: For the stop-gradient reward-shaping setup analyzed here, **only $k_1$ keeps the policy-gradient term aligned with reverse-KL regularization**. Both $k_2$ and $k_3$ introduce bias in that term; $k_3$ is especially treacherous because it looks attractive at the value-estimation level yet can still destabilize training.
+> **Note**: For the stop-gradient reward-shaping setup analyzed here, **only $k_1$ keeps the policy-gradient term aligned with reverse-KL regularization**. Both $k_2$ and $k_3$ introduce bias in that term; even though $k_3$ is value-unbiased with low variance, it theoretically already deviates from the target gradient.
 
 **Legend**: ✓✓ strongly recommended; ✓ recommended (slightly more complex or minor drawback); △ usable with caution; ✗✗ does not match the objective discussed here.
 
@@ -122,7 +140,7 @@ For derivations, variance analysis, and common pitfalls, keep reading.
 
 Before getting into the analysis, let’s fix the notation and write down two basic results that will be used throughout.
 
-### 3.1 Notation, Sampling Distribution, and True Gradients
+### 3.1 Notation, Sampling Distribution, and the True Gradient of the Objective
 
 **Notation:**
 
@@ -304,6 +322,16 @@ The design logic is easiest to see side by side:
 |   $k_2$   | $\frac{1}{2}\left(\log \frac{p}{q_\theta}\right)^2$ |   Local second-order KL surrogate    |
 |   $k_3$   | $\frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$  | Control variate + Bregman divergence |
 
+Before discussing bias, variance, and gradients, separate three ways in which the same $k_i$ may be used:
+
+| Usage semantics | Question being asked | Typical mistake |
+| --- | --- | --- |
+| KL value metric | Is the expectation the target KL? Is the variance low? | Seeing good value-estimation behavior for $k_3$ and using it everywhere |
+| Differentiable KL loss | Is the backpropagated gradient the gradient of the intended regularizer? | Dropping score-function paths or importance ratios |
+| KL reward shaping | Does the KL sample affect the update only through the policy-gradient term? | Reading a detached reward estimator as if it were a differentiable loss |
+
+When the post says a configuration is “correct” or “incorrect,” it is about the gradient induced under that usage, not merely about whether the scalar sample can estimate a KL value.
+
 ## 5. Value Estimation: Bias and Variance
 
 Assume we sample from $q_\theta$ to estimate reverse KL $D_{\mathrm{KL}}(q_\theta \| p)$:
@@ -324,7 +352,7 @@ For reverse KL **values**, $k_1$ and $k_3$ are unbiased estimators, while $k_2$ 
 
 ### 5.2 Variance Characteristics
 
-John Schulman's experiments ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005) show:
+John Schulman's numerical examples ($q = \mathcal{N}(0,1)$, $p = \mathcal{N}(0.1,1)$, true KL = 0.005) show:
 
 | Estimator | bias/true | stdev/true |
 | :-------: | :-------: | :--------: |
@@ -396,7 +424,7 @@ In many implementations, these two forms differ by just a `.detach()`. But optim
 
 ## 7. Gradient Analysis for Differentiable KL Losses
 
-When KL serves as a differentiable loss term, the key question is which objective each estimator actually optimizes through its gradient. This is subtle but central in practice.
+When KL serves as a differentiable loss term, the key question is which objective each estimator actually optimizes through its gradient. This is subtle but central to the theory.
 
 We will keep using the same unified framework, so on-policy and off-policy can be handled in one derivation. Recall the ratio
 
@@ -473,7 +501,7 @@ The gradients of the three estimators are:
 
 These basic gradients will be used repeatedly in the unified framework analysis that follows.
 
-#### “Expect-then-Differentiate” vs. “Differentiate-then-Expect”
+#### “The Gradient of the Mathematical Objective” vs. “The Gradient Returned by Code”
 
 When analyzing estimator gradients, there is a common pitfall: **“expect-then-differentiate” and “differentiate-then-expect” need not agree**.
 
@@ -682,7 +710,7 @@ $\text{sg}(\rho) k_2$ and $\rho k_3$ give the same gradient random variable. By 
 
 When $\mu$ differs greatly from $q_\theta$ — for example, when $\mu$ has almost no samples in high-density regions of $q_\theta$, or when $\rho = q_\theta / \mu$ explodes in the tails — any $\rho$-based method will suffer from severe variance issues. In such cases, the advantage of $\rho k_3$ (or $\text{sg}(\rho) k_2$) over $\rho k_1$ is no longer theoretically guaranteed, and strategies like clipping and regularization must be combined.
 
-However, in RL practice we typically control KL constraints and limit the degree of off-policy sampling (e.g., using a nearby policy $\mu = q_{\theta_\text{old}}$). In this common regime, we can say with confidence:
+In the local-policy-update theory usually assumed here, we control the KL constraint and limit the degree of off-policy sampling (e.g., using a nearby policy $\mu = q_{\theta_\text{old}}$). In this local regime, we can say with confidence:
 
 > **If you've decided to use importance sampling to optimize reverse KL, we recommend using $\rho k_3$ or $\text{sg}(\rho) k_2$ (both have equivalent gradients and low variance); in comparison, $\rho k_1$ has higher variance.**
 
@@ -815,14 +843,7 @@ $$
 
 **When $k_3$ is used in reward shaping, the gradient is biased**, with the bias term equal to the negative of the forward KL gradient.
 
-More precisely, using $k_3$ inside reward shaping mixes an extra bias term related to the forward-KL gradient into the reverse-KL update. So the resulting update no longer corresponds to pure reverse-KL regularization, which helps explain why it can become unstable.
-
-**Empirical evidence**: Shah et al. (2025) report that in on-policy RL fine-tuning of LLMs:
-
-- **$k_1$ in reward**: Training is stable
-- **$k_3$ in reward**: **Training becomes unstable and can collapse**
-
-This is consistent with the theoretical analysis above.
+More precisely, using $k_3$ inside reward shaping mixes an extra bias term related to the forward-KL gradient into the reverse-KL update. The resulting update therefore no longer corresponds to pure reverse-KL regularization. This conclusion follows from the gradient decomposition itself and does not depend on any particular experiment.
 
 #### Using $k_2$ as Penalty: Also Biased
 
@@ -866,9 +887,9 @@ One point is worth making explicit here: in the token/sample-level off-policy po
 | :-------: | :-------------: | :-----------------------------------------------------------: | :----------------: |
 |   $k_1$   |        ✓        |                               ✓                               |       Stable       |
 |   $k_2$   |        ✗        |                               ✗                               |    Not advised     |
-|   $k_3$   |        ✓        |                               ✗                               |    Can collapse    |
+|   $k_3$   |        ✓        |                               ✗                               |    Notably unstable    |
 
-Stepping back, value unbiasedness and gradient correctness are two separate axes. For the stop-gradient reward-shaping setup discussed here, **only $k_1$ gives the correct policy-gradient term for reverse-KL regularization**. Even though $k_3$ is value-unbiased and often lower variance, using it in reward shaping introduces a biased update and can destabilize training.
+Stepping back, value unbiasedness and gradient correctness are two separate axes. For the stop-gradient reward-shaping setup discussed here, **only $k_1$ gives the correct policy-gradient term for reverse-KL regularization**. Even though $k_3$ is value-unbiased and often lower variance, using it in reward shaping introduces a biased update and is indeed more prone to instability in practice.
 
 > **Scope reminder**: once you add a learned critic, GAE, baseline normalization, and other implementation details, additional bias sources appear. The conclusion here is intentionally about the policy-gradient term itself.
 
@@ -998,7 +1019,7 @@ This remains an **unbiased gradient**, while enjoying variance reduction from ce
 
 Based on the above conclusions about "value unbiasedness vs. gradient correctness" and "differences between Loss and Reward implementations", we now proceed to the quick reference guide and common pitfalls that can be directly applied to code.
 
-## 9. Practical Guide and Common Pitfalls
+## 9. Theoretical Selection Guide and Common Pitfalls
 
 ### 9.1 Quick Reference for the Three Estimator Definitions
 
@@ -1019,7 +1040,7 @@ $$
 1. **Using $k_1 = \log \frac{q_\theta}{p}$ directly as a loss term (on-policy)**: Gradient expectation is zero, completely ineffective.
 2. **Using $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ as a loss term to optimize reverse KL (on-policy)**: Its gradient corresponds to forward KL $D_{\mathrm{KL}}(p \| q_\theta)$, i.e. the wrong direction.
 3. **Using $\frac{q_\theta}{\mu} k_2$ (importance weight not detached) off-policy**: Gradient corresponds to a local second-order surrogate, not reverse KL.
-4. **Using $k_3$ inside reward shaping**: Although it is value-unbiased, it induces a biased policy-gradient update and may lead to training collapse.
+4. **Using $k_3$ inside reward shaping**: Although it is value-unbiased, it induces a biased policy-gradient update and introduces extra gradient terms outside the intended reverse-KL update.
 5. **Simply setting $\rho$ to constant 1 in on-policy**: Must explicitly construct $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$ (or equivalently $\exp(\log q_\theta - \text{sg}(\log q_\theta))$), otherwise the score-function gradient path is lost, causing $\rho k_1$ and $\rho k_3$ to degenerate to naive forms and fail.
 6. **Confusing "value unbiasedness" with "gradient correctness"**: $k_3$ is value-unbiased for reverse KL, but when used in reward shaping, the induced policy gradient is biased; both dimensions matter.
 

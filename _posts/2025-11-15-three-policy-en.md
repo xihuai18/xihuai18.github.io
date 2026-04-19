@@ -31,11 +31,20 @@ Throughout the note I’ll use:
 
 - **Behavior policy** $\mu$: the policy that _actually_ generates rollouts, i.e., “under which distribution your data are sampled.” In modern LLM RL systems this typically corresponds to the implementation inside the inference engine (vLLM, SGLang, etc.), and under asynchronous frameworks it is often a **mixture distribution over multiple worker policies**.
 
-- **Reference policy** $\pi_{\theta_{\text{old}}}$: the policy used in the training objective for importance sampling, clipping, or KL constraints — typically the “old policy” in PPO / GRPO.
+- **Proximal / reference policy** $\pi_{\theta_{\text{old}}}$: the policy used in the training objective for importance sampling, clipping, or trust-region constraints — typically the “old policy” in PPO / GRPO. To avoid overloading “reference,” I use $\pi_{\mathrm{ref}}$ separately whenever I mean a fixed SFT / KL reference model.
 
 - **Target policy** $\pi_\theta$: the policy we optimize in the training objective, i.e., “what we want the model to become” — typically the “new policy” in PPO / GRPO.
 
-In the classical idealized setup, we usually **implicitly assume** $\mu = \pi_{\theta_{\text{old}}}$. In real systems, however, asynchronous updates, different inference / training backends, MoE routing fluctuations, and even hardware-level numerical differences cause these two policies to deviate to varying degrees.
+A useful way to keep the objects apart is the following coordinate chart:
+
+| Theoretical object | Role in the analysis | Common engineering quantity |
+| --- | --- | --- |
+| $\mu$ | true sampling distribution | behavior log-prob, policy version, sampling config, routing trace |
+| $\pi_{\theta_{\text{old}}}$ | proximal anchor and ratio denominator | old log-prob, clip anchor, proximal checkpoint |
+| $\pi_\theta$ | target policy being optimized | new log-prob, current actor, current router |
+| $\pi_{\mathrm{ref}}$ | fixed KL reference model, if present | ref log-prob, SFT/reference checkpoint |
+
+In the classical idealized setup, we usually **implicitly assume** $\mu = \pi_{\theta_{\text{old}}}$. In real systems, however, asynchronous updates, different inference / training backends, MoE routing fluctuations, and even hardware-level numerical differences cause these two policies to deviate to varying degrees. The goal of this coordinate system is to separate who generated the data, who anchors the proximal update, and who is being optimized.
 
 ## 2. Related Work
 
@@ -368,7 +377,42 @@ This yields a very direct **three-policy TRPO lower bound**:
 
 The point of Theorem 2 is simple: the gap between $L_\mu(\pi_\theta)$ and $\mathcal{J}(\pi_\theta)$ is not exactly decomposed into two terms, but it is controlled by a conservative upper bound involving both $\alpha_0$ and $\alpha_1$. To get improvement you still need $L_\mu(\pi_\theta)$ itself to be large enough. Numerically this bound is often loose in LLM settings, so I read it mainly as a structural tool rather than a performance certificate.
 
-### 3.4 How to Control These Two Deviation Sources?
+### 3.4 Finite-Sequence Form for LLMs: Why Long Responses Amplify Three-Policy Mismatch
+
+The derivation above uses discounted-MDP notation to stay close to TRPO. In the more common prompt-response view of LLM RL, let the prompt be $x$ and the response be
+
+$$
+y=(a_1,\ldots,a_T).
+$$
+
+The three sequence probabilities are
+
+$$
+\mu(y\mid x)=\prod_{t=1}^T \mu(a_t\mid x,a_{<t}),
+$$
+
+$$
+\pi_{\theta_{\text{old}}}(y\mid x)=\prod_{t=1}^T \pi_{\theta_{\text{old}}}(a_t\mid x,a_{<t}),
+$$
+
+$$
+\pi_\theta(y\mid x)=\prod_{t=1}^T \pi_\theta(a_t\mid x,a_{<t}).
+$$
+
+Thus the behavior-to-target sequence ratio is
+
+$$
+\frac{\pi_\theta(y\mid x)}{\mu(y\mid x)}
+=
+\prod_{t=1}^T
+\frac{\pi_\theta(a_t\mid x,a_{<t})}{\mu(a_t\mid x,a_{<t})}.
+$$
+
+The corresponding log-ratio is a sum over token-level log-ratios. Small token-level three-policy mismatches therefore accumulate across long responses; at the sequence-ratio level, that accumulation appears multiplicatively. This is why $\alpha_0$ and $\alpha_1$ in LLM RL should not be read as abstract distance terms only: they interact with response length, truncated sampling, and routing decisions.
+
+This section is only a translation of the theoretical objects into the finite-sequence setting. Later, token-level TIS, sequence-level MIS, WTRS, and routing replay can all be seen as different granularities for handling the same behavior-proximal-target triangle.
+
+### 3.5 How to Control These Two Deviation Sources?
 
 We can now revisit various practical methods through the lens of Theorem 2:
 
@@ -394,6 +438,16 @@ In practice, this usually involves both **system-level mechanisms** and **algori
 2. **Algorithmic level: sample-wise correction**
 
    At the algorithmic level, we no longer attempt to “fix” the entire behavior policy. Instead, we use importance sampling ratios to filter or reweight samples at the **sample level**, so that the subset of data that actually participates in training is closer to the reference policy, or at least so that badly mismatched samples carry less weight.
+
+   To avoid overstating what these mechanisms do, it is useful to distinguish two distributions:
+
+   $$
+   \mu_{\mathrm{raw}} := \text{the true rollout behavior distribution},
+   \qquad
+   \mu_{\mathrm{eff}} := \text{the effective training distribution after reweighting, masking, or rejection}.
+   $$
+
+   TIS / IcePop / MIS / WTRS usually do not directly reduce $D(\mu_{\mathrm{raw}},\pi_{\theta_{\text{old}}})$. They modify $\mu_{\mathrm{eff}}$, or the weights with which samples enter the surrogate. Thus, if $\alpha_1$ denotes the raw behavior-reference distance, these sample-level mechanisms should not be described as simply “shrinking $\alpha_1$.” A more precise statement is that they make the effective objective less dominated by samples with extreme behavior-reference mismatch.
 
    Concretely, this gives rise to methods like TIS, IcePop, MIS, and WTRS. They are best understood as different ways to manage the consequences of this mismatch at training time.
 
@@ -651,7 +705,7 @@ Again, this is fundamentally a **change of objective**:
 - The deviation $\alpha_0$ in the true policy space is not reduced; it is merely rendered invisible by redefining the surrogate in terms of the old router.
 - Learning of the router is effectively frozen or heavily suppressed.
 
-### 5.4 Routing Replay as a Change of Surrogate Objective
+### 5.4 Routing Replay: A Conditioned Surrogate, Not a Direct Shrinkage of $\alpha_0/\alpha_1$
 
 Putting these replay variants side by side, they share several properties:
 
@@ -661,9 +715,9 @@ Putting these replay variants side by side, they share several properties:
 
 So, in the three-policy TRPO view, a more accurate characterization is:
 
-> **Routing replay is best thought of as a rewrite of the surrogate objective, not as a direct implementation of a constraint on $\alpha_0$ or $\alpha_1$.**
+> **Under the explicit-routing model used here, routing replay is best thought of as a surrogate objective conditioned on behavior-side routing, not as a direct implementation of a constraint on $\alpha_0$ or $\alpha_1$.**
 
-Put more bluntly: routing replay is often an effective workaround, not a theoretical fix.
+This does not contradict reports that R3-style methods reduce training-inference mismatch or measured policy KL. Those metrics are measured after the training path is conditioned to match the inference routing path more closely; the statement here concerns distances in the original joint token-routing policy space. The two claims are about different objects.
 
 ## 6. Discussion
 

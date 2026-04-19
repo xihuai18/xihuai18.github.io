@@ -32,10 +32,19 @@ wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 本文使用以下记号：
 
 - **行为策略** $\mu$：实际负责生成 rollout 的策略，即"数据是在什么分布下采样的"。在现代 LLM-RL 系统中，它对应推理引擎里的实现（vLLM / SGLang 等）；在异步框架下，它往往还可以**近似看作多个 worker 策略诱导分布的混合**。
-- **参考策略** $\pi_{\theta_{\text{old}}}$：训练目标中用于重要性采样、clipping 或 KL 约束的策略，典型的就是 PPO / GRPO 里的"旧策略"（old policy）。
+- **近端/参考策略** $\pi_{\theta_{\text{old}}}$：训练目标中用于重要性采样、clipping 或 trust-region 约束的策略，典型的就是 PPO / GRPO 里的"旧策略"（old policy）。为了避免和固定 KL 参考模型混淆，本文把它称为近端策略或参考策略；若后文提到固定 SFT 参考模型，会单独写成 $\pi_{\mathrm{ref}}$。
 - **目标策略** $\pi_\theta$：训练目标中要优化的策略，即"希望模型变成什么样"，典型的就是 PPO / GRPO 里的"新策略"（new policy）。
 
-在最理想化的设定里，我们通常**默认** $\mu = \pi_{\theta_{\text{old}}}$。但在真实系统里，由于异步更新、推理和训练后端不同、MoE 路由波动甚至硬件数值差异，二者往往会偏离，程度视系统而定。
+为了把理论对象和工程变量对应起来，可以先看下面这张文字版坐标图：
+
+| 理论对象 | 在分析中的角色 | 常见工程量 |
+| --- | --- | --- |
+| $\mu$ | 真实采样分布，决定数据来自哪里 | behavior log-prob、policy version、sampling config、routing trace |
+| $\pi_{\theta_{\text{old}}}$ | 近端锚点，决定 ratio 分母与 trust region 参照 | old log-prob、clip anchor、proximal checkpoint |
+| $\pi_\theta$ | 被优化的目标策略，决定更新方向 | new log-prob、当前 actor、当前 router |
+| $\pi_{\mathrm{ref}}$ | 若存在固定 KL 参考模型，只负责 KL 正则 | ref log-prob、SFT/reference checkpoint |
+
+在最理想化的设定里，我们通常**默认** $\mu = \pi_{\theta_{\text{old}}}$。但在真实系统里，由于异步更新、推理和训练后端不同、MoE 路由波动甚至硬件数值差异，二者往往会偏离，程度视系统而定。本文的理论坐标系就是要把"谁生成数据"、"谁作为近端锚点"、"谁正在被优化"这三件事分开。
 
 ## 2. 相关工作
 
@@ -360,7 +369,42 @@ $$
 
 定理 2 并不复杂：$L_\mu(\pi_\theta)$ 与 $\mathcal{J}(\pi_\theta)$ 之间的 gap 不是被精确拆成两项，而是被一条保守上界控制；这条上界恰好由"参考 vs 目标"的 $\alpha_0$ 和"行为 vs 参考"的 $\alpha_1$ 共同决定。若要真正推出性能提升，还需要 $L_\mu(\pi_\theta)$ 本身足够高，例如至少要超过 $\mathcal{J}(\mu) + C(\alpha_0 + \alpha_1)$。在 LLM 场景里，这个界的数值通常很松，所以我更把它当作一个结构工具，而不是性能证书。
 
-### 3.4 这两个偏差来源各自怎么控制？
+### 3.4 LLM 有限序列形式：为什么长回复会放大三策略偏移？
+
+上面的推导沿用折扣 MDP 记号，是为了直接承接 TRPO。若转写成 LLM-RL 中更常见的 prompt-response 形式，设 prompt 为 $x$，回复为
+
+$$
+y=(a_1,\ldots,a_T),
+$$
+
+则三类策略的序列概率分别为
+
+$$
+\mu(y\mid x)=\prod_{t=1}^T \mu(a_t\mid x,a_{<t}),
+$$
+
+$$
+\pi_{\theta_{\text{old}}}(y\mid x)=\prod_{t=1}^T \pi_{\theta_{\text{old}}}(a_t\mid x,a_{<t}),
+$$
+
+$$
+\pi_\theta(y\mid x)=\prod_{t=1}^T \pi_\theta(a_t\mid x,a_{<t}).
+$$
+
+于是行为到目标的序列级比率为
+
+$$
+\frac{\pi_\theta(y\mid x)}{\mu(y\mid x)}
+=
+\prod_{t=1}^T
+\frac{\pi_\theta(a_t\mid x,a_{<t})}{\mu(a_t\mid x,a_{<t})},
+$$
+
+对应的 log-ratio 是 token 级 log-ratio 的求和。也就是说，token 级很小的三策略偏移会在长回复中累积；如果直接看 sequence ratio，则这种累积会以乘积形式表现出来。这也是为什么在 LLM-RL 里，$\alpha_0$ 和 $\alpha_1$ 不只是普通 MDP 中的抽象距离项，还会和回复长度、截断采样、路由决策等序列结构耦合。
+
+这个小节的作用只是把理论对象翻译到有限序列设定：后文讨论 token-level TIS、sequence-level MIS、WTRS 和 routing replay 时，核心都是在不同粒度上处理同一个行为-近端-目标三角关系。
+
+### 3.5 这两个偏差来源各自怎么控制？
 
 回头看各种实际方法：
 
@@ -383,6 +427,16 @@ $$
 2. **算法层：样本修正**
 
    在算法层，我们不再试图"纠正整个行为策略"，而是用重要性采样比率在**样本层面**做筛选和重加权，让真正参与训练的样本子集更接近参考策略，或减小差异较大的样本在训练中的权重。
+
+   为了避免说法过强，后文把两个分布区分开来：
+
+   $$
+   \mu_{\mathrm{raw}} := \text{真实 rollout 行为分布},
+   \qquad
+   \mu_{\mathrm{eff}} := \text{经过重加权、掩码或拒绝后进入 surrogate 的有效训练分布}.
+   $$
+
+   TIS / IcePop / MIS / WTRS 通常不直接缩小 $D(\mu_{\mathrm{raw}},\pi_{\theta_{\text{old}}})$；它们改变的是 $\mu_{\mathrm{eff}}$，或改变不同样本在 surrogate 中的权重。因此，若仍用 $\alpha_1$ 表示原始行为策略距离，就不应把这些样本级机制简单说成"压低 $\alpha_1$"。更严谨的说法是：它们让实际被优化的有效目标更少受行为-参考偏移的极端样本主导。
 
    具体就是下面这些方法。它们的共同点是：都在样本层面缓解"行为 vs 参考"偏移带来的不良后果。
 
@@ -640,7 +694,7 @@ $$
 - 真实策略空间里的 $\alpha_0$ 并没有因此变小，只是被"用旧路由器重定义目标"而在 loss 中不可见；
 - 路由器的学习被强行冻结或大幅削弱。
 
-### 5.4 路由回放只是在改写 surrogate objective
+### 5.4 路由回放：条件化 surrogate，而不是直接缩小 $\alpha_0/\alpha_1$
 
 把两类 replay 放在一起看，它们的共同点是：
 
@@ -650,9 +704,9 @@ $$
 
 所以，从三策略 TRPO 的视角，更准确的理解是：
 
-> **在本文这套显式路由建模下，routing replay 更适合被理解为一种 surrogate objective 的改写，而不宜直接理解为对 $\alpha_0$ 或 $\alpha_1$ 的直接约束。**
+> **在本文这套显式路由建模下，routing replay 更适合被理解为一种被行为路由条件化的 surrogate objective，而不宜直接理解为对 $\alpha_0$ 或 $\alpha_1$ 的直接约束。**
 
-说得更直白些：routing replay 更像一个有效的工程 workaround，而不是对原问题的理论修正。
+这和 R3 类方法报告的 training-inference mismatch 或 measured policy KL 下降并不矛盾：那些指标衡量的是引入路由回放后的条件化训练路径与推理路径是否更一致；而本文这里讨论的是原始联合策略空间中的 token-routing 分布距离。两个说法的度量对象不同。
 
 ## 6. 讨论
 
