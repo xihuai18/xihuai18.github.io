@@ -1,0 +1,30 @@
+# Projects data for /projects/ page (currently hidden — `published: false` in _pages/projects.md).
+# Each entry renders as one card. Add / remove entries and flip the page to
+# `published: true` when ready to ship.
+
+- name: DPT-Agent
+  repo: github.com/sjtu-marl/DPT-Agent
+  blurb: >-
+    Language agent framework that operationalizes Dual Process Theory for
+    real-time simultaneous human-AI collaboration. Accepted at ACL 2025.
+  language: Python
+  stars:
+  tags: [llm, agent, human-ai]
+
+- name: ZSC-Eval
+  repo: github.com/sjtu-marl/ZSC-Eval
+  blurb: >-
+    Evaluation toolkit and benchmark for multi-agent zero-shot coordination.
+    NeurIPS 2024 Datasets & Benchmarks Track.
+  language: Python
+  stars:
+  tags: [marl, benchmark, coordination]
+
+- name: PMAT
+  repo: github.com/sjtu-marl/PMAT
+  blurb: >-
+    Per-agent policy optimization ordering for cooperative MARL. Published at
+    AAMAS 2025.
+  language: Python
+  stars:
+  tags: [marl, policy-optimization]
