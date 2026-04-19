@@ -52,7 +52,7 @@ navbar_fixed: true
 footer_fixed: false
 
 # Dimensions
-max_width: 960px
+max_width: 1120px
 
 # TODO: add layout settings (single page vs. multi-page)
 
@@ -173,7 +173,7 @@ collections:
     permalink: /projects/:path/
 
 news_scrollable: true # adds a vertical scroll bar if there are more than 3 news items
-news_limit: # leave blank to include all the news in the `_news` folder
+news_limit: 7 # kit shows 7 rows on home news feed; blank = all news
 
 # -----------------------------------------------------------------------------
 # Jekyll settings

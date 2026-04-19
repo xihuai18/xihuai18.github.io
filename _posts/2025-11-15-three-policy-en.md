@@ -771,15 +771,3 @@ If this note is useful at all, I hope it is because it makes one neglected point
 5. Wei Fu, Jiaxuan Gao, Xujie Shen, et al. "AReaL: A Large-Scale Asynchronous Reinforcement Learning System for Language Reasoning". arXiv:2505.24298. <https://arxiv.org/abs/2505.24298>
 6. Chujie Zheng, Shixuan Liu, Mingze Li, et al. "Group Sequence Policy Optimization" (GSPO). arXiv:2507.18071. <https://arxiv.org/abs/2507.18071>
 7. Wenhan Ma, Hailin Zhang, Liang Zhao, et al. "Stabilizing MoE Reinforcement Learning by Aligning Training and Inference Routers". arXiv:2510.11370. <https://arxiv.org/abs/2510.11370>
-
-```bibtex
-@misc{WangZhang2025ThreePolicyTRPO,
-  author       = {Wang, Xihuai and Zhang, Shao},
-  title        = {From Two Policies to Three: Extending TRPO under Behavior-Reference Policy Mismatch in LLM RL},
-  year         = {2025},
-  month        = nov,
-  day          = {15},
-  url          = {https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-en.html},
-  urldate      = {2025-11-23}
-}
-```

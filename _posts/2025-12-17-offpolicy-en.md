@@ -765,15 +765,3 @@ I omit the linear-operator algebra and constant bookkeeping here because the pos
 6. Jacob Hilton, Karl Cobbe, John Schulman. "Batch size-invariance for policy optimization" (Decoupled PPO). arXiv:2110.00641. <https://arxiv.org/abs/2110.00641>
 
 7. Sham Kakade, John Langford. "Approximately Optimal Approximate Reinforcement Learning". ICML 2002. <https://dl.acm.org/doi/10.5555/645531.657706>
-
-```bibtex
-@misc{WangZhang2025OffPolicyLLMRL,
-	author       = {Wang, Xihuai and Zhang, Shao},
-	title        = {Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees},
-	year         = {2025},
-	month        = dec,
-	day          = {17},
-	url          = {https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html},
-	urldate      = {2025-12-17}
-}
-```

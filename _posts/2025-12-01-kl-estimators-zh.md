@@ -1063,14 +1063,3 @@ $$
 5. Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. "Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization". arXiv:2510.01555. <https://arxiv.org/abs/2510.01555>
 6. Yifan Zhang, Yiping Ji, Gavin Brown, et al. "On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning". arXiv:2505.17508. <https://arxiv.org/abs/2505.17508>
 7. Vedant Shah, Johan Obando-Ceron, Vineet Jain, Brian Bartoldson, Bhavya Kailkhura, Sarthak Mittal, Glen Berseth, Pablo Samuel Castro. "A Comedy of Estimators: On KL Regularization in RL Training of LLMs". arXiv:2512.21852. <https://arxiv.org/abs/2512.21852>
-
-```bibtex
-@misc{WangZhang2025KLEstimators,
-  author       = {Wang, Xihuai and Zhang, Shao},
-  title        = {Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness},
-  year         = {2025},
-  month        = dec,
-  day          = {01},
-  url          = {https://xihuai18.github.io/reinforcement-learning/2025/12/01/kl-estimators-zh.html}
-}
-```
