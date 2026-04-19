@@ -153,7 +153,7 @@ pre code { background: none; padding: 0; font-size: inherit; }
  * ========================================================================== */
 .post-header.hero {
   text-align: center;
-  padding: 48px 0 36px;
+  padding: 0 0 var(--s-5);     /* top 0 — container.mt-5 already provides breathing */
   border-bottom: 1px solid var(--rule);
   margin-bottom: var(--s-6);
 }
@@ -1324,7 +1324,7 @@ html[data-theme='dark'] .cv h2 { color: var(--moss-600) !important; }
   margin: 0 auto;
 }
 .blog-index .post-header {
-  padding: 56px 0 var(--s-5);
+  padding: 0 0 var(--s-5);     /* top 0 — match pub page; container.mt-5 handles offset */
   margin-bottom: var(--s-6);
   border-bottom: 1px solid var(--rule);
 }

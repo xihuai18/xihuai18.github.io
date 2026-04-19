@@ -11,7 +11,9 @@ $(document).ready(function() {
             if (value === undefined || value === null || value === '') {
                 value = 0;
             }
-            $(this).text(value + ' views');
+            // Allow per-element label override (e.g. "阅读" for ZH rows).
+            var label = $(this).data('uvLabel') || 'views';
+            $(this).text(value + ' ' + label);
         });
 
         $('.uv-toggle').removeClass('font-weight-bold');

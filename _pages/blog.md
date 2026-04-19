@@ -106,10 +106,16 @@ twitter_card: summary
         {%- endfor -%}
       {%- endif -%}
 
+      {%- comment -%} Compute read_time for each language — word count differs between
+        English and the ZH translation, so reading-time estimates differ too. Views
+        (post_uv) are also keyed per URL, so EN and ZH have distinct view counts. {%- endcomment -%}
       {%- if post.external_source == blank -%}
-        {%- assign read_time = post.content | number_of_words | divided_by: 180 | plus: 1 -%}
+        {%- assign read_time_en = post.content | number_of_words | divided_by: 180 | plus: 1 -%}
       {%- else -%}
-        {%- assign read_time = post.feed_content | strip_html | number_of_words | divided_by: 180 | plus: 1 -%}
+        {%- assign read_time_en = post.feed_content | strip_html | number_of_words | divided_by: 180 | plus: 1 -%}
+      {%- endif -%}
+      {%- if zh_post -%}
+        {%- assign read_time_zh = zh_post.content | number_of_words | divided_by: 180 | plus: 1 -%}
       {%- endif -%}
 
     <li class="post-row blog-post-list-item" data-year="{{ post_year }}" data-categories="{{ post_categories_slug }}">
@@ -123,6 +129,7 @@ twitter_card: summary
           <button type="button" class="post-row__langtab is-active" data-lang-pair="{{ pair_id }}" data-lang-target="en" role="tab" aria-selected="true">EN</button>
           <button type="button" class="post-row__langtab" data-lang-pair="{{ pair_id }}" data-lang-target="zh" role="tab" aria-selected="false">中</button>
         </div>
+
         <div class="post-row__lang-pane is-active" data-lang-pair="{{ pair_id }}" data-lang="en">
           <h3 class="post-row__title">
             {%- if post.redirect == blank -%}
@@ -136,7 +143,20 @@ twitter_card: summary
           {%- if post.description -%}
           <p class="post-row__desc">{{ post.description }}</p>
           {%- endif -%}
+          <p class="post-row__meta mono-meta">
+            <span class="post-row__read">{{ read_time_en }} min read</span>
+            {%- for category in post.categories -%}
+            <span class="post-row__sep" aria-hidden="true">·</span>
+            <a class="post-row__cat" href="{{ '/blog/' | relative_url }}?category={{ category | slugify }}" data-filter-link data-filter-type="category" data-filter-value="{{ category | slugify }}">{{ category | replace: "-", " " | capitalize }}</a>
+            {%- endfor -%}
+            {%- if uv_enabled and uv_has_modes > 0 -%}
+            {%- include post_uv.html url=post.url -%}
+            <span class="post-row__sep" aria-hidden="true">·</span>
+            <span class="post-row__views post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">{{ uv_all }} views</span>
+            {%- endif -%}
+          </p>
         </div>
+
         <div class="post-row__lang-pane" data-lang-pair="{{ pair_id }}" data-lang="zh" hidden>
           <h3 class="post-row__title">
             <a href="{{ zh_post.url | relative_url }}">{{ zh_post.title }}</a>
@@ -144,7 +164,20 @@ twitter_card: summary
           {%- if zh_post.description -%}
           <p class="post-row__desc">{{ zh_post.description }}</p>
           {%- endif -%}
+          <p class="post-row__meta mono-meta">
+            <span class="post-row__read">{{ read_time_zh }} 分钟阅读</span>
+            {%- for category in zh_post.categories -%}
+            <span class="post-row__sep" aria-hidden="true">·</span>
+            <a class="post-row__cat" href="{{ '/blog/' | relative_url }}?category={{ category | slugify }}" data-filter-link data-filter-type="category" data-filter-value="{{ category | slugify }}">{{ category | replace: "-", " " | capitalize }}</a>
+            {%- endfor -%}
+            {%- if uv_enabled and uv_has_modes > 0 -%}
+            {%- include post_uv.html url=zh_post.url -%}
+            <span class="post-row__sep" aria-hidden="true">·</span>
+            <span class="post-row__views post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}" data-uv-label="阅读">{{ uv_all }} 阅读</span>
+            {%- endif -%}
+          </p>
         </div>
+
         {%- else -%}
         <h3 class="post-row__title">
           {%- if post.redirect == blank -%}
@@ -158,10 +191,14 @@ twitter_card: summary
         {%- if post.description -%}
         <p class="post-row__desc">{{ post.description }}</p>
         {%- endif -%}
+        {%- assign _lbl_read = "min read" -%}
+        {%- assign _lbl_views = "views" -%}
+        {%- if post.lang == 'zh' -%}
+          {%- assign _lbl_read = "分钟阅读" -%}
+          {%- assign _lbl_views = "阅读" -%}
         {%- endif -%}
-
         <p class="post-row__meta mono-meta">
-          <span class="post-row__read">{{ read_time }} min read</span>
+          <span class="post-row__read">{{ read_time_en }} {{ _lbl_read }}</span>
           {%- for category in post.categories -%}
           <span class="post-row__sep" aria-hidden="true">·</span>
           <a class="post-row__cat" href="{{ '/blog/' | relative_url }}?category={{ category | slugify }}" data-filter-link data-filter-type="category" data-filter-value="{{ category | slugify }}">{{ category | replace: "-", " " | capitalize }}</a>
@@ -169,9 +206,10 @@ twitter_card: summary
           {%- if uv_enabled and uv_has_modes > 0 -%}
           {%- include post_uv.html url=post.url -%}
           <span class="post-row__sep" aria-hidden="true">·</span>
-          <span class="post-row__views post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">{{ uv_all }} views</span>
+          <span class="post-row__views post-uv" data-uv-all="{{ uv_all }}" data-uv-d30="{{ uv_d30 }}">{{ uv_all }} {{ _lbl_views }}</span>
           {%- endif -%}
         </p>
+        {%- endif -%}
       </div>
     </li>
     {%- endfor -%}
