@@ -1,12 +1,7 @@
 $(document).ready(function() {
-    $('a.abstract').click(function() {
-        $(this).parent().parent().find(".abstract.hidden").toggleClass('open');
-        $(this).parent().parent().find(".bibtex.hidden.open").toggleClass('open');
-    });
-    $('a.bibtex').click(function() {
-        $(this).parent().parent().find(".bibtex.hidden").toggleClass('open');
-        $(this).parent().parent().find(".abstract.hidden.open").toggleClass('open');
-    });
+    // Note: legacy `.abstract` and `.bibtex` inline toggles were removed along
+    // with the markup that produced them. See _layouts/bib.html + bibtex_copy.js.
+
     $('a').removeClass('waves-effect waves-light');
 
     function updateUvMode(mode) {

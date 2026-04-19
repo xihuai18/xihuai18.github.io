@@ -93,49 +93,48 @@
    */
   function applyFilters() {
     const { year, category } = getFilters();
-    const posts = document.querySelectorAll('.post-list > li.blog-post-list-item');
+    // Cover both the new `.post-rows > .post-row` layout and any legacy `.post-list > li`.
+    const posts = document.querySelectorAll('.post-rows > .post-row, .post-list > li.blog-post-list-item');
     let visibleCount = 0;
     const totalCount = posts.length;
     let lastVisiblePost = null;
 
-    // Reset all borders first (remove inline styles to let CSS take over)
-    posts.forEach((post) => {
-      post.style.borderBottom = '';
-    });
+    posts.forEach((post) => { post.style.borderBottom = ''; });
 
     posts.forEach((post) => {
       const matchesYear = !year || post.dataset.year === year;
       const categories = (post.dataset.categories || '').toLowerCase().split(/\s+/).filter(Boolean);
       const matchesCategory = !category || categories.includes(category);
       const isVisible = matchesYear && matchesCategory;
-
       post.style.display = isVisible ? '' : 'none';
-      
-      if (isVisible) {
-        visibleCount += 1;
-        lastVisiblePost = post;
-      }
+      if (isVisible) { visibleCount += 1; lastVisiblePost = post; }
     });
 
-    // Only apply inline style if we have filters active (to override CSS :last-child)
-    // When filters are active, the :last-child CSS selector may not target the last visible post
     const hasActiveFilters = year || category;
     if (hasActiveFilters && lastVisiblePost) {
       lastVisiblePost.style.borderBottom = 'none';
     }
 
-    // Update active state of filter links
+    // Legacy: highlight text links with `active-filter` when they match.
     document.querySelectorAll('[data-filter-link]').forEach(link => {
       const filterType = link.getAttribute('data-filter-type');
       const filterValue = link.getAttribute('data-filter-value');
-      
-      if ((filterType === 'year' && filterValue === year) || 
-          (filterType === 'category' && filterValue === category)) {
-        link.classList.add('active-filter');
-      } else {
-        link.classList.remove('active-filter');
-      }
+      const active = (filterType === 'year' && filterValue === year) ||
+                     (filterType === 'category' && filterValue === category);
+      link.classList.toggle('active-filter', active);
     });
+
+    // Pill filter: toggle `.is-active` class. "All posts" (empty value) lights
+    // up when neither category nor year is active.
+    const pills = document.querySelectorAll('.blog-pill[data-filter-link][data-filter-type="category"]');
+    if (pills.length) {
+      pills.forEach(pill => {
+        const value = pill.getAttribute('data-filter-value') || '';
+        const isAll = value === '';
+        const isActive = isAll ? !category : (value === category);
+        pill.classList.toggle('is-active', isActive);
+      });
+    }
 
     updateFilterStatus(year, category, visibleCount, totalCount);
   }
@@ -260,10 +259,31 @@
     }
   }
 
+  // Per-row EN/中 lang tab toggle. Swaps visibility of panes within the same
+  // .post-row without navigating. Clicks elsewhere are unaffected.
+  function handleLangTab(event) {
+    const tab = event.target.closest('.post-row__langtab');
+    if (!tab) return;
+    event.preventDefault();
+    const pair = tab.getAttribute('data-lang-pair');
+    const target = tab.getAttribute('data-lang-target');
+    if (!pair || !target) return;
+    document.querySelectorAll('.post-row__langtab[data-lang-pair="' + pair + '"]').forEach(t => {
+      const active = t.getAttribute('data-lang-target') === target;
+      t.classList.toggle('is-active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('.post-row__lang-pane[data-lang-pair="' + pair + '"]').forEach(p => {
+      p.hidden = p.getAttribute('data-lang') !== target;
+      p.classList.toggle('is-active', p.getAttribute('data-lang') === target);
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     applyFilters();
 
     document.addEventListener('click', handleFilterLink);
+    document.addEventListener('click', handleLangTab);
     window.addEventListener('popstate', applyFilters);
   });
 })();
