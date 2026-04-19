@@ -1053,7 +1053,7 @@ If you only remember four lines, make them these:
 3. **If KL is used as stop-gradient reward shaping**: in the policy-gradient term analyzed here, only $k_1$ stays aligned with reverse-KL regularization.
 4. **A low-variance KL loss and $k_1$ in reward shaping can be sample-wise equivalent on the KL term, but the two algorithms still have different semantics.** In the former, KL is an explicit regularizer; in the latter, KL flows through advantage, baselines, and credit assignment.
 
-## 11. References
+## References
 
 1. Dibya Ghosh. "KL Divergence for Machine Learning". <https://dibyaghosh.com/blog/probability/kldivergence>
 2. John Schulman. "Approximating KL Divergence". <https://joschu.net/blog/kl-approx.html>

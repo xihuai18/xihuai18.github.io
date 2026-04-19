@@ -1054,7 +1054,7 @@ $$
 3. **若把 KL 写成 stop-grad reward shaping**：在本文讨论的策略梯度主项里，只有 $k_1$ 能保持与反向 KL 正则一致的无偏梯度。
 4. **低方差 KL loss 与 $k_1$ in reward 在 KL 那一项上可以样本级等价，但整体算法语义并不相同。** 前者把 KL 当作独立正则项；后者会把 KL 带进 advantage、baseline 和信用分配路径里。
 
-## 11. 参考文献
+## 参考文献
 
 1. Dibya Ghosh. "KL Divergence for Machine Learning". <https://dibyaghosh.com/blog/probability/kldivergence>
 2. John Schulman. "Approximating KL Divergence". <https://joschu.net/blog/kl-approx.html>

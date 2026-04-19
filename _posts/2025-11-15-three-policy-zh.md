@@ -746,7 +746,7 @@ $$
 
 如果这篇文章有什么实际作用，我希望至少是把一个常被忽略的问题说得更具体：很多看起来像"PPO 不稳"的现象，先坏掉的往往不是 clip 或 KL，而是 $\mu \neq \pi_{\theta_{\text{old}}}$。把这三种策略分开写，通常能更快看到真正的瓶颈。
 
-## 7. 参考文献与延伸阅读
+## 参考文献与延伸阅读
 
 1. John Schulman, Sergey Levine, Philipp Moritz, Michael I. Jordan, Pieter Abbeel. "Trust Region Policy Optimization" (TRPO). arXiv:1502.05477. <https://arxiv.org/abs/1502.05477>
 2. Jacob Hilton, Karl Cobbe, John Schulman. "Batch size-invariance for policy optimization" (Decoupled PPO). arXiv:2110.00641. <https://arxiv.org/abs/2110.00641>
