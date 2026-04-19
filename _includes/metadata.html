@@ -23,13 +23,14 @@
     {%- else -%}
         {%- capture title -%}{{ site.title }}{%- endcapture -%}
     {%- endif -%}
+    {%- assign page_tab_title = page.tab_title | default: page.title -%}
     {% if page.url == '/blog/' or page.url == '/blog/index.html' or page.permalink == '/blog/' %}
         {{ site.blog_nav_title }} | {{ title }}
     {%- elsif page.title != "blank" and page.url != "/" -%}
-        {%- if page.title == nil or page.title == "" -%}
+        {%- if page_tab_title == nil or page_tab_title == "" -%}
             {{ page.date | date: "%Y" }} | {{ title }}
         {%- else -%}
-            {{ page.title }} | {{ title }}
+            {{ page_tab_title }} | {{ title }}
         {%- endif -%}
     {%- else -%}
         {{ title }}

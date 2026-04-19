@@ -1,10 +1,19 @@
 <header>
+  <a class="skip-to-content" href="#main-content">Skip to content</a>
 
   <!-- Nav Bar -->
-  <nav id="navbar"
+  <nav id="navbar" aria-label="Primary"
     class="navbar navbar-light navbar-expand-sm {% if site.navbar_fixed %}fixed-top{% else %}sticky-top{% endif %}">
     <div class="container">
-      {% if page.permalink != '/' -%}
+      {%- comment -%} Kit (Home.jsx / kit.css) calls for the left side to always show
+        the social icon rail at every width. Icons are their own anchors, so the
+        wrapper must NOT be an `<a>` (invalid nested anchor tags get stripped by
+        the browser — which left the navbar empty in an earlier pass). {%- endcomment -%}
+      {%- if site.enable_navbar_social -%}
+      <div class="navbar-brand navbar-social-icons">
+        {% include social.html %}
+      </div>
+      {%- elsif page.permalink != '/' -%}
       <a class="navbar-brand title font-weight-lighter" href="{{ site.baseurl }}/">
         {%- if site.title == "blank" -%}
         {%- if site.first_name -%}
@@ -20,12 +29,7 @@
         {{- site.title -}}
         {%- endif -%}
       </a>
-      {%- elsif site.enable_navbar_social -%}
-      <!-- Social Icons in Navbar for About Page -->
-      <div class="navbar-brand navbar-social-icons">
-        {% include social.html %}
-      </div>
-      {% endif %}
+      {%- endif -%}
       <!-- Navbar Toggle -->
       <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +102,7 @@
           </li>
           {%- else %}
           <li class="nav-item {% if page.title == p.title %}active{% endif %}">
-            <a class="nav-link" href="{{ p.url | relative_url }}">{{ p.title }}
+            <a class="nav-link" href="{{ p.url | relative_url }}">{{ p.nav_title | default: p.title }}
               {%- if page.title == p.title -%}
               <span class="sr-only">(current)</span>
               {%- endif -%}
@@ -111,9 +115,16 @@
           {%- if site.enable_darkmode %}
           <!-- Toggle theme mode -->
           <li class="nav-item toggle-container">
-            <button id="light-toggle" class="nav-link" title="Change theme">
-              <i class="fas fa-moon"></i>
-              <i class="fas fa-sun"></i>
+            <button id="light-toggle" class="nav-link theme-toggle" title="Change theme" aria-label="Toggle dark mode">
+              <span class="theme-toggle__icons" aria-hidden="true">
+                <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+                </svg>
+                <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+              </span>
             </button>
           </li>
           {%- endif %}

@@ -1,16 +1,11 @@
 <div class="post-links">
   {% assign links = "" | split: "," %}
 
-  <!-- Bilingual Links -->
-  {% if page.zh_url %}
-    {% capture link %}<a href="{{ page.zh_url | relative_url }}">中文版本</a>{% endcapture %}
-    {% assign links = links | push: link %}
-  {% endif %}
-
-  {% if page.en_url %}
-    {% capture link %}<a href="{{ page.en_url | relative_url }}">English Version</a>{% endcapture %}
-    {% assign links = links | push: link %}
-  {% endif %}
+  {%- comment -%}
+    Bilingual EN/ZH switch moved to `.post-meta-row` in post.html so it sits
+    with the other meta items (BlogPost.jsx:18). This include now only hosts
+    external cross-post links.
+  {%- endcomment -%}
 
   <!-- External Platform Links -->
   {% if page.zhihu_url %}

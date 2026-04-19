@@ -1,8 +1,8 @@
 <table class="table table-sm table-borderless table-responsive">
     {% for content in entry.contents %}
       <tr>
-        <td class="p-1 pr-2 font-weight-bold" style="white-space: nowrap;"><b>{{ content.name }}</b></td>
-        <td class="p-1 pl-2 text font-weight-medium">{{ content.value }}</td>
+        <td class="p-1 pr-2" style="white-space: nowrap;">{{ content.name }}</td>
+        <td class="p-1 pl-2 text">{{ content.value }}</td>
       </tr>
     {% endfor %}
 </table>
