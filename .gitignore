@@ -17,3 +17,22 @@ AGENTs.md
 node_modules/vendor/
 .bundle/
 config.json
+
+# Local audit / screenshot artefacts (generated during UI reviews, not source)
+/*.png
+.audit-shots/
+.playwright-cli/
+.playwright-daemon/
+.chrome-cdp/
+.chrome-cdp-sys/
+.chrome-cdp-news/
+.chrome-headless/
+.chrome-shot/
+.edge-cdp-sys/
+.chrome-dom.txt
+.chrome-err.txt
+bash.exe.stackdump
+
+# Downloaded browser binaries / drivers
+chrome/
+chromedriver/
