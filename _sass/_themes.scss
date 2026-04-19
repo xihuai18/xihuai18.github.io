@@ -1,65 +1,209 @@
 /*******************************************************************************
- * Themes
+ * Themes — Xihuai Wang Refined Design System
+ * Pure paper / deep ink palette with moss-green accent. Shadow system uses
+ * warm-tungsten lows and long softs. All tokens are CSS custom properties so
+ * legacy al-folio rules keep rendering while the design-system layer builds
+ * on a consistent foundation.
  ******************************************************************************/
 
 @use "variables" as *;
 
 :root {
-  --global-bg-color: #{$white-color};
-  --global-code-bg-color: #{$code-bg-color-light};
-  --global-text-color: #{$black-color};
-  --global-text-color-light: #{$grey-color};
-  --global-theme-color: #{$green-color};
-  --global-hover-color: #{$green-color};
-  --global-footer-bg-color: #{$grey-color-dark};
-  --global-footer-text-color: #{$grey-color-light};
-  --global-footer-link-color: #{$white-color};
-  --global-distill-app-color: #{$grey-color};
-  --global-divider-color: rgba(0,0,0,.3);
-  --global-card-bg-color: #{$white-color};
-  --global-shadow-color: rgba(0, 0, 0, 0.1);
+  /* ---- Paper / ink scale ------------------------------------------------- */
+  --paper:          #FFFFFF;
+  --paper-2:        #F6F5F1;     /* colors_and_type.css:16 — canonical paper-2 */
 
-  .fa-sun {
-    display : none;
-  }
-  .fa-moon {
-    display : block;
-  }
+  /* Post body prose width — uses --prose-max as the floor, grows responsively.
+     See _design_system.scss blog post block for usage. */
+  --post-prose-max: var(--prose-max);
+  --ink:            #111418;
+  --ink-2:          #3A3F47;
+  --ink-3:          #6B7078;
+  --ink-4:          #A6A8AC;
+  --rule:           rgba(17, 20, 24, 0.10);
+  --rule-strong:    rgba(17, 20, 24, 0.22);
 
-  .repo-img-light {
-    display: block;
-  }
-  .repo-img-dark {
-    display: none;
-  }
+  /* ---- Moss scale (exposed for components) ------------------------------- */
+  --moss-50:  #{$moss-50};
+  --moss-100: #{$moss-100};
+  --moss-200: #{$moss-200};
+  --moss-300: #{$moss-300};
+  --moss-400: #{$moss-400};
+  --moss-500: #{$moss-500};
+  --moss-600: #{$moss-600};
+  --moss-700: #{$moss-700};
+
+  /* ---- Supporting accents ------------------------------------------------ */
+  --ink-blue:   #1E3A8A;
+  --ink-wine:   #8E1B3A;
+  --ink-ochre:  #B5791F;
+  --ink-cyan:   #1F6F7A;
+  --ink-plum:   #5B2A7C;
+
+  /* ---- Semantic ---------------------------------------------------------- */
+  --accent:         var(--moss-500);
+  --accent-hover:   var(--moss-600);
+  --accent-deep:    var(--moss-700);
+  --accent-wash:    var(--moss-50);
+
+  --bg:             var(--paper);
+  --bg-raised:      #FFFFFF;
+  --bg-sunken:      var(--paper-2);
+  --fg:             var(--ink);
+  --fg-2:           var(--ink-2);
+  --fg-3:           var(--ink-3);
+  --fg-4:           var(--ink-4);
+  --link:           var(--moss-600);
+  --link-hover:     var(--moss-700);
+
+  --code-bg:        rgba(17, 20, 24, 0.05);
+  --selection:      #D6EACF;
+
+  /* ---- Shadows (warm tungsten) ------------------------------------------ */
+  --shadow-xs:  0 1px 0 rgba(17,20,24,0.04);
+  --shadow-sm:  0 1px 2px rgba(17,20,24,0.06), 0 1px 1px rgba(17,20,24,0.04);
+  --shadow-md:  0 8px 24px -10px rgba(17,20,24,0.14), 0 2px 6px rgba(17,20,24,0.06);
+  --shadow-lg:  0 24px 60px -20px rgba(17,20,24,0.20), 0 6px 16px rgba(17,20,24,0.08);
+
+  /* ---- Radii ------------------------------------------------------------ */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* ---- Spacing (4px base) ------------------------------------------------ */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+
+  /* ---- Layout ----------------------------------------------------------- */
+  --page-max:   1120px;
+  --prose-max:  68ch;
+  --gutter:     24px;
+
+  /* ---- Type tokens (quoted so multi-word names parse as CSS strings) ---- */
+  --font-display: "Fraunces", "Noto Serif SC", "Source Serif 4", Georgia, serif;
+  --font-serif:   "Source Serif 4", "Noto Serif SC", Georgia, "Times New Roman", serif;
+  --font-sans:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-zh:      "Noto Serif SC", "Songti SC", "STSong", serif;
+  --font-mono:    "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+
+  --fs-xs:  0.75rem;
+  --fs-sm:  0.8125rem;
+  --fs-base:0.9375rem;
+  --fs-md:  1rem;
+  --fs-lg:  1.125rem;
+  --fs-xl:  1.375rem;
+  --fs-2xl: 1.75rem;
+  --fs-3xl: 2.25rem;
+  --fs-4xl: clamp(2.5rem, 4.5vw, 3.75rem);
+  --fs-5xl: clamp(3rem, 6vw, 5rem);
+
+  --lh-tight: 1.15;
+  --lh-snug:  1.3;
+  --lh-body:  1.62;
+  --lh-loose: 1.8;
+
+  /* ---- Transitions ------------------------------------------------------ */
+  --e-out:     cubic-bezier(0.22, 1, 0.36, 1);
+  --e-in-out:  cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast:    140ms var(--e-out);
+  --t-med:     240ms var(--e-out);
+  --t-slow:    480ms var(--e-out);
+
+  /* ---- Legacy al-folio custom properties (map onto design tokens) ------- */
+  --global-bg-color: var(--paper);
+  --global-code-bg-color: var(--code-bg);
+  --global-text-color: var(--ink);
+  --global-text-color-light: var(--ink-3);
+  --global-theme-color: var(--accent);
+  --global-hover-color: var(--accent-hover);
+  --global-footer-bg-color: var(--paper-2);
+  --global-footer-text-color: var(--ink-3);
+  --global-footer-link-color: var(--accent);
+  --global-distill-app-color: var(--ink-3);
+  --global-divider-color: var(--rule);
+  --global-card-bg-color: var(--paper);
+  --global-shadow-color: rgba(17,20,24,0.10);
+  --global-shadow-sm: var(--shadow-sm);
+  --global-shadow-md: var(--shadow-md);
+  --global-shadow-lg: var(--shadow-lg);
+
+  .fa-sun  { display: none; }
+  .fa-moon { display: block; }
+  .theme-toggle__sun  { opacity: 0; transform: rotate(-90deg) scale(0.6); pointer-events: none; }
+  .theme-toggle__moon { opacity: 1; transform: rotate(0)     scale(1); }
+  .repo-img-light { display: block; }
+  .repo-img-dark  { display: none; }
 }
 
 html[data-theme='dark'] {
-  --global-bg-color: #{$grey-color-dark};
-  --global-code-bg-color: #{$code-bg-color-dark};
-  --global-text-color: #{$grey-color-light};
-  --global-text-color-light: #{$grey-color-light};
-  --global-theme-color: #{$green-color-dark};
-  --global-hover-color: #{$green-color-dark};
-  --global-footer-bg-color: #{$grey-color-light};
-  --global-footer-text-color: #{$grey-color-dark};
-  --global-footer-link-color: #{$black-color};
-  --global-distill-app-color: #{$grey-color-light};
-  --global-divider-color: #424246;
-  --global-card-bg-color: #{$grey-900};
-  --global-shadow-color: rgba(0, 0, 0, 0.3);
+  --paper:          #0E1013;
+  --paper-2:        #151921;
+  --ink:            #E8E5DC;
+  --ink-2:          #C2C0B8;
+  --ink-3:          #8A8880;
+  --ink-4:          #5A5852;
+  --rule:           rgba(232, 229, 220, 0.10);
+  --rule-strong:    rgba(232, 229, 220, 0.22);
 
-  .fa-sun {
-    display : block;
-  }
-  .fa-moon {
-    display : none;
-  }
+  --moss-500: #6FB366;
+  --moss-600: #8FC987;
+  --moss-700: #B4DDA9;
+  --moss-50:  #1A2619;
 
-  .repo-img-light {
-    display: none;
-  }
-  .repo-img-dark {
-    display: block;
-  }
+  --accent:       var(--moss-500);
+  --accent-hover: var(--moss-600);
+  --accent-deep:  var(--moss-700);
+  --accent-wash:  var(--moss-50);
+
+  --bg:        var(--paper);
+  --bg-raised: #1A1E25;
+  --bg-sunken: var(--paper-2);
+  --fg:        var(--ink);
+  --fg-2:      var(--ink-2);
+  --fg-3:      var(--ink-3);
+  --fg-4:      var(--ink-4);
+  --link:      var(--moss-500);
+  --link-hover: var(--moss-600);
+
+  --code-bg:   rgba(232, 229, 220, 0.06);
+  --selection: #2D4529;
+
+  --shadow-xs: 0 1px 0 rgba(0,0,0,0.30);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.40), 0 1px 1px rgba(0,0,0,0.30);
+  --shadow-md: 0 8px 24px -10px rgba(0,0,0,0.50), 0 2px 6px rgba(0,0,0,0.25);
+  --shadow-lg: 0 24px 60px -20px rgba(0,0,0,0.60), 0 6px 16px rgba(0,0,0,0.35);
+
+  --global-bg-color: var(--paper);
+  --global-code-bg-color: var(--code-bg);
+  --global-text-color: var(--ink);
+  --global-text-color-light: var(--ink-3);
+  --global-theme-color: var(--accent);
+  --global-hover-color: var(--accent-hover);
+  --global-footer-bg-color: var(--paper-2);
+  --global-footer-text-color: var(--ink-3);
+  --global-footer-link-color: var(--accent);
+  --global-distill-app-color: var(--ink-3);
+  --global-divider-color: var(--rule);
+  --global-card-bg-color: var(--bg-raised);
+  --global-shadow-color: rgba(0,0,0,0.45);
+  --global-shadow-sm: var(--shadow-sm);
+  --global-shadow-md: var(--shadow-md);
+  --global-shadow-lg: var(--shadow-lg);
+
+  .fa-sun  { display: block; }
+  .fa-moon { display: none; }
+  .theme-toggle__sun  { opacity: 1; transform: rotate(0)     scale(1); }
+  .theme-toggle__moon { opacity: 0; transform: rotate(90deg) scale(0.6); pointer-events: none; }
+  .repo-img-light { display: none; }
+  .repo-img-dark  { display: block; }
 }

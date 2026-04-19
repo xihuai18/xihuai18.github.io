@@ -9,11 +9,13 @@
  * Enhanced Post Header Styles
  ******************************************************************************/
 
-.post-header {
+// Scoped to actual single blog posts (which contain .post-content). Keeps
+// Publications / CV / archive pages from inheriting a bottom hairline.
+.post:has(.post-content) .post-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--global-divider-color);
-  
+
   .post-title {
     font-size: $font-size-2xl;
     font-weight: 700;
@@ -33,32 +35,36 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 14px;                    // BlogPost.jsx uk-post-meta gap
   color: var(--global-text-color-light);
-  font-size: $font-size-sm;
-  
+  font-family: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+  font-size: 12px;              // BlogPost.jsx mono-meta
+  letter-spacing: 0.02em;
+
   > span {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    
+    gap: 0.35rem;
+
     i {
       font-size: 0.9em;
-      opacity: 0.8;
+      opacity: 0.7;
     }
   }
-  
-  .post-date {
-    color: var(--global-text-color);
-    font-weight: 500;
-  }
-  
-  .post-author {
-    color: var(--global-text-color-light);
-  }
-  
-  .post-reading-time {
-    color: var(--global-text-color-light);
+
+  .post-date,
+  .post-author,
+  .post-reading-time { color: var(--global-text-color-light); }
+
+  // Inline language switch — BlogPost.jsx:18 `中文版本 →` / `English Version →`
+  .post-lang-switch {
+    margin-left: auto;          // pushes to right like uk-blog-views
+    color: var(--global-theme-color);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &:hover { border-bottom-color: var(--global-theme-color); }
   }
 }
 
@@ -157,12 +163,12 @@
   // Ensure proper heading hierarchy and spacing
   h2 {
     font-size: $font-size-xl;  // 1.5rem = 24px
-    font-weight: 700;
+    font-weight: 600;
     margin-top: 2.5rem;
     margin-bottom: 1rem;
     line-height: 1.3;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--global-theme-color);
+    padding-bottom: 0;
+    border-bottom: none;        /* design kit: no decorative rule under h2 */
     color: var(--global-text-color);
   }
 
@@ -246,7 +252,7 @@
 
     thead {
       background-color: var(--global-code-bg-color);
-      border-bottom: 2px solid var(--global-theme-color);
+      border-bottom: 1px solid var(--global-divider-color);
       
       th {
         padding: 0.85rem 1rem;
@@ -711,32 +717,14 @@
     }
   }
 
-  // Item hover lift & left accent
+  // Item hover — title shifts to accent; no decorative left rail.
+  // (Design system: "Links get an underline, not a color swap"; we keep
+  // color swap for the list title because it reads as a link, not body copy.)
   .blog-post-list-item {
-    position: relative;
-    padding-left: 0.25rem;
-    transition: background-color 0.2s ease;
+    padding-left: 0;
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: -0.5rem;
-      top: 1.4rem;
-      bottom: 1.4rem;
-      width: 2px;
-      background: var(--global-theme-color);
-      opacity: 0;
-      border-radius: 2px;
-      transition: opacity 0.2s ease;
-    }
-
-    &:hover::before {
-      opacity: 0.8;
-    }
-
-    h3 a {
-      transition: color 0.2s ease;
-    }
+    h3 a { transition: color 0.14s cubic-bezier(0.22, 1, 0.36, 1); }
+    &:hover h3 a { color: var(--global-theme-color); }
   }
 }
 
@@ -1001,18 +989,10 @@ a[data-filter-link].active-filter {
     img {
       max-width: 100%;
       height: auto;
-      border-radius: 12px;
-      box-shadow: var(--global-shadow-md);
+      border-radius: var(--r-sm);
+      box-shadow: var(--global-shadow-sm);
       cursor: zoom-in;
-
-      @media (prefers-reduced-motion: no-preference) {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-        &:hover {
-          transform: scale(1.02);
-          box-shadow: var(--global-shadow-lg);
-        }
-      }
+      /* design: no scroll-linked parallax, no entrance choreography */
     }
 
     figcaption {
@@ -1044,21 +1024,10 @@ a[data-filter-link].active-filter {
     max-width: 100%;
     height: auto;
     margin: 2.5rem auto;
-    border-radius: 12px;
-    box-shadow: var(--global-shadow-md);
+    border-radius: var(--r-sm);
+    box-shadow: var(--global-shadow-sm);
     cursor: zoom-in;
-
-    &:hover {
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-      &:hover {
-        transform: scale(1.01);
-      }
-    }
+    /* design: flat paper; no hover scale */
   }
 
   // Image with caption using markdown
@@ -1077,34 +1046,8 @@ a[data-filter-link].active-filter {
     cursor: zoom-in;
   }
 
-  // Container for zoomable images with overlay hint
-  figure:has(img[data-zoomable]),
-  p:has(> img[data-zoomable]) {
-    position: relative;
-
-    &::after {
-      content: '🔍';
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      font-size: 1.25rem;
-      background: var(--global-bg-color);
-      border-radius: 50%;
-      width: 2.5rem;
-      height: 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      box-shadow: var(--global-shadow-sm);
-      transition: opacity 0.2s ease;
-    }
-
-    &:hover::after {
-      opacity: 0.85;
-    }
-  }
+  // zoomable-image 🔍 overlay removed — design keeps decoration minimal;
+  // image-level cursor: zoom-in already telegraphs the affordance.
 }
 
 /*******************************************************************************
@@ -1114,87 +1057,37 @@ a[data-filter-link].active-filter {
 .post-content {
   blockquote {
     margin: 2rem 0;
-    padding: 1.25rem 1.5rem;
-    border-left: 4px solid var(--global-theme-color);
-    background-color: var(--global-code-bg-color);
-    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 0 0.75rem 1.5rem;
+    border-left: 2px solid var(--global-theme-color);
+    background: none;                 /* design: flat paper, no fill */
+    border-radius: 0;
+    font-family: "Fraunces", "Noto Serif SC", "Source Serif 4", Georgia, serif;
     font-style: italic;
-    color: var(--global-text-color);
-    position: relative;
+    font-size: 1.125rem;
+    color: var(--global-text-color-light);
 
-    &::before {
-      content: '"';
-      position: absolute;
-      top: -0.5rem;
-      left: 0.75rem;
-      font-size: 3rem;
-      color: var(--global-theme-color);
-      opacity: 0.3;
-      font-family: Georgia, serif;
-      line-height: 1;
-      pointer-events: none;
-      // Note: CSS pseudo-elements are inherently not exposed to the accessibility tree,
-      // so no additional ARIA attributes are needed for this decorative content.
-    }
+    &::before { content: none; }      /* kill giant Georgia quote mark */
 
     p {
       margin: 0;
       font-style: italic;
       line-height: 1.7;
-      
-      &:not(:last-child) {
-        margin-bottom: 0.75rem;
-      }
+
+      &:not(:last-child) { margin-bottom: 0.75rem; }
     }
 
-    // Nested blockquotes
+    // Nested blockquotes — quieter rail
     blockquote {
       margin: 1rem 0;
       border-left-color: var(--global-text-color-light);
-      background-color: transparent;
-      padding: 0.75rem 1rem;
-      
-      &::before {
-        display: none;
-      }
+      padding: 0.5rem 0 0.5rem 1rem;
     }
 
-    // Note/Warning/Info styled blockquotes
-    &.note, &.info {
-      border-left-color: #3498db;
-      background-color: rgba(52, 152, 219, 0.08);
-      
-      &::before {
-        color: #3498db;
-      }
-    }
-
-    &.warning {
-      border-left-color: #f39c12;
-      background-color: rgba(243, 156, 18, 0.08);
-      
-      &::before {
-        color: #f39c12;
-      }
-    }
-
-    &.danger, &.error {
-      border-left-color: #e74c3c;
-      background-color: rgba(231, 76, 60, 0.08);
-      
-      &::before {
-        color: #e74c3c;
-      }
-    }
-
-    &.success, &.tip {
-      border-left-color: #2ecc71;
-      background-color: rgba(46, 204, 113, 0.08);
-      
-      &::before {
-        color: #2ecc71;
-      }
-    }
+    // Callout flavors — keep functional color but no background wash
+    &.note,   &.info    { border-left-color: #3498db; }
+    &.warning           { border-left-color: #f39c12; }
+    &.danger, &.error   { border-left-color: #e74c3c; }
+    &.success,&.tip     { border-left-color: #2ecc71; }
   }
 }
 
@@ -1372,7 +1265,7 @@ a[data-filter-link].active-filter {
   color: var(--global-text-color);
   background-color: var(--global-code-bg-color);
   border: 1px solid var(--global-divider-color);
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -1401,7 +1294,7 @@ pre {
     color: var(--global-text-color-light);
     background-color: var(--global-bg-color);
     border: 1px solid var(--global-divider-color);
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     cursor: pointer;
     opacity: 0;
     z-index: 10;
@@ -1437,7 +1330,7 @@ pre {
     color: var(--global-text-color-light);
     background-color: var(--global-bg-color);
     border: 1px solid var(--global-divider-color);
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     cursor: pointer;
     opacity: 0;
     z-index: 10;

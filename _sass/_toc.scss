@@ -58,85 +58,96 @@
   }
 }
 
+// Design system TOC — kit.css:221-230 `.uk-post-toc`.
+// Spare aside, no box / no toggle button / no header divider.
+// Each item carries its own left-border segment that turns moss on active
+// or hover, so the rail itself tracks where you are in the article.
 .toc-sidebar {
-  border-left: 1px solid var(--global-divider-color);
-  padding-left: 1rem;
   position: sticky;
-  top: 6rem; // accounts for fixed navbar + container margin
-  max-height: calc(100vh - 7rem);
-  overflow: auto;
+  top: 5rem;                    // ~80px, sits below fixed navbar
+  align-self: start;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;             // scroll internally if TOC is long
+  overflow-x: hidden;           // keep horizontal rule visible
+  padding: 0;
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.2s ease;
   }
 
-  &.is-empty {
-    display: none;
-  }
-  
-  &.is-collapsed {
-    opacity: 0;
-    transform: translateX(20px);
-    pointer-events: none;
-  }
+  &.is-empty { display: none; }
+  // `is-collapsed` was a legacy slide-out state; with the flat design there's
+  // no toggle any more, so keep the aside visible even if the JS adds the class.
+  &.is-collapsed { opacity: 1; pointer-events: auto; transform: none; }
 }
 
+// Keep the sidebar column mounted regardless of the legacy `toc-collapsed`
+// state and force it to stretch to the full row height so `position: sticky`
+// on `.toc-sidebar` has a tall enough containing block to stick within.
+.toc-layout.toc-collapsed .toc-sidebar-col { display: block; }
+// DO NOT expand .toc-content to `flex: 1 1 auto` — that makes its flex-basis
+// become its content width, which together with `col-lg-3`'s 25% overflows
+// the 100% row budget and wraps the sidebar onto the next line (breaking
+// sticky). Restore Bootstrap's `.col-lg` default `flex: 1 1 0%`.
+.toc-layout.toc-collapsed .toc-content { flex: 1 1 0%; max-width: 100%; }
+// Harden the row/column flex stretch so that if Bootstrap's grid CSS is slow
+// or offline the sticky TOC still has a tall enough containing block.
+.post.toc-layout > .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.post.toc-layout > .row > .toc-sidebar-col { align-self: stretch; }
+
+// Eyebrow + toggle row (toggle hidden by default; see below)
 .toc-sidebar__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--global-divider-color);
+  margin: 0 0 10px;                           // kit.css:222
+  padding: 0;
+  border: none;
+  gap: var(--s-2);
 }
 
 .toc-sidebar__title {
-  font-size: $font-size-sm;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--global-text-color-light);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.toc-toggle-btn {
-  display: flex;
+// Legacy al-folio toggle chevron — hidden by default.
+// A user who wants a foldable TOC can flip `.toc-sidebar--foldable` on the
+// include and the button will reappear.
+.toc-toggle-btn                           { display: none; }
+.toc-sidebar--foldable .toc-toggle-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: none;
-  background-color: transparent;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  background: transparent;
   color: var(--global-text-color-light);
   cursor: pointer;
-  border-radius: 4px;
+  transition: color var(--t-fast, 140ms ease);
 
+  &:hover { color: var(--global-theme-color); }
+
+  i { font-size: 0.7rem; }
   @media (prefers-reduced-motion: no-preference) {
-    transition: all 0.2s ease;
-  }
-  
-  &:hover {
-    background-color: var(--global-code-bg-color);
-    color: var(--global-theme-color);
-  }
-  
-  i {
-    font-size: 0.75rem;
-
-    @media (prefers-reduced-motion: no-preference) {
-      transition: transform 0.3s ease;
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    &.is-collapsed i {
-      transform: rotate(180deg);
-    }
+    &.is-collapsed i { transform: rotate(180deg); transition: transform 0.2s ease; }
   }
 }
 
-// Floating button shown when TOC is collapsed
-.toc-collapsed-toggle {
+// Floating collapsed-toggle button — hidden by default; design keeps the
+// TOC inline without a separate floating re-open affordance. Opt in with
+// `.toc-collapsed-toggle--foldable` class on the include if needed.
+.toc-collapsed-toggle { display: none !important; }
+.toc-collapsed-toggle--foldable {
   position: fixed;
   right: 30px;
   bottom: 104px; // Position above back-to-top button (50px + 44px + 10px gap)
@@ -196,82 +207,72 @@
 }
 
 .toc {
-  font-size: $font-size-sm;
-  line-height: 1.35;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 13px;                           // kit.css:226
+  line-height: 1.4;
 
   ul {
     list-style: none;
     margin: 0;
-    padding-left: 0;
+    padding: 0;
+    border-left: 2px solid var(--global-divider-color);    // 2px rail — kit.css:223
   }
 
   li {
-    margin: 0.25rem 0;
-    
-    // Collapsible section toggle
-    &.has-children {
-      position: relative;
-      
-      > .toc-section-toggle {
-        position: absolute;
-        left: -1rem;
-        top: 0.1rem;
-        width: 16px;
-        height: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        background: transparent;
-        color: var(--global-text-color-light);
-        cursor: pointer;
-        padding: 0;
-        font-size: 0.6rem;
+    margin: 0;
 
-        @media (prefers-reduced-motion: no-preference) {
-          transition: transform 0.2s ease;
-
-          &.is-collapsed {
-            transform: rotate(-90deg);
-          }
-        }
-        
-        &:hover {
-          color: var(--global-theme-color);
-        }
-      }
-    }
-    
-    // Hide children when collapsed
-    &.section-collapsed > ul {
-      display: none;
-    }
+    // With `headings="h2"` we don't generate nested children, but guard anyway:
+    // keep the section-toggle button out of sight if the plugin still emits it.
+    &.has-children > .toc-section-toggle { display: none; }
+    &.section-collapsed > ul { display: none; }
   }
 
+  // Nested lists keep their own 2px rail, indented
   ul ul {
-    margin-top: 0.25rem;
-    margin-left: 0.25rem;
-    padding-left: 0.75rem;
-    border-left: 1px solid var(--global-divider-color);
+    margin-top: 0;
+    margin-left: 6px;
+    padding-left: 0;
   }
 
   a {
+    display: block;
+    padding: 6px 14px;                        // kit.css:225
+    margin-left: -2px;                        // overlap parent rail — kit.css:225
+    border-left: 2px solid transparent;       // becomes moss on hover/active
     color: var(--global-text-color-light);
     text-decoration: none;
-    display: inline-block;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    transition: color 0.2s ease;
+    transition: color 0.14s cubic-bezier(0.22, 1, 0.36, 1),
+                border-left-color 0.14s cubic-bezier(0.22, 1, 0.36, 1);
 
-    &:hover {
-      color: var(--global-theme-color);
-    }
-
+    &:hover,
     &.is-active {
       color: var(--global-theme-color);
-      font-weight: 600;
+      border-left-color: var(--global-theme-color);
     }
+    &.is-active { font-weight: 600; }
   }
 }
+
+/* --- Responsive: narrow columns (992-1200) and tablet/mobile ------------- */
+// Between Bootstrap lg (992px) and xl (1200px) the col-lg-3 sidebar gets
+// tight; allow wrapping there instead of ellipsis, and shrink type slightly.
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .toc a {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: visible;
+    font-size: var(--fs-xs);
+    line-height: 1.35;
+    padding: 5px 12px;
+  }
+}
+
+// Below lg, al-folio hides the sidebar column (`d-none d-lg-block`), so the
+// desktop TOC vanishes. For readers on tablet/phone we don't render it — they
+// can use native browser heading navigation / the article order instead.
+// (If foldable top-of-post TOC is desired later, re-enable the
+// `.toc-collapsed-toggle--foldable` floating button.)

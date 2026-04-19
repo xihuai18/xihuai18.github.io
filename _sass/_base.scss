@@ -108,23 +108,26 @@ table.table a {
   }
 }
 
+// Global image reset — keep only responsive behavior. Decorative
+// border-radius + shadow moved to scoped post-content rules so that tiny
+// inline icons (wechat/zhihu/bilibili PNGs) don't inherit photo styling.
 figure,
 img {
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: transform 0.2s ease;
 }
 
 blockquote {
-  background: var(--global-code-bg-color);
-  border-left: 4px solid var(--global-theme-color);
+  background: none;
+  border-left: 2px solid var(--global-theme-color);
   margin: 1.5em 0;
-  padding: 1em 1.5em;
-  font-size: $font-size-base;
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  padding: 0.75em 0 0.75em 1.5em;
+  font-family: "Fraunces", "Noto Serif SC", "Source Serif 4", Georgia, serif;
+  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--global-text-color-light);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .job-ad {
@@ -263,6 +266,16 @@ pre code {
   margin-right: 0.75rem;
 }
 
+// On mobile, neutralize the desktop left/right margin offsets so the centered
+// `margin: 0 auto` from the base `.profile` rule lands cleanly.
+@media (max-width: 575.98px) {
+  .profile.float-right,
+  .profile.float-left {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 @media (min-width: 576px) {
   .profile {
     width: 24%;
@@ -302,6 +315,24 @@ pre code {
 
 
 // Navbar customization
+
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  z-index: 1101;
+  padding: 0.65rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+
+  &:focus,
+  &:focus-visible {
+    top: 0;
+    color: #fff;
+    text-decoration: none;
+  }
+}
 
 .navbar {
   box-shadow: none;
@@ -903,204 +934,6 @@ footer.sticky-bottom {
 }
 
 
-// Publications
-
-.publications {
-  margin-top: 1rem;
-
-  h1 {
-    color: var(--global-theme-color);
-    font-size: $font-size-xl;
-    text-align: center;
-    margin-top: 0.75em;
-    margin-bottom: 0.75em;
-  }
-
-  h2 {
-    margin-bottom: 0.75rem;
-
-    span {
-      font-size: $font-size-lg;
-    }
-  }
-
-  h2.year {
-    color: var(--global-text-color);
-    border-top: 1px solid var(--global-divider-color);
-    border-bottom: none;
-    padding-top: 0.75rem;
-    margin-top: 1.25rem;
-    margin-bottom: -1.25rem;
-    text-align: right;
-    font-size: $font-size-xl;
-    font-weight: bold;
-  }
-
-  ol.bibliography {
-    list-style: none;
-    padding: 0;
-    margin-top: 0;
-
-    li {
-      margin-bottom: 0.65rem;
-
-      .preview {
-        width: 100%;
-        min-width: 60px;
-        max-width: 160px;
-      }
-
-      .abbr {
-        height: auto;
-        margin-bottom: 0.5rem;
-
-        abbr {
-          display: inline-block;
-          background-color: transparent;
-          padding: 0;
-          font-size: $font-size-xs;
-          border-radius: 0;
-          font-weight: 400;
-          box-shadow: none;
-          border: none;
-          white-space: normal;
-          line-height: 1.2;
-          text-align: left;
-          color: var(--global-text-color-light);
-
-          a {
-            color: var(--global-text-color-light);
-
-            &:hover {
-              text-decoration: underline;
-              color: var(--global-theme-color);
-            }
-          }
-        }
-
-        .award {
-          color: var(--global-theme-color) !important;
-          border: 1px solid var(--global-theme-color);
-        }
-      }
-
-      .title {
-        font-weight: bolder;
-        font-size: $font-size-base;
-        line-height: 1.4;
-      }
-
-      .author {
-        font-size: $font-size-base;
-        line-height: 1.4;
-
-        a {
-          border-bottom: 1px dashed var(--global-theme-color);
-
-          &:hover {
-            border-bottom-style: solid;
-            text-decoration: none;
-          }
-        }
-
-        >em {
-          border-bottom: 1px solid;
-          font-style: normal;
-        }
-
-        >span.more-authors {
-          color: var(--global-text-color-light);
-          border-bottom: 1px dashed var(--global-text-color-light);
-          cursor: pointer;
-
-          &:hover {
-            color: var(--global-text-color);
-            border-bottom: 1px dashed var(--global-text-color);
-          }
-        }
-      }
-
-      .periodical {
-        font-size: $font-size-base;
-      }
-
-      .links {
-        a.btn {
-          color: var(--global-text-color);
-          border: 1px solid var(--global-text-color);
-          padding: 0.2rem 0.6rem;
-          font-size: $font-size-xs;
-          margin-right: 0.25rem;
-          border-radius: 4px;
-          transition: all 0.2s ease;
-
-          &:hover {
-            color: var(--global-theme-color);
-            border-color: var(--global-theme-color);
-            background-color: var(--global-code-bg-color);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            text-decoration: none;
-          }
-        }
-      }
-
-      .badges {
-        span {
-          display: inline-block;
-          color: $black-color;
-          height: 100%;
-          padding-left: 0.5rem;
-          vertical-align: middle;
-
-          &:hover {
-            text-decoration: underline;
-          }
-        }
-      }
-
-      .hidden {
-        font-size: $font-size-base;
-        max-height: 0px;
-        overflow: hidden;
-        text-align: justify;
-        transition-property: 0.15s ease;
-        -moz-transition: 0.15s ease;
-        -ms-transition: 0.15s ease;
-        -o-transition: 0.15s ease;
-        transition: all 0.15s ease;
-
-        p {
-          line-height: 1.4em;
-          margin: 10px;
-        }
-
-        pre {
-          font-size: $font-size-sm;
-          line-height: 1.4em;
-          padding: 10px;
-        }
-      }
-
-      .hidden.open {
-        max-height: 100em;
-        transition-property: 0.15s ease;
-        -moz-transition: 0.15s ease;
-        -ms-transition: 0.15s ease;
-        -o-transition: 0.15s ease;
-        transition: all 0.15s ease;
-      }
-
-      div.abstract.hidden {
-        border: dashed 1px var(--global-bg-color);
-      }
-
-      div.abstract.hidden.open {
-        border-color: var(--global-text-color);
-      }
-    }
-  }
-}
 
 // Rouge Color Customization
 figure.highlight {
@@ -1382,8 +1215,7 @@ pre {
 .navbar-social-icons {
   display: flex;
   align-items: center;
-  gap: 0;
-  // Match navbar-brand height exactly (padding 5px + line-height 35px = 45px)
+  gap: 4px;                // tiny breathing between icon circles
   padding: 5px 0;
   margin: 0;
   min-height: 35px;
@@ -1392,8 +1224,8 @@ pre {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.2rem;
-    height: 2.2rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
     background: transparent;
     transition: all 0.2s ease;
@@ -1401,19 +1233,21 @@ pre {
     text-decoration: none !important;
 
     i, i::before {
-      font-size: $font-size-xl;
+      font-size: 1.125rem;   // 18px — readable but not overpowering nav links
       color: var(--global-text-color);
       transition: all 0.2s ease;
     }
 
     &:hover {
-      background: transparent;
-      transform: none;
-      box-shadow: none;
+      background: var(--accent-wash);
 
       i, i::before {
-        color: var(--global-theme-color);
+        color: var(--accent);
       }
+    }
+    &:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
   }
 }
@@ -1422,7 +1256,6 @@ pre {
 .profile {
   .address {
     margin-top: 0.5rem;
-    font-family: 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
     font-size: $font-size-xs;
     color: var(--global-text-color-light);
     letter-spacing: 0.02em;
@@ -1463,97 +1296,9 @@ pre {
   }
 }
 
-// About Page - Refined Typography
-.post-header {
-  margin-bottom: 1rem;
-
-  // Hero section — center everything for classic academic look
-  &.hero {
-    text-align: center;
-    padding: 1.25rem 0 1.5rem;
-  }
-
-  .post-title {
-    font-weight: 700;
-    font-size: $font-size-2xl;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-
-    // Signature-style name: modern EN + classical CN, separated by a vertical bar
-    &.signature-name {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: center;
-      gap: 0.65rem;
-      margin-bottom: 0.35rem;
-
-      .name-en {
-        font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', sans-serif;
-        font-style: normal;
-        font-weight: 700;
-        font-size: $font-size-3xl;
-        letter-spacing: -0.025em;
-        background: linear-gradient(135deg, var(--global-text-color) 0%, var(--global-theme-color) 120%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .name-sep {
-        width: 1px;
-        height: 1.3em;
-        background: var(--global-divider-color);
-        align-self: center;
-      }
-
-      .name-zh {
-        font-family: 'KaiTi', 'STKaiti', 'FZKai-Z03', 'AR PL UKai CN', serif;
-        font-weight: 500;
-        font-size: $font-size-2xl;
-        color: var(--global-text-color-light);
-        letter-spacing: 0.08em;
-      }
-    }
-  }
-
-  .desc {
-    font-size: $font-size-md;
-    color: var(--global-text-color-light);
-    margin-bottom: 0.75rem;
-
-    a {
-      color: var(--global-theme-color);
-      text-decoration: none;
-      border-bottom: 1px dashed var(--global-theme-color);
-      transition: border-bottom-style 0.2s;
-
-      &:hover {
-        border-bottom-style: solid;
-      }
-    }
-  }
-
-}
-
-// Section Headers with subtle accent — scoped to about-page article (not blog post content)
-.post > article > h2 {
-  font-size: $font-size-xl;
-  font-weight: 700;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.3rem;
-  border-bottom: 2px solid var(--global-theme-color);
-  display: inline-block;
-
-  a {
-    color: inherit;
-    &:hover {
-      text-decoration: none;
-      opacity: 0.8;
-    }
-  }
-}
+// Legacy About-page hero typography and section-header rules removed here —
+// the Xihuai Wang Refined Design System (_design_system.scss) owns these
+// surfaces now (signature-name hero, post > article > h2, .desc link style).
 
 // Section Cards
 .news, .publications {
@@ -1609,510 +1354,18 @@ pre {
 }
 
 /*******************************************************************************
- * CV Page - Compact & Professional
+ * CV Page — see _sass/_design_system.scss section 13 for current styling.
+ * (Legacy `.cv { ... }` block removed; it conflicted with the dissolved-card
+ * design-system treatment and left a full-width green rule under each section
+ * heading plus a timeline dot marker that the new layout doesn't use.)
  ******************************************************************************/
 
-.cv {
-  margin-bottom: 1.5rem;
+// Legacy TOC sidebar rules lived here (`top: 70px` + `.nav-link` padding
+// animations). They are superseded by `_sass/_toc.scss` which now owns the
+// design-system flat list + moss rail. The old rule is removed because its
+// `top: 70px` was winning against the design-system `top: 5rem` due to
+// selector specificity.
 
-  .card {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    margin-top: 1.25rem !important;
-    padding: 0.25rem 0 0.75rem !important;
-    transition: none;
-
-    &:hover {
-      box-shadow: none !important;
-      transform: none !important;
-    }
-
-    .card-title {
-      font-family: 'Inter', 'Helvetica Neue', sans-serif;
-      font-size: $font-size-lg;
-      font-weight: 700;
-      color: var(--global-text-color);
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.5rem;
-      padding-left: 0.75rem;
-      border-bottom: 1px solid var(--global-divider-color);
-      position: relative;
-      letter-spacing: -0.01em;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0.15em;
-        width: 3px;
-        height: 1em;
-        background: var(--global-theme-color);
-        border-radius: 2px;
-      }
-    }
-  }
-
-  --cv-year-column-width: 120px;
-  --cv-timeline-gap: 2rem;
-
-  // Compact Time Table — Timeline style (desktop only)
-  .cv-timeline {
-    margin: 0;
-    padding: 0;
-    position: relative;
-
-    .list-group-item {
-      padding: 0.5rem 0;
-      border: none;
-      background: transparent;
-      position: relative;
-
-      &:last-child {
-        padding-bottom: 0;
-      }
-
-      &:first-child {
-        padding-top: 0;
-      }
-
-      .cv-entry {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-
-        @media (min-width: 768px) {
-          display: grid;
-          grid-template-columns: var(--cv-year-column-width) 2rem minmax(0, 1fr);
-          column-gap: 0;
-          align-items: start;
-        }
-      }
-
-      .cv-entry-year {
-        min-width: 0;
-      }
-
-      .cv-entry-marker {
-        display: none;
-
-        @media (min-width: 768px) {
-          display: block;
-          position: relative;
-          min-height: 100%;
-
-          &::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: var(--global-divider-color);
-            transform: translateX(-50%);
-          }
-
-          &::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0.65rem;
-            width: 9px;
-            height: 9px;
-            background: var(--global-bg-color);
-            border: 2px solid var(--global-theme-color);
-            border-radius: 50%;
-            transform: translateX(-50%);
-            z-index: 1;
-            transition: background 0.2s ease, transform 0.2s ease;
-          }
-        }
-      }
-
-      &:hover .cv-entry-marker::after {
-        background: var(--global-theme-color);
-        transform: translateX(-50%) scale(1.25);
-      }
-
-      .cv-entry-body {
-        min-width: 0;
-      }
-
-      .badge {
-        font-size: $font-size-xs;
-        font-weight: 600;
-        padding: 0;
-        min-width: auto;
-        background-color: transparent !important;
-        color: var(--global-theme-color) !important;
-        border: none;
-      }
-
-      h6.title {
-        font-size: $font-size-base;  // 1rem (16px) - entry title
-        font-weight: 600;
-        margin: 0 0 0.15rem 0;
-        color: var(--global-text-color);
-      }
-
-      h6:not(.title) {
-        font-size: 0.9375rem;  // 15px - institution name
-        font-weight: 400;
-        margin: 0;
-        color: var(--global-text-color-light);
-      }
-
-      .items {
-        margin: 0;
-        padding-left: 0;
-        font-size: $font-size-base;
-        list-style: none;
-
-        li {
-          margin-bottom: 0.15rem;
-          padding-left: 0;
-
-          &::marker {
-            content: '';
-          }
-        }
-      }
-
-      .cv-entry-list {
-        margin-top: 0.15rem;
-      }
-    }
-  }
-
-  // Year badge styling
-  .cv-year-badge {
-    font-size: $font-size-sm;  // 0.875rem (14px)
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--global-text-color);
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-  }
-
-  // Compact Map Table
-  .table {
-    margin: 0;
-    font-size: $font-size-base;  // 1rem (16px) - table content
-
-    tr {
-      td {
-        padding: 0.4rem 0.6rem;
-        border: none;
-
-        &:first-child {
-          font-weight: 600;
-          color: var(--global-text-color);
-          width: 120px;
-        }
-      }
-    }
-  }
-
-  // List and Nested List styling
-  .list-group-item {
-    font-size: $font-size-base;  // 1rem (16px)
-
-    h5.font-italic {
-      font-size: $font-size-base;  // 1rem (16px)
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-    }
-
-    .subitems {
-      font-size: $font-size-base;  // 1rem (16px)
-      margin-top: 0.2rem;
-      padding-left: 1rem;
-      color: var(--global-text-color);
-      
-      li {
-        margin-bottom: 0.15rem;
-      }
-    }
-
-    .nested-content {
-      font-size: $font-size-base;  // 1rem (16px)
-      color: var(--global-text-color);
-    }
-  }
-}
-
-// CV TOC Sidebar - Refined
-.toc-layout {
-  .col-lg-3 {
-    aside {
-      position: sticky;
-      top: 70px;
-      font-size: $font-size-xs;
-
-      .nav-link {
-        padding: 0.2rem 0.4rem;
-        color: var(--global-text-color-light);
-        transition: color 0.2s, padding-left 0.2s;
-
-        &:hover, &.active {
-          color: var(--global-theme-color);
-          padding-left: 0.6rem;
-        }
-      }
-    }
-  }
-}
-
-/*******************************************************************************
- * Publications Page - Compact & Organized
- ******************************************************************************/
-
-.publications {
-  margin-top: 0.75rem;
-
-  h2.year {
-    font-family: 'Inter', 'Helvetica Neue', sans-serif;
-    font-size: $font-size-xl;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--global-text-color);
-    margin-top: 1.75rem;
-    margin-bottom: 0.9rem;
-    padding-top: 1rem;
-    padding-bottom: 0.4rem;
-    border-top: none;
-    border-bottom: none;
-    text-align: left;
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-
-    &::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 1.1em;
-      background: var(--global-theme-color);
-      border-radius: 2px;
-    }
-
-    // Subtle background divider line extending to the right
-    &::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(to right, var(--global-divider-color) 0%, transparent 100%);
-      margin-left: 0.5rem;
-    }
-  }
-
-  ol.bibliography {
-    li {
-      margin-bottom: 1rem;
-      padding-bottom: 1rem;
-      border-radius: 0;
-      background: transparent;
-      border-bottom: 1px solid var(--global-divider-color);
-      transition: none;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      &:hover {
-        box-shadow: none !important;
-        border: none !important;
-        background-color: transparent !important;
-        border-bottom: 1px solid var(--global-divider-color) !important;
-      }
-
-      &:last-child:hover {
-        border-bottom: none !important;
-      }
-
-      &.single-pub-in-year {
-        border-bottom: none !important;
-
-        &:hover {
-          border-bottom: none !important;
-        }
-      }
-
-      .row {
-        margin: 0;
-        padding: 0;
-      }
-
-      // Remove left padding from Bootstrap columns to align with text
-      .col-sm-10,
-      .col-sm-12 {
-        padding-left: 0;
-      }
-
-      .col-sm-2 {
-        padding: 0 0.4rem 0 0;
-
-        &.abbr {
-          height: auto;
-          margin-bottom: 0;
-        }
-      }
-
-      .col-sm-8 {
-        padding: 0;
-      }
-
-      .title {
-        font-size: $font-size-base;
-        font-weight: 600;
-        line-height: 1.35;
-        margin-bottom: 0.2rem;
-
-        abbr.badge {
-          font-size: $font-size-xs;
-          padding: 0;
-          border-radius: 0;
-          line-height: 1.2;
-          text-align: left;
-          display: inline;
-          width: auto;
-          margin-bottom: 0;
-          background-color: transparent;
-          color: var(--global-text-color-light);
-          border: none;
-          font-weight: 400;
-
-          a {
-            color: var(--global-text-color-light);
-            &:hover {
-              text-decoration: underline;
-              color: var(--global-theme-color);
-            }
-          }
-        }
-      }
-
-      .author {
-        font-size: $font-size-base;
-        line-height: 1.35;
-        margin-bottom: 0.15rem;
-      }
-
-      .periodical {
-        font-size: $font-size-base;
-        color: var(--global-text-color-light);
-        margin-bottom: 0.2rem;
-      }
-
-      .links {
-        margin-top: 0.25rem;
-        margin-left: 0;
-
-        a.btn {
-          font-size: $font-size-xs;
-          padding: 0.15rem 0.4rem;
-          margin-right: 0.2rem;
-          margin-left: 0;
-          border-radius: 3px;
-
-          &:first-child {
-            margin-left: 0;
-          }
-        }
-      }
-
-      .venue-tag {
-        margin-top: 0.4rem;
-        font-size: $font-size-xs;
-        display: inline-flex;
-        align-items: center;
-        background-color: var(--global-code-bg-color);
-        padding: 0.15rem 0.5rem 0.15rem 0.35rem;
-        border-radius: 0 3px 3px 0;
-        border: 1px solid var(--global-divider-color);
-        border-left: 3px solid var(--global-theme-color);
-        position: relative;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:hover,
-        &:focus {
-          background-color: var(--global-theme-color);
-          border-color: var(--global-theme-color);
-          transform: translateX(2px);
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          outline: none;
-        }
-
-        &:focus {
-          box-shadow: 0 0 0 2px var(--global-bg-color), 0 0 0 4px var(--global-theme-color);
-        }
-
-        &.active-filter {
-          background-color: var(--global-theme-color);
-          border-color: var(--global-theme-color);
-
-          .venue-link, .venue-name {
-            color: white;
-          }
-
-          &::after {
-            content: '✓';
-            margin-left: 0.3rem;
-            color: white;
-            font-weight: bold;
-          }
-        }
-
-        &::before {
-          content: '';
-          position: absolute;
-          left: 0.35rem;
-          width: 4px;
-          height: 4px;
-          background-color: white;
-          border-radius: 50%;
-          border: 1px solid var(--global-divider-color);
-        }
-
-        .venue-link, .venue-name {
-          color: var(--global-text-color-light);
-          text-decoration: none;
-          font-weight: 400;
-          margin-left: 0.4rem;
-          transition: color 0.2s ease;
-        }
-
-        &:hover .venue-link,
-        &:hover .venue-name,
-        &:focus .venue-link,
-        &:focus .venue-name {
-          color: white;
-        }
-
-        .venue-name {
-          cursor: pointer;
-        }
-      }
-
-      .hidden {
-        font-size: $font-size-xs;
-        margin-top: 0;
-
-        pre {
-          font-size: $font-size-xs;
-          padding: 0.4rem;
-        }
-      }
-
-      .hidden.open {
-        margin-top: 0.35rem;
-      }
-    }
-  }
-}
 
 // Selected Papers on About Page - More Compact
 .post .publications {
@@ -2157,210 +1410,6 @@ pre {
   }
 }
 
-.post ol.bibliography {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-
-  // Ensure the entire Selected Papers block lines up with the intro text
-  .publications & {
-    padding-left: 0;
-    margin-left: 0;
-  }
-
-  @media (max-width: 768px) {
-    padding-left: 0;
-  }
-
-  li {
-    margin-bottom: 1.0rem;
-    padding-bottom: 0.3rem;
-    padding-left: 0;
-    background: transparent;
-    border-bottom: 1px solid var(--global-divider-color);
-    transition: none;
-
-    .row {
-      margin: 0;
-      padding: 0;
-    }
-
-    // Remove left padding from Bootstrap columns to align with text
-    .col-sm-10,
-    .col-sm-12 {
-      padding-left: 0;
-    }
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
-      box-shadow: none !important;
-      background: transparent !important;
-      border-bottom: 1px solid var(--global-divider-color) !important;
-    }
-
-    &:last-child:hover {
-      border-bottom: none !important;
-    }
-
-    &.single-pub-in-year {
-      border-bottom: none !important;
-
-      &:hover {
-        border-bottom: none !important;
-      }
-    }
-
-    .title {
-      font-size: $font-size-base;
-    }
-
-    .author {
-      font-size: $font-size-base;
-    }
-
-    .periodical {
-      font-size: $font-size-base;
-    }
-
-    .links a.btn {
-      font-size: $font-size-xs;
-      padding: 0.12rem 0.35rem;
-      margin-left: 0;
-    }
-
-    .links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.2rem;
-      margin-top: 0.35rem;
-      padding-left: 0;
-      margin-left: 0;
-    }
-
-    .venue-tag {
-      margin-top: 0.4rem;
-      font-size: $font-size-xs;
-      display: inline-flex;
-      align-items: center;
-      background-color: var(--global-code-bg-color);
-      padding: 0.15rem 0.5rem 0.15rem 0.35rem;
-      border-radius: 0 3px 3px 0;
-      border: 1px solid var(--global-divider-color);
-      border-left: 3px solid var(--global-theme-color);
-      position: relative;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover,
-      &:focus {
-        background-color: var(--global-theme-color);
-        border-color: var(--global-theme-color);
-        transform: translateX(2px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        outline: none;
-      }
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0.35rem;
-        width: 4px;
-        height: 4px;
-        background-color: white;
-        border-radius: 50%;
-        border: 1px solid var(--global-divider-color);
-      }
-
-      .venue-link, .venue-name {
-        color: var(--global-text-color-light);
-        text-decoration: none;
-        font-weight: 400;
-        margin-left: 0.4rem;
-        transition: color 0.2s ease;
-      }
-
-      &:hover .venue-link,
-      &:hover .venue-name,
-      &:focus .venue-link,
-      &:focus .venue-name {
-        color: white;
-      }
-
-      .venue-name {
-        cursor: pointer;
-      }
-    }
-  }
-}
-
-/*******************************************************************************
- * Venue/Topic Tag — Per-topic accent colors
- * Applies to both Publications and Selected Papers.
- * The site uses topic names (not venue names) as the abbr/filter value.
- ******************************************************************************/
-
-.venue-tag {
-  // LLM Reasoning and Agency — purple
-  &[data-venue-filter="LLM Reasoning and Agency"] {
-    border-left-color: #8b5cf6;
-    &:hover, &:focus { background-color: #8b5cf6; border-color: #8b5cf6; }
-  }
-
-  // MARL Efficiency — teal
-  &[data-venue-filter="MARL Efficiency"] {
-    border-left-color: #14b8a6;
-    &:hover, &:focus { background-color: #14b8a6; border-color: #14b8a6; }
-  }
-
-  // MARL Generalization — amber
-  &[data-venue-filter="MARL Generalization"] {
-    border-left-color: #f59e0b;
-    &:hover, &:focus { background-color: #f59e0b; border-color: #f59e0b; }
-  }
-
-  // Fallback for real conference venues if added later
-  &[data-venue-filter^="ACL"],
-  &[data-venue-filter^="EMNLP"],
-  &[data-venue-filter^="NAACL"] {
-    border-left-color: #dc2626;
-    &:hover, &:focus { background-color: #dc2626; border-color: #dc2626; }
-  }
-  &[data-venue-filter^="NeurIPS"],
-  &[data-venue-filter^="ICML"] {
-    border-left-color: #8b5cf6;
-    &:hover, &:focus { background-color: #8b5cf6; border-color: #8b5cf6; }
-  }
-  &[data-venue-filter^="ICLR"] {
-    border-left-color: #3b82f6;
-    &:hover, &:focus { background-color: #3b82f6; border-color: #3b82f6; }
-  }
-}
-
-/*******************************************************************************
- * Publication Links — tighter, link-like buttons
- ******************************************************************************/
-
-.publications,
-.post ol.bibliography {
-  .links {
-    a.btn {
-      font-family: $font-family-monospace;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      line-height: 1.2;
-
-      &:hover {
-        background-color: var(--global-theme-color);
-        color: #fff !important;
-        border-color: var(--global-theme-color);
-      }
-    }
-  }
-}
 
 /*******************************************************************************
  * Subtle scroll-reveal for news rows & paper items (respects reduced-motion)
