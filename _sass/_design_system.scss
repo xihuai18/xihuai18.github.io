@@ -961,6 +961,23 @@ html[data-theme='dark'] .venue-filter-status__clear:hover { color: var(--paper);
     font-weight: 600;
     border-bottom: 1px dashed var(--moss-400);
   }
+  /* Coauthor profile links: surface a dotted underline so readers can tell
+     the name is clickable before hovering. The self name keeps its dashed
+     mark; coauthors get a thinner dotted variant in the subdued ink color. */
+  .bibliography .author a,
+  .bibliography .author a:visited {
+    color: var(--fg-2);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: var(--moss-400);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: color var(--t-fast), text-decoration-color var(--t-fast);
+  }
+  .bibliography .author a:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+  }
 
   .bibliography .links {
     margin-top: 10px;
@@ -1272,11 +1289,19 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
   line-height: 1.5;
   color: var(--fg-2);
 }
-.selected-paper-card__authors a {
-  color: inherit;
+.selected-paper-card__authors a,
+.selected-paper-card__authors a:visited {
+  color: var(--fg-2);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--moss-400);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color var(--t-fast), text-decoration-color var(--t-fast);
 }
 .selected-paper-card__authors a:hover {
   color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 .selected-paper-card__author--self {
   color: var(--fg);
