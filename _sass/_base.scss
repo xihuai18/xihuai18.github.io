@@ -289,18 +289,33 @@ pre code {
 // Navbar customization
 
 .skip-to-content {
+  // Visually hidden until focused — use the standard sr-only clip pattern so
+  // the link's padding can never leak below the viewport's top edge.
   position: absolute;
-  top: -40px;
+  top: 0;
   left: 0;
-  z-index: 1101;
-  padding: 0.65rem 1rem;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
   background: var(--accent);
   color: #fff;
   text-decoration: none;
+  z-index: 1101;
 
   &:focus,
   &:focus-visible {
-    top: 0;
+    width: auto;
+    height: auto;
+    padding: 0.65rem 1rem;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
     color: #fff;
     text-decoration: none;
   }
