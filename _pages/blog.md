@@ -116,23 +116,18 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
         {%- endif -%}
         <article class="blog-featured-card ds-card ds-card-hover">
           <a class="blog-featured-card__link" href="{{ featured_href }}"{{ featured_target }}>
-            <div class="blog-featured-card__main">
-              <div class="blog-featured-card__art" aria-hidden="true">
-                <span class="blog-featured-card__pin">&#128204;</span>
-                <span class="blog-featured-card__symbol">{{ featured_symbol }}</span>
-                <span class="blog-featured-card__caption mono-meta">{{ post.categories | first | replace: "-", " " | capitalize }}</span>
-              </div>
-              <div class="blog-featured-card__body">
-                <h2 class="blog-featured-card__title">{{ post.title }}</h2>
-                {%- if post.description -%}
-                <p class="blog-featured-card__desc">{{ post.description }}</p>
-                {%- endif -%}
-                <p class="blog-featured-card__meta mono-meta">
-                  <span>Pinned &middot; {{ post.date | date: "%b %-d, %Y" }}</span>
-                  <span class="post-row__sep" aria-hidden="true">&middot;</span>
-                  <span>{{ post.categories | first | replace: "-", " " | capitalize }}</span>
-                </p>
-              </div>
+            <div class="blog-featured-card__body blog-featured-card__body--plain">
+              <p class="blog-featured-card__kicker mono-meta">
+                <span>Pinned</span>
+                <span class="post-row__sep" aria-hidden="true">&middot;</span>
+                <span>{{ post.date | date: "%b %-d, %Y" }}</span>
+                <span class="post-row__sep" aria-hidden="true">&middot;</span>
+                <span>{{ post.categories | first | replace: "-", " " | capitalize }}</span>
+              </p>
+              <h2 class="blog-featured-card__title">{{ post.title }}</h2>
+              {%- if post.description -%}
+              <p class="blog-featured-card__desc">{{ post.description }}</p>
+              {%- endif -%}
             </div>
           </a>
         </article>

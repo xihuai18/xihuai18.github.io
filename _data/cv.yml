@@ -48,8 +48,3 @@
   type: list
   contents:
     - <u>Hobbies:</u> BodyBuilding, etc.
-
-- title: PDF Version
-  type: nested_list
-  contents:
-    - items: If you are looking for my CV in PDF format, feel free to contact me via email!

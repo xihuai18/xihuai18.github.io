@@ -43,7 +43,7 @@ layout: default
           <!-- News -->
           {% if page.news -%}
             <div class="about-section-head">
-              <h2>News</h2>
+              <h2><a href="{{ '/news/' | relative_url }}">News</a></h2>
               <a class="about-section-head__more" href="{{ '/news/' | relative_url }}">all news &rarr;</a>
             </div>
             {%- include news.html limit=true scrollable=true %}
@@ -52,7 +52,7 @@ layout: default
           <!-- Selected papers -->
           {% if page.selected_papers -%}
             <div class="about-section-head">
-              <h2>Selected Papers</h2>
+              <h2><a href="{{ '/publications/' | relative_url }}">Selected Papers</a></h2>
               <a class="about-section-head__more" href="{{ '/publications/' | relative_url }}">all publications &rarr;</a>
             </div>
             <div class="about-selected-papers">

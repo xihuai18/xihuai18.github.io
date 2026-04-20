@@ -19,11 +19,11 @@
   stars:
   tags: [marl, benchmark, coordination]
 
-- name: PMAT
-  repo: github.com/sjtu-marl/PMAT
+- name: A2PO
+  repo: github.com/xihuai18/A2PO-ICLR2023
   blurb: >-
-    Per-agent policy optimization ordering for cooperative MARL. Published at
-    AAMAS 2025.
+    Agent-by-agent policy optimization for cooperative MARL. Published at ICLR
+    2023.
   language: Python
   stars:
-  tags: [marl, policy-optimization]
+  tags: [marl, policy-optimization, iclr]

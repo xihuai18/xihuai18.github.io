@@ -30,15 +30,7 @@
 
 {%- if on_home_selected -%}
 <article class="selected-paper-card ds-card ds-card-hover">
-  <div class="selected-paper-card__thumb" aria-hidden="true">
-    <span class="selected-paper-card__mark">&#9733;</span>
-    <span class="selected-paper-card__year">{{ entry.year }}</span>
-    {%- if topic_label != "" -%}
-    <span class="selected-paper-card__thumb-label">{{ topic_label }}</span>
-    {%- endif -%}
-  </div>
-
-  <div class="selected-paper-card__body">
+  <div class="selected-paper-card__body selected-paper-card__body--plain">
     {%- if topic_label != "" or periodical_text != "" -%}
     <div class="selected-paper-card__meta">
       {%- if topic_label != "" -%}
