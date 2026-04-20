@@ -103,7 +103,6 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
       {%- for post in postlist -%}
         {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
         {%- unless post.featured == true -%}{%- continue -%}{%- endunless -%}
-        {%- assign featured_symbol = post.featured_symbol | default: "RL" -%}
         {%- if post.redirect == blank -%}
           {%- assign featured_href = post.url | relative_url -%}
           {%- assign featured_target = nil -%}
@@ -115,21 +114,19 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
           {%- assign featured_target = nil -%}
         {%- endif -%}
         <article class="blog-featured-card ds-card ds-card-hover">
-          <a class="blog-featured-card__link" href="{{ featured_href }}"{{ featured_target }}>
-            <div class="blog-featured-card__body blog-featured-card__body--plain">
-              <p class="blog-featured-card__kicker mono-meta">
-                <span>Pinned</span>
-                <span class="post-row__sep" aria-hidden="true">&middot;</span>
-                <span>{{ post.date | date: "%b %-d, %Y" }}</span>
-                <span class="post-row__sep" aria-hidden="true">&middot;</span>
-                <span>{{ post.categories | first | replace: "-", " " | capitalize }}</span>
-              </p>
-              <h2 class="blog-featured-card__title">{{ post.title }}</h2>
-              {%- if post.description -%}
-              <p class="blog-featured-card__desc">{{ post.description }}</p>
-              {%- endif -%}
-            </div>
-          </a>
+          <div class="blog-featured-card__body blog-featured-card__body--plain">
+            <p class="blog-featured-card__kicker mono-meta">
+              <span>Pinned</span>
+              <span class="post-row__sep" aria-hidden="true">&middot;</span>
+              <span>{{ post.date | date: "%b %-d, %Y" }}</span>
+              <span class="post-row__sep" aria-hidden="true">&middot;</span>
+              <span>{{ post.categories | first | replace: "-", " " | capitalize }}</span>
+            </p>
+            <h2 class="blog-featured-card__title"><a href="{{ featured_href }}"{{ featured_target }}>{{ post.title }}</a></h2>
+            {%- if post.description -%}
+            <p class="blog-featured-card__desc">{{ post.description }}</p>
+            {%- endif -%}
+          </div>
         </article>
       {%- endfor -%}
     </div>

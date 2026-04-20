@@ -2,6 +2,7 @@
 layout: cv
 permalink: /cv/
 title: A concise record of education, research, and honors.
+display_title: 'A concise <span class="blog-title__dropcap">r</span>ecord of education, research, and honors.'
 tab_title: CV
 nav_title: CV
 description: A concise overview of my education, research experience, and honors.

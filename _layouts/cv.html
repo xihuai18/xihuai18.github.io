@@ -6,7 +6,11 @@ layout: default
         <div class="post">
           <header class="post-header">
             <p class="eyebrow">{{ page.eyebrow | default: "Curriculum Vitæ" }}</p>
+            {%- if page.display_title -%}
+            <h1 class="post-title">{{ page.display_title }} {% if page.cv_pdf %}<i class="fas fa-file-pdf"></i>{% endif %}</h1>
+            {%- else -%}
             <h1 class="post-title">{{ page.title }} {% if page.cv_pdf %}<i class="fas fa-file-pdf"></i>{% endif %}</h1>
+            {%- endif -%}
             {%- if page.lead -%}
             <p class="lead">{{ page.lead }}</p>
             {%- elsif page.description -%}

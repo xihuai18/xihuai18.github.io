@@ -1,6 +1,7 @@
 ---
 layout: page
-title: Code & artifacts from the lab.
+title: Code & artifacts.
+display_title: '<span class="blog-title__dropcap">C</span>ode &amp; artifacts.'
 tab_title: Projects
 nav_title: Projects
 eyebrow: Projects
