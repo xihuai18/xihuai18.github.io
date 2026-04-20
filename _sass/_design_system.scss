@@ -902,6 +902,13 @@ html[data-theme='dark'] .venue-filter-status__clear:hover { color: var(--paper);
 
 }
 .publications {
+  .pub-page-note {
+    margin: 0 0 var(--s-5);
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--fg-2);
+  }
 
   .bibliography .title {
     font-family: var(--font-display);

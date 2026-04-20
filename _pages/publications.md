@@ -6,7 +6,7 @@ display_title: 'A record of collaborative <span class="blog-title__dropcap">w</s
 tab_title: Publications
 nav_title: Publications
 eyebrow: Publications
-lead: Peer-reviewed papers and preprints, organized by year. <strong>*</strong> denotes equal contribution. Full list also on <a href="https://scholar.google.com/citations?user={{ site.scholar_userid }}" target="_blank" rel="noopener">Google Scholar</a>.
+lead: Peer-reviewed papers and preprints, organized by year. <strong>*</strong> denotes equal contribution.
 years: [2026, 2025, 2024, 2023, 2022, 2021]
 topics:
   - { name: "LLM Reasoning & Agency", abbr: "LLM Reasoning and Agency" }
@@ -18,6 +18,8 @@ nav_order: 1
 
 <!-- _pages/publications.md -->
 <div class="publications" data-publications-page>
+
+<p class="pub-page-note">Full list also on <a href="https://scholar.google.com/citations?user={{ site.scholar_userid }}" target="_blank" rel="noopener">Google Scholar</a>.</p>
 
 <nav class="pub-topic-filter blog-controls" role="group" aria-label="Filter papers by topic" markdown="0">
   <button type="button" class="chip no-dot pub-topic-pill is-active" data-topic-filter="" aria-pressed="true" onclick="clearVenueFilter()">
