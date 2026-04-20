@@ -131,13 +131,14 @@
         </ul>
       </div>
     </div>
-  </nav>
-  {% if site.enable_progressbar %}
-  <!-- Scrolling Progress Bar -->
-  <progress id="progress" value="0">
-    <div class="progress-container">
-      <span class="progress-bar"></span>
+    {% if site.enable_progressbar %}
+    <!-- Scroll progress is anchored INSIDE the fixed navbar so it moves with
+         it rather than as a separate fixed element. iOS Safari's dynamic
+         address bar otherwise causes two fixed-position elements at different
+         offsets to drift relative to each other. -->
+    <div class="scroll-progress" aria-hidden="true">
+      <span class="scroll-progress__bar" id="scroll-progress-bar"></span>
     </div>
-  </progress>
-  {%- endif %}
+    {%- endif %}
+  </nav>
 </header>

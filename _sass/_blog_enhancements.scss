@@ -1150,22 +1150,6 @@ pre {
 }
 
 /*******************************************************************************
- * Reading Progress Indicator
- ******************************************************************************/
-
-.reading-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 0%;
-  height: 3px;
-  background: linear-gradient(90deg, var(--global-theme-color), var(--global-hover-color));
-  z-index: 9999;
-  transition: width 0.1s ease-out;
-  box-shadow: 0 0 10px var(--global-theme-color);
-}
-
-/*******************************************************************************
  * Enhanced Link Styling
  ******************************************************************************/
 
