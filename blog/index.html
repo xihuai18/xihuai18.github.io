@@ -145,6 +145,9 @@
           <li class="nav-item ">
             <a class="nav-link" href="/cv/">CV</a>
           </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/projects/">Projects</a>
+          </li>
           <!-- Toggle theme mode -->
           <li class="nav-item toggle-container">
             <button id="light-toggle" class="nav-link theme-toggle" title="Change theme" aria-label="Toggle dark mode">
@@ -197,11 +200,46 @@
 <a href="#" class="uv-toggle" data-uv-mode="d30">30 days</a>
 </span>
     
-  </nav>
 
-  <ol class="post-rows"><li class="post-row blog-post-list-item" data-year="2025" data-categories="reinforcement-learning">
+  </nav>
+  <section class="blog-featured" data-featured-section="">
+    <div class="blog-featured__head">
+      <p class="eyebrow">Pinned note</p>
+      <p><span class="blog-featured__rule" aria-hidden="true"></span></p>
+    </div>
+    <div class="blog-featured__grid">
+      <article class="blog-featured-card ds-card ds-card-hover">
+        <p><a class="blog-featured-card__link" href="/reinforcement-learning/2025/12/01/kl-estimators-en.html"></a></p>
+        <div class="blog-featured-card__main">
+          <div class="blog-featured-card__art" aria-hidden="true">
+            <p><span class="blog-featured-card__pin">📌</span>
+<span class="blog-featured-card__symbol">KL</span>
+<span class="blog-featured-card__caption mono-meta">Reinforcement learning</span></p>
+          </div>
+          <div class="blog-featured-card__body">
+            <h2 class="blog-featured-card__title">Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness</h2>
+            <p class="blog-featured-card__desc">In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares k1, k2, k3 in on-policy and off-policy settings, and turns the result into a practical selection guide.</p>
+            <p class="blog-featured-card__meta mono-meta">
+<span>Pinned · Dec 1, 2025</span>
+<span class="post-row__sep" aria-hidden="true">·</span>
+<span>Reinforcement learning</span>
+</p>
+          </div>
+        </div>
+        <p>&lt;/a&gt;</p>
+      </article>
+    </div>
+  </section>
+  <section class="blog-year-group" data-year-group="2025">
+    <h2 class="blog-year-head">
+<span class="blog-year-num">2025</span>
+<span class="blog-year-rule" aria-hidden="true"></span>
+<span class="blog-year-count">3 posts</span>
+</h2>
+
+    <ol class="post-rows"><li class="post-row blog-post-list-item" data-year="2025" data-categories="reinforcement-learning">
 <time class="post-row__date mono-meta" datetime="2025-12-17T00:00:00+00:00">
-        Dec 17, 2025
+          Dec 17, 2025
 </time>
 <div class="post-row__body"><div class="post-row__langbar" role="tablist" aria-label="Language">
 <button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang-target="en" role="tab" aria-selected="true">EN</button>
@@ -225,7 +263,7 @@
 </div></div>
 </li><li class="post-row blog-post-list-item" data-year="2025" data-categories="reinforcement-learning">
 <time class="post-row__date mono-meta" datetime="2025-12-01T00:00:00+00:00">
-        Dec 1, 2025
+          Dec 1, 2025
 </time>
 <div class="post-row__body"><div class="post-row__langbar" role="tablist" aria-label="Language">
 <button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang-target="en" role="tab" aria-selected="true">EN</button>
@@ -249,7 +287,7 @@
 </div></div>
 </li><li class="post-row blog-post-list-item" data-year="2025" data-categories="reinforcement-learning">
 <time class="post-row__date mono-meta" datetime="2025-11-15T00:00:00+00:00">
-        Nov 15, 2025
+          Nov 15, 2025
 </time>
 <div class="post-row__body"><div class="post-row__langbar" role="tablist" aria-label="Language">
 <button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang-target="en" role="tab" aria-selected="true">EN</button>
@@ -273,6 +311,8 @@
 </div></div>
 </li></ol>
 
+  </section>
+
 </div>
 
 <script defer="" src="/assets/js/blog_filter.js"></script>
@@ -280,9 +320,10 @@
 
     </main>
 
-    <!-- Footer -->    <footer class="sticky-bottom mt-5">
-      <div class="container">
-        &copy; Copyright 2026 Xihuai Leo Wang. Last updated: April 20, 2026.
+    <!-- Footer --><footer class="sticky-bottom mt-5">
+      <div class="container uk-footer-inner">
+        <span class="uk-footer-copy">
+          &copy; 2026 Xihuai Leo Wang. Built with care in Shanghai.</span><span class="mono-meta uk-footer-updated">last updated &middot; Apr 2026</span>
       </div>
     </footer>
 

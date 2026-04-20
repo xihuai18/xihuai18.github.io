@@ -149,6 +149,9 @@
           <li class="nav-item ">
             <a class="nav-link" href="/cv/">CV</a>
           </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/projects/">Projects</a>
+          </li>
           <!-- Toggle theme mode -->
           <li class="nav-item toggle-container">
             <button id="light-toggle" class="nav-link theme-toggle" title="Change theme" aria-label="Toggle dark mode">
@@ -188,14 +191,14 @@
             <!-- _pages/publications.md -->
 <div class="publications">
   <nav class="pub-topic-filter blog-controls" role="group" aria-label="Filter papers by topic">
-  <button type="button" class="blog-pill pub-topic-pill is-active" data-topic-filter="" onclick="clearVenueFilter()">
-    All papers <span class="blog-pill__count">8</span>
-  </button><button type="button" class="blog-pill pub-topic-pill" data-topic-filter="LLM Reasoning &amp; Agency" onclick="filterByVenue('LLM Reasoning &amp; Agency')">
-      LLM Reasoning &amp; Agency <span class="blog-pill__count">3</span>
-</button><button type="button" class="blog-pill pub-topic-pill" data-topic-filter="MARL Generalization" onclick="filterByVenue('MARL Generalization')">
-      MARL Generalization <span class="blog-pill__count">1</span>
-</button><button type="button" class="blog-pill pub-topic-pill" data-topic-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')">
-      MARL Efficiency <span class="blog-pill__count">4</span>
+  <button type="button" class="chip no-dot pub-topic-pill is-active" data-topic-filter="" onclick="clearVenueFilter()">
+    All papers
+  </button><button type="button" class="chip no-dot pub-topic-pill" data-topic-filter="LLM Reasoning &amp; Agency" onclick="filterByVenue('LLM Reasoning &amp; Agency')">
+      LLM Reasoning &amp; Agency
+</button><button type="button" class="chip no-dot pub-topic-pill" data-topic-filter="MARL Generalization" onclick="filterByVenue('MARL Generalization')">
+      MARL Generalization
+</button><button type="button" class="chip no-dot pub-topic-pill" data-topic-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')">
+      MARL Efficiency
 </button></nav>
 
   <h2 class="year">
@@ -204,41 +207,29 @@
 <span class="year-count">1 paper</span>
   </h2>
   <ol class="bibliography"><li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="fu2026srft" class="col-sm-12" data-venue="LLM Reasoning &amp; Agency"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="LLM Reasoning &amp; Agency" onclick="filterByVenue('LLM Reasoning &amp; Agency')" title="Click to filter papers from LLM Reasoning &amp; Agency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('LLM Reasoning &amp; Agency')"><span class="venue-name">LLM Reasoning &amp; Agency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>14th ICLR</em>, 2026</span></div><!-- Title -->
-        <div class="title">
-          SRFT: A Single-Stage Method with Supervised and Reinforcement Fine-Tuning for Reasoning
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        Yuqian Fu,&nbsp;Tinghong Chen,&nbsp;Jiajun Chai,&nbsp;<em>Xihuai Wang</em>,&nbsp;Songjun Tu,&nbsp;Guojun Yin,&nbsp;Wei Lin,&nbsp;Qichao Zhang,&nbsp;Yuanheng Zhu,&nbsp;and&nbsp;Dongbin Zhao</div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="fu2026srft" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/abs/2506.19767.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="fu2026srft" hidden="" aria-hidden="true">@article{fu2026srft,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2026</span><span class="selected-paper-card__thumb-label">LLM Reasoning &amp; Agency</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">LLM Reasoning &amp; Agency</span><span class="selected-paper-card__venue mono-meta"><em>14th ICLR</em>, 2026</span></div><h3 class="selected-paper-card__title">SRFT: A Single-Stage Method with Supervised and Reinforcement Fine-Tuning for Reasoning</h3>
+    <p class="selected-paper-card__authors">Yuqian Fu,&nbsp;Tinghong Chen,&nbsp;Jiajun Chai,&nbsp;<span class="selected-paper-card__author--self">Xihuai Wang</span>,&nbsp;Songjun Tu,&nbsp;Guojun Yin,&nbsp;Wei Lin,&nbsp;Qichao Zhang,&nbsp;Yuanheng Zhu,&nbsp;and&nbsp;Dongbin Zhao</p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/abs/2506.19767.pdf">PDF</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="fu2026srft" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="fu2026srft" hidden="" aria-hidden="true">@article{fu2026srft,
   author = {Fu, Yuqian and Chen, Tinghong and Chai, Jiajun and Wang, Xihuai and Tu, Songjun and Yin, Guojun and Lin, Wei and Zhang, Qichao and Zhu, Yuanheng and Zhao, Dongbin},
   title = {SRFT: A Single-Stage Method with Supervised and Reinforcement Fine-Tuning for Reasoning},
   journal = {14th ICLR},
   year = {2026},
 }
 </div>
-        </div>
-      </div>
-</li></ol>
+  </div>
+</article></li></ol>
 
   <h2 class="year">
 <span class="year-num">2025</span>
@@ -246,79 +237,55 @@
 <span class="year-count">2 papers</span>
   </h2>
   <ol class="bibliography"><li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="zhang2025dpt" class="col-sm-12" data-venue="LLM Reasoning &amp; Agency"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="LLM Reasoning &amp; Agency" onclick="filterByVenue('LLM Reasoning &amp; Agency')" title="Click to filter papers from LLM Reasoning &amp; Agency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('LLM Reasoning &amp; Agency')"><span class="venue-name">LLM Reasoning &amp; Agency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>63rd ACL</em>, 2025</span><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="selected-mark eyebrow">★ Selected</span></div><!-- Title -->
-        <div class="title">
-          Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        <a href="https://shaozhang.info/">Shao Zhang*</a>,&nbsp;<em>Xihuai Wang*</em>,&nbsp;Wenhao Zhang,&nbsp;Chaoran Li,&nbsp;Junru Song,&nbsp;Tingyu Li,&nbsp;Lin Qiu,&nbsp;Xuezhi Cao,&nbsp;Xunliang Cai,&nbsp;Wen Yao,&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;Xinbing Wang,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="zhang2025dpt" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/abs/2502.11882.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
-            <a href="https://github.com/sjtu-marl/DPT-Agent" class="btn btn-sm z-depth-0" role="button">Code</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="zhang2025dpt" hidden="" aria-hidden="true">@article{zhang2025dpt,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2025</span><span class="selected-paper-card__thumb-label">LLM Reasoning &amp; Agency</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">LLM Reasoning &amp; Agency</span><span class="selected-paper-card__venue mono-meta"><em>63rd ACL</em>, 2025</span></div><h3 class="selected-paper-card__title">Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration</h3>
+    <p class="selected-paper-card__authors"><a href="https://shaozhang.info/">Shao Zhang*</a>,&nbsp;<span class="selected-paper-card__author--self">Xihuai Wang*</span>,&nbsp;Wenhao Zhang,&nbsp;Chaoran Li,&nbsp;Junru Song,&nbsp;Tingyu Li,&nbsp;Lin Qiu,&nbsp;Xuezhi Cao,&nbsp;Xunliang Cai,&nbsp;Wen Yao,&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;Xinbing Wang,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/abs/2502.11882.pdf">PDF</a>
+        <a href="https://github.com/sjtu-marl/DPT-Agent">Code</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="zhang2025dpt" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="zhang2025dpt" hidden="" aria-hidden="true">@article{zhang2025dpt,
   author = {Zhang*, Shao and Wang*, Xihuai and Zhang, Wenhao and Li, Chaoran and Song, Junru and Li, Tingyu and Qiu, Lin and Cao, Xuezhi and Cai, Xunliang and Yao, Wen and Zhang, Weinan and Wang, Xinbing and Wen, Ying},
   title = {Leveraging Dual Process Theory in Language Agent Framework for Real-time Simultaneous Human-AI Collaboration},
   journal = {63rd ACL},
   year = {2025},
 }
 </div>
-        </div>
-      </div>
-</li>
+  </div>
+</article></li>
 <li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="hu2025pmat" class="col-sm-12" data-venue="MARL Efficiency"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>24th AAMAS</em>, 2025</span></div><!-- Title -->
-        <div class="title">
-          PMAT: Optimizing Action Generation Order in Multi-Agent Reinforcement Learning
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        Kun Hu,&nbsp;Muning Wen,&nbsp;<em>Xihuai Wang</em>,&nbsp;<a href="https://shaozhang.info/">Shao Zhang</a>,&nbsp;Yiwei Shi,&nbsp;Minne Li,&nbsp;Minglong Li,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="hu2025pmat" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/pdf/2502.16496" class="btn btn-sm z-depth-0" role="button">PDF</a>
-            <a href="https://github.com/NUDT-BI-MARL/PMAT" class="btn btn-sm z-depth-0" role="button">Code</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="hu2025pmat" hidden="" aria-hidden="true">@article{hu2025pmat,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2025</span><span class="selected-paper-card__thumb-label">MARL Efficiency</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">MARL Efficiency</span><span class="selected-paper-card__venue mono-meta"><em>24th AAMAS</em>, 2025</span></div><h3 class="selected-paper-card__title">PMAT: Optimizing Action Generation Order in Multi-Agent Reinforcement Learning</h3>
+    <p class="selected-paper-card__authors">Kun Hu,&nbsp;Muning Wen,&nbsp;<span class="selected-paper-card__author--self">Xihuai Wang</span>,&nbsp;<a href="https://shaozhang.info/">Shao Zhang</a>,&nbsp;Yiwei Shi,&nbsp;Minne Li,&nbsp;Minglong Li,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/pdf/2502.16496">PDF</a>
+        <a href="https://github.com/NUDT-BI-MARL/PMAT">Code</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="hu2025pmat" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="hu2025pmat" hidden="" aria-hidden="true">@article{hu2025pmat,
   author = {Hu, Kun and Wen, Muning and Wang, Xihuai and Zhang, Shao and Shi, Yiwei and Li, Minne and Li, Minglong and Wen, Ying},
   title = {PMAT: Optimizing Action Generation Order in Multi-Agent Reinforcement Learning},
   journal = {24th AAMAS},
   year = {2025},
 }
 </div>
-        </div>
-      </div>
-</li></ol>
+  </div>
+</article></li></ol>
 
   <h2 class="year">
 <span class="year-num">2024</span>
@@ -326,78 +293,54 @@
 <span class="year-count">2 papers</span>
   </h2>
   <ol class="bibliography"><li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="zhang2024mutualtheorymindhumanai" class="col-sm-12" data-venue="LLM Reasoning &amp; Agency"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="LLM Reasoning &amp; Agency" onclick="filterByVenue('LLM Reasoning &amp; Agency')" title="Click to filter papers from LLM Reasoning &amp; Agency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('LLM Reasoning &amp; Agency')"><span class="venue-name">LLM Reasoning &amp; Agency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>Preprint Under Review</em>, 2024</span></div><!-- Title -->
-        <div class="title">
-          Mutual Theory of Mind in Human-AI Collaboration: An Empirical Study with LLM-driven AI Agents in a Real-time Shared Workspace Task
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        <a href="https://shaozhang.info/">Shao Zhang*</a>,&nbsp;<em>Xihuai Wang*</em>,&nbsp;Wenhao Zhang,&nbsp;Yongshan Chen,&nbsp;Landi Gao,&nbsp;Dakuo Wang,&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;Xinbing Wang,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="zhang2024mutualtheorymindhumanai" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/abs/2409.08811.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="zhang2024mutualtheorymindhumanai" hidden="" aria-hidden="true">@article{zhang2024mutualtheorymindhumanai,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2024</span><span class="selected-paper-card__thumb-label">LLM Reasoning &amp; Agency</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">LLM Reasoning &amp; Agency</span><span class="selected-paper-card__venue mono-meta"><em>Preprint Under Review</em>, 2024</span></div><h3 class="selected-paper-card__title">Mutual Theory of Mind in Human-AI Collaboration: An Empirical Study with LLM-driven AI Agents in a Real-time Shared Workspace Task</h3>
+    <p class="selected-paper-card__authors"><a href="https://shaozhang.info/">Shao Zhang*</a>,&nbsp;<span class="selected-paper-card__author--self">Xihuai Wang*</span>,&nbsp;Wenhao Zhang,&nbsp;Yongshan Chen,&nbsp;Landi Gao,&nbsp;Dakuo Wang,&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;Xinbing Wang,&nbsp;and&nbsp;<a href="https://yingwen.io">Ying Wen</a></p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/abs/2409.08811.pdf">PDF</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="zhang2024mutualtheorymindhumanai" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="zhang2024mutualtheorymindhumanai" hidden="" aria-hidden="true">@article{zhang2024mutualtheorymindhumanai,
   author = {Zhang*, Shao and Wang*, Xihuai and Zhang, Wenhao and Chen, Yongshan and Gao, Landi and Wang, Dakuo and Zhang, Weinan and Wang, Xinbing and Wen, Ying},
   title = {Mutual Theory of Mind in Human-AI Collaboration: An Empirical Study with LLM-driven AI Agents in a Real-time Shared Workspace Task},
   journal = {Preprint Under Review},
   year = {2024},
 }
 </div>
-        </div>
-      </div>
-</li>
+  </div>
+</article></li>
 <li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="wang2023zsceval" class="col-sm-12" data-venue="MARL Generalization"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Generalization" onclick="filterByVenue('MARL Generalization')" title="Click to filter papers from MARL Generalization" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Generalization')"><span class="venue-name">MARL Generalization</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>38th NeurIPS</em>, 2024</span><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="selected-mark eyebrow">★ Selected</span></div><!-- Title -->
-        <div class="title">
-          ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        <em>Xihuai Wang</em>,&nbsp;<a href="https://shaozhang.info/">Shao Zhang</a>,&nbsp;Wenhao Zhang,&nbsp;Wentao Dong,&nbsp;Jingxiao Chen,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="wang2023zsceval" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/pdf/2310.05208.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
-            <a href="https://github.com/sjtu-marl/zsc-eval" class="btn btn-sm z-depth-0" role="button">Code</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="wang2023zsceval" hidden="" aria-hidden="true">@article{wang2023zsceval,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2024</span><span class="selected-paper-card__thumb-label">MARL Generalization</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">MARL Generalization</span><span class="selected-paper-card__venue mono-meta"><em>38th NeurIPS</em>, 2024</span></div><h3 class="selected-paper-card__title">ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination</h3>
+    <p class="selected-paper-card__authors"><span class="selected-paper-card__author--self">Xihuai Wang</span>,&nbsp;<a href="https://shaozhang.info/">Shao Zhang</a>,&nbsp;Wenhao Zhang,&nbsp;Wentao Dong,&nbsp;Jingxiao Chen,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/pdf/2310.05208.pdf">PDF</a>
+        <a href="https://github.com/sjtu-marl/zsc-eval">Code</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="wang2023zsceval" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="wang2023zsceval" hidden="" aria-hidden="true">@article{wang2023zsceval,
   author = {Wang, Xihuai and Zhang, Shao and Zhang, Wenhao and Dong, Wentao and Chen, Jingxiao and Wen, Ying and Zhang, Weinan},
   title = {ZSC-Eval: An Evaluation Toolkit and Benchmark for Multi-agent Zero-shot Coordination},
   journal = {38th NeurIPS},
   year = {2024},
 }
 </div>
-        </div>
-      </div>
-</li></ol>
+  </div>
+</article></li></ol>
 
   <h2 class="year">
 <span class="year-num">2023</span>
@@ -405,33 +348,22 @@
 <span class="year-count">1 paper</span>
   </h2>
   <ol class="bibliography"><li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="wang2023order" class="col-sm-12" data-venue="MARL Efficiency"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>11th ICLR</em>, 2023</span><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="selected-mark eyebrow">★ Selected</span></div><!-- Title -->
-        <div class="title">
-          Order Matters: Agent-by-agent Policy Optimization
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        <em>Xihuai Wang</em>,&nbsp;Zheng Tian,&nbsp;Ziyu Wan,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;<a href="http://www0.cs.ucl.ac.uk/staff/jun.wang">Jun Wang</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="wang2023order" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/pdf/2302.06205.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
-            <a href="https://github.com/xihuai18/A2PO-ICLR2023" class="btn btn-sm z-depth-0" role="button">Code</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="wang2023order" hidden="" aria-hidden="true">@article{wang2023order,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2023</span><span class="selected-paper-card__thumb-label">MARL Efficiency</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">MARL Efficiency</span><span class="selected-paper-card__venue mono-meta"><em>11th ICLR</em>, 2023</span></div><h3 class="selected-paper-card__title">Order Matters: Agent-by-agent Policy Optimization</h3>
+    <p class="selected-paper-card__authors"><span class="selected-paper-card__author--self">Xihuai Wang</span>,&nbsp;Zheng Tian,&nbsp;Ziyu Wan,&nbsp;<a href="https://yingwen.io">Ying Wen</a>,&nbsp;<a href="http://www0.cs.ucl.ac.uk/staff/jun.wang">Jun Wang</a>,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/pdf/2302.06205.pdf">PDF</a>
+        <a href="https://github.com/xihuai18/A2PO-ICLR2023">Code</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="wang2023order" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="wang2023order" hidden="" aria-hidden="true">@article{wang2023order,
   author = {Wang, Xihuai and Tian, Zheng and Wan, Ziyu and Wen, Ying and Wang, Jun and Zhang, Weinan},
   title = {Order Matters: Agent-by-agent Policy Optimization},
   journal = {11th ICLR},
@@ -439,9 +371,8 @@
   url = {https://openreview.net/forum?id=Q-neeWNVv1},
 }
 </div>
-        </div>
-      </div>
-</li></ol>
+  </div>
+</article></li></ol>
 
   <h2 class="year">
 <span class="year-num">2022</span>
@@ -449,41 +380,29 @@
 <span class="year-count">1 paper</span>
   </h2>
   <ol class="bibliography"><li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="wang2022modelbased" class="col-sm-12" data-venue="MARL Efficiency"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>arXiv preprint arXiv:2203.10603</em>, 2022</span></div><!-- Title -->
-        <div class="title">
-          Model-based Multi-agent Reinforcement Learning: Recent Progress and Prospects
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        <em>Xihuai Wang</em>,&nbsp;Zhicheng Zhang,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="wang2022modelbased" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/pdf/2203.10603.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="wang2022modelbased" hidden="" aria-hidden="true">@article{wang2022modelbased,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2022</span><span class="selected-paper-card__thumb-label">MARL Efficiency</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">MARL Efficiency</span><span class="selected-paper-card__venue mono-meta"><em>arXiv preprint arXiv:2203.10603</em>, 2022</span></div><h3 class="selected-paper-card__title">Model-based Multi-agent Reinforcement Learning: Recent Progress and Prospects</h3>
+    <p class="selected-paper-card__authors"><span class="selected-paper-card__author--self">Xihuai Wang</span>,&nbsp;Zhicheng Zhang,&nbsp;and&nbsp;<a href="https://wnzhang.net">Weinan Zhang</a></p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/pdf/2203.10603.pdf">PDF</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="wang2022modelbased" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="wang2022modelbased" hidden="" aria-hidden="true">@article{wang2022modelbased,
   author = {Wang, Xihuai and Zhang, Zhicheng and Zhang, Weinan},
   title = {Model-based Multi-agent Reinforcement Learning: Recent Progress and Prospects},
   journal = {arXiv preprint arXiv:2203.10603},
   year = {2022},
 }
 </div>
-        </div>
-      </div>
-</li></ol>
+  </div>
+</article></li></ol>
 
   <h2 class="year">
 <span class="year-num">2021</span>
@@ -491,42 +410,30 @@
 <span class="year-count">1 paper</span>
   </h2>
   <ol class="bibliography"><li><!-- _layouts/bib.html -->
-      <div class="row"><!-- Entry bib key --><div id="zhang2021modelbased" class="col-sm-12" data-venue="MARL Efficiency"><!-- Journal/Book title and date -->
-        
-        
-        <div class="pub-meta-row"><div class="venue-tag" data-venue-filter="MARL Efficiency" onclick="filterByVenue('MARL Efficiency')" title="Click to filter papers from MARL Efficiency" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('MARL Efficiency')"><span class="venue-name">MARL Efficiency</span></div><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="pub-meta-venue mono-meta"><em>30th IJCAI</em>, 2021</span><span class="pub-meta-sep kicker" aria-hidden="true">·</span><span class="selected-mark eyebrow">★ Selected</span></div><!-- Title -->
-        <div class="title">
-          Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts
-        </div>
-        <!-- Author -->
-        <div class="author">
-        
 
-        <a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;<em>Xihuai Wang</em>,&nbsp;Jian Shen,&nbsp;and&nbsp;<a href="https://www.mingzak.com">Ming Zhou</a></div><!-- Links/Buttons -->
-          <div class="links">
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="zhang2021modelbased" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
-              <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-              <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
-            <a href="https://arxiv.org/pdf/2105.03363.pdf" class="btn btn-sm z-depth-0" role="button">PDF</a>
-            <a href="https://github.com/xihuai18/AORPO" class="btn btn-sm z-depth-0" role="button">Code</a>
-          </div>
-          
-          
-          <div class="badges">
-            <span class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-type="2" data-badge-popover="right"></span>
-              <span class="__dimensions_badge_embed__" data-pmid="" data-hide-zero-citations="true" data-style="small_rectangle" data-legend="hover-right" style="margin-bottom: 6px;"></span>
-          </div><!-- BibTeX source kept in DOM so the Copy button can read it; hidden visually. -->
-          <div class="bibtex-source" data-entry-key="zhang2021modelbased" hidden="" aria-hidden="true">@article{zhang2021modelbased,
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">2021</span><span class="selected-paper-card__thumb-label">MARL Efficiency</span></div>
+
+  <div class="selected-paper-card__body"><div class="selected-paper-card__meta"><span class="chip is-accent no-dot">MARL Efficiency</span><span class="selected-paper-card__venue mono-meta"><em>30th IJCAI</em>, 2021</span></div><h3 class="selected-paper-card__title">Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts</h3>
+    <p class="selected-paper-card__authors"><a href="https://wnzhang.net">Weinan Zhang</a>,&nbsp;<span class="selected-paper-card__author--self">Xihuai Wang</span>,&nbsp;Jian Shen,&nbsp;and&nbsp;<a href="https://www.mingzak.com">Ming Zhou</a></p>
+
+    <div class="selected-paper-card__links">
+        <a href="https://arxiv.org/pdf/2105.03363.pdf">PDF</a>
+        <a href="https://github.com/xihuai18/AORPO">Code</a>
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="zhang2021modelbased" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+    </div>
+
+    <div class="bibtex-source" data-entry-key="zhang2021modelbased" hidden="" aria-hidden="true">@article{zhang2021modelbased,
   author = {Zhang, Weinan and Wang, Xihuai and Shen, Jian and Zhou, Ming},
   title = {Model-based Multi-agent Policy Optimization with Adaptive Opponent-wise Rollouts},
   journal = {30th IJCAI},
   year = {2021},
 }
 </div>
-        </div>
-      </div>
-</li></ol>
+  </div>
+</article></li></ol>
 
 </div>
 
@@ -536,9 +443,10 @@
 
     </main>
 
-    <!-- Footer -->    <footer class="sticky-bottom mt-5">
-      <div class="container">
-        &copy; Copyright 2026 Xihuai Leo Wang. Last updated: April 20, 2026.
+    <!-- Footer --><footer class="sticky-bottom mt-5">
+      <div class="container uk-footer-inner">
+        <span class="uk-footer-copy">
+          &copy; 2026 Xihuai Leo Wang. Built with care in Shanghai.</span><span class="mono-meta uk-footer-updated">last updated &middot; Apr 2026</span>
       </div>
     </footer>
 

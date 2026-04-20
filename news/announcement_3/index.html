@@ -160,6 +160,9 @@
           <li class="nav-item ">
             <a class="nav-link" href="/cv/">CV</a>
           </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/projects/">Projects</a>
+          </li>
           <!-- Toggle theme mode -->
           <li class="nav-item toggle-container">
             <button id="light-toggle" class="nav-link theme-toggle" title="Change theme" aria-label="Toggle dark mode">
@@ -193,26 +196,16 @@
       <!-- _layouts/post.html -->
 
 <div class="post toc-layout">
-  <header class="post-header">
-    <h1 class="post-title">ZSC-Eval</h1><div class="post-meta-container">
-      <div class="post-meta-row">
-        <span class="post-date">
-          <i class="far fa-calendar-alt"></i>
-          September 26, 2024
-        </span></div>
-      <div class="post-tags-row">
-        <a href="/blog/?year=2024" data-filter-link data-filter-type="year" data-filter-value="2024">
-          📅 2024
-        </a>
-          &nbsp; &middot; &nbsp;
-          
-            <a href="/blog/?category=paper" data-filter-link data-filter-type="category" data-filter-value="paper">
-              🏷️ paper
-            </a>
-            
-          
-      </div>
-    </div>
+  <header class="post-header"><p class="eyebrow post-kicker">
+      <a href="/blog/?category=paper" data-filter-link data-filter-type="category" data-filter-value="paper">Paper</a>
+      <span class="post-meta-dot" aria-hidden="true">&middot;</span>
+      <span>Essay</span>
+    </p><h1 class="post-title">ZSC-Eval</h1><div class="post-meta-row">
+      <span class="post-author">Xihuai Wang</span>
+      <span class="post-meta-dot" aria-hidden="true">&middot;</span>
+      <a class="post-meta-link" href="/blog/?year=2024" data-filter-link data-filter-type="year" data-filter-value="2024">Sep 26, 2024</a>
+      <span class="post-meta-dot" aria-hidden="true">&middot;</span>
+      <span class="post-reading-time">1 min read</span></div>
   </header>
 
   <div class="post-links">
@@ -237,7 +230,17 @@
       <article class="post-content">
         <p>Our work about zero-shot coordination evaluation <a href="https://arxiv.org/pdf/2310.05208.pdf">ZSC-Eval</a> is accepted by NeurIPS 2024 Dataset and Benchmark Track!</p>
 
-      </article><aside class="post-cite">
+      </article><aside class="post-toc-mobile d-lg-none" aria-label="Contents">
+        <span class="eyebrow">Contents</span>
+        <nav
+          class="toc"
+          data-toc
+          data-toc-content=".toc-content"
+          data-toc-headings="h2"
+          data-toc-min-items="2"
+          aria-label="Contents"
+        ></nav>
+      </aside><aside class="post-cite">
           <div class="post-cite__head">
             <span class="eyebrow">Cite this post</span>
             <button type="button" class="post-cite__copy" data-copy-target="#post-cite-bib" data-copied-label="Copied">
@@ -287,9 +290,10 @@
 
     </main>
 
-    <!-- Footer -->    <footer class="sticky-bottom mt-5">
-      <div class="container">
-        &copy; Copyright 2026 Xihuai Leo Wang. Last updated: April 20, 2026.
+    <!-- Footer --><footer class="sticky-bottom mt-5">
+      <div class="container uk-footer-inner">
+        <span class="uk-footer-copy">
+          &copy; 2026 Xihuai Leo Wang. Built with care in Shanghai.</span><span class="mono-meta uk-footer-updated">last updated &middot; Apr 2026</span>
       </div>
     </footer>
 
