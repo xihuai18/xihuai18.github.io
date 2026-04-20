@@ -96,10 +96,7 @@
    */
   function applyFilters() {
     const { year, category } = getFilters();
-    // Cover grouped `.post-rows > .post-row` layouts and any legacy `.post-list > li`.
-    const posts = document.querySelectorAll(
-      ".post-rows > .post-row, .post-list > li.blog-post-list-item",
-    );
+    const posts = document.querySelectorAll(".post-rows > .post-row");
     const yearGroups = document.querySelectorAll("[data-year-group]");
     const featuredSection = document.querySelector("[data-featured-section]");
     let visibleCount = 0;
@@ -218,14 +215,14 @@
       clearBtn.addEventListener("click", clearFilters);
       statusElement.appendChild(clearBtn);
 
-      // Insert before the first post list or featured posts section
+      // Insert before the first post list or featured section
       const postSection = document.querySelector(".post");
       if (postSection) {
         const featuredPosts = postSection.querySelector(
-          "[data-featured-section], .featured-posts",
+          "[data-featured-section]",
         );
         const postList = postSection.querySelector(
-          ".blog-year-group, .post-rows, .post-list",
+          ".blog-year-group, .post-rows",
         );
         const insertBefore = featuredPosts || postList;
         if (insertBefore) {
