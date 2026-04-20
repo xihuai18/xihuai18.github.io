@@ -4,19 +4,10 @@ layout: default
 <!-- _layouts/cv.html — TOC sidebar removed: design system does not spec TOC
      for the CV page (only blog post has `.uk-post-toc`). -->
         <div class="post">
-          <header class="post-header">
-            <p class="eyebrow">{{ page.eyebrow | default: "Curriculum Vitæ" }}</p>
-            {%- if page.display_title -%}
-            <h1 class="post-title">{{ page.display_title }} {% if page.cv_pdf %}<i class="fas fa-file-pdf"></i>{% endif %}</h1>
-            {%- else -%}
-            <h1 class="post-title">{{ page.title }} {% if page.cv_pdf %}<i class="fas fa-file-pdf"></i>{% endif %}</h1>
-            {%- endif -%}
-            {%- if page.lead -%}
-            <p class="lead">{{ page.lead }}</p>
-            {%- elsif page.description -%}
-            <p class="post-description">{{ page.description }}</p>
-            {%- endif -%}
-          </header>
+          {% capture _cv_title_suffix %}{% if page.cv_pdf %}<i class="fas fa-file-pdf"></i>{% endif %}{% endcapture %}
+          {% assign _cv_title_html = page.display_title | default: page.title %}
+          {% assign _cv_eyebrow = page.eyebrow | default: 'Curriculum Vitæ' %}
+          {% include page_header.html eyebrow=_cv_eyebrow title_html=_cv_title_html title_suffix=_cv_title_suffix lead=page.lead description=page.description %}
 
           <article>
             <div class="cv">

@@ -2,7 +2,8 @@
 layout: default
 ---
 
-{% assign target = '/blog/' | relative_url | append: '?year=' | append: page.date | date: "%Y" %}
+{% assign archive_year = page.date | date: "%Y" %}
+{% assign target = '/blog/' | relative_url | append: '?year=' | append: archive_year %}
 <meta http-equiv="refresh" content="5; url={{ target }}">
 <script>
   // Immediate redirect as a fallback for environments where meta refresh may be delayed or missed
@@ -10,10 +11,8 @@ layout: default
 </script>
 
 <div class="post">
-  <header class="post-header">
-    <h1 class="post-title"><i class="fas fa-calendar fa-sm"></i> {{ page.date | date: "%Y" }}</h1>
-    <p class="post-description">Redirecting to the main blog with this year filtered in place.</p>
-  </header>
+  {% capture _archive_year_title %}<i class="fas fa-calendar fa-sm"></i> {{ page.date | date: "%Y" }}{% endcapture %}
+  {% include page_header.html title_html=_archive_year_title description="Redirecting to the main blog with this year filtered in place." %}
 
   <article>
     <p>If you are not redirected automatically, <a href="{{ target }}">click here to view posts from this year on the blog page</a>.</p>

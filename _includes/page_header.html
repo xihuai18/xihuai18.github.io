@@ -1,0 +1,17 @@
+<header class="post-header{% if include.header_class %} {{ include.header_class }}{% endif %}">
+  {%- if include.eyebrow -%}
+  <p class="eyebrow{% if include.eyebrow_class %} {{ include.eyebrow_class }}{% endif %}">{{ include.eyebrow }}</p>
+  {%- endif -%}
+
+  {%- assign _title_html = include.title_html | default: page.display_title | default: page.title -%}
+  {%- assign _title_class = include.title_class | default: 'post-title' -%}
+  <h1 class="{{ _title_class }}">{{ _title_html }}{% if include.title_suffix %} {{ include.title_suffix }}{% endif %}</h1>
+
+  {%- assign _lead = include.lead | default: page.lead -%}
+  {%- assign _description = include.description | default: page.description -%}
+  {%- if _lead -%}
+  <p class="lead{% if include.lead_class %} {{ include.lead_class }}{% endif %}">{{ _lead }}</p>
+  {%- elsif _description -%}
+  <p class="post-description{% if include.description_class %} {{ include.description_class }}{% endif %}">{{ _description }}</p>
+  {%- endif -%}
+</header>
