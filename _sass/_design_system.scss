@@ -1524,6 +1524,19 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
 html[data-theme='dark'] .cv .card .card-title,
 html[data-theme='dark'] .cv h2 { color: var(--moss-600) !important; }
 
+/* Homepage visitor map — RevolverMaps injects a fixed-size canvas. Center it
+   in a dedicated footer block so it doesn't fight the last content section. */
+.visitor-map {
+  margin: var(--s-8) 0 var(--s-4);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 130px;
+}
+.visitor-map > * { max-width: 100%; }
+
 /* Shared page header — used by page/cv/archive/news/publications/projects.
    Excludes the home hero and blog index/post layouts, which have dedicated rules. */
 .post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) {
