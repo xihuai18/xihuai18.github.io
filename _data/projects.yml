@@ -17,7 +17,7 @@
     NeurIPS 2024 Datasets & Benchmarks Track.
   language: Python
   stars:
-  tags: [marl, benchmark, coordination]
+  tags: [marl, "zero-shot coordination"]
 
 - name: A2PO
   repo: github.com/xihuai18/A2PO-ICLR2023
@@ -26,4 +26,4 @@
     2023.
   language: Python
   stars:
-  tags: [marl, policy-optimization, iclr]
+  tags: [marl, "policy optimization"]

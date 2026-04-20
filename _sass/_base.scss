@@ -130,24 +130,6 @@ blockquote {
   box-shadow: none;
 }
 
-.job-ad {
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  border: 1px solid var(--global-divider-color);
-  border-left: 5px solid var(--global-theme-color);
-  border-radius: 5px;
-  background-color: var(--global-bg-color);
-  box-shadow: none;
-  overflow: hidden;
-
-  p {
-    margin-bottom: 0.5rem;
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-}
-
 // Math
 
 .equation {
@@ -200,16 +182,6 @@ pre code {
 
   .card-title {
     color: var(--global-text-color);
-  }
-
-  .card-item {
-    width: auto;
-    margin-bottom: 10px;
-
-    .row {
-      display: flex;
-      align-items: center;
-    }
   }
 }
 
@@ -886,53 +858,6 @@ footer.sticky-bottom {
     text-decoration: none;
   }
 }
-
-
-// Projects
-
-.projects {
-  a {
-    text-decoration: none;
-
-    &:hover {
-      .card-title {
-        color: var(--global-theme-color);
-      }
-    }
-  }
-
-  .card {
-    img {
-      width: 100%;
-    }
-  }
-
-  .card-item {
-    width: auto;
-    margin-bottom: 10px;
-
-    .row {
-      display: flex;
-      align-items: center;
-    }
-  }
-
-  .grid-sizer,
-  .grid-item {
-    width: 250px;
-    margin-bottom: 10px;
-  }
-
-  h2.category {
-    color: var(--global-divider-color);
-    border-bottom: 1px solid var(--global-divider-color);
-    padding-top: 0.5rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    text-align: right;
-  }
-}
-
 
 
 // Rouge Color Customization

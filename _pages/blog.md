@@ -103,6 +103,15 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
       {%- for post in postlist -%}
         {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
         {%- unless post.featured == true -%}{%- continue -%}{%- endunless -%}
+        {%- assign zh_post = nil -%}
+        {%- if post.lang == 'en' and post.zh_url -%}
+          {%- for candidate in postlist -%}
+            {%- if candidate.lang == 'zh' and candidate.en_url == post.url -%}
+              {%- assign zh_post = candidate -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
         {%- if post.redirect == blank -%}
           {%- assign featured_href = post.url | relative_url -%}
           {%- assign featured_target = nil -%}
@@ -116,11 +125,18 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
         <article class="blog-featured-card ds-card ds-card-hover">
           <div class="blog-featured-card__body blog-featured-card__body--plain">
             <p class="blog-featured-card__kicker mono-meta">
-              <span>Pinned</span>
+              <span class="blog-featured-card__pin" aria-hidden="true">&#128204;</span>
               <span class="post-row__sep" aria-hidden="true">&middot;</span>
               <span>{{ post.date | date: "%b %-d, %Y" }}</span>
               <span class="post-row__sep" aria-hidden="true">&middot;</span>
               <span>{{ post.categories | first | replace: "-", " " | capitalize }}</span>
+              {%- if zh_post -%}
+              <span class="blog-featured-card__langs">
+                <a href="{{ post.url | relative_url }}">EN</a>
+                <span class="post-row__sep" aria-hidden="true">/</span>
+                <a href="{{ zh_post.url | relative_url }}">中</a>
+              </span>
+              {%- endif -%}
             </p>
             <h2 class="blog-featured-card__title"><a href="{{ featured_href }}"{{ featured_target }}>{{ post.title }}</a></h2>
             {%- if post.description -%}
