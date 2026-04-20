@@ -8,7 +8,10 @@
     var key = trigger.getAttribute("data-entry-key");
     if (!key) return;
     // Find the matching source within the same bib entry
-    var scope = trigger.closest("[id='" + key + "']") || trigger.closest(".row") || document;
+    var scope =
+      trigger.closest("[id='" + key + "']") ||
+      trigger.closest(".row") ||
+      document;
     var source =
       scope.querySelector(".bibtex-source[data-entry-key='" + key + "']") ||
       document.querySelector(".bibtex-source[data-entry-key='" + key + "']");
@@ -18,6 +21,9 @@
 
     var label = trigger.querySelector(".bibtex-copy-label");
     var originalLabel = label ? label.textContent : null;
+    var status = trigger.querySelector(".bibtex-copy-status");
+    var originalAriaLabel =
+      trigger.getAttribute("aria-label") || "Copy BibTeX to clipboard";
 
     var flashState = function (state) {
       // Cancel any pending revert from a prior rapid click so the new flash
@@ -29,17 +35,33 @@
       trigger.classList.remove("is-copied", "is-failed");
       trigger.classList.add(state === "ok" ? "is-copied" : "is-failed");
       if (label) label.textContent = state === "ok" ? "Copied" : "Copy failed";
+      trigger.setAttribute(
+        "aria-label",
+        state === "ok" ? "BibTeX copied" : "BibTeX copy failed",
+      );
+      if (status) {
+        status.textContent =
+          state === "ok"
+            ? "BibTeX copied to clipboard"
+            : "Failed to copy BibTeX";
+      }
       trigger.__bibFlashTimer = setTimeout(function () {
         trigger.classList.remove("is-copied", "is-failed");
         if (label && originalLabel !== null) label.textContent = originalLabel;
+        trigger.setAttribute("aria-label", originalAriaLabel);
+        if (status) status.textContent = "";
         trigger.__bibFlashTimer = null;
       }, 1400);
     };
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(
-        function () { flashState("ok"); },
-        function () { fallback(); }
+        function () {
+          flashState("ok");
+        },
+        function () {
+          fallback();
+        },
       );
     } else {
       fallback();
@@ -61,6 +83,9 @@
         document.body.removeChild(ta);
       } catch (e) {
         ok = false;
+      }
+      if (!ok && window.prompt) {
+        window.prompt("Copy BibTeX manually:", text);
       }
       flashState(ok ? "ok" : "fail");
     }

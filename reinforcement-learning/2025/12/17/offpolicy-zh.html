@@ -22,21 +22,21 @@
     5) site.og_image                                      -> site default
     This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
-    <meta itemprop="name" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
-    <meta itemprop="description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta itemprop="image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
-    <meta name="weibo:article:description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta name="weibo:article:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta itemprop="name" content="驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
+    <meta itemprop="description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta itemprop="image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Leo+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
+    <meta name="weibo:article:description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta name="weibo:article:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Leo+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
 
     <!-- OpenGraph -->
     <meta property="og:site_name" content="Xihuai Wang's Page" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2025-12-17T00:00:00+00:00" /><meta property="article:author" content="Xihuai Leo Wang" /><meta property="og:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
     <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html" />
-    <meta property="og:description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta property="og:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
-    <meta property="og:image:secure_url" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta property="og:description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta property="og:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Leo+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta property="og:image:secure_url" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Leo+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" /><meta property="og:locale" content="zh_CN" />
 
         <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
-    <meta name="twitter:description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta name="twitter:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
+    <meta name="twitter:description" content="本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。" /><meta name="twitter:image" content="https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Leo+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12" />
     <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件" />
     
 
@@ -48,12 +48,12 @@
           "@type": "WebPage",
           "@id": "https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html"
         },
-        "headline": "Xihuai&#39;s Blog | 驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件",
-        "description": "本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。","image": "https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12","author": {
+        "headline": "驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件",
+        "description": "本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。",
+        "inLanguage": "zh-CN","image": "https://og.tailgraph.com/og?fontFamily=Inter&title=Xihuai%27s+Blog+%7C+%E9%A9%AF%E6%9C%8D%E9%99%88%E6%97%A7%E6%95%B0%E6%8D%AE%EF%BC%9ALLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=%E6%9C%AC%E6%96%87%E4%BB%8E%E5%8D%95%E7%AD%96%E7%95%A5%E9%87%87%E6%A0%B7%E7%9A%84%E6%80%A7%E8%83%BD%E6%94%B9%E8%BF%9B%E4%B8%8B%E7%95%8C%E5%87%BA%E5%8F%91%EF%BC%8C%E6%8E%A8%E5%AF%BC+LLM+%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%BC%82%E7%AD%96%E7%95%A5%E8%AE%AD%E7%BB%83%E9%97%AE%E9%A2%98%EF%BC%8C%E6%89%A9%E5%B1%95%E5%88%B0%E5%A4%9A%E7%AD%96%E7%95%A5%E9%9D%99%E6%80%81%2F%E5%8A%A8%E6%80%81%E6%B7%B7%E5%90%88%E9%87%87%E6%A0%B7%EF%BC%8C%E5%B9%B6%E6%8A%8A%E5%8D%95%E8%B0%83%E6%8F%90%E5%8D%87%E6%9D%A1%E4%BB%B6%E6%8B%86%E6%88%90%E6%9B%B4%E6%96%B0%E5%A2%9E%E9%87%8F%E5%81%8F%E7%A7%BB%E3%80%81%E9%87%87%E6%A0%B7%E9%99%88%E6%97%A7%E6%80%A7%E3%80%81%E4%BC%98%E5%8A%BF%E6%9B%BF%E6%8D%A2%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%94%AF%E6%92%91%E9%9B%86%E6%9D%A1%E4%BB%B6%E3%80%82&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=Xihuai+Leo+Wang%20%C2%B7%202025-12-17&footerTailwind=text-gray-400&containerTailwind=p-12","author": {
           "@type": "Person",
           "name": "Xihuai Leo Wang"
-        },
-        "publisher": {
+        },"publisher": {
           "@type": "Person",
           "name": "Xihuai Leo Wang"
         },"datePublished": "2025-12-17T00:00:00+00:00","dateModified": "2025-12-17T00:00:00+00:00","url": "https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html",
@@ -88,10 +88,9 @@
     
     <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
     
-    <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html">
-
-    <!-- Dark Mode -->
+    <link rel="stylesheet" href="/assets/css/main.css"><link rel="canonical" href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html"><link rel="alternate" hreflang="zh-CN" href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html">
+    <link rel="alternate" hreflang="en" href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html">
+    <link rel="alternate" hreflang="x-default" href="https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-en.html"><!-- Dark Mode -->
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/monokai.css" media="none" id="highlight_theme_dark" />
 
@@ -197,15 +196,15 @@
 
 <div class="post toc-layout">
   <header class="post-header"><p class="eyebrow post-kicker">
-      <a href="/blog/?category=reinforcement-learning" data-filter-link data-filter-type="category" data-filter-value="reinforcement-learning">Reinforcement learning</a>
+      <a href="/blog/?category=reinforcement-learning&lang=zh" data-filter-link data-filter-type="category" data-filter-value="reinforcement-learning">Reinforcement learning</a>
       <span class="post-meta-dot" aria-hidden="true">&middot;</span>
       <span>文章</span>
     </p><h1 class="post-title">驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件</h1><p class="lead post-lead">本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。</p><div class="post-meta-row">
-      <span class="post-author">Xihuai Wang</span>
+      <span class="post-author">Xihuai Leo Wang</span>
       <span class="post-meta-dot" aria-hidden="true">&middot;</span>
-      <a class="post-meta-link" href="/blog/?year=2025" data-filter-link data-filter-type="year" data-filter-value="2025">Dec 17, 2025</a>
+      <a class="post-meta-link" href="/blog/?year=2025&lang=zh" data-filter-link data-filter-type="year" data-filter-value="2025">2025年12月17日</a>
       <span class="post-meta-dot" aria-hidden="true">&middot;</span>
-      <span class="post-reading-time">9 分钟阅读</span><a class="post-lang-switch" href="/reinforcement-learning/2025/12/17/offpolicy-en.html">English Version →</a></div>
+      <span class="post-reading-time">49 分钟阅读</span><a class="post-lang-switch" href="/reinforcement-learning/2025/12/17/offpolicy-en.html" lang="en" hreflang="en">English Version →</a></div>
   </header>
 
   <div class="post-links">
@@ -225,7 +224,17 @@
   <div class="row">
     
       <div class="col-lg toc-content">
-    
+    <aside class="post-toc-mobile d-lg-none" aria-label="目录">
+        <span class="eyebrow">目录</span>
+        <nav
+          class="toc"
+          data-toc
+          data-toc-content=".post-content"
+          data-toc-headings="h2"
+          data-toc-min-items="2"
+          aria-label="目录"
+        ></nav>
+      </aside>
 
       <article class="post-content">
         <blockquote>
@@ -1241,17 +1250,7 @@ $$</p>
   </li>
 </ol>
 
-      </article><aside class="post-toc-mobile d-lg-none" aria-label="目录">
-        <span class="eyebrow">目录</span>
-        <nav
-          class="toc"
-          data-toc
-          data-toc-content=".toc-content"
-          data-toc-headings="h2"
-          data-toc-min-items="2"
-          aria-label="目录"
-        ></nav>
-      </aside><aside class="post-cite">
+      </article><aside class="post-cite">
           <div class="post-cite__head">
             <span class="eyebrow">引用本文</span>
             <button type="button" class="post-cite__copy" data-copy-target="#post-cite-bib" data-copied-label="已复制">
@@ -1260,7 +1259,7 @@ $$</p>
             </button>
           </div>
           <pre class="post-cite__bib" id="post-cite-bib"><code><span class="bib-type">@misc</span>&#123;<span class="bib-key">2025offpolicyzh</span>,
-  <span class="bib-field">author</span> = &#123;<span class="bib-value">Xihuai Wang</span>&#125;,
+  <span class="bib-field">author</span> = &#123;<span class="bib-value">Xihuai Leo Wang</span>&#125;,
   <span class="bib-field">title</span>  = &#123;<span class="bib-value">驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件</span>&#125;,
   <span class="bib-field">year</span>   = &#123;<span class="bib-value">2025</span>&#125;,
   <span class="bib-field">url</span>    = &#123;<span class="bib-value">https://xihuai18.github.io/reinforcement-learning/2025/12/17/offpolicy-zh.html</span>&#125;
@@ -1274,7 +1273,7 @@ $$</p>
     <div class="col-lg-3 d-none d-lg-block toc-sidebar-col"><aside class="toc-sidebar" data-toc-sidebar id="toc-sidebar">
   <div class="toc-sidebar__header">
     <div class="toc-sidebar__title">目录</div>
-    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
+    <button class="toc-toggle-btn" aria-label="切换目录显示" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
@@ -1282,7 +1281,7 @@ $$</p>
     id="toc-content"
     class="toc js-page-toc"
     data-toc
-    data-toc-content=".toc-content"
+    data-toc-content=".post-content"
     data-toc-headings="h2"
     data-toc-min-items="2"
     aria-label="目录"
@@ -1290,7 +1289,7 @@ $$</p>
 </aside>
 
 <!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
-<button class="toc-collapsed-toggle" aria-label="Show table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-expand>
+<button class="toc-collapsed-toggle" aria-label="显示目录" aria-expanded="false" aria-controls="toc-content" data-toc-expand>
   <i class="fas fa-list"></i>
 </button>
 
@@ -1303,7 +1302,7 @@ $$</p>
     <!-- Footer --><footer class="sticky-bottom mt-5">
       <div class="container uk-footer-inner">
         <span class="uk-footer-copy">
-          &copy; 2026 Xihuai Leo Wang. Built with care in Shanghai.</span><span class="mono-meta uk-footer-updated">last updated &middot; Apr 2026</span></div>
+          &copy; 2026 Xihuai Leo Wang. Built with care in Shanghai.</span><span class="mono-meta uk-footer-updated">last built &middot; Apr 2026</span></div>
     </footer>
 
 
@@ -1556,9 +1555,15 @@ $$</p>
    * To account for this, a minimal delay was introduced before computing the
    * values.
    */
-  window.onload = function () {
+  function queueProgressBarSetup() {
     setTimeout(progressBarSetup, 50);
-  };
+  }
+
+  if (document.readyState === "complete") {
+    queueProgressBarSetup();
+  } else {
+    window.addEventListener("load", queueProgressBarSetup, { once: true });
+  }
   /*
    * We set up the bar according to the browser.
    * If the browser supports the progress element we use that.
@@ -1590,11 +1595,18 @@ $$</p>
     // Use the CSS-defined padding-top value to avoid layout shift
     // The navbar height is already handled by CSS: body.fixed-top-nav { padding-top: 50px; }
     let navbarHeight = $("#navbar").outerHeight(true) || 50;
+    let distance = getDistanceToScroll();
     // Only set progressBar position, don't override body padding to avoid layout shift
-    $("progress-container").css({ "padding-top": navbarHeight });
+    $(".progress-container").css({ "padding-top": navbarHeight });
     progressBar.css({ top: navbarHeight });
+    if (distance <= 0) {
+      progressBar.css({ display: "none" });
+      progressBar.attr({ max: 1, value: 0 });
+      return;
+    }
+    progressBar.css({ display: "" });
     progressBar.attr({
-      max: getDistanceToScroll(),
+      max: distance,
       value: getCurrentScrollPosition(),
     });
   }
@@ -1604,15 +1616,22 @@ $$</p>
    * This is the distance the user can scroll
    */
   function getDistanceToScroll() {
-    return $(document).height() - $(window).height();
+    return Math.max($(document).height() - $(window).height(), 0);
   }
 
   function resizeProgressBar() {
+    if (getDistanceToScroll() <= 0) {
+      progressBar.css({ width: 0, display: "none" });
+      return;
+    }
+    progressBar.css({ display: "" });
     progressBar.css({ width: getWidthPercentage() + "%" });
   }
   // The scroll ratio equals the percentage to resize the bar
   function getWidthPercentage() {
-    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+    const distance = getDistanceToScroll();
+    if (distance <= 0) return 0;
+    return (getCurrentScrollPosition() / distance) * 100;
   }
 </script>
 

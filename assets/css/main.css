@@ -3170,18 +3170,6 @@ pre code {
 .post:has(.post-header.hero) > article > .clearfix > ol {
   max-width: none;
 }
-.post:has(.post-header.hero) > article > h2 {
-  margin-top: var(--s-7);
-  padding-bottom: var(--s-2);
-  border-bottom: 1px solid var(--rule);
-}
-.post:has(.post-header.hero) > article > h2 a {
-  color: inherit;
-}
-.post:has(.post-header.hero) > article > h2 a:hover {
-  color: var(--accent);
-  text-decoration: none;
-}
 
 .about-section-head {
   display: flex;
@@ -3477,7 +3465,7 @@ html[data-theme=dark] .navbar {
 
 .news table th,
 .news table td {
-  padding: 14px 0;
+  padding: 14px 0 !important;
   border-bottom: 1px solid var(--rule);
   border-top: none !important;
   vertical-align: baseline;
@@ -3506,6 +3494,12 @@ html[data-theme=dark] .navbar {
   line-height: 1.55;
 }
 
+.news table td .news-tag {
+  display: inline-flex;
+  margin-right: 12px;
+  vertical-align: baseline;
+}
+
 .news a.news-title {
   color: var(--fg);
   font-family: var(--font-display);
@@ -3528,7 +3522,7 @@ html[data-theme=dark] .navbar {
 .news-full {
   max-width: 820px; /* pages.css:261 */
   margin: 0 auto;
-  padding: 56px var(--gutter) 80px; /* pages.css:261 */
+  padding: 0 var(--gutter) 80px;
 }
 
 .news-year {
@@ -3896,31 +3890,6 @@ html[data-theme=dark] .venue-filter-status__clear:hover {
 .publications ul.bibliography > li:last-child {
   border-bottom: none;
 }
-.publications .bibliography .abbr {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  font-family: var(--font-sans);
-  font-size: 10px; /* components-paper-card.html:34 */
-  font-weight: 500;
-  letter-spacing: 0.02em; /* kit.css:338 .chip */
-  text-transform: uppercase;
-  border-radius: var(--r-pill);
-  color: var(--accent-deep);
-  background: var(--accent-wash);
-  margin-right: var(--s-2);
-}
-.publications .bibliography .abbr abbr {
-  border: none !important;
-  text-decoration: none !important;
-  color: inherit !important;
-  cursor: help;
-}
-
-html[data-theme=dark] .publications .bibliography .abbr {
-  color: var(--moss-700);
-  background: rgba(111, 179, 102, 0.15); /* kit.css:354 dark chip.is-accent */
-}
 
 .publications .bibliography .title {
   font-family: var(--font-display);
@@ -4015,12 +3984,6 @@ html[data-theme=dark] .publications .bibliography .abbr {
 .publications .bibtex-source {
   display: none !important;
 }
-.publications .bibliography .selected,
-.publications .bibliography li.selected {
-  /* highlight rail for "selected" papers (ochre per kit) */
-  box-shadow: inset 2px 0 0 var(--ink-ochre);
-  padding-left: 14px !important;
-}
 .publications {
   /* "★ Selected" label — kit.css:194-197 */
 }
@@ -4038,6 +4001,10 @@ html[data-theme=dark] .publications .bibliography .links .bibtex-copy:hover,
 html[data-theme=dark] .publications .bibliography .links .bibtex-copy.is-copied,
 html[data-theme=dark] .publications .bibliography .links .bibtex-copy.is-failed {
   color: var(--paper) !important;
+}
+
+.publications ol.bibliography > li.single-pub-in-year {
+  border-bottom: none !important;
 }
 
 /* Pre-title meta row — inline row of venue-tag + ★ Selected sitting above the
@@ -4334,13 +4301,6 @@ html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
  * ========================================================================== */
 .cv {
   font-family: var(--font-serif);
-}
-.cv h1 {
-  font-family: var(--font-display);
-  font-size: var(--fs-3xl);
-  letter-spacing: -0.02em;
-}
-.cv {
   /* Card shell dissolves — become transparent section blocks with space. */
 }
 .cv .card {
@@ -4391,6 +4351,9 @@ html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
   border: none !important;
   border-bottom: 1px dotted var(--rule) !important;
   padding: var(--s-4) 0 !important;
+}
+.cv .cv-timeline .list-group-item + .list-group-item {
+  border-top: none !important;
 }
 .cv .cv-timeline .list-group-item:last-child {
   border-bottom: none !important;
@@ -4485,6 +4448,30 @@ html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
   text-transform: none;
   margin: 0;
 }
+.cv .cv-entry-list {
+  margin: var(--s-2) 0 0;
+  padding-left: var(--s-4);
+}
+.cv .cv-entry-list > li + li {
+  margin-top: var(--s-2);
+}
+.cv .cv-entry-list .item-title {
+  display: inline-block;
+  margin-bottom: var(--s-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.cv .cv-entry-list .item,
+.cv .cv-entry-list .subitem {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--fg-2);
+}
 .cv {
   /* General Information table — serif, no inner borders */
 }
@@ -4524,18 +4511,42 @@ html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
     width: auto;
   }
 }
-.cv {
-  /* Page header rule — pages.css:175-177 `.uk-page-head` */
-}
-.cv .post-header {
-  padding-bottom: var(--s-5);
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: var(--s-6);
-}
 
 html[data-theme=dark] .cv .card .card-title,
 html[data-theme=dark] .cv h2 {
   color: var(--moss-600) !important;
+}
+
+/* Shared page header — used by page/cv/archive/news/publications/projects.
+   Excludes the home hero and blog index/post layouts, which have dedicated rules. */
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) {
+  padding: 0 0 var(--s-5);
+  margin-bottom: var(--s-6);
+  border-bottom: 1px solid var(--rule);
+}
+
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .eyebrow {
+  margin-bottom: var(--s-3);
+}
+
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .post-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 500;
+  margin: 0 0 var(--s-4);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .lead,
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .post-description {
+  margin: 0;
+  max-width: 62ch;
+  font-family: var(--font-serif);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-body);
+  color: var(--fg-2);
 }
 
 /* ============================================================================
@@ -5073,6 +5084,10 @@ html[data-theme=dark] .cv h2 {
 }
 
 .post-toc-mobile .toc.is-empty {
+  display: none;
+}
+
+.post-toc-mobile:has(.toc.is-empty) {
   display: none;
 }
 
