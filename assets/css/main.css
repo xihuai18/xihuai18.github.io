@@ -3701,6 +3701,16 @@ pre code {
   color: var(--fg);
 }
 
+.about-section-head h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.about-section-head h2 a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 .about-section-head__more {
   font-family: var(--font-sans);
   font-size: 13px;
@@ -4750,85 +4760,8 @@ html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
 }
 
 .selected-paper-card {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: var(--s-5);
+  display: block;
   padding: var(--s-4);
-  align-items: stretch;
-}
-
-.selected-paper-card__thumb {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 4/3;
-  min-height: 96px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--rule);
-  background: linear-gradient(135deg, #E9EEE5, #CFDCC8);
-  color: var(--moss-600);
-  overflow: hidden;
-}
-
-html[data-theme=dark] .selected-paper-card__thumb {
-  background: linear-gradient(135deg, #1E2A1B, #243424);
-  color: var(--moss-500);
-  border-color: rgba(232, 229, 220, 0.12);
-}
-
-.selected-papers ol.bibliography > li:nth-child(3n+2) .selected-paper-card__thumb {
-  background: linear-gradient(135deg, #EFE9DD, #DCCEB5);
-  color: var(--ink-ochre);
-}
-
-html[data-theme=dark] .selected-papers ol.bibliography > li:nth-child(3n+2) .selected-paper-card__thumb {
-  background: linear-gradient(135deg, #2A2518, #3B3522);
-  color: #E0B977;
-}
-
-.selected-papers ol.bibliography > li:nth-child(3n+3) .selected-paper-card__thumb {
-  background: linear-gradient(135deg, #E3E6EE, #C5CBDA);
-  color: var(--ink-blue);
-}
-
-html[data-theme=dark] .selected-papers ol.bibliography > li:nth-child(3n+3) .selected-paper-card__thumb {
-  background: linear-gradient(135deg, #1B2033, #242B3E);
-  color: #8AA6E4;
-}
-
-.selected-paper-card__mark {
-  font-size: 26px;
-  line-height: 1;
-  opacity: 0.7;
-}
-
-.selected-paper-card__year {
-  position: absolute;
-  left: 10px;
-  bottom: 8px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--fg-3);
-  opacity: 0.85;
-  text-transform: none;
-}
-
-.selected-paper-card__thumb-label {
-  position: absolute;
-  right: 10px;
-  bottom: 8px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-3);
-  opacity: 0.8;
-  max-width: calc(100% - 44px);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .selected-paper-card__body {
@@ -4837,12 +4770,16 @@ html[data-theme=dark] .selected-papers ol.bibliography > li:nth-child(3n+3) .sel
   min-width: 0;
 }
 
+.selected-paper-card__body--plain {
+  gap: var(--s-2);
+}
+
 .selected-paper-card__meta {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
-  margin-bottom: 6px;
+  margin: 0;
 }
 
 .selected-paper-card__venue {
@@ -4854,7 +4791,7 @@ html[data-theme=dark] .selected-papers ol.bibliography > li:nth-child(3n+3) .sel
 }
 
 .selected-paper-card__title {
-  margin: 0 0 6px;
+  margin: 0;
   font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 600;
@@ -4864,7 +4801,7 @@ html[data-theme=dark] .selected-papers ol.bibliography > li:nth-child(3n+3) .sel
 }
 
 .selected-paper-card__authors {
-  margin: 0 0 8px;
+  margin: 0;
   font-family: var(--font-serif);
   font-size: 14px;
   line-height: 1.5;
@@ -4890,7 +4827,7 @@ html[data-theme=dark] .selected-papers ol.bibliography > li:nth-child(3n+3) .sel
   flex-wrap: wrap;
   gap: 14px;
   align-items: center;
-  margin-top: auto;
+  margin-top: var(--s-2);
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: 0.02em;
@@ -5300,69 +5237,9 @@ html[data-theme=dark] .cv h2 {
 
 .blog-featured-card__link {
   display: block;
-  padding: var(--s-4) var(--s-5);
+  padding: var(--s-4) var(--s-5) var(--s-5);
   color: inherit;
   text-decoration: none;
-}
-
-.blog-featured-card__main {
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
-  gap: var(--s-5);
-  align-items: stretch;
-}
-
-.blog-featured-card__art {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 4/3;
-  min-height: 128px;
-  padding: var(--s-4);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--rule);
-  background: linear-gradient(135deg, #EDF3EA, #C8DABF);
-}
-
-html[data-theme=dark] .blog-featured-card__art {
-  background: linear-gradient(135deg, #1E2A1B, #243424);
-  border-color: rgba(232, 229, 220, 0.12);
-}
-
-.blog-featured-card__pin {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-.blog-featured-card__symbol {
-  font-family: var(--font-display);
-  font-size: clamp(2.6rem, 4vw, 3.2rem);
-  font-style: italic;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--accent-deep);
-  opacity: 0.85;
-  font-variation-settings: "opsz" 144, "SOFT" 50;
-}
-
-html[data-theme=dark] .blog-featured-card__symbol {
-  color: var(--moss-500);
-}
-
-.blog-featured-card__caption {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  color: var(--fg-3);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.75;
 }
 
 .blog-featured-card__body {
@@ -5371,33 +5248,35 @@ html[data-theme=dark] .blog-featured-card__symbol {
   min-width: 0;
 }
 
+.blog-featured-card__body--plain {
+  gap: var(--s-2);
+}
+
+.blog-featured-card__kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+  color: var(--fg-3);
+}
+
 .blog-featured-card__title {
-  margin: 0 0 var(--s-2);
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: clamp(1.35rem, 2.2vw, 1.6rem);
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.01em;
 }
 
 .blog-featured-card__desc {
-  margin: 0 0 auto;
+  margin: 0;
   font-family: var(--font-serif);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--fg-2);
   max-width: none;
-}
-
-.blog-featured-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: var(--s-3) 0 0;
-  padding-top: var(--s-3);
-  border-top: 1px dotted var(--rule);
-  color: var(--fg-3);
-  font-size: 11px;
 }
 
 .blog-featured-card:hover .blog-featured-card__title,
