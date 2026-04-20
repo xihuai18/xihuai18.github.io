@@ -4,7 +4,6 @@ title: "Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correc
 date: 2025-12-01
 description: "In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares k1, k2, k3 in on-policy and off-policy settings, and turns the result into a practical selection guide."
 og_image: /assets/img/kl-estimators/kl-estimator.png
-featured: true
 categories: reinforcement-learning
 lang: en
 zh_url: /reinforcement-learning/2025/12/01/kl-estimators-zh.html

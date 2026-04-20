@@ -7,8 +7,11 @@
 
 {%- assign toc_title = include.title -%}
 {%- if toc_title == nil or toc_title == '' -%}
-  {%- assign _lang = page.lang | default: site.lang -%}
-  {%- if _lang == 'zh' or _lang == 'zh-CN' or _lang == 'cn' -%}
+  {%- assign _lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+  {%- if _lang == 'zh-cn' or _lang == 'cn' -%}
+    {%- assign _lang = 'zh' -%}
+  {%- endif -%}
+  {%- if _lang == 'zh' -%}
     {%- assign toc_title = '目录' -%}
   {%- else -%}
     {%- assign toc_title = 'Contents' -%}
@@ -37,4 +40,3 @@
 <button class="toc-collapsed-toggle" aria-label="Show table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-expand>
   <i class="fas fa-list"></i>
 </button>
-

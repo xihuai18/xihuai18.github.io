@@ -6,13 +6,17 @@ layout: default
 {%- assign primary_category = page.categories | first -%}
 {%- capture post_author_default -%}{{ site.first_name }} {{ site.last_name }}{%- endcapture -%}
 {%- assign post_author = page.author | default: site.author.name | default: post_author_default | strip -%}
+{%- assign _post_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if _post_lang == 'zh-cn' or _post_lang == 'cn' -%}
+  {%- assign _post_lang = 'zh' -%}
+{%- endif -%}
 {%- if page.external_source == blank -%}
   {%- assign read_time = page.content | number_of_words | divided_by: 180 | plus: 1 -%}
 {%- else -%}
   {%- assign read_time = page.feed_content | strip_html | number_of_words | divided_by: 180 | plus: 1 -%}
 {%- endif -%}
 {%- assign post_read_label = "min read" -%}
-{%- if page.lang == 'zh' or page.lang == 'zh-CN' or page.lang == 'cn' -%}
+{%- if _post_lang == 'zh' -%}
   {%- assign post_read_label = "分钟阅读" -%}
 {%- endif -%}
 
@@ -30,7 +34,7 @@ layout: default
     <p class="eyebrow post-kicker">
       <a href="{{ '/blog/' | relative_url }}?category={{ primary_category_slug }}" data-filter-link data-filter-type="category" data-filter-value="{{ primary_category_slug }}">{{ primary_category | replace: "-", " " | capitalize }}</a>
       <span class="post-meta-dot" aria-hidden="true">&middot;</span>
-      <span>{% if page.lang == 'zh' or page.lang == 'zh-CN' or page.lang == 'cn' %}文章{% else %}Essay{% endif %}</span>
+      <span>{% if _post_lang == 'zh' %}文章{% else %}Essay{% endif %}</span>
     </p>
     {%- endif -%}
     <h1 class="post-title">{{ page.title }}</h1>
@@ -69,7 +73,7 @@ layout: default
       </article>
 
       {%- assign toc_title = "Contents" -%}
-      {%- if page.lang == 'zh' or page.lang == 'zh-CN' or page.lang == 'cn' -%}
+      {%- if _post_lang == 'zh' -%}
         {%- assign toc_title = '目录' -%}
       {%- endif -%}
       <aside class="post-toc-mobile d-lg-none" aria-label="{{ toc_title }}">
@@ -97,8 +101,7 @@ layout: default
         {%- assign cite_author = page.author | default: site.author.name | default: "Xihuai Wang" -%}
         {%- assign cite_year = page.date | date: "%Y" -%}
         {%- assign cite_url = page.url | absolute_url -%}
-        {%- assign _lang = page.lang | default: site.lang -%}
-        {%- if _lang == 'zh' or _lang == 'zh-CN' or _lang == 'cn' -%}
+        {%- if _post_lang == 'zh' -%}
           {%- assign cite_label = '引用本文' -%}
           {%- assign cite_copy_label = '复制 BibTeX' -%}
           {%- assign cite_copy_ok = '已复制' -%}

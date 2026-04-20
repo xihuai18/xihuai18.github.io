@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-{%- assign _page_lang = page.lang | default: site.lang -%}
+{%- assign _page_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if _page_lang == 'zh-cn' or _page_lang == 'cn' -%}
+  {%- assign _page_lang = 'zh' -%}
+{%- endif -%}
 {%- if _page_lang == 'zh' -%}
   {%- assign _html_lang = 'zh-CN' -%}
 {%- elsif _page_lang == 'en' -%}

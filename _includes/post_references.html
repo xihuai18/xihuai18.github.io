@@ -17,8 +17,11 @@
 {%- endif -%}
 
 {%- if show_references -%}
-  {%- assign _lang = page.lang | default: site.lang -%}
-  {%- if _lang == 'zh' or _lang == 'zh-CN' or _lang == 'cn' -%}
+  {%- assign _lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+  {%- if _lang == 'zh-cn' or _lang == 'cn' -%}
+    {%- assign _lang = 'zh' -%}
+  {%- endif -%}
+  {%- if _lang == 'zh' -%}
     {%- assign refs_title = '参考文献' -%}
   {%- else -%}
     {%- assign refs_title = 'References' -%}
@@ -29,4 +32,3 @@
     {% bibliography --cited --template bib_post %}
   </section>
 {%- endif -%}
-

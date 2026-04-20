@@ -7,7 +7,7 @@ nav_title: Projects
 eyebrow: Projects
 permalink: /projects/
 description: Research code and toolkits I maintain or contributed to.
-lead: Repositories tied to papers I wrote or contributed to in a meaningful way. Everything is MIT or Apache. Take it, break it, and let me know when it helps.
+lead: Repositories tied to papers I've written or contributed meaningfully to. Everything is MIT or Apache. Take it, break it, ping me when it helps.
 nav: true
 nav_order: 3
 published: true
@@ -24,8 +24,11 @@ published: true
           <span class="project-lang-dot project-lang-dot--{{ p.language | downcase | replace: '+', 'p' | replace: ' ', '-' | default: 'other' }}"></span>
           {{ p.language | default: "—" }}
         </span>
-        {%- if p.stars -%}
-        <span class="project-stars">★ {{ p.stars }}</span>
+        {%- if p.stars or p.forks -%}
+        <span class="project-stats mono-meta">
+          {%- if p.stars -%}<span>★ {{ p.stars }}</span>{%- endif -%}
+          {%- if p.forks -%}<span>⑂ {{ p.forks }}</span>{%- endif -%}
+        </span>
         {%- endif -%}
       </div>
       <h3 class="project-title">

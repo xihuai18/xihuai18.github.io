@@ -98,7 +98,6 @@
     const { year, category } = getFilters();
     const posts = document.querySelectorAll(".post-rows > .post-row");
     const yearGroups = document.querySelectorAll("[data-year-group]");
-    const featuredSection = document.querySelector("[data-featured-section]");
     let visibleCount = 0;
     const totalCount = posts.length;
     let lastVisiblePost = null;
@@ -123,9 +122,6 @@
     });
 
     const hasActiveFilters = year || category;
-    if (featuredSection) {
-      featuredSection.hidden = Boolean(hasActiveFilters);
-    }
 
     yearGroups.forEach((group) => {
       const hasVisiblePosts = Array.from(
@@ -215,18 +211,14 @@
       clearBtn.addEventListener("click", clearFilters);
       statusElement.appendChild(clearBtn);
 
-      // Insert before the first post list or featured section
+      // Insert before the first year group / post list
       const postSection = document.querySelector(".post");
       if (postSection) {
-        const featuredPosts = postSection.querySelector(
-          "[data-featured-section]",
-        );
         const postList = postSection.querySelector(
           ".blog-year-group, .post-rows",
         );
-        const insertBefore = featuredPosts || postList;
-        if (insertBefore) {
-          insertBefore.parentNode.insertBefore(statusElement, insertBefore);
+        if (postList) {
+          postList.parentNode.insertBefore(statusElement, postList);
         }
       }
     }

@@ -162,7 +162,10 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="{{ _share_meta_title }}" />
     {%- endif -%}
-        {%- assign _page_lang = page.lang | default: site.lang -%}
+        {%- assign _page_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+        {%- if _page_lang == 'zh-cn' or _page_lang == 'cn' -%}
+            {%- assign _page_lang = 'zh' -%}
+        {%- endif -%}
         {%- if _page_lang == 'zh' -%}
             {%- assign _og_locale = 'zh_CN' -%}
         {%- elsif _page_lang == 'en' -%}

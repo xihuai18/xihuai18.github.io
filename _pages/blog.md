@@ -31,15 +31,13 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
 {%- assign cat_name_list = "|" -%}
 {%- assign cat_count_str = "" -%}
 {%- assign year_list_raw = "" -%}
-{%- assign featured_count = 0 -%}
 {%- for post in postlist -%}
-{%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
+{%- assign post_lang = post.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if post_lang == 'zh-cn' or post_lang == 'cn' -%}{%- assign post_lang = 'zh' -%}{%- endif -%}
+{%- if post_lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
 {%- assign visible_count = visible_count | plus: 1 -%}
 {%- assign post_year = post.date | date: "%Y" -%}
 {%- assign year_list_raw = year_list_raw | append: post_year | append: "|" -%}
-{%- if post.featured == true -%}
-{%- assign featured_count = featured_count | plus: 1 -%}
-{%- endif -%}
 {%- for category in post.categories -%}
 {%- assign cat_slug = category | slugify -%}
 {%- assign cat_slug_token = "|" | append: cat_slug | append: "|" -%}
@@ -69,7 +67,9 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
       {%- if this_slug == "" -%}{%- continue -%}{%- endif -%}
       {%- assign this_count = 0 -%}
       {%- for post in postlist -%}
-        {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
+        {%- assign post_lang = post.lang | default: site.lang | downcase | replace: '_', '-' -%}
+        {%- if post_lang == 'zh-cn' or post_lang == 'cn' -%}{%- assign post_lang = 'zh' -%}{%- endif -%}
+        {%- if post_lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
         {%- for c in post.categories -%}
           {%- if c | slugify == this_slug -%}{%- assign this_count = this_count | plus: 1 -%}{%- break -%}{%- endif -%}
         {%- endfor -%}
@@ -92,68 +92,13 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
 
   </nav>
 
-{%- if featured_count > 0 -%}
-
-  <section class="blog-featured" data-featured-section>
-    <div class="blog-featured__head">
-      <p class="eyebrow">Pinned note{% if featured_count > 1 %}s{% endif %}</p>
-      <span class="blog-featured__rule" aria-hidden="true"></span>
-    </div>
-    <div class="blog-featured__grid">
-      {%- for post in postlist -%}
-        {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
-        {%- unless post.featured == true -%}{%- continue -%}{%- endunless -%}
-        {%- assign zh_post = nil -%}
-        {%- if post.lang == 'en' and post.zh_url -%}
-          {%- for candidate in postlist -%}
-            {%- if candidate.lang == 'zh' and candidate.en_url == post.url -%}
-              {%- assign zh_post = candidate -%}
-              {%- break -%}
-            {%- endif -%}
-          {%- endfor -%}
-        {%- endif -%}
-        {%- if post.redirect == blank -%}
-          {%- assign featured_href = post.url | relative_url -%}
-          {%- assign featured_target = nil -%}
-        {%- elsif post.redirect contains '://' -%}
-          {%- assign featured_href = post.redirect -%}
-          {%- assign featured_target = ' target="_blank" rel="noopener"' -%}
-        {%- else -%}
-          {%- assign featured_href = post.redirect | relative_url -%}
-          {%- assign featured_target = nil -%}
-        {%- endif -%}
-        <article class="blog-featured-card ds-card ds-card-hover">
-          <div class="blog-featured-card__body blog-featured-card__body--plain">
-            <p class="blog-featured-card__kicker mono-meta">
-              <span class="blog-featured-card__pin" aria-hidden="true">&#128204;</span>
-              <span class="post-row__sep" aria-hidden="true">&middot;</span>
-              <span>{{ post.date | date: "%b %-d, %Y" }}</span>
-              <span class="post-row__sep" aria-hidden="true">&middot;</span>
-              <span>{{ post.categories | first | replace: "-", " " | capitalize }}</span>
-              {%- if zh_post -%}
-              <span class="blog-featured-card__langs">
-                <a href="{{ post.url | relative_url }}">EN</a>
-                <span class="post-row__sep" aria-hidden="true">/</span>
-                <a href="{{ zh_post.url | relative_url }}">中</a>
-              </span>
-              {%- endif -%}
-            </p>
-            <h2 class="blog-featured-card__title"><a href="{{ featured_href }}"{{ featured_target }}>{{ post.title }}</a></h2>
-            {%- if post.description -%}
-            <p class="blog-featured-card__desc">{{ post.description }}</p>
-            {%- endif -%}
-          </div>
-        </article>
-      {%- endfor -%}
-    </div>
-  </section>
-  {%- endif -%}
-
 {%- for year in years_list -%}
 {%- if year == "" -%}{%- continue -%}{%- endif -%}
 {%- assign count_in_year = 0 -%}
 {%- for post in postlist -%}
-{%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
+{%- assign post_lang = post.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if post_lang == 'zh-cn' or post_lang == 'cn' -%}{%- assign post_lang = 'zh' -%}{%- endif -%}
+{%- if post_lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
 {%- assign post_year = post.date | date: "%Y" -%}
 {%- if post_year == year -%}{%- assign count_in_year = count_in_year | plus: 1 -%}{%- endif -%}
 {%- endfor -%}
@@ -167,7 +112,9 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
 
     <ol class="post-rows">
       {%- for post in postlist -%}
-        {%- if post.lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
+        {%- assign post_lang = post.lang | default: site.lang | downcase | replace: '_', '-' -%}
+        {%- if post_lang == 'zh-cn' or post_lang == 'cn' -%}{%- assign post_lang = 'zh' -%}{%- endif -%}
+        {%- if post_lang == 'zh' and post.en_url -%}{%- continue -%}{%- endif -%}
         {%- assign post_year = post.date | date: "%Y" -%}
         {%- unless post_year == year -%}{%- continue -%}{%- endunless -%}
 
@@ -182,9 +129,11 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
         {%- endfor -%}
 
         {%- assign zh_post = nil -%}
-        {%- if post.lang == 'en' and post.zh_url -%}
+        {%- if post_lang == 'en' and post.zh_url -%}
           {%- for candidate in postlist -%}
-            {%- if candidate.lang == 'zh' and candidate.en_url == post.url -%}
+            {%- assign candidate_lang = candidate.lang | default: site.lang | downcase | replace: '_', '-' -%}
+            {%- if candidate_lang == 'zh-cn' or candidate_lang == 'cn' -%}{%- assign candidate_lang = 'zh' -%}{%- endif -%}
+            {%- if candidate_lang == 'zh' and candidate.en_url == post.url -%}
               {%- assign zh_post = candidate -%}
               {%- break -%}
             {%- endif -%}
@@ -202,6 +151,19 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
         {%- if zh_post -%}
           {%- assign read_time_zh = zh_post.content | number_of_words | divided_by: 180 | plus: 1 -%}
         {%- endif -%}
+        {%- if post.redirect == blank -%}
+          {%- assign post_href = post.url | relative_url -%}
+          {%- assign post_target = '' -%}
+          {%- assign post_is_external = false -%}
+        {%- elsif post.redirect contains '://' -%}
+          {%- assign post_href = post.redirect -%}
+          {%- assign post_target = ' target="_blank" rel="noopener"' -%}
+          {%- assign post_is_external = true -%}
+        {%- else -%}
+          {%- assign post_href = post.redirect | relative_url -%}
+          {%- assign post_target = '' -%}
+          {%- assign post_is_external = false -%}
+        {%- endif -%}
 
       <li class="post-row blog-post-list-item" data-year="{{ post_year }}" data-categories="{{ post_categories_slug }}">
         <time class="post-row__date mono-meta" datetime="{{ post.date | date_to_xmlschema }}">
@@ -217,13 +179,7 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
 
           <div class="post-row__lang-pane is-active" data-lang-pair="{{ pair_id }}" data-lang="en">
             <h3 class="post-row__title">
-              {%- if post.redirect == blank -%}
-                <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-              {%- elsif post.redirect contains '://' -%}
-                <a href="{{ post.redirect }}" target="_blank" rel="noopener">{{ post.title }} <span class="post-row__external" aria-hidden="true">↗</span></a>
-              {%- else -%}
-                <a href="{{ post.redirect | relative_url }}">{{ post.title }}</a>
-              {%- endif -%}
+              <a href="{{ post_href }}"{{ post_target }}>{{ post.title }}{%- if post_is_external -%} <span class="post-row__external" aria-hidden="true">↗</span>{%- endif -%}</a>
             </h3>
             {%- if post.description -%}
             <p class="post-row__desc">{{ post.description }}</p>
@@ -265,20 +221,14 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
 
           {%- else -%}
           <h3 class="post-row__title">
-            {%- if post.redirect == blank -%}
-              <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-            {%- elsif post.redirect contains '://' -%}
-              <a href="{{ post.redirect }}" target="_blank" rel="noopener">{{ post.title }} <span class="post-row__external" aria-hidden="true">↗</span></a>
-            {%- else -%}
-              <a href="{{ post.redirect | relative_url }}">{{ post.title }}</a>
-            {%- endif -%}
+            <a href="{{ post_href }}"{{ post_target }}>{{ post.title }}{%- if post_is_external -%} <span class="post-row__external" aria-hidden="true">↗</span>{%- endif -%}</a>
           </h3>
           {%- if post.description -%}
           <p class="post-row__desc">{{ post.description }}</p>
           {%- endif -%}
           {%- assign _lbl_read = "min read" -%}
           {%- assign _lbl_views = "views" -%}
-          {%- if post.lang == 'zh' -%}
+          {%- if post_lang == 'zh' -%}
             {%- assign _lbl_read = "分钟阅读" -%}
             {%- assign _lbl_views = "阅读" -%}
           {%- endif -%}
