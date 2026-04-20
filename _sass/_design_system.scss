@@ -1484,6 +1484,8 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
       font-family: var(--font-serif);
       font-size: 0.95rem;
       color: var(--fg);
+      word-break: break-word;
+      overflow-wrap: anywhere;
       &:first-child {
         font-family: var(--font-sans);
         font-weight: 500;
@@ -1492,6 +1494,7 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
         letter-spacing: 0.08em;
         color: var(--fg-3);
         width: 160px;
+        padding-right: var(--s-4) !important;  /* gap between label and value */
       }
     }
   }
@@ -1502,7 +1505,19 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
     .table tr td:first-child { width: 120px; }
   }
   @media (max-width: 575.98px) {
-    .table tr td:first-child { width: auto; }
+    /* On narrow phones the UPDATED TIME label won't fit on one line with any
+       side padding, so stack each row: label on its own line above the value. */
+    .table,
+    .table tbody,
+    .table tr,
+    .table tr td { display: block !important; width: auto !important; }
+    .table tr { padding: var(--s-2) 0 !important; }
+    .table tr + tr { border-top: 1px dotted var(--rule) !important; }
+    .table tr td { padding: 0 !important; }
+    .table tr td:first-child {
+      margin-bottom: 4px !important;
+      padding-right: 0 !important;
+    }
   }
 
 }
