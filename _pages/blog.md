@@ -337,8 +337,17 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
         {%- endif -%}
 
       <li class="post-row blog-post-list-item" data-year="{{ post_year }}" data-categories="{{ post_categories_slug }}" data-tags="{{ post_tags_slug }}">
-        <time class="post-row__date mono-meta" datetime="{{ post.date | date_to_xmlschema }}">
-          {{ post.date | date: "%b %-d, %Y" }}
+        <time
+          class="post-row__date mono-meta"
+          datetime="{{ post.date | date_to_xmlschema }}"
+          data-date-en="{{ post.date | date: '%b %-d, %Y' }}"
+          data-date-zh="{{ post.date | date: '%Y年%-m月%-d日' }}"
+        >
+          {%- if post_lang == 'zh' and zh_post == nil -%}
+            {{ post.date | date: "%Y年%-m月%-d日" }}
+          {%- else -%}
+            {{ post.date | date: "%b %-d, %Y" }}
+          {%- endif -%}
         </time>
         <div class="post-row__body">
           {%- if zh_post -%}

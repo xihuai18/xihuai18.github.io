@@ -144,6 +144,23 @@
       pane.hidden = !active;
       pane.classList.toggle("is-active", active);
     });
+
+    document.querySelectorAll(".post-row").forEach((row) => {
+      syncRowDate(row, lang);
+    });
+  }
+
+  function syncRowDate(row, lang) {
+    if (!row || (lang !== "zh" && lang !== "en")) return;
+    const dateNode = row.querySelector(".post-row__date");
+    if (!dateNode) return;
+
+    const nextLabel = dateNode.getAttribute(
+      lang === "zh" ? "data-date-zh" : "data-date-en",
+    );
+    if (nextLabel) {
+      dateNode.textContent = nextLabel;
+    }
   }
 
   function updateYearCounts(yearGroups) {
@@ -508,6 +525,8 @@
         p.hidden = p.getAttribute("data-lang") !== target;
         p.classList.toggle("is-active", p.getAttribute("data-lang") === target);
       });
+
+    syncRowDate(tab.closest(".post-row"), target);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
