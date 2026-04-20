@@ -1,6 +1,117 @@
 ---
 ---
 <!-- _layouts/bib.html -->
+{%- assign topic_label = entry.abbr | default: "" | replace: " and ", " & " -%}
+{%- assign is_selected = false -%}
+{%- if entry.selected == true or entry.selected == "true" -%}
+  {%- assign is_selected = true -%}
+{%- endif -%}
+{% assign proceedings = "inproceedings,incollection" | split: ','%}
+{% assign thesis = "thesis,mastersthesis,phdthesis" | split: ','%}
+{% if entry.type == "article" -%}
+  {%- capture entrytype -%}<em>{{entry.journal}}</em>{%- endcapture -%}
+{%- elsif proceedings contains entry.type -%}
+  {%- capture entrytype -%}<em>In {{entry.booktitle}}</em> {%- endcapture -%}
+{%- elsif thesis contains entry.type -%}
+  {%- capture entrytype -%}<em>{{entry.school}}</em> {%- endcapture -%}
+{%- else -%}
+  {%- capture entrytype -%}{%- endcapture -%}
+{%- endif -%}
+{%- if entry.month -%}
+  {%- capture entrymonth -%}{{ " " }}{{ entry.month | capitalize }}{%- endcapture -%}
+{%- endif -%}
+{%- if entry.year -%}
+  {%- capture entryyear -%}{{ " " }}{{entry.year}}{%- endcapture -%}
+{%- endif -%}
+{% assign entrytype_text = entrytype | strip_html | strip %}
+{%- capture periodical -%}{{ entrytype }}{%- if entrytype_text != "" and entryyear != "" -%}, {%- endif -%}{{ entrymonth }}{{ entryyear }}{%- endcapture -%}
+{% assign periodical_text = periodical | strip_html | strip %}
+{%- assign on_home_selected = page.url == '/' -%}
+
+{%- if on_home_selected -%}
+<article class="selected-paper-card ds-card ds-card-hover">
+  <div class="selected-paper-card__thumb" aria-hidden="true">
+    <span class="selected-paper-card__mark">&#9733;</span>
+    <span class="selected-paper-card__year">{{ entry.year }}</span>
+    {%- if topic_label != "" -%}
+    <span class="selected-paper-card__thumb-label">{{ topic_label }}</span>
+    {%- endif -%}
+  </div>
+
+  <div class="selected-paper-card__body">
+    {%- if topic_label != "" or periodical_text != "" -%}
+    <div class="selected-paper-card__meta">
+      {%- if topic_label != "" -%}
+      <span class="chip is-accent no-dot">{{ topic_label }}</span>
+      {%- endif -%}
+      {%- if periodical_text != "" -%}
+      <span class="selected-paper-card__venue mono-meta">{{ periodical | strip }}</span>
+      {%- endif -%}
+    </div>
+    {%- endif -%}
+
+    <h3 class="selected-paper-card__title">{{ entry.title }}</h3>
+    <p class="selected-paper-card__authors">
+    {%- for author in entry.author_array -%}
+      {%- assign author_is_self = false -%}
+      {%- assign author_last_name = author.last | remove: "¶" | remove: "&" | remove: "*" | remove: "†" | remove: "^" -%}
+      {%- if site.scholar.last_name contains author_last_name and site.scholar.first_name contains author.first -%}
+        {%- assign author_is_self = true -%}
+      {%- endif -%}
+      {%- assign coauthor_url = nil -%}
+      {%- if site.data.coauthors[author_last_name] -%}
+        {%- for coauthor in site.data.coauthors[author_last_name] -%}
+          {%- if coauthor.firstname contains author.first -%}
+            {%- assign coauthor_url = coauthor.url -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      {%- if forloop.length > 1 -%}
+        {%- if forloop.first == false -%},&nbsp;{%- endif -%}
+        {%- if forloop.last -%}and&nbsp;{%- endif -%}
+      {%- endif -%}
+      {%- if author_is_self -%}
+        <span class="selected-paper-card__author--self">{{author.first}} {{author.last}}</span>
+      {%- elsif coauthor_url -%}
+        <a href="{{coauthor_url}}">{{author.first}} {{author.last}}</a>
+      {%- else -%}
+        {{author.first}} {{author.last}}
+      {%- endif -%}
+    {%- endfor -%}
+    </p>
+
+    <div class="selected-paper-card__links">
+      {%- if entry.arxiv %}
+        <a href="http://arxiv.org/abs/{{ entry.arxiv }}">arXiv</a>
+      {%- endif %}
+      {%- if entry.pdf %}
+        {% if entry.pdf contains '://' -%}
+        <a href="{{ entry.pdf }}">PDF</a>
+        {%- else -%}
+        <a href="{{ entry.pdf | prepend: '/assets/pdf/' | relative_url }}">PDF</a>
+        {%- endif %}
+      {%- endif %}
+      {%- if entry.code %}
+        <a href="{{ entry.code }}">Code</a>
+      {%- endif %}
+      {%- if entry.blog %}
+        <a href="{{ entry.blog }}">Blog</a>
+      {%- endif %}
+      {%- if entry.website %}
+        <a href="{{ entry.website }}">Website</a>
+      {%- endif %}
+      {%- if entry.bibtex_show %}
+        <a class="bibtex-copy selected-paper-card__bibtex" role="button" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">BibTeX</a>
+      {%- endif %}
+    </div>
+
+    {% if entry.bibtex_show -%}
+    <div class="bibtex-source" data-entry-key="{{ entry.key }}" hidden aria-hidden="true">{{ entry.bibtex | hideCustomBibtex }}</div>
+    {%- endif %}
+  </div>
+</article>
+{%- else -%}
       <div class="row">
         {%- if entry.preview -%}
         <div class="col-sm-2 preview">
@@ -17,38 +128,11 @@
         {%- endif -%}
 
         <!-- Entry bib key -->
-        {%- assign topic_label = entry.abbr | default: "" | replace: " and ", " & " -%}
         <div id="{{entry.key}}" class="{% if entry.preview %}col-sm-10{% else %}col-sm-12{% endif %}" data-venue="{% if topic_label != "" %}{{topic_label}}{% endif %}">
 
         {%- comment -%} Pre-title meta row — kit Publications.jsx calls for chip / venue / selected
           to sit above the title as a single inline row. Compute is_selected here so we can
           render it inline; jekyll-scholar passes `selected` as a string, hence the explicit compare. {%- endcomment -%}
-        {%- assign is_selected = false -%}
-        {%- if entry.selected == true or entry.selected == "true" -%}
-          {%- assign is_selected = true -%}
-        {%- endif -%}
-
-        <!-- Journal/Book title and date -->
-        {% assign proceedings = "inproceedings,incollection" | split: ','%}
-        {% assign thesis = "thesis,mastersthesis,phdthesis" | split: ','%}
-        {% if entry.type == "article" -%}
-          {%- capture entrytype -%}<em>{{entry.journal}}</em>{%- endcapture -%}
-        {%- elsif proceedings contains entry.type -%}
-          {%- capture entrytype -%}<em>In {{entry.booktitle}}</em> {%- endcapture -%}
-        {%- elsif thesis contains entry.type -%}
-          {%- capture entrytype -%}<em>{{entry.school}}</em> {%- endcapture -%}
-        {%- else -%}
-          {%- capture entrytype -%}{%- endcapture -%}
-        {%- endif -%}
-        {%- if entry.month -%}
-          {%- capture entrymonth -%}{{ " " }}{{ entry.month | capitalize }}{%- endcapture -%}
-        {%- endif -%}
-        {%- if entry.year -%}
-          {%- capture entryyear -%}{{ " " }}{{entry.year}}{%- endcapture -%}
-        {%- endif -%}
-        {% assign entrytype_text = entrytype | strip_html | strip %}
-        {%- capture periodical -%}{{ entrytype }}{%- if entrytype_text != "" and entryyear != "" -%}, {%- endif -%}{{ entrymonth }}{{ entryyear }}{%- endcapture -%}
-        {% assign periodical_text = periodical | strip_html | strip %}
 
         {%- assign show_selected = false -%}
         {%- if is_selected and page.url contains "/publications" -%}
@@ -259,3 +343,4 @@
           {%- endif %}
         </div>
       </div>
+{%- endif -%}

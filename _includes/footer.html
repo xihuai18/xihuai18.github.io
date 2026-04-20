@@ -1,24 +1,28 @@
+    {%- assign footer_copy = site.footer_text | default: 'Built with care in Shanghai.' -%}
+    {%- assign footer_year = site.time | date: '%Y' -%}
+    {%- capture footer_name -%}{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}{%- endcapture -%}
+    {%- capture footer_left -%}&copy; {{ footer_year }} {{ footer_name | strip }}. {{ footer_copy }}{%- endcapture -%}
     {% if site.footer_fixed %}
     <footer class="fixed-bottom">
       <div class="container mt-0 uk-footer-inner">
         <span class="uk-footer-copy">
-          &copy; Copyright {{ site.time | date: '%Y' }} {{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}. {{ site.footer_text }}
+          {{ footer_left }}
           {%- if site.impressum_path %} <a href="{{ site.url }}{{ site.baseurl }}{{ site.impressum_path }}">Impressum</a>.{%- endif %}
         </span>
         {%- if site.last_updated -%}
-        <span class="mono-meta uk-footer-updated">Last updated: {{ "now" | date: '%b %-d, %Y' }}</span>
+        <span class="mono-meta uk-footer-updated">last updated &middot; {{ "now" | date: '%b %Y' }}</span>
         {%- endif -%}
       </div>
     </footer>
     {%- else -%}
     <footer class="sticky-bottom mt-5">
-      <div class="container">
-        &copy; Copyright {{ site.time | date: '%Y' }} {{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}. {{ site.footer_text }}
-        {%- if site.impressum_path -%}
-        <a href="{{ site.url }}{{ site.baseurl }}{{ site.impressum_path }}">Impressum</a>.
-        {%- endif -%}
+      <div class="container uk-footer-inner">
+        <span class="uk-footer-copy">
+          {{ footer_left }}
+          {%- if site.impressum_path -%} <a href="{{ site.url }}{{ site.baseurl }}{{ site.impressum_path }}">Impressum</a>.{%- endif -%}
+        </span>
         {%- if site.last_updated -%}
-        Last updated: {{ "now" | date: '%B %d, %Y' }}.
+        <span class="mono-meta uk-footer-updated">last updated &middot; {{ "now" | date: '%b %Y' }}</span>
         {%- endif %}
       </div>
     </footer>

@@ -3,8 +3,18 @@ layout: default
 ---
 <!-- _layouts/post.html -->
 {%- assign year = page.date | date: "%Y" -%}
-{%- assign tags = page.tags | join: "" -%}
-{%- assign categories = page.categories | join: "" -%}
+{%- assign primary_category = page.categories | first -%}
+{%- capture post_author_default -%}{{ site.first_name }} {{ site.last_name }}{%- endcapture -%}
+{%- assign post_author = page.author | default: site.author.name | default: post_author_default | strip -%}
+{%- if page.external_source == blank -%}
+  {%- assign read_time = page.content | number_of_words | divided_by: 180 | plus: 1 -%}
+{%- else -%}
+  {%- assign read_time = page.feed_content | strip_html | number_of_words | divided_by: 180 | plus: 1 -%}
+{%- endif -%}
+{%- assign post_read_label = "min read" -%}
+{%- if page.lang == 'zh' or page.lang == 'zh-CN' or page.lang == 'cn' -%}
+  {%- assign post_read_label = "分钟阅读" -%}
+{%- endif -%}
 
 {% if page._styles %}
 <!-- Page/Post style -->
@@ -15,63 +25,30 @@ layout: default
 
 <div class="post toc-layout{% if page.sidenotes %} post--sidenotes{% endif %}">
   <header class="post-header">
+    {%- if primary_category -%}
+    {%- assign primary_category_slug = primary_category | slugify -%}
+    <p class="eyebrow post-kicker">
+      <a href="{{ '/blog/' | relative_url }}?category={{ primary_category_slug }}" data-filter-link data-filter-type="category" data-filter-value="{{ primary_category_slug }}">{{ primary_category | replace: "-", " " | capitalize }}</a>
+      <span class="post-meta-dot" aria-hidden="true">&middot;</span>
+      <span>{% if page.lang == 'zh' or page.lang == 'zh-CN' or page.lang == 'cn' %}文章{% else %}Essay{% endif %}</span>
+    </p>
+    {%- endif -%}
     <h1 class="post-title">{{ page.title }}</h1>
     {%- if page.description -%}
     <p class="lead post-lead">{{ page.description }}</p>
     {%- endif -%}
-    <div class="post-meta-container">
-      <div class="post-meta-row">
-        <span class="post-date">
-          <i class="far fa-calendar-alt"></i>
-          {{ page.date | date: "%B %-d, %Y" }}
-        </span>
-        {%- if page.author -%}
-        <span class="post-author">
-          <i class="far fa-user"></i>
-          {{ page.author }}
-        </span>
-        {%- endif -%}
-        {%- if page.meta -%}
-        <span class="post-reading-time">
-          <i class="far fa-clock"></i>
-          {{ page.meta }}
-        </span>
-        {%- endif -%}
-        {%- comment -%} BlogPost.jsx:18 — language switch lives inline with meta {%- endcomment -%}
-        {%- if page.zh_url -%}
-        <a class="post-lang-switch" href="{{ page.zh_url | relative_url }}">中文版本 →</a>
-        {%- endif -%}
-        {%- if page.en_url -%}
-        <a class="post-lang-switch" href="{{ page.en_url | relative_url }}">English Version →</a>
-        {%- endif -%}
-      </div>
-      <div class="post-tags-row">
-        <a href="{{ '/blog/' | relative_url }}?year={{ year }}" data-filter-link data-filter-type="year" data-filter-value="{{ year }}">
-          📅 {{ year }}
-        </a>
-        {%- if tags != "" %}
-          {% for tag in page.tags -%}
-            <a href="{{ tag | slugify | prepend: '/blog/tag/' | relative_url }}">
-              #️⃣ {{ tag }}
-            </a>
-            {% unless forloop.last %}
-              &nbsp;
-            {% endunless %}
-          {% endfor -%}
-        {% endif %}
-        {%- if categories != "" %}
-          &nbsp; &middot; &nbsp;
-          {% for category in page.categories -%}
-            {% assign category_slug = category | slugify %}
-            <a href="{{ '/blog/' | relative_url }}?category={{ category_slug }}" data-filter-link data-filter-type="category" data-filter-value="{{ category_slug }}">
-              🏷️ {{ category }}
-            </a>
-            {% unless forloop.last %}
-              &nbsp;
-            {% endunless %}
-          {% endfor -%}
-        {% endif %}
-      </div>
+    <div class="post-meta-row">
+      <span class="post-author">{{ post_author }}</span>
+      <span class="post-meta-dot" aria-hidden="true">&middot;</span>
+      <a class="post-meta-link" href="{{ '/blog/' | relative_url }}?year={{ year }}" data-filter-link data-filter-type="year" data-filter-value="{{ year }}">{{ page.date | date: "%b %-d, %Y" }}</a>
+      <span class="post-meta-dot" aria-hidden="true">&middot;</span>
+      <span class="post-reading-time">{{ read_time }} {{ post_read_label }}</span>
+      {%- if page.zh_url -%}
+      <a class="post-lang-switch" href="{{ page.zh_url | relative_url }}">中文版本 →</a>
+      {%- endif -%}
+      {%- if page.en_url -%}
+      <a class="post-lang-switch" href="{{ page.en_url | relative_url }}">English Version →</a>
+      {%- endif -%}
     </div>
   </header>
 
@@ -90,6 +67,22 @@ layout: default
       <article class="post-content">
         {{ content }}
       </article>
+
+      {%- assign toc_title = "Contents" -%}
+      {%- if page.lang == 'zh' or page.lang == 'zh-CN' or page.lang == 'cn' -%}
+        {%- assign toc_title = '目录' -%}
+      {%- endif -%}
+      <aside class="post-toc-mobile d-lg-none" aria-label="{{ toc_title }}">
+        <span class="eyebrow">{{ toc_title }}</span>
+        <nav
+          class="toc"
+          data-toc
+          data-toc-content=".toc-content"
+          data-toc-headings="h2"
+          data-toc-min-items="2"
+          aria-label="{{ toc_title }}"
+        ></nav>
+      </aside>
 
       {%- comment -%} "Cite this post" footer — BlogPost.jsx:63-71. Emits a misc BibTeX
         entry so readers can drop the reference into their own bibliography. Auto-built

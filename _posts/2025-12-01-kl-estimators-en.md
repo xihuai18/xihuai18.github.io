@@ -4,6 +4,8 @@ title: "Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correc
 date: 2025-12-01
 description: "In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares k1, k2, k3 in on-policy and off-policy settings, and turns the result into a practical selection guide."
 og_image: /assets/img/kl-estimators/kl-estimator.png
+featured: true
+featured_symbol: KL
 categories: reinforcement-learning
 lang: en
 zh_url: /reinforcement-learning/2025/12/01/kl-estimators-zh.html
@@ -76,11 +78,11 @@ Unlike classic notes that mainly discuss KL approximation as a value-estimation 
 
 To make the post easier to read, start with three questions before looking at any derivation:
 
-| Question | If the answer is… | What can go wrong? |
-| --- | --- | --- |
-| Does KL backpropagate directly? | Directly: KL is a loss; not directly: KL is reward shaping or a metric | The same $k_i$ has different gradient semantics in loss and reward form |
-| Where do samples come from? | From $q_\theta$ means on-policy; from $\mu$ means off-policy | Off-policy requires separating the target distribution from the sampling distribution |
-| Which direction is being regularized? | Reverse KL, forward KL, or a local surrogate | The KL value being estimated need not match the gradient direction of the loss |
+| Question                              | If the answer is…                                                      | What can go wrong?                                                                    |
+| ------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Does KL backpropagate directly?       | Directly: KL is a loss; not directly: KL is reward shaping or a metric | The same $k_i$ has different gradient semantics in loss and reward form               |
+| Where do samples come from?           | From $q_\theta$ means on-policy; from $\mu$ means off-policy           | Off-policy requires separating the target distribution from the sampling distribution |
+| Which direction is being regularized? | Reverse KL, forward KL, or a local surrogate                           | The KL value being estimated need not match the gradient direction of the loss        |
 
 These three questions determine all recommendations below. The main mental model is:
 
@@ -124,10 +126,10 @@ The three tables below condense the entire operational guidance of the post. A m
 
 ### 2.3 KL as Reward Shaping (stop-gradient)
 
-| Estimator |                       Pros                        |                                                      Cons                                                      | Rec. |
-| :-------: | :-----------------------------------------------: | :------------------------------------------------------------------------------------------------------------: | :--: |
-|   $k_1$   | Value unbiased, **policy-gradient term unbiased** |                                                Higher variance                                                 |  ✓✓  |
-|   $k_2$   |                   Value biased                    |                                          Policy-gradient term biased                                           |  ✗✗  |
+| Estimator |                       Pros                        |                                                     Cons                                                      | Rec. |
+| :-------: | :-----------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: | :--: |
+|   $k_1$   | Value unbiased, **policy-gradient term unbiased** |                                                Higher variance                                                |  ✓✓  |
+|   $k_2$   |                   Value biased                    |                                          Policy-gradient term biased                                          |  ✗✗  |
 |   $k_3$   |           Value unbiased, low variance            | **Policy-gradient term biased**, bias term is $-\nabla D_{\mathrm{KL}}(p\|q)$, adds non-target gradient terms |  ✗✗  |
 
 > **Note**: For the stop-gradient reward-shaping setup analyzed here, **only $k_1$ keeps the policy-gradient term aligned with reverse-KL regularization**. Both $k_2$ and $k_3$ introduce bias in that term; even though $k_3$ is value-unbiased with low variance, it theoretically already deviates from the target gradient.
@@ -324,11 +326,11 @@ The design logic is easiest to see side by side:
 
 Before discussing bias, variance, and gradients, separate three ways in which the same $k_i$ may be used:
 
-| Usage semantics | Question being asked | Typical mistake |
-| --- | --- | --- |
-| KL value metric | Is the expectation the target KL? Is the variance low? | Seeing good value-estimation behavior for $k_3$ and using it everywhere |
-| Differentiable KL loss | Is the backpropagated gradient the gradient of the intended regularizer? | Dropping score-function paths or importance ratios |
-| KL reward shaping | Does the KL sample affect the update only through the policy-gradient term? | Reading a detached reward estimator as if it were a differentiable loss |
+| Usage semantics        | Question being asked                                                        | Typical mistake                                                         |
+| ---------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| KL value metric        | Is the expectation the target KL? Is the variance low?                      | Seeing good value-estimation behavior for $k_3$ and using it everywhere |
+| Differentiable KL loss | Is the backpropagated gradient the gradient of the intended regularizer?    | Dropping score-function paths or importance ratios                      |
+| KL reward shaping      | Does the KL sample affect the update only through the policy-gradient term? | Reading a detached reward estimator as if it were a differentiable loss |
 
 When the post says a configuration is “correct” or “incorrect,” it is about the gradient induced under that usage, not merely about whether the scalar sample can estimate a KL value.
 
@@ -887,7 +889,7 @@ One point is worth making explicit here: in the token/sample-level off-policy po
 | :-------: | :-------------: | :-----------------------------------------------------------: | :----------------: |
 |   $k_1$   |        ✓        |                               ✓                               |       Stable       |
 |   $k_2$   |        ✗        |                               ✗                               |    Not advised     |
-|   $k_3$   |        ✓        |                               ✗                               |    Notably unstable    |
+|   $k_3$   |        ✓        |                               ✗                               |  Notably unstable  |
 
 Stepping back, value unbiasedness and gradient correctness are two separate axes. For the stop-gradient reward-shaping setup discussed here, **only $k_1$ gives the correct policy-gradient term for reverse-KL regularization**. Even though $k_3$ is value-unbiased and often lower variance, using it in reward shaping introduces a biased update and is indeed more prone to instability in practice.
 

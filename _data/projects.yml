@@ -1,6 +1,5 @@
-# Projects data for /projects/ page (currently hidden — `published: false` in _pages/projects.md).
-# Each entry renders as one card. Add / remove entries and flip the page to
-# `published: true` when ready to ship.
+# Projects data for /projects/ page.
+# Each entry renders as one card. Add or remove entries here as the page evolves.
 
 - name: DPT-Agent
   repo: github.com/sjtu-marl/DPT-Agent

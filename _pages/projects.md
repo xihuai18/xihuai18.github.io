@@ -1,28 +1,18 @@
 ---
 layout: page
-title: Projects
+title: Code & artifacts from the lab.
+tab_title: Projects
+nav_title: Projects
+eyebrow: Projects
 permalink: /projects/
 description: Research code and toolkits I maintain or contributed to.
-nav: false
-nav_order: 5
-published: false
+lead: Repositories tied to papers I wrote or contributed to in a meaningful way. Everything is MIT or Apache. Take it, break it, and let me know when it helps.
+nav: true
+nav_order: 3
+published: true
 ---
 
-<!--
-  HIDDEN PAGE — NOT LINKED FROM NAV, NOT INCLUDED IN SITE OUTPUT.
-  To enable: set `published: true` above. The template below follows the
-  design system Projects prototype (ui_kits/website/Pages.jsx § Projects).
-
-  Data: each card reads from `site.data.projects` — edit `_data/projects.yml`.
-  Expected schema per entry:
-    - name: Project display name
-      repo: github.com/org/repo
-      url:  optional landing URL (defaults to https://<repo>)
-      blurb: 1–2 sentence summary
-      language: Python | TypeScript | Rust | C++  (drives the dot color)
-      stars: integer (optional, display-only)
-      tags: [rl, marl, benchmark, …]
--->
+<!-- Projects page — follows the design system Projects prototype. -->
 
 <div class="projects-page">
   <ul class="projects-grid">
@@ -38,7 +28,11 @@ published: false
         {%- endif -%}
       </div>
       <h3 class="project-title">
-        <a href="{{ p.url | default: 'https://' | append: p.repo }}" target="_blank" rel="noopener">{{ p.name }}</a>
+        {%- if p.url -%}
+        <a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.name }}</a>
+        {%- else -%}
+        <a href="https://{{ p.repo }}" target="_blank" rel="noopener">{{ p.name }}</a>
+        {%- endif -%}
       </h3>
       <p class="project-blurb">{{ p.blurb }}</p>
       <div class="project-repo">
