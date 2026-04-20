@@ -1,5 +1,15 @@
 <div class="post-links">
   {% assign links = "" | split: "," %}
+  {%- assign _post_links_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+  {%- if _post_links_lang == 'zh-cn' or _post_links_lang == 'cn' -%}
+    {%- assign _post_links_lang = 'zh' -%}
+  {%- endif -%}
+  {%- assign external_source_label = 'Originally published on ' -%}
+  {%- assign external_source_aria = 'Originally published on ' -%}
+  {%- if _post_links_lang == 'zh' -%}
+    {%- assign external_source_label = '原文发布于' -%}
+    {%- assign external_source_aria = '原文发布于' -%}
+  {%- endif -%}
 
   {%- comment -%}
     Bilingual EN/ZH switch moved to `.post-meta-row` in post.html so it sits
@@ -9,18 +19,20 @@
 
   <!-- External Platform Links -->
   {% if page.zhihu_url %}
-    {% capture link %}<a href="{{ page.zhihu_url }}" target="_blank">知乎 <img src="{{ '/assets/img/icons/zhihu.ico' | relative_url }}" style="height: 1em; vertical-align: middle;"></a>{% endcapture %}
+    {% capture link %}<a href="{{ page.zhihu_url }}" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="知乎（新标签页打开）">知乎 <img src="{{ '/assets/img/icons/zhihu.ico' | relative_url }}" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>{% endcapture %}
     {% assign links = links | push: link %}
   {% endif %}
 
   {% if page.wechat_url %}
-    {% capture link %}<a href="{{ page.wechat_url }}" target="_blank">微信公众号 <img src="{{ '/assets/img/icons/wechat.png' | relative_url }}" style="height: 1em; vertical-align: middle;"></a>{% endcapture %}
+    {% capture link %}<a href="{{ page.wechat_url }}" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="微信公众号（新标签页打开）">微信公众号 <img src="{{ '/assets/img/icons/wechat.png' | relative_url }}" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>{% endcapture %}
     {% assign links = links | push: link %}
   {% endif %}
 
   <!-- External Source (from plugin) -->
-  {% if page.external_source %}
-    {% capture link %}<a href="{{ page.redirect }}" target="_blank">Originally published on {{ page.external_source }}</a>{% endcapture %}
+  {% if page.external_source and page.redirect and page.redirect != true and page.redirect != 'true' %}
+    {%- assign external_source_tab_cue = ' (opens in new tab)' -%}
+    {%- if _post_links_lang == 'zh' -%}{%- assign external_source_tab_cue = '（新标签页打开）' -%}{%- endif -%}
+    {% capture link %}<a href="{{ page.redirect }}" target="_blank" rel="noopener noreferrer" aria-label="{{ external_source_aria }} {{ page.external_source }}{{ external_source_tab_cue }}">{{ external_source_label }} {{ page.external_source }}</a>{% endcapture %}
     {% assign links = links | push: link %}
   {% endif %}
 

@@ -13,15 +13,25 @@
   {%- endif -%}
   {%- if _lang == 'zh' -%}
     {%- assign toc_title = '目录' -%}
+    {%- assign toc_toggle_label = '切换目录显示' -%}
+    {%- assign toc_expand_label = '显示目录' -%}
   {%- else -%}
     {%- assign toc_title = 'Contents' -%}
+    {%- assign toc_toggle_label = 'Toggle table of contents' -%}
+    {%- assign toc_expand_label = 'Show table of contents' -%}
   {%- endif -%}
+{%- endif -%}
+{%- if toc_toggle_label == nil or toc_toggle_label == '' -%}
+  {%- assign toc_toggle_label = 'Toggle table of contents' -%}
+{%- endif -%}
+{%- if toc_expand_label == nil or toc_expand_label == '' -%}
+  {%- assign toc_expand_label = 'Show table of contents' -%}
 {%- endif -%}
 
 <aside class="toc-sidebar{% if include.class %} {{ include.class }}{% endif %}" data-toc-sidebar id="toc-sidebar">
   <div class="toc-sidebar__header">
     <div class="toc-sidebar__title">{{ toc_title }}</div>
-    <button class="toc-toggle-btn" aria-label="Toggle table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
+    <button class="toc-toggle-btn" aria-label="{{ toc_toggle_label }}" aria-expanded="false" aria-controls="toc-content" data-toc-toggle>
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
@@ -37,6 +47,6 @@
 </aside>
 
 <!-- Collapsed TOC toggle button (shown when TOC is collapsed) -->
-<button class="toc-collapsed-toggle" aria-label="Show table of contents" aria-expanded="false" aria-controls="toc-content" data-toc-expand>
+<button class="toc-collapsed-toggle" aria-label="{{ toc_expand_label }}" aria-expanded="false" aria-controls="toc-content" data-toc-expand>
   <i class="fas fa-list"></i>
 </button>

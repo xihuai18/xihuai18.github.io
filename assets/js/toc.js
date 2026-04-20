@@ -1,7 +1,7 @@
 /* Auto-generate a table of contents for pages that include an element with
  * `data-toc`. Intended for CV + blog posts (or any page) and designed to be
  * no-op when the container doesn't exist.
- * 
+ *
  * Features:
  * - Auto-generated TOC from headings
  * - Collapsible sidebar toggle
@@ -10,8 +10,9 @@
  */
 
 (() => {
-  const STORAGE_KEY = "toc-collapsed";
-  const SECTION_STORAGE_KEY = "toc-sections-collapsed";
+  const storageScope = window.location.pathname + window.location.search;
+  const STORAGE_KEY = "toc-collapsed:" + storageScope;
+  const SECTION_STORAGE_KEY = "toc-sections-collapsed:" + storageScope;
 
   // Safe localStorage wrapper for privacy-focused browsers
   function safeLocalStorage(action, key, value) {
@@ -42,7 +43,11 @@
 
   // Save collapsed sections to localStorage
   function saveCollapsedSections(collapsedSet) {
-    safeLocalStorage("set", SECTION_STORAGE_KEY, JSON.stringify([...collapsedSet]));
+    safeLocalStorage(
+      "set",
+      SECTION_STORAGE_KEY,
+      JSON.stringify([...collapsedSet]),
+    );
   }
 
   function onReady(fn) {
@@ -62,7 +67,7 @@
     slug = slug.replace(/\s+/g, "-");
     slug = slug.replace(
       /[^a-z0-9_\-\u00c0-\u024f\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]+/g,
-      ""
+      "",
     );
     slug = slug.replace(/-+/g, "-").replace(/^-|-$/g, "");
     return slug;
@@ -111,23 +116,23 @@
       if (!subUl) {
         subUl = document.createElement("ul");
         currentTopLi.appendChild(subUl);
-        
+
         // Add section toggle button for collapsible sections
         currentTopLi.classList.add("has-children");
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "toc-section-toggle";
         toggleBtn.setAttribute("aria-label", "Toggle section");
-        
+
         // Use createElement instead of innerHTML for security
         const icon = document.createElement("i");
         icon.className = "fas fa-chevron-down";
         toggleBtn.appendChild(icon);
-        
+
         // Capture the current li for the event listener to avoid closure issues
         const parentLi = currentTopLi;
         // Use heading id as section identifier for persistence
         const sectionId = heading.id;
-        
+
         // Restore collapsed state from localStorage
         const wasCollapsed = collapsedSections.has(sectionId);
         if (wasCollapsed) {
@@ -137,7 +142,7 @@
         } else {
           toggleBtn.setAttribute("aria-expanded", "true");
         }
-        
+
         toggleBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -146,7 +151,7 @@
           // Update aria-expanded state
           const isCollapsed = parentLi.classList.contains("section-collapsed");
           toggleBtn.setAttribute("aria-expanded", !isCollapsed);
-          
+
           // Save section collapsed state to localStorage
           const currentCollapsed = getCollapsedSections();
           if (isCollapsed) {
@@ -176,10 +181,10 @@
     const savedState = safeLocalStorage("get", STORAGE_KEY);
     // Default to collapsed (true) if no saved state exists
     const isCollapsed = savedState === null ? true : savedState === "true";
-    
+
     // Set initial aria-expanded state based on collapsed state
     toggleBtn.setAttribute("aria-expanded", !isCollapsed);
-    
+
     // Apply initial collapsed state
     if (isCollapsed) {
       setCollapsed(true);
@@ -227,12 +232,18 @@
     const wrapper = tocEl.closest(".toc-sidebar") || tocEl;
     const root = tocEl.closest(".toc-layout") || document;
 
-    const contentSelector = tocEl.getAttribute("data-toc-content") || ".toc-content";
+    const contentSelector =
+      tocEl.getAttribute("data-toc-content") || ".toc-content";
     const headingsSelector = tocEl.getAttribute("data-toc-headings") || "h2,h3";
     const minItems = Number(tocEl.getAttribute("data-toc-min-items") || "2");
 
-    const content = root.querySelector(contentSelector) || root.querySelector("article") || root;
-    const headings = Array.from(content.querySelectorAll(headingsSelector)).filter((h) => {
+    const content =
+      root.querySelector(contentSelector) ||
+      root.querySelector("article") ||
+      root;
+    const headings = Array.from(
+      content.querySelectorAll(headingsSelector),
+    ).filter((h) => {
       const text = (h.textContent || "").trim();
       return text.length > 0;
     });
@@ -256,7 +267,13 @@
       const target = id ? document.getElementById(id) : null;
       if (!target) return;
       e.preventDefault();
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      const prefersReducedMotion =
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
       history.pushState(null, "", `#${id}`);
     });
 
@@ -279,7 +296,9 @@
         else break;
       }
 
-      tocEl.querySelectorAll("a.is-active").forEach((a) => a.classList.remove("is-active"));
+      tocEl
+        .querySelectorAll("a.is-active")
+        .forEach((a) => a.classList.remove("is-active"));
       const activeLink = current && linkById.get(current.id);
       if (activeLink) activeLink.classList.add("is-active");
     }
