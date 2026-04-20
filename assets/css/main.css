@@ -927,53 +927,6 @@ footer.sticky-bottom {
   color: var(--global-text-color-light);
 }
 
-.post-list {
-  margin: 0;
-  margin-bottom: 1.5rem;
-  padding: 0;
-}
-.post-list li {
-  border-bottom: 1px solid var(--global-divider-color);
-  list-style: none;
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
-}
-.post-list li:last-child {
-  border-bottom: none;
-}
-.post-list li .post-meta {
-  color: var(--global-text-color-light);
-  font-size: 0.8125rem;
-  margin-bottom: 0;
-  line-height: 1.4;
-}
-.post-list li .post-tags {
-  color: var(--global-text-color-light);
-  font-size: 0.8125rem;
-  padding-top: 0.1rem;
-  padding-bottom: 0;
-  line-height: 1.4;
-}
-.post-list li a {
-  color: var(--global-text-color);
-  text-decoration: none;
-}
-.post-list li a:hover {
-  color: var(--global-theme-color);
-}
-.post-list li h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-  line-height: 1.35;
-}
-.post-list li p {
-  font-size: 1rem;
-  line-height: 1.45;
-  margin-bottom: 0.2rem;
-  color: var(--global-text-color-light);
-}
-
 .pagination .page-item .page-link {
   color: var(--global-text-color);
 }
@@ -1027,45 +980,6 @@ html.transition *:after {
   transition-delay: 0 !important;
 }
 
-.post .post-meta {
-  color: var(--global-text-color-light);
-  font-size: 0.8125rem;
-  margin-bottom: 0;
-}
-.post .post-tags {
-  color: var(--global-text-color-light);
-  font-size: 0.8125rem;
-  padding-top: 0.25rem;
-  padding-bottom: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-}
-.post .post-tags a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.3rem 0.65rem;
-  background-color: var(--global-bg-color);
-  border: 1px solid var(--global-divider-color);
-  border-radius: 5px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-decoration: none;
-  color: var(--global-text-color);
-  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-.post .post-tags a:hover {
-  color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  background-color: transparent;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px var(--global-shadow-color);
-}
-.post .post-tags a {
-  white-space: nowrap;
-}
 .post .post-content blockquote {
   border-left: 5px solid var(--global-theme-color);
   padding: 8px;
@@ -2006,13 +1920,6 @@ pre:not(.wrapped) pre {
   background: var(--global-theme-color);
 }
 
-.post-list .tab-content {
-  margin-top: 0;
-}
-.post-list .tab-content .tab-pane {
-  padding: 0;
-}
-
 @media (min-width: 992px) {
   .post.post--sidenotes .footnotes {
     display: none;
@@ -2087,10 +1994,6 @@ pre:not(.wrapped) pre {
   margin: 0 !important;
 }
 
-.post .post-tags {
-  padding-bottom: 0.35rem;
-  margin-bottom: 0;
-}
 .post .post-links {
   margin-bottom: 1.75rem;
 }
@@ -2099,109 +2002,6 @@ pre:not(.wrapped) pre {
  * Blog Page Time and Tag Button Styles
  * (Mixin defined in _mixins.scss)
  ******************************************************************************/
-.tag-category-list {
-  margin-bottom: 1.5rem;
-}
-.tag-category-list ul {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.tag-category-list ul li {
-  margin: 0;
-}
-.tag-category-list ul li a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.35rem 0.75rem;
-  background-color: var(--global-bg-color);
-  border: 1px solid var(--global-divider-color);
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-decoration: none;
-  color: var(--global-text-color);
-  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-.tag-category-list ul li a:hover {
-  color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  background-color: transparent;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px var(--global-shadow-color);
-}
-.tag-category-list ul li a[href*="?category="].active-filter, .tag-category-list ul li a[href*="?year="].active-filter {
-  background-color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  color: white;
-}
-.tag-category-list ul li a[href*="?category="].active-filter:hover, .tag-category-list ul li a[href*="?year="].active-filter:hover {
-  background-color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  color: white;
-  opacity: 0.9;
-}
-.tag-category-list ul p {
-  margin: 0;
-  color: var(--global-text-color-light);
-  font-size: 0.8125rem;
-}
-
-.post-list li .post-meta a,
-.post-list li .post-tags a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.6rem;
-  background-color: var(--global-bg-color);
-  border: 1px solid var(--global-divider-color);
-  border-radius: 5px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-decoration: none;
-  color: var(--global-text-color);
-  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-.post-list li .post-meta a:hover,
-.post-list li .post-tags a:hover {
-  color: var(--global-theme-color);
-  border-color: var(--global-theme-color);
-  background-color: transparent;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px var(--global-shadow-color);
-}
-.post-list li .post-meta a,
-.post-list li .post-tags a {
-  white-space: nowrap;
-}
-.post-list li .post-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-}
-.post-list li .post-tags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  padding-top: 0.5rem;
-}
-.post-list .blog-post-list-item {
-  padding-left: 0;
-}
-.post-list .blog-post-list-item h3 a {
-  transition: color 0.14s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.post-list .blog-post-list-item:hover h3 a {
-  color: var(--global-theme-color);
-}
-
 a[data-filter-link].active-filter {
   background-color: var(--global-theme-color) !important;
   border-color: var(--global-theme-color) !important;
