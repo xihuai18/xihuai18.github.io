@@ -101,13 +101,13 @@ bundle exec jekyll serve --watch --livereload
 
 ## 页面概览
 
-| 页面     | URL              | 描述                                   | 编辑文件                                             |
-| -------- | ---------------- | -------------------------------------- | ---------------------------------------------------- |
-| **首页** | `/`              | 个人简介、精选论文、新闻、社交链接     | [_pages/about.md](_pages/about.md)                   |
-| **博客** | `/blog/`         | 文章列表，支持筛选、双语切换、访问统计 | [_pages/blog.md](_pages/blog.md)                     |
-| **论文** | `/publications/` | 从 BibTeX 自动生成，按年份分组         | [_bibliography/papers.bib](_bibliography/papers.bib) |
-| **简历** | `/cv/`           | 从 YAML 数据渲染                       | [_data/cv.yml](_data/cv.yml)                         |
-| **新闻** | `/news/`         | 独立公告页面                           | [_news/](_news/)                                     |
+| 页面     | URL              | 描述                                   | 编辑文件                                              |
+| -------- | ---------------- | -------------------------------------- | ----------------------------------------------------- |
+| **首页** | `/`              | 个人简介、精选论文、新闻、社交链接     | [\_pages/about.md](_pages/about.md)                   |
+| **博客** | `/blog/`         | 文章列表，支持筛选、双语切换、访问统计 | [\_pages/blog.md](_pages/blog.md)                     |
+| **论文** | `/publications/` | 从 BibTeX 自动生成，按年份分组         | [\_bibliography/papers.bib](_bibliography/papers.bib) |
+| **简历** | `/cv/`           | 从 YAML 数据渲染                       | [\_data/cv.yml](_data/cv.yml)                         |
+| **新闻** | `/news/`         | 独立公告页面                           | [\_news/](_news/)                                     |
 
 ---
 
@@ -115,7 +115,7 @@ bundle exec jekyll serve --watch --livereload
 
 ### 网站设置
 
-编辑 [_config.yml](_config.yml)：
+编辑 [\_config.yml](_config.yml)：
 
 | 设置项                                 | 描述               |
 | -------------------------------------- | ------------------ |
@@ -137,25 +137,23 @@ date: 2025-01-01
 description: "简短描述"
 categories: 分类名
 tags: [标签1, 标签2]
-lang: zh                    # 语言：en 或 zh
-featured: true              # 置顶到博客顶部
-og_image: /assets/img/...   # 自定义社交预览图
+lang: zh # 语言：en 或 zh
+og_image: /assets/img/... # 自定义社交预览图
 # 可选链接
 en_url: /path/to/english-version.html
 zhihu_url: https://zhuanlan.zhihu.com/p/...
 wechat_url: https://mp.weixin.qq.com/s/...
 # 可选功能
-sidenotes: true             # 在边栏显示脚注
-giscus_comments: true       # 启用评论
-related_posts: false        # 禁用相关文章
+sidenotes: true # 在边栏显示脚注
+giscus_comments: true # 启用评论
+related_posts: false # 禁用相关文章
 ---
-
 正文内容...
 ```
 
 ### 学术论文
 
-编辑 [_bibliography/papers.bib](_bibliography/papers.bib)：
+编辑 [\_bibliography/papers.bib](_bibliography/papers.bib)：
 
 ```bibtex
 @inproceedings{key2025,
@@ -186,11 +184,11 @@ related_posts: false        # 禁用相关文章
 
 ### 简历
 
-编辑 [_data/cv.yml](_data/cv.yml)：
+编辑 [\_data/cv.yml](_data/cv.yml)：
 
 ```yaml
 - title: 章节标题
-  type: time_table          # 或：map, list, nested_list
+  type: time_table # 或：map, list, nested_list
   contents:
     - title: 职位
       institution: 机构
@@ -211,15 +209,14 @@ title: 公告标题
 date: 2025-01-01
 inline: true
 ---
-
 公告内容（支持 Markdown 和 HTML）。
 ```
 
 在 `_config.yml` 中配置显示：
 
 ```yaml
-news_scrollable: true  # 超过 3 条时显示滚动条
-news_limit: 5          # 最多显示条数（留空显示全部）
+news_scrollable: true # 超过 3 条时显示滚动条
+news_limit: 5 # 最多显示条数（留空显示全部）
 ```
 
 ---
@@ -229,37 +226,42 @@ news_limit: 5          # 最多显示条数（留空显示全部）
 ### 数学公式与代码
 
 **LaTeX 数学公式**（MathJax）：
+
 ```markdown
 行内公式：$E = mc^2$
 
 块级公式：
+
 $$
 \nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
 $$
 ```
 
 **代码块**（语法高亮）：
-~~~markdown
+
+````markdown
 ```python
 def hello():
     print("你好！")
 ```
-~~~
+````
 
 ### 图表
 
 **Mermaid 流程图**：
-~~~markdown
+
+````markdown
 ```mermaid
 graph TD
     A[开始] --> B{判断}
     B -->|是| C[确定]
     B -->|否| D[结束]
 ```
-~~~
+````
 
 **伪代码**：
-~~~markdown
+
+````markdown
 ```pseudocode
 \begin{algorithm}
 \caption{算法名称}
@@ -270,20 +272,23 @@ graph TD
 \end{algorithmic}
 \end{algorithm}
 ```
-~~~
+````
 
 ### 图片
 
 **带缩放的基本图片**：
 {% raw %}
+
 ```liquid
 {% include figure.html path="assets/img/photo.jpg" class="img-fluid" zoomable=true caption="图片说明" %}
 ```
+
 {% endraw %}
 
 **HTML 方式（带缩放）**：
+
 ```html
-<img src="..." data-zoomable>
+<img src="..." data-zoomable />
 ```
 
 ### 双语文章
@@ -303,6 +308,7 @@ graph TD
 <summary><strong>边栏脚注（Sidenotes）</strong></summary>
 
 在 front matter 中添加 `sidenotes: true`。标准脚注 `[^1]` 会在桌面端显示在边栏。
+
 </details>
 
 <details>
@@ -315,7 +321,7 @@ graph TD
 layout: distill
 distill_citations: true
 distill_footnotes: true
-distill_bibliography: post.bib  # 放在 assets/bibliography/
+distill_bibliography: post.bib # 放在 assets/bibliography/
 authors:
   - name: 你的名字
     affiliations:
@@ -324,12 +330,14 @@ authors:
 ```
 
 使用 `<d-cite key="key"></d-cite>` 和 `<d-footnote>文本</d-footnote>`。
+
 </details>
 
 <details>
 <summary><strong>可折叠区块</strong></summary>
 
 {% raw %}
+
 ```liquid
 {% details "点击展开" %}
 支持 **Markdown** 的隐藏内容。
@@ -339,7 +347,9 @@ authors:
 初始状态为展开。
 {% enddetails %}
 ```
+
 {% endraw %}
+
 </details>
 
 <details>
@@ -356,6 +366,7 @@ giscus:
 ```
 
 在文章 front matter 中添加 `giscus_comments: true`。
+
 </details>
 
 <details>
@@ -369,12 +380,14 @@ external_sources:
   - name: medium.com
     rss_url: https://medium.com/@user/feed
 ```
+
 </details>
 
 <details>
 <summary><strong>代码块增强</strong></summary>
 
 所有代码块自动包含：
+
 - **复制按钮**：一键复制到剪贴板
 - **换行切换**：在自动换行和水平滚动之间切换
 - **语法高亮**：基于语言的代码着色（Rouge）
@@ -384,12 +397,14 @@ external_sources:
 <summary><strong>脚注悬浮预览</strong></summary>
 
 标准 Markdown 脚注 `[^1]` 在鼠标悬停时显示工具提示预览，读者无需滚动到页面底部。
+
 </details>
 
 <details>
 <summary><strong>论文会议筛选</strong></summary>
 
 在论文页面，点击任意会议徽章（如 `ICLR`、`NeurIPS`）可按该会议筛选论文。再次点击清除筛选。
+
 </details>
 
 ---
@@ -405,6 +420,7 @@ external_sources:
 - **组合筛选**：`?year=2025&category=reinforcement-learning`
 
 归档页面自动生成：
+
 - `/blog/YYYY/` — 按年份归档
 - `/blog/tag/TAG/` — 按标签归档
 - `/blog/category/CATEGORY/` — 按分类归档
@@ -429,16 +445,6 @@ external_sources:
 related_posts: false
 ---
 ```
-
-**置顶文章**：以卡片形式固定在博客顶部：
-
-```yaml
----
-featured: true
----
-```
-
----
 
 ## SEO 与社交分享
 
@@ -494,28 +500,28 @@ OG 图片在 CI 构建时自动压缩（目标：<500KB）。
 在 `_config.yml` 中配置：
 
 ```yaml
-enable_google_analytics: true   # GA4 跟踪
-enable_math: true               # MathJax 数学公式
-enable_mermaid: true            # Mermaid 图表
-enable_pseudocode: true         # 伪代码块
-enable_darkmode: true           # 深色/浅色模式切换
-enable_medium_zoom: true        # 图片缩放
-enable_progressbar: true        # 阅读进度条
-enable_masonry: true            # 项目卡片布局
-enable_navbar_social: true      # 导航栏社交图标
-enable_tooltips: false          # 自动生成工具提示链接
+enable_google_analytics: true # GA4 跟踪
+enable_math: true # MathJax 数学公式
+enable_mermaid: true # Mermaid 图表
+enable_pseudocode: true # 伪代码块
+enable_darkmode: true # 深色/浅色模式切换
+enable_medium_zoom: true # 图片缩放
+enable_progressbar: true # 阅读进度条
+enable_masonry: true # 项目卡片布局
+enable_navbar_social: true # 导航栏社交图标
+enable_tooltips: false # 自动生成工具提示链接
 ```
 
 ### 附加功能
 
-| 功能           | 描述                                                  |
-| -------------- | ----------------------------------------------------- |
-| **深色模式**   | 通过导航栏按钮切换，遵循系统偏好                      |
-| **进度条**     | 页面顶部的阅读进度指示器                              |
-| **图片缩放**   | 点击图片放大（Medium 风格）                           |
+| 功能           | 描述                                                   |
+| -------------- | ------------------------------------------------------ |
+| **深色模式**   | 通过导航栏按钮切换，遵循系统偏好                       |
+| **进度条**     | 页面顶部的阅读进度指示器                               |
+| **图片缩放**   | 点击图片放大（Medium 风格）                            |
 | **Emoji 支持** | 通过 `jemoji` 支持 GitHub 风格 emoji（`:smile:` → 😄） |
-| **最后更新**   | 页脚显示网站最后构建时间（`last_updated: true`）      |
-| **导航栏社交** | 在导航栏显示社交图标                                  |
+| **最后更新**   | 页脚显示网站最后构建时间（`last_updated: true`）       |
+| **导航栏社交** | 在导航栏显示社交图标                                   |
 
 ### GA4 页面访问统计
 

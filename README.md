@@ -101,13 +101,13 @@ Open **http://localhost:4000**
 
 ## Pages Overview
 
-| Page             | URL              | Description                                             | Edit                                                 |
-| ---------------- | ---------------- | ------------------------------------------------------- | ---------------------------------------------------- |
-| **Home/About**   | `/`              | Bio, selected papers, news, social links                | [_pages/about.md](_pages/about.md)                   |
-| **Blog**         | `/blog/`         | Post list with filters, bilingual switcher, view counts | [_pages/blog.md](_pages/blog.md)                     |
-| **Publications** | `/publications/` | Auto-generated from BibTeX, grouped by year             | [_bibliography/papers.bib](_bibliography/papers.bib) |
-| **CV**           | `/cv/`           | Rendered from YAML data                                 | [_data/cv.yml](_data/cv.yml)                         |
-| **News**         | `/news/`         | Individual announcements                                | [_news/](_news/)                                     |
+| Page             | URL              | Description                                             | Edit                                                  |
+| ---------------- | ---------------- | ------------------------------------------------------- | ----------------------------------------------------- |
+| **Home/About**   | `/`              | Bio, selected papers, news, social links                | [\_pages/about.md](_pages/about.md)                   |
+| **Blog**         | `/blog/`         | Post list with filters, bilingual switcher, view counts | [\_pages/blog.md](_pages/blog.md)                     |
+| **Publications** | `/publications/` | Auto-generated from BibTeX, grouped by year             | [\_bibliography/papers.bib](_bibliography/papers.bib) |
+| **CV**           | `/cv/`           | Rendered from YAML data                                 | [\_data/cv.yml](_data/cv.yml)                         |
+| **News**         | `/news/`         | Individual announcements                                | [\_news/](_news/)                                     |
 
 ---
 
@@ -115,7 +115,7 @@ Open **http://localhost:4000**
 
 ### Site Settings
 
-Edit [_config.yml](_config.yml):
+Edit [\_config.yml](_config.yml):
 
 | Setting                                   | Description                  |
 | ----------------------------------------- | ---------------------------- |
@@ -137,25 +137,23 @@ date: 2025-01-01
 description: "Short description"
 categories: category-name
 tags: [tag1, tag2]
-lang: en                    # Language: en or zh
-featured: true              # Pin to top of blog
-og_image: /assets/img/...   # Custom social preview
+lang: en # Language: en or zh
+og_image: /assets/img/... # Custom social preview
 # Optional links
 zh_url: /path/to/chinese-version.html
 zhihu_url: https://zhuanlan.zhihu.com/p/...
 wechat_url: https://mp.weixin.qq.com/s/...
 # Optional features
-sidenotes: true             # Show footnotes in margin
-giscus_comments: true       # Enable comments
-related_posts: false        # Disable related posts
+sidenotes: true # Show footnotes in margin
+giscus_comments: true # Enable comments
+related_posts: false # Disable related posts
 ---
-
 Your content here...
 ```
 
 ### Publications
 
-Edit [_bibliography/papers.bib](_bibliography/papers.bib):
+Edit [\_bibliography/papers.bib](_bibliography/papers.bib):
 
 ```bibtex
 @inproceedings{key2025,
@@ -186,11 +184,11 @@ Edit [_bibliography/papers.bib](_bibliography/papers.bib):
 
 ### CV
 
-Edit [_data/cv.yml](_data/cv.yml):
+Edit [\_data/cv.yml](_data/cv.yml):
 
 ```yaml
 - title: Section Title
-  type: time_table          # or: map, list, nested_list
+  type: time_table # or: map, list, nested_list
   contents:
     - title: Position
       institution: Organization
@@ -211,15 +209,14 @@ title: Announcement Title
 date: 2025-01-01
 inline: true
 ---
-
 Content here (supports Markdown and HTML).
 ```
 
 Configure display in `_config.yml`:
 
 ```yaml
-news_scrollable: true  # Scrollable list if >3 items
-news_limit: 5          # Max items to show (blank = all)
+news_scrollable: true # Scrollable list if >3 items
+news_limit: 5 # Max items to show (blank = all)
 ```
 
 ---
@@ -229,37 +226,42 @@ news_limit: 5          # Max items to show (blank = all)
 ### Math & Code
 
 **LaTeX Math** (MathJax):
+
 ```markdown
 Inline: $E = mc^2$
 
 Block:
+
 $$
 \nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
 $$
 ```
 
 **Code Blocks** (syntax highlighting):
-~~~markdown
+
+````markdown
 ```python
 def hello():
     print("Hello!")
 ```
-~~~
+````
 
 ### Diagrams
 
 **Mermaid**:
-~~~markdown
+
+````markdown
 ```mermaid
 graph TD
     A[Start] --> B{Decision}
     B -->|Yes| C[OK]
     B -->|No| D[End]
 ```
-~~~
+````
 
 **Pseudocode**:
-~~~markdown
+
+````markdown
 ```pseudocode
 \begin{algorithm}
 \caption{Algorithm Name}
@@ -270,20 +272,23 @@ graph TD
 \end{algorithmic}
 \end{algorithm}
 ```
-~~~
+````
 
 ### Images
 
 **Basic image with zoom**:
 {% raw %}
+
 ```liquid
 {% include figure.html path="assets/img/photo.jpg" class="img-fluid" zoomable=true caption="Caption" %}
 ```
+
 {% endraw %}
 
 **HTML with zoom**:
+
 ```html
-<img src="..." data-zoomable>
+<img src="..." data-zoomable />
 ```
 
 ### Bilingual Posts
@@ -303,6 +308,7 @@ The blog page shows a language switcher for paired posts.
 <summary><strong>Sidenotes (Margin Notes)</strong></summary>
 
 Add `sidenotes: true` to front matter. Standard footnotes `[^1]` will appear in the margin on desktop.
+
 </details>
 
 <details>
@@ -315,7 +321,7 @@ For academic posts with hover citations:
 layout: distill
 distill_citations: true
 distill_footnotes: true
-distill_bibliography: post.bib  # in assets/bibliography/
+distill_bibliography: post.bib # in assets/bibliography/
 authors:
   - name: Your Name
     affiliations:
@@ -324,12 +330,14 @@ authors:
 ```
 
 Use `<d-cite key="key"></d-cite>` and `<d-footnote>text</d-footnote>`.
+
 </details>
 
 <details>
 <summary><strong>Collapsible Sections</strong></summary>
 
 {% raw %}
+
 ```liquid
 {% details "Click to expand" %}
 Hidden content with **Markdown** support.
@@ -339,7 +347,9 @@ Hidden content with **Markdown** support.
 Starts open.
 {% enddetails %}
 ```
+
 {% endraw %}
+
 </details>
 
 <details>
@@ -356,6 +366,7 @@ giscus:
 ```
 
 Add `giscus_comments: true` to post front matter.
+
 </details>
 
 <details>
@@ -369,12 +380,14 @@ external_sources:
   - name: medium.com
     rss_url: https://medium.com/@user/feed
 ```
+
 </details>
 
 <details>
 <summary><strong>Code Block Enhancements</strong></summary>
 
 All code blocks automatically include:
+
 - **Copy Button**: One-click copy to clipboard
 - **Wrap Toggle**: Switch between wrapped and horizontal scroll modes
 - **Syntax Highlighting**: Language-aware coloring (Rouge)
@@ -384,12 +397,14 @@ All code blocks automatically include:
 <summary><strong>Footnote Hover Preview</strong></summary>
 
 Standard Markdown footnotes `[^1]` show a tooltip preview on hover, so readers don't need to scroll to the bottom.
+
 </details>
 
 <details>
 <summary><strong>Publication Venue Filter</strong></summary>
 
 On the Publications page, click any venue badge (e.g., `ICLR`, `NeurIPS`) to filter papers by that venue. Click again to clear the filter.
+
 </details>
 
 ---
@@ -405,6 +420,7 @@ The blog page supports client-side filtering:
 - **Combined**: `?year=2025&category=reinforcement-learning`
 
 Archives are auto-generated at:
+
 - `/blog/YYYY/` — Posts by year
 - `/blog/tag/TAG/` — Posts by tag
 - `/blog/category/CATEGORY/` — Posts by category
@@ -429,16 +445,6 @@ Posts and CV pages automatically display a **collapsible sidebar TOC** on deskto
 related_posts: false
 ---
 ```
-
-**Featured Posts**: Pin posts to the top of the blog with cards:
-
-```yaml
----
-featured: true
----
-```
-
----
 
 ## SEO & Social
 
@@ -494,16 +500,16 @@ Hosted on **GitHub Pages** with **GitHub Actions**.
 Configure in `_config.yml`:
 
 ```yaml
-enable_google_analytics: true   # GA4 tracking
-enable_math: true               # MathJax
-enable_mermaid: true            # Mermaid diagrams
-enable_pseudocode: true         # Pseudocode blocks
-enable_darkmode: true           # Dark/light toggle
-enable_medium_zoom: true        # Image zoom
-enable_progressbar: true        # Reading progress bar
-enable_masonry: true            # Project card layout
-enable_navbar_social: true      # Social icons in navbar
-enable_tooltips: false          # Auto-generate tooltip links
+enable_google_analytics: true # GA4 tracking
+enable_math: true # MathJax
+enable_mermaid: true # Mermaid diagrams
+enable_pseudocode: true # Pseudocode blocks
+enable_darkmode: true # Dark/light toggle
+enable_medium_zoom: true # Image zoom
+enable_progressbar: true # Reading progress bar
+enable_masonry: true # Project card layout
+enable_navbar_social: true # Social icons in navbar
+enable_tooltips: false # Auto-generate tooltip links
 ```
 
 ### Additional Features
@@ -513,7 +519,7 @@ enable_tooltips: false          # Auto-generate tooltip links
 | **Dark Mode**     | Toggle via navbar button, respects system preference       |
 | **Progress Bar**  | Reading progress indicator at top of page                  |
 | **Image Zoom**    | Click images to zoom (Medium-style)                        |
-| **Emoji Support** | GitHub-style emoji via `jemoji` (`:smile:` → 😄)            |
+| **Emoji Support** | GitHub-style emoji via `jemoji` (`:smile:` → 😄)           |
 | **Last Updated**  | Footer shows site's last build time (`last_updated: true`) |
 | **Navbar Social** | Social icons displayed in navigation bar                   |
 
