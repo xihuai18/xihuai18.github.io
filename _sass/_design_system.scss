@@ -716,13 +716,13 @@ html[data-theme="dark"] .navbar {
 }
 
 /* Homepage news list (table rendered by _includes/news.html):
-   a `.news-photo` image floats LEFT at thumbnail size so the text wraps beside it. */
+   a `.news-photo` image floats RIGHT at thumbnail size so the text wraps beside it. */
 .news table td img.news-photo {
-  float: left;
+  float: right;
   width: 96px;
   height: 72px;
   object-fit: cover;
-  margin: 4px 14px 6px 0;
+  margin: 4px 0 6px 14px;
   border-radius: var(--r-xs);
   box-shadow: var(--shadow-xs);
   border: 1px solid var(--rule);
@@ -731,6 +731,30 @@ html[data-theme="dark"] .navbar {
 }
 /* ensure the row clears the floated image so the next news item isn't pulled up */
 .news table td::after { content: ""; display: block; clear: both; }
+
+/* Inline-mode news items written as a single-item markdown list (e.g. "- [EN](…) | [中文](…)")
+   render as <ul><li>. On the homepage summary we want them to read as a plain
+   secondary-line chip row, not a bulleted list, so drop the disc and tighten
+   the indent. */
+.news table td ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 4px 0 0;
+}
+.news table td ul > li {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .news table td img.news-photo {
+    float: none;
+    display: block;
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+    margin: 6px 0;
+  }
+}
 
 /* Category chip — 4 semantic colors per kit */
 .news-tag {
