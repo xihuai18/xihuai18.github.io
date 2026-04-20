@@ -424,15 +424,6 @@
   }
 }
 
-// Blog list tab content - more compact
-.post-list .tab-content {
-  margin-top: 0;
-  
-  .tab-pane {
-    padding: 0;
-  }
-}
-
 // Sidenotes (opt-in per post: `sidenotes: true`)
 .post.post--sidenotes {
   @media (min-width: 992px) {
@@ -518,11 +509,6 @@
 
 // Tighten spacing above post link buttons on post pages.
 .post {
-  .post-tags {
-    padding-bottom: 0.35rem;
-    margin-bottom: 0;
-  }
-
   .post-links {
     margin-bottom: 1.75rem;
   }
@@ -532,90 +518,6 @@
  * Blog Page Time and Tag Button Styles
  * (Mixin defined in _mixins.scss)
  ******************************************************************************/
-
-// Tag category list at the top of blog page
-.tag-category-list {
-  margin-bottom: 1.5rem;
-  
-  ul {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    
-    li {
-      margin: 0;
-      
-      a {
-        @include tag-button-style(0.35rem 0.75rem, $font-size-sm, 6px);
-        
-        // Active state for filter links
-        &[href*="?category="], &[href*="?year="] {
-          &.active-filter {
-            background-color: var(--global-theme-color);
-            border-color: var(--global-theme-color);
-            color: white;
-            
-            &:hover {
-              background-color: var(--global-theme-color);
-              border-color: var(--global-theme-color);
-              color: white;
-              opacity: 0.9;
-            }
-          }
-        }
-      }
-    }
-    
-    p {
-      margin: 0;
-      color: var(--global-text-color-light);
-      font-size: $font-size-sm;
-    }
-  }
-}
-
-// Post metadata and tags in blog list
-.post-list {
-  li {
-    .post-meta,
-    .post-tags {
-      a {
-        @include tag-button-style();
-        white-space: nowrap;
-      }
-    }
-
-    // Adjust spacing for inline elements
-    .post-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .post-tags {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
-      padding-top: 0.5rem;
-    }
-  }
-
-  // Item hover — title shifts to accent; no decorative left rail.
-  // (Design system: "Links get an underline, not a color swap"; we keep
-  // color swap for the list title because it reads as a link, not body copy.)
-  .blog-post-list-item {
-    padding-left: 0;
-
-    h3 a { transition: color 0.14s cubic-bezier(0.22, 1, 0.36, 1); }
-    &:hover h3 a { color: var(--global-theme-color); }
-  }
-}
 
 // Global active filter style for blog
 a[data-filter-link].active-filter {

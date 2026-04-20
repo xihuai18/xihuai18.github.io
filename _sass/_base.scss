@@ -773,61 +773,6 @@ footer.sticky-bottom {
   }
 }
 
-.post-list {
-  margin: 0;
-  margin-bottom: 1.5rem;
-  padding: 0;
-
-  li {
-    border-bottom: 1px solid var(--global-divider-color);
-    list-style: none;
-    padding-top: 1.25rem;
-    padding-bottom: 1.25rem;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .post-meta {
-      color: var(--global-text-color-light);
-      font-size: $font-size-sm;
-      margin-bottom: 0;
-      line-height: 1.4;
-    }
-
-    .post-tags {
-      color: var(--global-text-color-light);
-      font-size: $font-size-sm;
-      padding-top: 0.1rem;
-      padding-bottom: 0;
-      line-height: 1.4;
-    }
-
-    a {
-      color: var(--global-text-color);
-      text-decoration: none;
-
-      &:hover {
-        color: var(--global-theme-color);
-      }
-    }
-
-    h3 {
-      font-size: $font-size-md;
-      font-weight: 600;
-      margin-bottom: 0.2rem;
-      line-height: 1.35;
-    }
-
-    p {
-      font-size: $font-size-base;
-      line-height: 1.45;
-      margin-bottom: 0.2rem;
-      color: var(--global-text-color-light);
-    }
-  }
-}
-
 .pagination {
   .page-item {
     .page-link {
@@ -905,28 +850,6 @@ html.transition *:after {
 
 // Extra Markdown style (post Customization)
 .post {
-  .post-meta {
-    color: var(--global-text-color-light);
-    font-size: $font-size-sm;
-    margin-bottom: 0;
-  }
-
-  .post-tags {
-    color: var(--global-text-color-light);
-    font-size: $font-size-sm;
-    padding-top: 0.25rem;
-    padding-bottom: 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-
-    a {
-      @include tag-button-style(0.3rem 0.65rem, $font-size-xs, 5px);
-      white-space: nowrap;
-    }
-  }
-
   .post-content {
     blockquote {
       border-left: 5px solid var(--global-theme-color);
