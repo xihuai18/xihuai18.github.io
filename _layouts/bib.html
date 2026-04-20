@@ -110,22 +110,22 @@
 
     <div class="links">
       {%- if primary_url %}
-        <a href="{{ primary_url }}">{{ primary_label }}</a>
+        <a href="{{ primary_url }}" class="btn btn-sm z-depth-0" role="button">{{ primary_label }}</a>
       {%- endif %}
       {%- if pdf_url %}
-        <a href="{{ pdf_url }}">PDF</a>
+        <a href="{{ pdf_url }}" class="btn btn-sm z-depth-0" role="button">PDF</a>
       {%- endif %}
       {%- if entry.code %}
-        <a href="{{ entry.code }}">Code</a>
+        <a href="{{ entry.code }}" class="btn btn-sm z-depth-0" role="button">Code</a>
       {%- endif %}
       {%- if entry.blog %}
-        <a href="{{ entry.blog }}">Blog</a>
+        <a href="{{ entry.blog }}" class="btn btn-sm z-depth-0" role="button">Blog</a>
       {%- endif %}
       {%- if entry.website %}
-        <a href="{{ entry.website }}">Website</a>
+        <a href="{{ entry.website }}" class="btn btn-sm z-depth-0" role="button">Website</a>
       {%- endif %}
       {%- if entry.bibtex_show %}
-        <button type="button" class="bibtex-copy btn" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+        <button type="button" class="bibtex-copy btn btn-sm z-depth-0" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
           <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           <span class="bibtex-copy-label">Copy Bib</span>
           <span class="sr-only bibtex-copy-status" aria-live="polite"></span>

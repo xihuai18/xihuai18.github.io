@@ -947,13 +947,19 @@ html[data-theme='dark'] .venue-filter-status__clear:hover { color: var(--paper);
     font-size: 0.75rem;
 
     a, .btn {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
       background: transparent !important;
       border: 1px solid var(--rule-strong) !important;
+      box-shadow: none !important;
       color: var(--fg-2) !important;
+      text-decoration: none !important;
       padding: 4px 10px !important;
       border-radius: var(--r-pill) !important;
       font-size: 0.72rem !important;
       font-weight: 500 !important;
+      line-height: 1.2 !important;
       letter-spacing: 0.02em !important;
       text-transform: none !important;
       transition: all var(--t-fast);
