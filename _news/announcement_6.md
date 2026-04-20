@@ -1,5 +1,4 @@
 ---
-layout: post
 title: KL Estimators Blog
 date: 2025-12-02
 inline: true

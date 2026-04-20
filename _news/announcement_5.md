@@ -1,5 +1,4 @@
 ---
-layout: post
 title: LLM-RL Training–Inference Mismatch Blog
 date: 2025-11-23
 inline: true

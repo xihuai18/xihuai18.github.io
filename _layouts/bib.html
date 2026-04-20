@@ -26,6 +26,41 @@
 {% assign entrytype_text = entrytype | strip_html | strip %}
 {%- capture periodical -%}{{ entrytype }}{%- if entrytype_text != "" and entryyear != "" -%}, {%- endif -%}{{ entrymonth }}{{ entryyear }}{%- endcapture -%}
 {% assign periodical_text = periodical | strip_html | strip %}
+{%- assign primary_url = nil -%}
+{%- assign primary_label = nil -%}
+{%- if entry.arxiv -%}
+  {%- assign primary_url = 'https://arxiv.org/abs/' | append: entry.arxiv -%}
+  {%- assign primary_label = 'arXiv' -%}
+{%- elsif entry.url -%}
+  {%- assign _entry_url = entry.url | append: '' -%}
+  {%- if _entry_url contains '://' -%}
+    {%- assign primary_url = _entry_url -%}
+  {%- else -%}
+    {%- assign primary_url = _entry_url | relative_url -%}
+  {%- endif -%}
+  {%- assign _entry_url_lc = _entry_url | downcase -%}
+  {%- if _entry_url_lc contains 'arxiv.org/pdf/' -%}
+    {%- assign primary_label = 'PDF' -%}
+  {%- elsif _entry_url_lc contains 'arxiv.org' -%}
+    {%- assign primary_label = 'arXiv' -%}
+  {%- elsif _entry_url_lc contains 'openreview.net' -%}
+    {%- assign primary_label = 'OpenReview' -%}
+  {%- else -%}
+    {%- assign primary_label = 'Paper' -%}
+  {%- endif -%}
+{%- endif -%}
+{%- assign pdf_url = nil -%}
+{%- if entry.pdf -%}
+  {%- assign _entry_pdf = entry.pdf | append: '' -%}
+  {%- if _entry_pdf contains '://' -%}
+    {%- assign pdf_url = _entry_pdf -%}
+  {%- else -%}
+    {%- assign pdf_url = _entry_pdf | prepend: '/assets/pdf/' | relative_url -%}
+  {%- endif -%}
+  {%- if primary_url and primary_url == pdf_url -%}
+    {%- assign pdf_url = nil -%}
+  {%- endif -%}
+{%- endif -%}
 {%- assign on_home_selected = page.url == '/' -%}
 
 {%- if on_home_selected -%}
@@ -74,15 +109,11 @@
     </p>
 
     <div class="links">
-      {%- if entry.arxiv %}
-        <a href="http://arxiv.org/abs/{{ entry.arxiv }}">arXiv</a>
+      {%- if primary_url %}
+        <a href="{{ primary_url }}">{{ primary_label }}</a>
       {%- endif %}
-      {%- if entry.pdf %}
-        {% if entry.pdf contains '://' -%}
-        <a href="{{ entry.pdf }}">PDF</a>
-        {%- else -%}
-        <a href="{{ entry.pdf | prepend: '/assets/pdf/' | relative_url }}">PDF</a>
-        {%- endif %}
+      {%- if pdf_url %}
+        <a href="{{ pdf_url }}">PDF</a>
       {%- endif %}
       {%- if entry.code %}
         <a href="{{ entry.code }}">Code</a>
@@ -94,10 +125,11 @@
         <a href="{{ entry.website }}">Website</a>
       {%- endif %}
       {%- if entry.bibtex_show %}
-        <a class="bibtex-copy" role="button" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+        <button type="button" class="bibtex-copy btn" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
           <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           <span class="bibtex-copy-label">Copy Bib</span>
-        </a>
+          <span class="sr-only bibtex-copy-status" aria-live="polite"></span>
+        </button>
       {%- endif %}
     </div>
 
@@ -137,12 +169,8 @@
         {%- if topic_label != "" or periodical_text != "" or show_selected -%}
         <div class="pub-meta-row">
           {%- if topic_label != "" -%}
-          <div class="venue-tag" data-venue-filter="{{topic_label}}" onclick="filterByVenue('{{topic_label}}')" title="Click to filter papers from {{topic_label}}" role="button" tabindex="0" onkeypress="if(event.key==='Enter')filterByVenue('{{topic_label}}')">
-            {%- if site.data.venues[topic_label] -%}
-              <a href="{{site.data.venues[topic_label].url}}" class="venue-link" onclick="event.stopPropagation();" title="Visit {{topic_label}} website">{{topic_label}}</a>
-            {%- else -%}
-              <span class="venue-name">{{topic_label}}</span>
-            {%- endif -%}
+          <div class="venue-tag" data-venue-filter="{{topic_label}}" onclick="filterByVenue('{{topic_label}}')" title="Click to filter papers from {{topic_label}}" role="button" tabindex="0" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterByVenue('{{topic_label}}')}">
+            <span class="venue-name">{{topic_label}}</span>
           </div>
           {%- endif -%}
           {%- if topic_label != "" and periodical_text != "" -%}
@@ -248,24 +276,21 @@
 
           <!-- Links/Buttons -->
           <div class="links">
-          {%- if entry.arxiv %}
-            <a href="http://arxiv.org/abs/{{ entry.arxiv }}" class="btn btn-sm z-depth-0" role="button">arXiv</a>
+          {%- if primary_url %}
+            <a href="{{ primary_url }}" class="btn btn-sm z-depth-0" role="button">{{ primary_label }}</a>
           {%- endif %}
           {%- if entry.bibtex_show %}
-            <a class="bibtex-copy btn btn-sm z-depth-0" role="button" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
+            <button type="button" class="bibtex-copy btn btn-sm z-depth-0" data-entry-key="{{ entry.key }}" aria-label="Copy BibTeX to clipboard" title="Click to copy BibTeX">
               <svg class="bibtex-copy-icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               <span class="bibtex-copy-label">Copy Bib</span>
-            </a>
+              <span class="sr-only bibtex-copy-status" aria-live="polite"></span>
+            </button>
           {%- endif %}
           {%- if entry.html %}
             <a href="{{ entry.html }}" class="btn btn-sm z-depth-0" role="button">HTML</a>
           {%- endif %}
-          {%- if entry.pdf %}
-            {% if entry.pdf contains '://' -%}
-            <a href="{{ entry.pdf }}" class="btn btn-sm z-depth-0" role="button">PDF</a>
-            {%- else -%}
-            <a href="{{ entry.pdf | prepend: '/assets/pdf/' | relative_url }}" class="btn btn-sm z-depth-0" role="button">PDF</a>
-            {%- endif %}
+          {%- if pdf_url %}
+            <a href="{{ pdf_url }}" class="btn btn-sm z-depth-0" role="button">PDF</a>
           {%- endif %}
           {%- if entry.supp %}
             {% if entry.supp contains '://' -%}

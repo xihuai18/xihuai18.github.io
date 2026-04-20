@@ -342,13 +342,6 @@ pre code { background: none; padding: 0; font-size: inherit; }
   > .clearfix > p,
   > .clearfix > ul,
   > .clearfix > ol { max-width: none; }
-  > h2 {
-    margin-top: var(--s-7);
-    padding-bottom: var(--s-2);
-    border-bottom: 1px solid var(--rule);
-  }
-  > h2 a { color: inherit; }
-  > h2 a:hover { color: var(--accent); text-decoration: none; }
 }
 
 .about-section-head {
@@ -589,7 +582,7 @@ html[data-theme="dark"] .navbar {
 }
 .news table th,
 .news table td {
-  padding: 14px 0;
+  padding: 14px 0 !important;
   border-bottom: 1px solid var(--rule);
   border-top: none !important;
   vertical-align: baseline;
@@ -612,6 +605,11 @@ html[data-theme="dark"] .navbar {
   font-size: 14px;               /* components-news.html */
   line-height: 1.55;
 }
+.news table td .news-tag {
+  display: inline-flex;
+  margin-right: 12px;
+  vertical-align: baseline;
+}
 .news a.news-title {
   color: var(--fg);
   font-family: var(--font-display);
@@ -628,7 +626,7 @@ html[data-theme="dark"] .navbar {
 .news-full {
   max-width: 820px;                        /* pages.css:261 */
   margin: 0 auto;
-  padding: 56px var(--gutter) 80px;        /* pages.css:261 */
+  padding: 0 var(--gutter) 80px;
 }
 .news-year { margin-top: 44px; }           /* pages.css:262 */
 .news-year:first-of-type { margin-top: 32px; }  /* pages.css:263 */
@@ -902,30 +900,6 @@ html[data-theme='dark'] .venue-filter-status__clear:hover { color: var(--paper);
     > li:last-child { border-bottom: none; }
   }
 
-  .bibliography .abbr {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    font-family: var(--font-sans);
-    font-size: 10px;                /* components-paper-card.html:34 */
-    font-weight: 500;
-    letter-spacing: 0.02em;          /* kit.css:338 .chip */
-    text-transform: uppercase;
-    border-radius: var(--r-pill);
-    color: var(--accent-deep);
-    background: var(--accent-wash);
-    margin-right: var(--s-2);
-    abbr {
-      border: none !important;
-      text-decoration: none !important;
-      color: inherit !important;
-      cursor: help;
-    }
-  }
-}
-html[data-theme='dark'] .publications .bibliography .abbr {
-  color: var(--moss-700);
-  background: rgba(111, 179, 102, 0.15);  /* kit.css:354 dark chip.is-accent */
 }
 .publications {
 
@@ -1019,12 +993,6 @@ html[data-theme='dark'] .publications .bibliography .abbr {
   /* BibTeX source is kept in DOM (hidden) so JS can copy; never renders. */
   .bibtex-source { display: none !important; }
 
-  .bibliography .selected,
-  .bibliography li.selected {
-    /* highlight rail for "selected" papers (ochre per kit) */
-    box-shadow: inset 2px 0 0 var(--ink-ochre);
-    padding-left: 14px !important;
-  }
   /* "★ Selected" label — kit.css:194-197 */
   .selected-mark {
     display: inline-block;
@@ -1040,6 +1008,9 @@ html[data-theme='dark'] .publications .bibliography .links .bibtex-copy:hover,
 html[data-theme='dark'] .publications .bibliography .links .bibtex-copy.is-copied,
 html[data-theme='dark'] .publications .bibliography .links .bibtex-copy.is-failed {
   color: var(--paper) !important;
+}
+.publications ol.bibliography > li.single-pub-in-year {
+  border-bottom: none !important;
 }
 
 /* Pre-title meta row — inline row of venue-tag + ★ Selected sitting above the
@@ -1289,12 +1260,6 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
 .cv {
   font-family: var(--font-serif);
 
-  h1 {
-    font-family: var(--font-display);
-    font-size: var(--fs-3xl);
-    letter-spacing: -0.02em;
-  }
-
   /* Card shell dissolves — become transparent section blocks with space. */
   .card {
     background: transparent !important;
@@ -1337,6 +1302,9 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
     border: none !important;
     border-bottom: 1px dotted var(--rule) !important;
     padding: var(--s-4) 0 !important;
+  }
+  .cv-timeline .list-group-item + .list-group-item {
+    border-top: none !important;
   }
   .cv-timeline .list-group-item:last-child { border-bottom: none !important; }
   .cv-timeline .list-group-item:hover { background: transparent !important; }
@@ -1420,6 +1388,30 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
     text-transform: none;
     margin: 0;
   }
+  .cv-entry-list {
+    margin: var(--s-2) 0 0;
+    padding-left: var(--s-4);
+  }
+  .cv-entry-list > li + li {
+    margin-top: var(--s-2);
+  }
+  .cv-entry-list .item-title {
+    display: inline-block;
+    margin-bottom: var(--s-1);
+    font-family: var(--font-sans);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+  .cv-entry-list .item,
+  .cv-entry-list .subitem {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--fg-2);
+  }
 
   /* General Information table — serif, no inner borders */
   .table {
@@ -1451,15 +1443,38 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
     .table tr td:first-child { width: auto; }
   }
 
-  /* Page header rule — pages.css:175-177 `.uk-page-head` */
-  .post-header {
-    padding-bottom: var(--s-5);
-    border-bottom: 1px solid var(--rule);
-    margin-bottom: var(--s-6);
-  }
 }
 html[data-theme='dark'] .cv .card .card-title,
 html[data-theme='dark'] .cv h2 { color: var(--moss-600) !important; }
+
+/* Shared page header — used by page/cv/archive/news/publications/projects.
+   Excludes the home hero and blog index/post layouts, which have dedicated rules. */
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) {
+  padding: 0 0 var(--s-5);
+  margin-bottom: var(--s-6);
+  border-bottom: 1px solid var(--rule);
+}
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .eyebrow {
+  margin-bottom: var(--s-3);
+}
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .post-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 500;
+  margin: 0 0 var(--s-4);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .lead,
+.post:not(.blog-index):not(:has(.post-content)) > .post-header:not(.hero) .post-description {
+  margin: 0;
+  max-width: 62ch;
+  font-family: var(--font-serif);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-body);
+  color: var(--fg-2);
+}
 
 /* ============================================================================
  * 14. Blog index / post list
@@ -1909,6 +1924,9 @@ html[data-theme='dark'] .cv h2 { color: var(--moss-600) !important; }
   margin-bottom: 10px;
 }
 .post-toc-mobile .toc.is-empty {
+  display: none;
+}
+.post-toc-mobile:has(.toc.is-empty) {
   display: none;
 }
 

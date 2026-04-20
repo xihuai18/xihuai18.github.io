@@ -166,7 +166,7 @@ blog_nav_title: Blog
 
 collections:
   news:
-    output: true
+    output: false
     permalink: /news/:path/
   projects:
     output: false

@@ -2,26 +2,36 @@
           <div class="news">
             {% if site.news != blank -%}
             {%- assign news_size = site.news | size -%}
+            {%- assign news = site.news | sort: "date" | reverse -%}
+            {%- if include.limit -%}
+              {%- if site.news_limit == blank -%}
+                {%- assign news_limit = news_size -%}
+              {%- else -%}
+                {%- assign news_limit = site.news_limit -%}
+              {%- endif -%}
+            {%- else -%}
+              {%- assign news_limit = news_size -%}
+            {%- endif -%}
+            {%- assign rendered_news_count = news_limit -%}
+            {%- if rendered_news_count > news_size -%}
+              {%- assign rendered_news_count = news_size -%}
+            {%- endif -%}
             {%- assign news_scrollable = false -%}
-            {%- if include.scrollable and news_size > 3 -%}
+            {%- if include.scrollable and rendered_news_count > 3 -%}
               {%- assign news_scrollable = true -%}
             {%- endif -%}
             <div class="table-responsive news-table{% if news_scrollable %} news-scrollable{% endif %}">
               <table class="table table-sm table-borderless">
-              {%- assign news = site.news | reverse -%}
-              {% if include.limit %}
-              {% assign news_limit = site.news_limit | default: 5 %}
-              {% else %}
-              {% assign news_limit = news_size %}
-              {% endif %}
               {% for item in news limit: news_limit %}
-                <tr {% unless item.inline %}class="clickable-row" data-href="{{ item.url | relative_url }}" style="cursor: pointer;" onclick="window.location='{{ item.url | relative_url }}';"{% endunless %}>
+                {%- assign cat = item.category | default: 'note' -%}
+                <tr>
                   <th scope="row">{{ item.date | date: "%b %-d, %Y" }}</th>
                   <td>
+                    <span class="news-tag news-tag--{{ cat }}">{{ cat | capitalize }}</span>
                     {% if item.inline -%}
                       {{ item.content | remove: '<p>' | remove: '</p>' | emojify }}
                     {%- else -%}
-                      <a class="news-title" href="{{ item.url | relative_url }}">{{ item.title }}</a>
+                      <span class="news-title">{{ item.title }}</span>
                     {%- endif %}
                   </td>
                 </tr>

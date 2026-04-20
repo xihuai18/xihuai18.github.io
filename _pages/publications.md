@@ -6,7 +6,7 @@ display_title: 'A record of collaborative <span class="blog-title__dropcap">w</s
 tab_title: Publications
 nav_title: Publications
 eyebrow: Publications
-lead: Peer-reviewed papers and preprints, organized by year. <strong>*</strong> denotes equal contribution. Full list also on <a href="https://scholar.google.com/citations?user=YEc4cq8AAAAJ" target="_blank" rel="noopener">Google Scholar</a>.
+lead: Peer-reviewed papers and preprints, organized by year. <strong>*</strong> denotes equal contribution. Full list also on <a href="https://scholar.google.com/citations?user={{ site.scholar_userid }}" target="_blank" rel="noopener">Google Scholar</a>.
 years: [2026, 2025, 2024, 2023, 2022, 2021]
 topics:
   - { name: "LLM Reasoning & Agency", abbr: "LLM Reasoning and Agency" }
@@ -17,19 +17,10 @@ nav_order: 1
 ---
 
 <!-- _pages/publications.md -->
-<div class="publications">
-
-{%- comment -%} Topic filter chip bar — reuses `filterByVenue()` from venue_filter.js.
-Counts are computed by splitting jekyll-scholar's output on `</li>` closers. {%- endcomment -%}
-{%- assign total_entries = 0 -%}
-{%- for y in page.years -%}
-{%- capture _ye -%}{% bibliography -f papers -q @*[year={{y}}]* %}{%- endcapture -%}
-{%- assign _yc = _ye | split: '</li>' | size | minus: 1 -%}
-{%- assign total_entries = total_entries | plus: _yc -%}
-{%- endfor -%}
+<div class="publications" data-publications-page>
 
 <nav class="pub-topic-filter blog-controls" role="group" aria-label="Filter papers by topic" markdown="0">
-  <button type="button" class="chip no-dot pub-topic-pill is-active" data-topic-filter="" onclick="clearVenueFilter()">
+  <button type="button" class="chip no-dot pub-topic-pill is-active" data-topic-filter="" aria-pressed="true" onclick="clearVenueFilter()">
     All papers
   </button>
   {%- for topic in page.topics -%}
@@ -37,7 +28,7 @@ Counts are computed by splitting jekyll-scholar's output on `</li>` closers. {%-
     {%- assign _tc = _te | split: '</li>' | size | minus: 1 -%}
     {%- assign topic_dom = topic.abbr | replace: " and ", " & " -%}
     {%- if _tc > 0 -%}
-    <button type="button" class="chip no-dot pub-topic-pill" data-topic-filter="{{ topic_dom }}" onclick="filterByVenue('{{ topic_dom }}')">
+    <button type="button" class="chip no-dot pub-topic-pill" data-topic-filter="{{ topic_dom }}" aria-pressed="false" onclick="filterByVenue('{{ topic_dom }}')">
       {{ topic.name }}
     </button>
     {%- endif -%}

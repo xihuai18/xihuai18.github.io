@@ -1,5 +1,4 @@
 ---
-layout: post
 title: ZSC-Eval
 date: 2024-09-26
 inline: true

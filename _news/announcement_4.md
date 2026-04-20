@@ -1,5 +1,4 @@
 ---
-layout: post
 title: DPT-Agent
 date: 2025-05-16
 inline: true
