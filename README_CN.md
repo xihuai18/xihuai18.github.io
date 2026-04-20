@@ -84,7 +84,7 @@ bundle exec jekyll serve --watch --livereload
 ├── _data/
 │   ├── cv.yml           # 简历数据
 │   ├── coauthors.yml    # 合作者链接
-│   ├── repositories.yml # 展示的 GitHub 仓库
+│   ├── projects.yml     # Projects 页面卡片数据
 │   └── post_uv.json     # 页面访问量（自动生成）
 ├── assets/
 │   ├── img/             # 图片
@@ -106,8 +106,9 @@ bundle exec jekyll serve --watch --livereload
 | **首页** | `/`              | 个人简介、精选论文、新闻、社交链接     | [\_pages/about.md](_pages/about.md)                   |
 | **博客** | `/blog/`         | 文章列表，支持筛选、双语切换、访问统计 | [\_pages/blog.md](_pages/blog.md)                     |
 | **论文** | `/publications/` | 从 BibTeX 自动生成，按年份分组         | [\_bibliography/papers.bib](_bibliography/papers.bib) |
+| **项目** | `/projects/`     | 研究代码与实验产物                     | [\_data/projects.yml](_data/projects.yml)             |
 | **简历** | `/cv/`           | 从 YAML 数据渲染                       | [\_data/cv.yml](_data/cv.yml)                         |
-| **新闻** | `/news/`         | 独立公告页面                           | [\_news/](_news/)                                     |
+| **新闻** | `/news/`         | 聚合公告页                             | [\_news/](_news/)                                     |
 
 ---
 
@@ -204,19 +205,21 @@ related_posts: false # 禁用相关文章
 
 ```yaml
 ---
-layout: post
 title: 公告标题
 date: 2025-01-01
 inline: true
+category: paper # paper | writing | talk | milestone | note
 ---
 公告内容（支持 Markdown 和 HTML）。
 ```
+
+新闻只会渲染到首页 feed 和 `/news/` 聚合页，不会为每条公告生成单独页面。
 
 在 `_config.yml` 中配置显示：
 
 ```yaml
 news_scrollable: true # 超过 3 条时显示滚动条
-news_limit: 5 # 最多显示条数（留空显示全部）
+news_limit: 7 # 首页最多显示条数（留空显示全部）
 ```
 
 ---
@@ -401,9 +404,9 @@ external_sources:
 </details>
 
 <details>
-<summary><strong>论文会议筛选</strong></summary>
+<summary><strong>论文主题筛选</strong></summary>
 
-在论文页面，点击任意会议徽章（如 `ICLR`、`NeurIPS`）可按该会议筛选论文。再次点击清除筛选。
+在论文页面，可使用主题 chips 按研究方向筛选论文（例如 `LLM Reasoning & Agency`、`MARL Efficiency`）。再次点击可清除筛选。
 
 </details>
 
@@ -417,7 +420,8 @@ external_sources:
 
 - **按年份**：点击年份链接或使用 `?year=2025` URL 参数
 - **按分类**：点击分类链接或使用 `?category=reinforcement-learning`
-- **组合筛选**：`?year=2025&category=reinforcement-learning`
+- **按标签**：点击标签链接或使用 `?tag=rlhf`
+- **组合筛选**：`?year=2025&category=reinforcement-learning&tag=rlhf`
 
 归档页面自动生成：
 
@@ -427,11 +431,10 @@ external_sources:
 
 ### 目录导航
 
-文章和简历页面在桌面端自动显示**可折叠的侧边栏目录**：
+博客文章在桌面端自动显示侧边栏目录：
 
-- 从 `h2` 和 `h3` 标题自动生成
+- 从 `h2` 标题自动生成
 - 滚动时固定定位
-- 可通过按钮折叠/展开
 - 支持中英文标题（"Contents" / "目录"）
 
 ### 阅读时间与相关文章
@@ -507,7 +510,6 @@ enable_pseudocode: true # 伪代码块
 enable_darkmode: true # 深色/浅色模式切换
 enable_medium_zoom: true # 图片缩放
 enable_progressbar: true # 阅读进度条
-enable_masonry: true # 项目卡片布局
 enable_navbar_social: true # 导航栏社交图标
 enable_tooltips: false # 自动生成工具提示链接
 ```
@@ -545,7 +547,7 @@ enable_tooltips: false # 自动生成工具提示链接
 | ------------------- | ----------------------------------- |
 | `cv.yml`            | 简历内容（教育、经历、论文等）      |
 | `coauthors.yml`     | 按姓氏自动链接论文中的合作者        |
-| `repositories.yml`  | 要展示的 GitHub 用户/仓库           |
+| `projects.yml`      | Projects 页面展示的项目卡片         |
 | `post_uv.json`      | 页面访问量（由 GA4 工作流自动生成） |
 | `post_uv_meta.json` | 页面访问统计的元数据                |
 
@@ -559,13 +561,16 @@ enable_tooltips: false # 自动生成工具提示链接
 
 这会自动为论文作者列表中的 "W. Zhang" 或 "Weinan Zhang" 添加链接。
 
-**仓库示例**（`repositories.yml`）：
+**项目示例**（`projects.yml`）：
 
 ```yaml
-github_users:
-  - username
-github_repos:
-  - owner/repo-name
+- name: Project Name
+  repo: owner/repo-name
+  blurb: 一两句客观描述。
+  language: Python
+  stars:
+  forks:
+  tags: [topic-a, topic-b]
 ```
 
 ---
