@@ -1230,7 +1230,7 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
 
 .selected-papers {
   display: grid;
-  gap: var(--s-4);
+  gap: 0;
 }
 .selected-papers ol.bibliography,
 .selected-papers ul.bibliography {
@@ -1238,13 +1238,35 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
   padding: 0;
   margin: 0;
   display: grid;
-  gap: var(--s-5);
+  gap: 0;
 }
 .selected-papers ol.bibliography > li,
 .selected-papers ul.bibliography > li {
   padding: 0;
   border: 0;
   margin: 0;
+}
+
+/* Homepage selected papers — dissolve the card shell. The li-level hairline
+   divider carries the rhythm; no background, border, radius, or shadow. */
+.about-selected-papers .selected-paper-card,
+.about-selected-papers .selected-paper-card.ds-card,
+.about-selected-papers .selected-paper-card.ds-card-hover {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: var(--s-5) 0;
+  transition: none;
+}
+.about-selected-papers .selected-paper-card.ds-card-hover:hover {
+  transform: none;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+.about-selected-papers .selected-papers ol.bibliography > li + li .selected-paper-card,
+.about-selected-papers .selected-papers ul.bibliography > li + li .selected-paper-card {
+  border-top: 1px solid var(--rule) !important;
 }
 
 .selected-paper-card {
