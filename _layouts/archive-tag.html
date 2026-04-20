@@ -1,24 +1,66 @@
 ---
-layout: default
 ---
-
-<div class="post">
-  {% capture _archive_tag_title %}<i class="fas fa-hashtag fa-sm"></i> {{ page.title }}{% endcapture %}
-  {% include page_header.html title_html=_archive_tag_title description="an archive of posts with this tag" %}
-
-  <article>
-    <div class="table-responsive">
-      <table class="table table-sm table-borderless">
-        {% for post in page.posts %}
-        <tr>
-          <th scope="row">{{ post.date | date: "%b %-d, %Y" }}</th>
-          <td>
-              <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-          </td>
-        </tr>
-      {% endfor %}
-      </table>
-    </div>
-  </article>
-
-</div>
+<!DOCTYPE html>
+{%- assign _page_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if _page_lang == 'zh-cn' or _page_lang == 'cn' -%}
+  {%- assign _page_lang = 'zh' -%}
+{%- endif -%}
+{%- if _page_lang == 'zh' -%}
+  {%- assign _html_lang = 'zh-CN' -%}
+{%- elsif _page_lang == 'en' -%}
+  {%- assign _html_lang = 'en' -%}
+{%- else -%}
+  {%- assign _html_lang = _page_lang -%}
+{%- endif -%}
+{% assign tag_slug = page.title | slugify | url_encode %}
+{%- assign archive_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if archive_lang == 'zh-cn' or archive_lang == 'cn' -%}
+  {%- assign archive_lang = 'zh' -%}
+{%- endif -%}
+{% assign target = '/blog/?tag=' | append: tag_slug %}
+{%- if archive_lang == 'zh' -%}{% assign target = target | append: '&lang=zh' %}{%- endif -%}
+{% assign target_href = target | relative_url %}
+{% assign redirect_title = site.blog_nav_title | default: 'Blog' %}
+{% if archive_lang == 'zh' %}
+  {% assign redirect_description = '主博客页面，已按标签筛选。' %}
+{% else %}
+  {% assign redirect_description = 'The main blog page filtered by tag.' %}
+{% endif %}
+<html lang="{{ _html_lang }}">
+  <head>
+    <meta http-equiv="refresh" content="3; url={{ target_href }}" />
+    {% include head.html %}
+  </head>
+  <body class="{% if site.navbar_fixed %}fixed-top-nav{% endif %} {% unless site.footer_fixed %}sticky-bottom-footer{% endunless %}">
+    {%- include header.html %}
+    <main id="main-content" class="container mt-5" tabindex="-1">
+      <script>
+        window.location.replace("{{ target_href }}");
+      </script>
+      <div class="post">
+        {% capture _archive_tag_title %}<i class="fas fa-hashtag fa-sm"></i> {{ page.title }}{% endcapture %}
+        {% if archive_lang == 'zh' %}
+          {% include page_header.html title_html=_archive_tag_title description="正在跳转到主博客页面，并自动筛选该标签。" %}
+        {% else %}
+          {% include page_header.html title_html=_archive_tag_title description="Redirecting to the main blog with this tag filtered in place." %}
+        {% endif %}
+        <article>
+          {% if archive_lang == 'zh' %}
+          <p>如果没有自动跳转，<a href="{{ target_href }}">点这里查看带有该标签的博客文章</a>。</p>
+          {% else %}
+          <p>If you are not redirected automatically, <a href="{{ target_href }}">click here to view posts with this tag on the blog page</a>.</p>
+          {% endif %}
+        </article>
+      </div>
+    </main>
+    {%- include footer.html %}
+    {% include scripts/jquery.html %}
+    {% include scripts/bootstrap.html %}
+    {% include scripts/masonry.html %}
+    {% include scripts/misc.html %}
+    {% include scripts/badges.html %}
+    {% include scripts/mathjax.html %}
+    {% include scripts/analytics.html %}
+    {% include scripts/progressBar.html %}
+  </body>
+</html>

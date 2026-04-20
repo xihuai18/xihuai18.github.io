@@ -4,9 +4,7 @@ layout: default
 <!-- page.html -->
         <div class="post">
           {% assign _page_title_html = page.display_title | default: page.title %}
-          {% assign _page_title_class = 'post-title' %}
-          {%- if page.display_title -%}{% assign _page_title_class = 'post-title has-dropcap' %}{%- endif -%}
-          {% include page_header.html eyebrow=page.eyebrow title_html=_page_title_html title_class=_page_title_class lead=page.lead description=page.description %}
+          {% include page_header.html eyebrow=page.eyebrow title_html=_page_title_html title_class='post-title' lead=page.lead description=page.description %}
 
           <article>
             {{ content }}

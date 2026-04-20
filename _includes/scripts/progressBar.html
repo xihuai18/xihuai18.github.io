@@ -19,9 +19,15 @@
    * To account for this, a minimal delay was introduced before computing the
    * values.
    */
-  window.onload = function () {
+  function queueProgressBarSetup() {
     setTimeout(progressBarSetup, 50);
-  };
+  }
+
+  if (document.readyState === "complete") {
+    queueProgressBarSetup();
+  } else {
+    window.addEventListener("load", queueProgressBarSetup, { once: true });
+  }
   /*
    * We set up the bar according to the browser.
    * If the browser supports the progress element we use that.
@@ -53,11 +59,18 @@
     // Use the CSS-defined padding-top value to avoid layout shift
     // The navbar height is already handled by CSS: body.fixed-top-nav { padding-top: 50px; }
     let navbarHeight = $("#navbar").outerHeight(true) || 50;
+    let distance = getDistanceToScroll();
     // Only set progressBar position, don't override body padding to avoid layout shift
-    $("progress-container").css({ "padding-top": navbarHeight });
+    $(".progress-container").css({ "padding-top": navbarHeight });
     progressBar.css({ top: navbarHeight });
+    if (distance <= 0) {
+      progressBar.css({ display: "none" });
+      progressBar.attr({ max: 1, value: 0 });
+      return;
+    }
+    progressBar.css({ display: "" });
     progressBar.attr({
-      max: getDistanceToScroll(),
+      max: distance,
       value: getCurrentScrollPosition(),
     });
   }
@@ -67,15 +80,22 @@
    * This is the distance the user can scroll
    */
   function getDistanceToScroll() {
-    return $(document).height() - $(window).height();
+    return Math.max($(document).height() - $(window).height(), 0);
   }
 
   function resizeProgressBar() {
+    if (getDistanceToScroll() <= 0) {
+      progressBar.css({ width: 0, display: "none" });
+      return;
+    }
+    progressBar.css({ display: "" });
     progressBar.css({ width: getWidthPercentage() + "%" });
   }
   // The scroll ratio equals the percentage to resize the bar
   function getWidthPercentage() {
-    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+    const distance = getDistanceToScroll();
+    if (distance <= 0) return 0;
+    return (getCurrentScrollPosition() / distance) * 100;
   }
 </script>
 

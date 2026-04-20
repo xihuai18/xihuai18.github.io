@@ -1,7 +1,28 @@
 <!DOCTYPE html>
 <!-- _layouts/distill.html -->
-<html>
+{%- assign _page_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if _page_lang == 'zh-cn' or _page_lang == 'cn' -%}
+  {%- assign _page_lang = 'zh' -%}
+{%- endif -%}
+{%- if _page_lang == 'zh' -%}
+  {%- assign _html_lang = 'zh-CN' -%}
+{%- elsif _page_lang == 'en' -%}
+  {%- assign _html_lang = 'en' -%}
+{%- else -%}
+  {%- assign _html_lang = _page_lang -%}
+{%- endif -%}
+<html lang="{{ _html_lang }}">
   <head>
+    {%- if page.redirect -%}
+      {%- assign _head_redirect_target = page.redirect -%}
+      {%- if _head_redirect_target == true or _head_redirect_target == 'true' -%}
+        {%- assign _head_redirect_target = site.baseurl | default: '/' -%}
+      {%- elsif _head_redirect_target contains '://' -%}
+      {%- else -%}
+        {%- assign _head_redirect_target = _head_redirect_target | relative_url -%}
+      {%- endif -%}
+      <meta http-equiv="refresh" content="3; url={{ _head_redirect_target }}" />
+    {%- endif -%}
     {%- include head.html %}
 
     {% include scripts/jquery.html %}
@@ -21,18 +42,18 @@
 
   <d-front-matter>
     <script async type="text/json">{
-      "title": "{{ page.title }}",
-      "description": "{{ page.description }}",
-      "published": "{{ page.date | date: '%B %-d, %Y' }}",
+      "title": {{ page.title | jsonify }},
+      "description": {{ page.description | jsonify }},
+      "published": {{ page.date | date: '%B %-d, %Y' | jsonify }},
       "authors": [
         {% for author in page.authors -%}
         {
-          "author": "{{ author.name }}",
-          "authorURL": "{{ author.url }}",
+          "author": {{ author.name | jsonify }},
+          "authorURL": {{ author.url | jsonify }},
           "affiliations": [
             {
-              "name": "{{ author.affiliations.name }}",
-              "url": "{{ author.affiliations.url }}"
+              "name": {{ author.affiliations.name | jsonify }},
+              "url": {{ author.affiliations.url | jsonify }}
             }
           ]
         }{% if forloop.last == false %},{% endif %}
@@ -61,6 +82,7 @@
     {%- include header.html %}
 
     <!-- Content -->
+    <main id="main-content" class="container mt-5" tabindex="-1">
     <div class="post distill">
 
       <d-title>
@@ -109,6 +131,7 @@
       {%- endif -%}
 
     </div>
+    </main>
 
     <!-- Footer -->
     {%- include footer.html %}
@@ -116,5 +139,6 @@
     {% include scripts/bootstrap.html %}
     {% include scripts/analytics.html %}
     {% include scripts/progressBar.html %}
+    {% include scripts/misc.html %}
   </body>
 </html>

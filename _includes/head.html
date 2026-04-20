@@ -36,7 +36,36 @@
     <link rel="shortcut icon" href="{{ site.icon | prepend: '/assets/img/' | relative_url}}"/>
     {% endif %}
     <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
-    <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+    {%- assign _canonical_target = page.url | replace:'index.html','' | absolute_url -%}
+    {%- if page.redirect -%}
+      {%- if page.redirect == true or page.redirect == 'true' -%}
+        {%- assign _canonical_target = '/' | absolute_url -%}
+      {%- elsif page.redirect contains '://' -%}
+        {%- assign _canonical_target = page.redirect -%}
+      {%- else -%}
+        {%- assign _canonical_target = page.redirect | absolute_url -%}
+      {%- endif -%}
+    {%- elsif target -%}
+      {%- if target contains '://' -%}
+        {%- assign _canonical_target = target -%}
+      {%- else -%}
+        {%- assign _canonical_target = target | absolute_url -%}
+      {%- endif -%}
+    {%- endif -%}
+    <link rel="canonical" href="{{ _canonical_target }}">
+    {%- assign _page_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+    {%- if _page_lang == 'zh-cn' or _page_lang == 'cn' -%}
+      {%- assign _page_lang = 'zh' -%}
+    {%- endif -%}
+    {%- if page.zh_url -%}
+    <link rel="alternate" hreflang="en" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+    <link rel="alternate" hreflang="zh-CN" href="{{ page.zh_url | replace:'index.html','' | absolute_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+    {%- elsif page.en_url -%}
+    <link rel="alternate" hreflang="zh-CN" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+    <link rel="alternate" hreflang="en" href="{{ page.en_url | replace:'index.html','' | absolute_url }}">
+    <link rel="alternate" hreflang="x-default" href="{{ page.en_url | replace:'index.html','' | absolute_url }}">
+    {%- endif -%}
 
     <!-- Dark Mode -->
     {% if site.enable_darkmode %}

@@ -1,20 +1,66 @@
 ---
-layout: default
 ---
-
+<!DOCTYPE html>
+{%- assign _page_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if _page_lang == 'zh-cn' or _page_lang == 'cn' -%}
+  {%- assign _page_lang = 'zh' -%}
+{%- endif -%}
+{%- if _page_lang == 'zh' -%}
+  {%- assign _html_lang = 'zh-CN' -%}
+{%- elsif _page_lang == 'en' -%}
+  {%- assign _html_lang = 'en' -%}
+{%- else -%}
+  {%- assign _html_lang = _page_lang -%}
+{%- endif -%}
 {% assign archive_year = page.date | date: "%Y" %}
-{% assign target = '/blog/' | relative_url | append: '?year=' | append: archive_year %}
-<meta http-equiv="refresh" content="5; url={{ target }}">
-<script>
-  // Immediate redirect as a fallback for environments where meta refresh may be delayed or missed
-  window.location.href = "{{ target }}";
-</script>
-
-<div class="post">
-  {% capture _archive_year_title %}<i class="fas fa-calendar fa-sm"></i> {{ page.date | date: "%Y" }}{% endcapture %}
-  {% include page_header.html title_html=_archive_year_title description="Redirecting to the main blog with this year filtered in place." %}
-
-  <article>
-    <p>If you are not redirected automatically, <a href="{{ target }}">click here to view posts from this year on the blog page</a>.</p>
-  </article>
-</div>
+{%- assign archive_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+{%- if archive_lang == 'zh-cn' or archive_lang == 'cn' -%}
+  {%- assign archive_lang = 'zh' -%}
+{%- endif -%}
+{% assign target = '/blog/?year=' | append: archive_year %}
+{%- if archive_lang == 'zh' -%}{% assign target = target | append: '&lang=zh' %}{%- endif -%}
+{% assign target_href = target | relative_url %}
+{% assign redirect_title = site.blog_nav_title | default: 'Blog' %}
+{% if archive_lang == 'zh' %}
+  {% assign redirect_description = '主博客页面，已按年份筛选。' %}
+{% else %}
+  {% assign redirect_description = 'The main blog page filtered by year.' %}
+{% endif %}
+<html lang="{{ _html_lang }}">
+  <head>
+    <meta http-equiv="refresh" content="3; url={{ target_href }}" />
+    {% include head.html %}
+  </head>
+  <body class="{% if site.navbar_fixed %}fixed-top-nav{% endif %} {% unless site.footer_fixed %}sticky-bottom-footer{% endunless %}">
+    {%- include header.html %}
+    <main id="main-content" class="container mt-5" tabindex="-1">
+      <script>
+        window.location.replace("{{ target_href }}");
+      </script>
+      <div class="post">
+        {% capture _archive_year_title %}<i class="fas fa-calendar fa-sm"></i> {{ page.date | date: "%Y" }}{% endcapture %}
+        {% if archive_lang == 'zh' %}
+          {% include page_header.html title_html=_archive_year_title description="正在跳转到主博客页面，并自动筛选该年份。" %}
+        {% else %}
+          {% include page_header.html title_html=_archive_year_title description="Redirecting to the main blog with this year filtered in place." %}
+        {% endif %}
+        <article>
+          {% if archive_lang == 'zh' %}
+          <p>如果没有自动跳转，<a href="{{ target_href }}">点这里查看该年份的博客文章</a>。</p>
+          {% else %}
+          <p>If you are not redirected automatically, <a href="{{ target_href }}">click here to view posts from this year on the blog page</a>.</p>
+          {% endif %}
+        </article>
+      </div>
+    </main>
+    {%- include footer.html %}
+    {% include scripts/jquery.html %}
+    {% include scripts/bootstrap.html %}
+    {% include scripts/masonry.html %}
+    {% include scripts/misc.html %}
+    {% include scripts/badges.html %}
+    {% include scripts/mathjax.html %}
+    {% include scripts/analytics.html %}
+    {% include scripts/progressBar.html %}
+  </body>
+</html>

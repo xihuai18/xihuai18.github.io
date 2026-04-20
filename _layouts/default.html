@@ -15,7 +15,14 @@
   <!-- Head -->
   <head>
   {%- if page.redirect -%}
-    <meta http-equiv="refresh" content="3; url={{ site.baseurl }}/" />
+    {%- assign _head_redirect_target = page.redirect -%}
+    {%- if _head_redirect_target == true or _head_redirect_target == 'true' -%}
+      {%- assign _head_redirect_target = site.baseurl | default: '/' -%}
+    {%- elsif _head_redirect_target contains '://' -%}
+    {%- else -%}
+      {%- assign _head_redirect_target = _head_redirect_target | relative_url -%}
+    {%- endif -%}
+    <meta http-equiv="refresh" content="3; url={{ _head_redirect_target }}" />
   {%- endif -%}
   {% include head.html %}
   </head>

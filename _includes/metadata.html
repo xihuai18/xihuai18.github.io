@@ -42,17 +42,38 @@
     - strip_html/strip_newlines: avoid breaking meta attributes
     - escape_once: safe for HTML attribute context
     {%- endcomment -%}
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    {%- if redirect_title -%}
+        {%- capture _share_meta_title -%}{{ redirect_title }}{%- endcapture -%}
+    {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
         {%- capture _share_meta_title -%}Xihuai's Blog |{% if page.title %} {{ page.title }}{% else %} {{ title }}{% endif %}{%- endcapture -%}
     {%- else -%}
         {%- capture _share_meta_title -%}{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}{%- endcapture -%}
     {%- endif -%}
-    {%- assign _share_meta_title = _share_meta_title | strip_html | strip_newlines | escape_once -%}
-    {%- capture _share_meta_desc -%}{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}{%- endcapture -%}
-    {%- assign _share_meta_desc = _share_meta_desc | strip_html | strip_newlines | escape_once -%}
+    {%- assign _share_meta_title_raw = _share_meta_title | strip_html | strip_newlines | strip -%}
+    {%- assign _share_meta_title = _share_meta_title_raw | escape_once -%}
+    {%- capture _share_meta_desc -%}{%- if redirect_description -%}{{ redirect_description }}{%- elsif page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}{%- endcapture -%}
+    {%- assign _share_meta_desc_raw = _share_meta_desc | strip_html | strip_newlines | strip -%}
+    {%- assign _share_meta_desc = _share_meta_desc_raw | escape_once -%}
+    {%- capture _site_owner_name -%}{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}{%- endcapture -%}
+    {%- assign _site_owner_name = _site_owner_name | strip -%}
+    {%- assign _meta_author_name = page.author | default: '' | strip -%}
+    {%- assign _distill_author_names = page.authors | map: 'name' | compact -%}
+    {%- if _meta_author_name == '' and _distill_author_names.size > 0 -%}
+        {%- assign _meta_author_name = _distill_author_names | join: ', ' -%}
+    {%- endif -%}
+    {%- if _meta_author_name == '' -%}
+        {%- assign _meta_author_name = site.author.name | default: _site_owner_name | strip -%}
+    {%- endif -%}
+    {%- assign _schema_title = _share_meta_title -%}
+    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+        {%- assign _schema_title = page.title | default: title | strip_html | strip_newlines | strip -%}
+    {%- endif -%}
 
-    <meta name="author" content="{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}" />
+    <meta name="author" content="{{ _meta_author_name }}" />
     <meta name="description" content="{{ _share_meta_desc }}" />
+{%- if page.redirect or target or page.permalink == '/404.html' or page.url == '/404.html' -%}
+    <meta name="robots" content="noindex, follow" />
+{%- endif -%}
 {%- if page.keywords or site.keywords %}
     <meta name="keywords" content="{%- if page.keywords -%}{{ page.keywords }}{%- else -%}{{ site.keywords }}{%- endif -%}" />
 {%- endif %}
@@ -91,7 +112,7 @@
         {%- capture _share_desc_raw -%}{%- if page.description -%}{{ page.description }}{%- else -%}{{ site.description }}{%- endif -%}{%- endcapture -%}
         {%- assign _share_desc = _share_desc_raw | strip_html | strip_newlines | truncate: 100 | url_encode -%}
 
-        {%- capture _share_author_raw -%}{{ site.first_name }} {{ site.last_name }}{%- endcapture -%}
+        {%- capture _share_author_raw -%}{{ _meta_author_name }}{%- endcapture -%}
         {%- assign _share_author = _share_author_raw | strip_html | strip_newlines | url_encode -%}
 
         {%- capture _share_date -%}{%- if page.date -%}{{ page.date | date: "%Y-%m-%d" }}{%- endif -%}{%- endcapture -%}
@@ -100,7 +121,7 @@
         {%- comment -%} Auto-generate a horizontal share image for non-post pages (e.g., /blog/ index). {%- endcomment -%}
         {%- assign _share_title = _share_meta_title | url_encode -%}
         {%- assign _share_desc = _share_meta_desc | truncate: 100 | url_encode -%}
-        {%- capture _share_author_raw -%}{{ site.first_name }} {{ site.last_name }}{%- endcapture -%}
+        {%- capture _share_author_raw -%}{{ _meta_author_name }}{%- endcapture -%}
         {%- assign _share_author = _share_author_raw | strip_html | strip_newlines | url_encode -%}
         {%- assign _share_image_url = "https://og.tailgraph.com/og?fontFamily=Inter&title=" | append: _share_title | append: "&titleTailwind=font-bold%20text-4xl%20text-white&titleFontFamily=Inter&text=" | append: _share_desc | append: "&textTailwind=text-lg%20mt-4%20text-gray-300&textFontFamily=Inter&logoTailwind=h-12&bgTailwind=bg-gradient-to-br%20from-green-900%20via-emerald-800%20to-teal-900&footer=" | append: _share_author | append: "&footerTailwind=text-gray-400&containerTailwind=p-12" -%}
     {%- elsif site.og_image -%}
@@ -109,9 +130,33 @@
             {%- assign _share_image_url = _share_image_url | prepend: site.baseurl | prepend: site.url -%}
         {%- endunless -%}
     {%- endif -%}
+    {%- assign _page_url_for_meta = page.url | replace:'index.html','' | absolute_url -%}
+    {%- if page.redirect -%}
+        {%- if page.redirect == true or page.redirect == 'true' -%}
+            {%- assign _page_url_for_meta = '/' | absolute_url -%}
+        {%- elsif page.redirect contains '://' -%}
+            {%- assign _page_url_for_meta = page.redirect -%}
+        {%- else -%}
+            {%- assign _page_url_for_meta = page.redirect | absolute_url -%}
+        {%- endif -%}
+    {%- elsif target -%}
+        {%- if target contains '://' -%}
+            {%- assign _page_url_for_meta = target -%}
+        {%- else -%}
+            {%- assign _page_url_for_meta = target | absolute_url -%}
+        {%- endif -%}
+    {%- endif -%}
+    {%- assign _page_content_lang = page.lang | default: site.lang | downcase | replace: '_', '-' -%}
+    {%- if _page_content_lang == 'zh-cn' or _page_content_lang == 'cn' -%}
+        {%- assign _page_content_lang = 'zh-CN' -%}
+    {%- elsif _page_content_lang == 'zh' -%}
+        {%- assign _page_content_lang = 'zh-CN' -%}
+    {%- elsif _page_content_lang == 'en' -%}
+        {%- assign _page_content_lang = 'en' -%}
+    {%- endif -%}
 
     <!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
-    <meta itemprop="name" content="{{ _share_meta_title }}" />
+    <meta itemprop="name" content="{{ _schema_title | escape_once }}" />
     <meta itemprop="description" content="{{ _share_meta_desc }}" />
     {%- if _share_image_url -%}
     <meta itemprop="image" content="{{ _share_image_url }}" />
@@ -140,7 +185,7 @@
     {%- if page.last_modified_at -%}
     <meta property="article:modified_time" content="{{ page.last_modified_at | date_to_xmlschema }}" />
     {%- endif -%}
-    <meta property="article:author" content="{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}" />
+    <meta property="article:author" content="{{ _meta_author_name }}" />
     {%- if page.tags -%}
     {%- for tag in page.tags -%}
     <meta property="article:tag" content="{{ tag }}" />
@@ -151,7 +196,7 @@
     {%- endif -%}
     {%- comment -%} Add "Xihuai's Blog | " prefix for blog posts to build personal brand {%- endcomment -%}
     <meta property="og:title" content="{{ _share_meta_title }}" />
-    <meta property="og:url" content="{{ page.url | replace:'index.html','' | absolute_url }}" />
+    <meta property="og:url" content="{{ _page_url_for_meta }}" />
     <meta property="og:description" content="{{ _share_meta_desc }}" />
     
     {%- comment -%} Use unified share image URL calculated earlier {%- endcomment -%}
@@ -328,20 +373,32 @@
         "@type": "BlogPosting",
         "mainEntityOfPage": {
           "@type": "WebPage",
-          "@id": {{ page.url | replace:'index.html','' | absolute_url | jsonify }}
+          "@id": {{ _page_url_for_meta | jsonify }}
         },
-        "headline": {{ _share_meta_title | jsonify }},
-        "description": {{ _share_meta_desc | jsonify }},
+        "headline": {{ _schema_title | jsonify }},
+        "description": {{ _share_meta_desc_raw | jsonify }},
+        "inLanguage": {{ _page_content_lang | jsonify }},
         {%- if _share_image_url -%}
         "image": {{ _share_image_url | jsonify }},
         {%- endif -%}
+        {%- if _distill_author_names.size > 0 -%}
+        "author": [
+          {%- for author_name in _distill_author_names -%}
+          {
+            "@type": "Person",
+            "name": {{ author_name | jsonify }}
+          }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ],
+        {%- else -%}
         "author": {
           "@type": "Person",
-          "name": "{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}"
+          "name": {{ _meta_author_name | jsonify }}
         },
+        {%- endif -%}
         "publisher": {
           "@type": "Person",
-          "name": "{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}"
+          "name": {{ _site_owner_name | jsonify }}
         },
         {%- if page.date -%}
         "datePublished": "{{ page.date | date_to_xmlschema }}",
@@ -360,7 +417,7 @@
         "name": {{ _share_meta_title | jsonify }},
         "description": {{ _share_meta_desc | jsonify }},
         {%- endif -%}
-        "url": {{ page.url | replace:'index.html','' | absolute_url | jsonify }}{% if sameaslinks.size > 0 %},
+        "url": {{ _page_url_for_meta | jsonify }}{% if sameaslinks.size > 0 %},
         "sameAs": {{ sameaslinks | jsonify }}
         {%- endif %}
       }
