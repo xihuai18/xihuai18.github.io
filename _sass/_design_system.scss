@@ -1546,18 +1546,34 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
 html[data-theme='dark'] .cv .card .card-title,
 html[data-theme='dark'] .cv h2 { color: var(--moss-600) !important; }
 
-/* Homepage visitor map — MapMyVisitors injects a fixed-size widget. Center it
-   in a dedicated footer block so it doesn't fight the last content section. */
+/* Homepage visitor map — MapMyVisitors injects a fixed 600×294 widget with
+   inline styles, so it can't size itself. Scale fluidly against the container
+   (one formula, no breakpoint stepping), then pull up the trailing whitespace
+   since transform leaves the layout box intact. */
 .visitor-map {
+  --map-w: 600px;
+  --map-h: 294px;
+  --map-scale: clamp(0.45, calc(100cqi / var(--map-w)), 1);
+
   margin: var(--s-8) 0 var(--s-4);
   padding-top: var(--s-5);
   border-top: 1px solid var(--rule);
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 130px;
+  align-items: flex-start;
+  min-height: 9rem;
+  overflow: hidden;
+  container-type: inline-size;
 }
-.visitor-map > * { max-width: 100%; }
+
+.visitor-map > #mapmyvisitors-widget {
+  display: block;
+  flex-shrink: 0;
+  width: var(--map-w);
+  transform: scale(var(--map-scale));
+  transform-origin: top center;
+  margin-bottom: calc(var(--map-h) * (var(--map-scale) - 1));
+}
 
 /* Shared page header — used by page/cv/archive/news/publications/projects.
    Excludes the home hero and blog index/post layouts, which have dedicated rules. */
