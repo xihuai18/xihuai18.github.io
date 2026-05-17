@@ -1,6 +1,6 @@
 {
   "all": {
-    "/": 3521,
+    "/": 3525,
     "/'assets/pdf/'%20%7C%20relative_url%20%7D%7D": 1,
     "//0.0.0.1/": 11,
     "//fb/": 2,
@@ -13,7 +13,7 @@
     "/assets/pdf/CV.pdf": 1,
     "/b.php": 6,
     "/blog": 1,
-    "/blog/": 393,
+    "/blog/": 395,
     "/blog/2025/": 4,
     "/blog/2025/2025": 2,
     "/blog/2025/kl-estimators-zh/": 1,
@@ -44,7 +44,7 @@
     "/reinforcement-learning/2025/11/15/null": 1,
     "/reinforcement-learning/2025/11/15/three-policy-cn.html": 38,
     "/reinforcement-learning/2025/11/15/three-policy-en.html": 398,
-    "/reinforcement-learning/2025/11/15/three-policy-zh.html": 338,
+    "/reinforcement-learning/2025/11/15/three-policy-zh.html": 339,
     "/reinforcement-learning/2025/11/15/three-policy.html": 6,
     "/reinforcement-learning/2025/11/150/three-policy-en.html": 2,
     "/reinforcement-learning/2025/11/20/three-policy-cn.html": 7,
@@ -54,7 +54,7 @@
     "/reinforcement-learning/2025/12/01/kl-estimators-en.htm": 1,
     "/reinforcement-learning/2025/12/01/kl-estimators-en.html": 883,
     "/reinforcement-learning/2025/12/01/kl-estimators-zh.htm": 1,
-    "/reinforcement-learning/2025/12/01/kl-estimators-zh.html": 832,
+    "/reinforcement-learning/2025/12/01/kl-estimators-zh.html": 835,
     "/reinforcement-learning/2025/12/01/kl-estimators-zh.html，这种比较优质的": 1,
     "/reinforcement-learning/2025/12/17/offpolicy-en.html": 53,
     "/reinforcement-learning/2025/12/17/offpolicy-zh.html": 117,
@@ -73,9 +73,9 @@
     "/xihuai18.github.io/publications/": 2
   },
   "d30": {
-    "/": 197,
+    "/": 196,
     "/404.html": 1,
-    "/blog/": 62,
+    "/blog/": 64,
     "/blog/2025/kl-estimators-zh/": 1,
     "/cv/": 48,
     "/news/": 9,
@@ -83,11 +83,11 @@
     "/projects/": 17,
     "/publications/": 42,
     "/reinforcement-learning/": 1,
-    "/reinforcement-learning/2025/11/15/three-policy-en.html": 60,
-    "/reinforcement-learning/2025/11/15/three-policy-zh.html": 63,
+    "/reinforcement-learning/2025/11/15/three-policy-en.html": 59,
+    "/reinforcement-learning/2025/11/15/three-policy-zh.html": 62,
     "/reinforcement-learning/2025/12/01/kl-estimators-cn.html": 6,
-    "/reinforcement-learning/2025/12/01/kl-estimators-en.html": 118,
-    "/reinforcement-learning/2025/12/01/kl-estimators-zh.html": 207,
+    "/reinforcement-learning/2025/12/01/kl-estimators-en.html": 113,
+    "/reinforcement-learning/2025/12/01/kl-estimators-zh.html": 202,
     "/reinforcement-learning/2025/12/17/offpolicy-en.html": 6,
     "/reinforcement-learning/2025/12/17/offpolicy-zh.html": 26
   }
