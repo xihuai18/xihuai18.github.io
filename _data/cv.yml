@@ -4,9 +4,9 @@
     - name: Full Name
       value: Xihuai Wang (王锡淮)
     - name: Email
-      value: leoxhwang@sjtu.edu.cn
+      value: wang_98xh@qq.com
     - name: Updated Time
-      value: 2026-01-13
+      value: 2026-07-01
 
 - title: Education
   type: time_table
@@ -21,6 +21,9 @@
 - title: Experience
   type: time_table
   contents:
+    - title: Researcher
+      institution: WeLM Team, WeChat AI
+      year: 2026-Present
     - title: Beidou Intern
       institution: Meituan LongCat Team
       year: 2024-2025

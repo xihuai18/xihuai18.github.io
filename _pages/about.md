@@ -2,8 +2,8 @@
 layout: about
 title: About
 permalink: /
-subtitle: Ph.D. @ <a href='https://apex.sjtu.edu.cn/'>APEX Lab, Shanghai Jiao Tong University</a>.
-description: "Xihuai Wang (王锡淮) - Ph.D. from Shanghai Jiao Tong University. Research focuses on Reinforcement Learning, Multi-Agent Systems, and LLM Reasoning & Agency."
+subtitle: Researcher @ WeLM Team, WeChat AI.
+description: "Xihuai Wang (王锡淮) - Researcher at WeLM Team, WeChat AI. Research focuses on LLM post-training, Reinforcement Learning, Multi-Agent Systems, and LLM Reasoning & Agency."
 og_image: /assets/img/portrait.png
 twitter_card: summary
 
@@ -19,7 +19,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I received my Ph.D. from the [APEX Lab](https://apex.sjtu.edu.cn/) at Shanghai Jiao Tong University in 2026, under the supervision of [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/), affiliated with both the SJTU-Apex Group and the SJTU-MARL Group. I was honored to be selected into the [Wen-Tsun Wu AI Honorary Doctoral Program](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Prior to this, I received my B.Eng. in Computer Science and Technology from the [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
+I am now a Researcher at the WeLM Team, WeChat AI, focusing on post-training of large language models. I received my Ph.D. from the [APEX Lab](https://apex.sjtu.edu.cn/) at Shanghai Jiao Tong University in 2026, under the supervision of [Prof. Weinan Zhang](https://wnzhang.net/) and [Prof. Ying Wen](https://yingwen.io/), affiliated with both the SJTU-Apex Group and the SJTU-MARL Group. I was honored to be selected into the [Wen-Tsun Wu AI Honorary Doctoral Program](https://ai.sjtu.edu.cn/cultivate/postgraduate/managements) in 2020. Prior to this, I received my B.Eng. in Computer Science and Technology from the [School of Computer Science and Engineering, Sun Yat-sen University](https://cse.sysu.edu.cn/) in 2020.
 
 My research lies at the intersection of **Reinforcement Learning** and **Multi-Agent Learning**. My current research focuses on:
 
