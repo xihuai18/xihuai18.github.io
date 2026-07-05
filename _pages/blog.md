@@ -125,13 +125,15 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
         {%- endif -%}
         {%- assign matched_category = false -%}
         {%- for c in post.categories -%}
-          {%- if c | slugify == this_slug -%}{%- assign matched_category = true -%}{%- break -%}{%- endif -%}
+          {%- assign c_slug = c | slugify -%}
+          {%- if c_slug == this_slug -%}{%- assign matched_category = true -%}{%- break -%}{%- endif -%}
         {%- endfor -%}
-        {%- unless matched_category -%}
+        {%- if matched_category == false and zh_post -%}
           {%- for c in zh_post.categories -%}
-            {%- if c | slugify == this_slug -%}{%- assign matched_category = true -%}{%- break -%}{%- endif -%}
+            {%- assign c_slug = c | slugify -%}
+            {%- if c_slug == this_slug -%}{%- assign matched_category = true -%}{%- break -%}{%- endif -%}
           {%- endfor -%}
-        {%- endunless -%}
+        {%- endif -%}
         {%- if matched_category -%}{%- assign this_count = this_count | plus: 1 -%}{%- endif -%}
       {%- endfor -%}
       {%- assign display_name = this_name | replace: "-", " " | capitalize -%}
@@ -162,13 +164,15 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
         {%- endif -%}
         {%- assign matched_tag = false -%}
         {%- for t in post.tags -%}
-          {%- if t | slugify == this_slug -%}{%- assign matched_tag = true -%}{%- break -%}{%- endif -%}
+          {%- assign t_slug = t | slugify -%}
+          {%- if t_slug == this_slug -%}{%- assign matched_tag = true -%}{%- break -%}{%- endif -%}
         {%- endfor -%}
-        {%- unless matched_tag -%}
+        {%- if matched_tag == false and zh_post -%}
           {%- for t in zh_post.tags -%}
-            {%- if t | slugify == this_slug -%}{%- assign matched_tag = true -%}{%- break -%}{%- endif -%}
+            {%- assign t_slug = t | slugify -%}
+            {%- if t_slug == this_slug -%}{%- assign matched_tag = true -%}{%- break -%}{%- endif -%}
           {%- endfor -%}
-        {%- endunless -%}
+        {%- endif -%}
         {%- if matched_tag -%}{%- assign this_count = this_count | plus: 1 -%}{%- endif -%}
       {%- endfor -%}
       {%- assign display_name = this_name | replace: "-", " " | capitalize -%}

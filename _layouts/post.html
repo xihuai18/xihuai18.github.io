@@ -130,9 +130,9 @@ layout: default
           {%- assign cite_copy_ok = 'Copied' -%}
         {%- endif -%}
         {%- comment -%} Build the BibTeX entry as a single string with `&#123;` / `&#125;` html entities,
-          then drop it into the <code> block via `{{ cite_bib }}`. This sidesteps Liquid's greedy
-          `{{ … }}` tokenizer, which used to trip over literal-brace escapes when they sat
-          adjacent to `{{ cite_key }}` (see Jekyll docker build failure on 2026-04-19). {%- endcomment -%}
+          then drop it into the <code> block via the cite_bib output tag. This sidesteps Liquid's
+          greedy output tokenizer, which used to trip over literal-brace escapes when they sat
+          adjacent to the cite_key output (see Jekyll docker build failure on 2026-04-19). {%- endcomment -%}
         {%- comment -%} Wrap BibTeX tokens in syntax-highlighting spans so the block reads
           as code rather than a grey panel. `textContent` copy stays valid BibTeX because
           the spans drop out — see assets/js/post_cite.js. {%- endcomment -%}
