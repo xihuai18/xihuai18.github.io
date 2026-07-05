@@ -39,6 +39,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install google-analytics-data
 
+      - name: Baseline against latest published data
+        # master keeps a frozen snapshot of the UV files; the live values sit
+        # on post-views-data. Overlay them before exporting so the changed
+        # check compares against what was actually published last run.
+        run: |
+          if git fetch origin post-views-data 2>/dev/null; then
+            git checkout FETCH_HEAD -- _data/post_uv.json _data/post_uv_meta.json || true
+          fi
+
       - name: Export post UV data
         env:
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
@@ -50,7 +59,9 @@ jobs:
       - name: Commit and push if changed
         id: commit
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          # post_uv_meta.json carries a generated_at timestamp that changes
+          # every run, so gate on the actual view counts only.
+          if [ -n "$(git status --porcelain -- _data/post_uv.json)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add _data/post_uv.json _data/post_uv_meta.json
