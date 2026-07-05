@@ -19,9 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout 🛎️
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+    - name: Pull latest post views data 📈
+      # Daily GA4 refreshes land on the post-views-data branch (see
+      # ga4-post-uv.yml); overlay the two data files if that branch exists,
+      # otherwise fall back to the committed baseline.
+      run: |
+        if git fetch origin post-views-data 2>/dev/null; then
+          git checkout FETCH_HEAD -- _data/post_uv.json _data/post_uv_meta.json || true
+        fi
     - name: Setup Python 🐍
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     - name: Compress OG Images 🖼️
@@ -33,10 +41,8 @@ jobs:
       with:
         ruby-version: '3.2.1'
         bundler-cache: true
-    - name: Install and Build 🔧
-      run: |
-        npm install -g mermaid.cli
-        bundle exec jekyll build
+    - name: Build 🔧
+      run: bundle exec jekyll build
     - name: Deploy 🚀
       if: github.event_name != 'pull_request'
       uses: JamesIves/github-pages-deploy-action@v4.6.4

@@ -55,20 +55,10 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add _data/post_uv.json _data/post_uv_meta.json
             git commit -m "Update post views data"
-
-            branch="${GITHUB_REF_NAME}"
-            for i in 1 2 3; do
-              git fetch origin "$branch"
-              git rebase "origin/$branch" || true
-              if git push origin "HEAD:$branch"; then
-                break
-              fi
-              if [ "$i" -eq 3 ]; then
-                echo "Push failed after retries" >&2
-                exit 1
-              fi
-              sleep 2
-            done
+            # Publish to a dedicated data branch instead of master, so daily
+            # refreshes stop flooding the main history. deploy.yml overlays
+            # these two files at build time.
+            git push --force origin "HEAD:refs/heads/post-views-data"
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "No changes"
