@@ -133,11 +133,15 @@ module Jekyll
              .gsub('>', GT_MARKER)
       end
       
-      # Restore special characters in math expressions
+      # Restore special characters in math expressions.
+      # < and > come back as HTML entities: restore runs post-render, so raw
+      # angle brackets would open bogus HTML tags (e.g. `a_{<t}` swallowed the
+      # rest of the formula as `<t}...>`). MathJax reads decoded text nodes,
+      # so entities render identically.
       def restore_special_chars(math)
         math.gsub(LINEBREAK_MARKER) { '\\\\' }
-            .gsub(LT_MARKER) { '<' }
-            .gsub(GT_MARKER) { '>' }
+            .gsub(LT_MARKER) { '&lt;' }
+            .gsub(GT_MARKER) { '&gt;' }
       end
       
       def process_blockquote_display_math(content, math_store, counter)
