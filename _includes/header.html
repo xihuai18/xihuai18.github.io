@@ -68,7 +68,10 @@
           {%- endif %}
 
           <!-- CV -->
-          <!-- {% if site.cv_nav_title %}
+          {% comment %}
+          Disabled PDF-CV nav entry; kept for reference. Liquid inside HTML
+          comments still executes, so this must stay a Liquid comment.
+          {% if site.cv_nav_title %}
           <li class="nav-item {% if page.url contains 'blog' %}active{% endif %}">
             <a class="nav-link" href="{{ site.cv_pdf | prepend: 'assets/pdf/' | relative_url }}" target="_blank"
               rel="noopener noreferrer">{{ site.cv_nav_title }}
@@ -77,8 +80,8 @@
               {%- endif -%}
             </a>
           </li>
-          {%- endif %} -->
-          <!-- Other pages -->
+          {%- endif %}
+          {% endcomment %}          <!-- Other pages -->
           {%- assign sorted_pages = site.pages | sort: "nav_order" -%}
           {%- for p in sorted_pages -%}
           {%- if p.nav and p.autogen == nil -%}

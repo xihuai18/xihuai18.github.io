@@ -114,8 +114,9 @@ layout: default
         {%- assign cite_key = page.cite_key -%}
         {%- if cite_key == nil or cite_key == "" -%}
           {%- assign _slug = page.slug | default: page.title | slugify | replace: "-", "" -%}
-          {%- assign _author_key = site.scholar.last_name | downcase | default: "wang" -%}
-          {%- assign cite_key = _author_key | append: page.date | date: "%Y" | append: _slug -%}
+          {%- assign _author_key = site.scholar.last_name | first | downcase | default: "wang" -%}
+          {%- assign _cite_year = page.date | date: "%Y" -%}
+          {%- assign cite_key = _author_key | append: _cite_year | append: _slug -%}
         {%- endif -%}
         {%- assign cite_author = post_author -%}
         {%- assign cite_year = page.date | date: "%Y" -%}
