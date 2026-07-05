@@ -199,9 +199,17 @@ include: ['_pages']
 exclude:
   - bin
   - .github
+  - CONTRIBUTING.md
+  - Dockerfile
+  - docker-compose.yml
+  - docker-local.yml
   - Gemfile
   - Gemfile.lock
-  - sitemap.xml
+  - node_modules
+  - README.md
+  - README_CN.md
+  - scripts
+  - sitemap-snapshot.xml
   - vendor
 keep_files:
   - CNAME
