@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees"
+title: "Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Conditions"
 date: 2025-12-17
 description: "This post derives an off-policy view of LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions that decompose update shift, sampling staleness, advantage replacement error, and support assumptions."
 categories: reinforcement-learning
@@ -24,7 +24,9 @@ We will ultimately see that the lower bound is governed by three pieces: a surro
 
 In many RLHF / online alignment setups, if we view the prompt as context and the response as action while ignoring long-horizon environment evolution, the problem is often well approximated as a contextual bandit. I still start from the discounted-MDP setting because it lets us write multi-version behavior mixing, sampling staleness, and clipping in one unified language. Section 6 returns to which terms disappear, and which conclusions remain, in the bandit limit.
 
-Related work has already touched neighboring parts of this picture: GePPO studies off-policy sample reuse with policy-improvement guarantees, while Decoupled PPO explicitly separates the behavior policy from the proximal policy. The emphasis here is different: I expand the behavior side into a dynamic mixture of historical policy versions and then split the risk into update increment shift and sampling staleness. You can also read this post as a continuation of the earlier three-policy perspective: here the behavior side is no longer a single policy $\mu$, but a mixture over historical policies $\{\pi^{(i)}\}$, while $\pi_k$ and $\pi_{k+1}$ play the roles of the current reference policy and update target. Even without that earlier post, the only principle needed here is to separate what the current update can control from what comes from behavior-distribution mismatch.
+Related work has already built a large part of this picture, and I want to be precise about what is inherited. GePPO derives a policy-improvement lower bound for reusing samples from recent policy versions, and already uses a triangle inequality to split the risk into an update-shift part and a staleness part accumulated across consecutive versions; its generalized clipping will reappear in Section 7 as Method 1. Decoupled PPO separates the behavior policy from the proximal policy inside the PPO objective; its decoupled objective will reappear as Method 2. On the systems side, IMPALA/V-trace is the classic multi-version off-policy correction in asynchronous actor-learner training, and recent LLM-RL systems such as AReaL and asynchronous RLHF operate exactly in the staleness regime studied here. Relative to that line, what this post adds is mainly: (i) an augmented-MDP formulation that covers trajectory-level and step/segment-level (partial-rollout style) dynamic mixtures in one language; (ii) a surrogate anchored to each source policy's own advantage, which makes the mixture-bias term explicit and exposes an advantage-substitution bias specific to step-level mixing; (iii) an explicit advantage-replacement error term; and (iv) training-inference mismatch handled as effective staleness.
+
+You can also read this post as a continuation of the earlier [three-policy perspective](/reinforcement-learning/2025/11/15/three-policy-en.html): here the behavior side is no longer a single policy $\mu$, but a mixture over historical policies $\{\pi^{(i)}\}$, while $\pi_k$ and $\pi_{k+1}$ play the roles of the current reference policy and update target. Even without that earlier post, the only principle needed here is to separate what the current update can control from what comes from behavior-distribution mismatch.
 
 ### 1.1 Which Off-Policy Problems Are Being Analyzed?
 
@@ -45,6 +47,8 @@ The bounds below mainly handle the first four. The fifth is a prerequisite for a
 ### 2.1 Basic Setup
 
 We consider a standard Markov Decision Process (MDP) comprising a state space $\mathcal{S}$, action space $\mathcal{A}$, transition probability $p(s'\mid s,a)$, reward function $r(s,a)$, initial distribution $\rho_0$, and discount factor $\gamma \in (0,1)$.
+
+> For LLM RL, many workloads are closer to finite-horizon sequence decision problems than to infinite-horizon discounted MDPs. I keep the discounted notation because it connects most directly to the classical derivations; the same decompositions carry over to finite-horizon versions, with the $1/(1-\gamma)$ factors replaced by polynomial dependence on the horizon.
 
 The expected cumulative discounted return of policy $\pi$ is:
 
@@ -102,10 +106,12 @@ All lower bounds below should be read as structural guarantees under standard as
    \pi(a\mid s)>0 \Rightarrow \mu(a\mid s)>0.
    $$
 
+   In the mixture setting below, read this condition per source: every behavior policy $\pi^{(i)}$ whose data enter the loss must cover the support of the target $\pi_{k+1}$ — and also of the current policy $\pi_k$ wherever the ratio $\pi_k/\pi^{(i)}$ is used (as in Section 7).
+
 2. **Bounded advantage**: there exists $A_{\max}$ such that $|A^{\pi_k}(s,a)|\le A_{\max}$. This lets TV / KL distances control distribution-replacement errors.
 3. **Bounded or constrained ratios**: the importance ratio $\pi(a\mid s)/\mu(a\mid s)$ must exist and cannot be arbitrarily large in the theoretical statement; clipping produces a biased surrogate rather than an unbiased estimate of the original objective.
 4. **Well-defined mixture index**: for trajectory-level mixtures, each trajectory keeps a fixed policy index; for step/segment-level mixtures, one must model the index transition explicitly.
-5. **Controlled advantage replacement error**: the actual $\hat A$ used in the loss must stay close enough to $A^{\pi_k}$; Section 5.4 isolates this term.
+5. **Controlled advantage replacement error**: the actual $\hat A$ used in the loss must stay close enough to the reference advantage appearing in the bound ($A^{\pi_k}$ for single-policy sampling, $A^{\beta^{(k)}}$ for mixtures); Section 5.4 isolates this term.
 
 These assumptions are not technical bookkeeping. They mark the boundary where off-policy theory can make a meaningful statement. In particular, if common support fails, the importance ratio itself is not a legitimate object.
 
@@ -155,7 +161,7 @@ Here $L_{\pi_k}(\pi)$ omits the additive constant $J(\pi_k)$, so in textbook TRP
 
 This lower bound consists of two parts:
 
-1. **Surrogate objective** $L_{\pi_k}(\pi)$: Can be directly estimated from old policy data via importance sampling; this is the optimization objective of TRPO/PPO.
+1. **Surrogate objective** $L_{\pi_k}(\pi)$: Can be directly estimated from old policy data via importance sampling; this is the classic TRPO surrogate and the starting point of PPO's clipped / penalized objectives.
 
 2. **Policy shift penalty**: Increases with the TV distance between new and old policies, explaining why PPO needs to constrain update magnitude.
 
@@ -206,6 +212,8 @@ In practice, a batch of data may come from multiple policy versions $\{\pi^{(1)}
 **Core idea: augmented state space**
 
 The solution is an elegant modeling technique: **treat the policy version index as part of the state**.
+
+Why build this space at all? The nuisance with mixture sampling is that "which version generated this sample" lives outside the MDP: at the same state $s$, a sample from $\pi^{(1)}$ and a sample from $\pi^{(9)}$ follow completely different action distributions, and $s$ alone cannot tell them apart. Folding the version index $i$ into the state makes "who generated it" part of the state itself: on the augmented space, the mixture becomes **one** ordinary Markov policy, and every single-behavior-policy result from Section 3 can be reused verbatim — no new theorems needed.
 
 Define the augmented state space $\tilde{\mathcal{S}} := \mathcal{S} \times \mathcal{I}$, where $\mathcal{I} = \{1, \ldots, M\}$ is the policy index set. Under augmented state $(s, i)$, the **mixture behavior policy** is defined as $\beta(a \mid s, i) := \pi^{(i)}(a \mid s)$.
 
@@ -265,13 +273,22 @@ where $\sigma(i)$ is the switching probability and $\kappa(\cdot\mid i)$ is the 
 
 ### 5.2 Decomposition and Monotonic Improvement Bound
 
-By introducing the mixture return $J_{\mathrm{mix}}^{(k)}$ as an intermediate bridge, the performance difference decomposes as:
+Write $\beta^{(k)}$ for the mixture behavior policy of round $k$ — the $\beta$ of Section 4, equipped with that round's initial index distribution $\alpha^{(k)}$ and index kernel $q$ — and let $J_{\mathrm{mix}}^{(k)} := J(\beta^{(k)})$ be its return in the augmented MDP. Using this mixture return as an intermediate bridge, the performance difference decomposes as:
 
 $$
 J(\pi_{k+1}) - J(\pi_k) = \underbrace{[J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}]}_{\text{improvement over mixture policy}} + \underbrace{[J_{\mathrm{mix}}^{(k)} - J(\pi_k)]}_{\text{mixture bias term}}
 $$
 
-The first term is handled using Theorem 3.2. The second is the **mixture bias term**. The way to handle it is to expand $J_{\mathrm{mix}}^{(k)} - J(\pi_k)$ into a weighted sum of $J(\pi^{(i)}) - J(\pi_k)$ terms, apply a TV-based two-policy lower bound to each component, and then collect everything using $\|A^{\pi_k}\|_\infty$. This gives:
+The first term is handled by applying Theorem 3.2 in the augmented MDP. The second is the **mixture bias term**. For trajectory-level mixtures one could expand it as a weighted sum of $J(\pi^{(i)}) - J(\pi_k)$ and bound each component, but that expansion relies on Lemma 4.1 and is only valid when the index never switches. A route that works for **any** index kernel $q$ is to apply the performance difference lemma directly in the augmented MDP, between the behavior policy $\beta^{(k)}$ (as the "new" policy) and the lifted $\pi_k$ (as the "old" one). Since the lifted $\pi_k$ ignores the index and the index evolves on its own, its value and advantage do not depend on $i$, and the lemma gives exactly
+
+$$
+J_{\mathrm{mix}}^{(k)} - J(\pi_k)
+=
+\frac{1}{1-\gamma}\,
+\mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}}\Big[\mathbb{E}_{a\sim \pi^{(i)}(\cdot\mid s)}\big[A^{\pi_k}(s,a)\big]\Big].
+$$
+
+Because $\mathbb{E}_{a\sim\pi_k}[A^{\pi_k}(s,a)]=0$, the inner expectation is at most $2\|A^{\pi_k}\|_\infty\, D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s)$ in absolute value, which yields:
 
 $$
 J_{\mathrm{mix}}^{(k)} - J(\pi_k) \geq -\frac{2\|A^{\pi_k}\|_\infty}{1-\gamma} \mathbb{E}_{(s,i)\sim d_{\beta^{(k)}}} \big[ D_{\mathrm{TV}}(\pi^{(i)}, \pi_k; s) \big]
@@ -341,6 +358,8 @@ This decomposes the coupled constraint into two independent parts:
 - **Update increment shift** $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k; s)$: Deviation of the new policy from the current policy, **controllable by the optimization side**
 - **Sampling staleness** $D_{\mathrm{TV}}(\pi_k, \pi^{(i)}; s)$: Deviation of the current policy from each old policy, **must be controlled by the sampling side**
 
+If you have read the three-policy post, this split should look familiar: $U_k$ and $S_k$ below are the average-TV, multi-version counterparts of $\alpha_0$ and $\alpha_1$ there — the same two mismatch sources, with the behavior side now expanded into a version-indexed family. GePPO performs the same triangle-inequality move, except that it further expands the staleness leg into a sum of TV distances between consecutive versions.
+
 Define:
 
 $$
@@ -359,33 +378,39 @@ The key is that after decomposition, $U_k$ only involves the new policy $\pi_{k+
 
 Operationally, this leads to a simple **separation of concerns**:
 
-| Control Term                   | Responsible Party      | Control Mechanism              |
-| ------------------------------ | ---------------------- | ------------------------------ |
-| $U_k$ (update increment shift) | Optimization algorithm | Policy clipping                |
-| $S_k$ (sampling staleness)     | Sampling system        | Data filtering, version window |
+| Control Term                   | Theoretical Meaning                              | Responsible Party      | Control Mechanism              |
+| ------------------------------ | ------------------------------------------------ | ---------------------- | ------------------------------ |
+| $U_k$ (update increment shift) | deviation of $\pi_{k+1}$ from $\pi_k$            | Optimization algorithm | Policy clipping                |
+| $S_k$ (sampling staleness)     | deviation of the behavior family from $\pi_k$    | Sampling system        | Data filtering, version window |
+
+#### When Is the Certificate Non-Vacuous?
+
+One more reading of Corollary 5.3 deserves emphasis. The bound is a *sufficient-condition certificate*: improvement is guaranteed when the right-hand side is positive. In the single-policy case the certificate can always be made non-vacuous — taking $\pi_{k+1}=\pi_k$ makes both the surrogate and the penalty vanish, so the right-hand side is exactly zero; maximizing the right-hand side therefore always certifies at least "no degradation". Here that safety net is gone: setting $\pi_{k+1}=\pi_k$ gives $U_k=0$, but the $S_k$ terms remain. If the data are stale enough, the right-hand side can be negative for **every** candidate $\pi_{k+1}$, and the bound certifies nothing. That is the theoretical reason why the sampling side must first push $S_k$ into a workable range (data filtering, version windows) before optimization-side clipping has anything to protect. GePPO takes the complementary route of shrinking the clipping radius with the expected data age so that the optimization side absorbs the staleness budget instead; Section 7.4 returns to this trade-off.
 
 ### 5.4 Advantage Replacement Error: Off-Policy Is Not Only a Ratio Problem
 
-The bounds above assume that the surrogate uses the theoretical advantage $A^{\pi_k}(s,a)$. In LLM RL, however, the loss often uses a batch estimate, critic / GAE output, normalized verifier reward, or group-relative advantage. Let the actual advantage be $\hat A(s,a)$. Even if the importance ratio is correct, there is an additional advantage-replacement error:
+The bounds above assume that the surrogate uses the theoretical advantage: $A^{\pi_k}(s,a)$ in the single-policy bound of Section 3, and $A^{\beta^{(k)}}((s,i),a)$ — which reduces to $A^{\pi^{(i)}}(s,a)$ under trajectory-level mixture — in the mixture bounds of this section. In LLM RL, however, the loss often uses a batch estimate, critic / GAE output, normalized verifier reward, or group-relative advantage. Write $A^{\mathrm{ref}}$ for the reference advantage required by the bound, $\hat A$ for what actually enters the loss, and $\mu$ for the behavior distribution. Even if the importance ratio is correct, there is an additional advantage-replacement error:
 
 $$
 \mathbb{E}_{\mu}\left[\rho(s,a)\hat A(s,a)\right]
 -
-\mathbb{E}_{\mu}\left[\rho(s,a)A^{\pi_k}(s,a)\right]
+\mathbb{E}_{\mu}\left[\rho(s,a)A^{\mathrm{ref}}(s,a)\right]
 =
-\mathbb{E}_{\mu}\left[\rho(s,a)(\hat A(s,a)-A^{\pi_k}(s,a))\right].
+\mathbb{E}_{\mu}\left[\rho(s,a)(\hat A(s,a)-A^{\mathrm{ref}}(s,a))\right].
 $$
 
-If $|\rho(s,a)|\le M$ and $|\hat A(s,a)-A^{\pi_k}(s,a)|\le \epsilon_A$, then
+If $|\rho(s,a)|\le M$ and $|\hat A(s,a)-A^{\mathrm{ref}}(s,a)|\le \epsilon_A$, then
 
 $$
 \left|
-\mathbb{E}_{\mu}\left[\rho(s,a)(\hat A(s,a)-A^{\pi_k}(s,a))\right]
+\mathbb{E}_{\mu}\left[\rho(s,a)(\hat A(s,a)-A^{\mathrm{ref}}(s,a))\right]
 \right|
 \le M\epsilon_A.
 $$
 
-Thus the off-policy error has at least three components: update shift $U_k$, sampling staleness $S_k$, and advantage replacement error $\epsilon_A$. Focusing only on the actor ratio misses the third term; theoretically, whether $\hat A$ remains close to $A^{\pi_k}$ is part of the monotonic-improvement condition.
+One practical subtlety hides in the choice of $A^{\mathrm{ref}}$. Pipelines often estimate advantages with the *current* critic, i.e. $\hat A \approx A^{\pi_k}$, while the mixture bound wants $A^{\beta^{(k)}}$. In that case the error splits as $(\hat A - A^{\pi_k}) + (A^{\pi_k} - A^{\beta^{(k)}})$: the first part is estimation quality, and the second is yet another staleness effect — it grows with the distance between $\pi_k$ and the source policies and vanishes in the on-policy limit.
+
+Thus the off-policy error has at least three components: update shift $U_k$, sampling staleness $S_k$, and advantage replacement error $\epsilon_A$. Focusing only on the actor ratio misses the third term; theoretically, whether $\hat A$ remains close to $A^{\mathrm{ref}}$ is part of the monotonic-improvement condition.
 
 ## 6. Comparison of Trajectory-Level and Step/Segment-Level Mixture
 
@@ -423,25 +448,46 @@ As long as $\sigma \gg 1-\gamma$, the old-policy mass is significantly compresse
 
 #### Unification Under Bandit Setting
 
-In single-step episode LLM training, with no subsequent state transitions, the estimation problems of both mechanisms unify, with no such bias.
+In single-step-episode LLM training there are no subsequent state transitions, so $A^{\beta^{(k)}}$ reduces to $A^{\pi^{(i)}}$ exactly and the estimation problems of the two mechanisms coincide. Section 6.3 spells out what else simplifies in that limit.
 
 ### 6.2 Risks and Applicable Scenarios
 
-Step/segment-level mixture has another hidden concern: even if single-step importance ratios are clipped, multi-step noise accumulation over long trajectories can still amplify gradient estimation variance. When policy changes per update are large, "behavioral discontinuities" within trajectories may induce heavier-tailed ratio distributions. This is also why Table 6.1 recommends trajectory-level mixture for scenarios with large policy change per update.
+Step/segment-level mixture has another hidden concern: even if single-step importance ratios are clipped, multi-step noise accumulation over long trajectories can still amplify gradient estimation variance. When policy changes per update are large, "behavioral discontinuities" within trajectories may induce heavier-tailed ratio distributions. This is also why the table below recommends trajectory-level mixture for scenarios with large policy change per update.
 
 #### Applicable Scenarios
 
-#### Table 6.1 Applicable Scenarios for Two Mixture Mechanisms
+#### Applicable Scenarios for Two Mixture Mechanisms
 
 | Scenario Characteristics                                     | Recommended Mechanism | Rationale                                  |
 | ------------------------------------------------------------ | --------------------- | ------------------------------------------ |
 | Long trajectories, high-frequency updates, strong asynchrony | Step/segment-level    | Can significantly compress $S_k$           |
-| Short trajectories (non-bandit)                              | Trajectory-level      | $S_k$ is naturally low                     |
+| Short trajectories (non-bandit)                              | Trajectory-level      | Rollouts finish fast, little staleness accumulates |
 | Large policy change per update                               | Trajectory-level      | Avoids variance amplification              |
 | Single-step episode (bandit)                                 | Either                | Choose based on implementation convenience |
 | Need for compromise                                          | Segment-level         | Switch at natural boundaries               |
 
 **Core trade-off**: Step/segment-level mixture is stronger on the sampling side (fast staleness removal), while trajectory-level mixture is more stable on the estimation side (easier surrogate objective estimation).
+
+### 6.3 The Bandit Limit: Which Terms Disappear, Which Remain
+
+The introduction promised to return to the contextual-bandit view, so let me collect the pieces. Treat the prompt $x\sim\rho_0$ as the state and the whole response $y$ as a single action (the sequence-level view of Section 3.3), so that each episode contains exactly one decision. In this one-step episodic normalization the $1/(1-\gamma)$ prefactors drop out, and I omit them below.
+
+The structural fact doing all the work is that **the state distribution no longer depends on the policy**: every policy faces the same prompt distribution $\rho_0$.
+
+- **The update-shift penalty disappears.** The penalty in Theorem 3.2 exists only because $d_\pi \neq d_{\pi_k}$; with $d_\pi \equiv \rho_0$ the surrogate becomes exact. Under common support, importance sampling gives the unbiased identity
+
+  $$
+  J(\pi_{k+1}) - J_{\mathrm{mix}}^{(k)}
+  =
+  \mathbb{E}_{x\sim\rho_0,\; i,\; y\sim \pi^{(i)}(\cdot\mid x)}\left[\frac{\pi_{k+1}(y\mid x)}{\pi^{(i)}(y\mid x)}\,A^{\beta^{(k)}}((x,i),y)\right],
+  $$
+
+  with no penalty term at all.
+- **The staleness penalty degenerates into a constant offset.** $J_{\mathrm{mix}}^{(k)} - J(\pi_k)$ does not involve $\pi_{k+1}$, so it cancels when comparing candidate updates. Since the surrogate is exact for any target, the monotonic-improvement condition reduces to the clean statement $L_{\beta^{(k)}}(\pi_{k+1}) > L_{\beta^{(k)}}(\pi_k)$: beat the surrogate value of standing still, and improvement follows. Staleness no longer threatens the *validity* of the bound.
+- **What clipping is for changes.** At the level of exact expectations, nothing forces a trust region anymore. The remaining reasons to clip or filter are finite-sample ones: the sequence-level ratio of Section 3.3 is heavy-tailed, and stale sources make it heavier. Update shift and staleness survive as **variance** problems rather than as bias terms in the bound.
+- **What survives unchanged.** The support condition (Section 3.3), the advantage-replacement error $\epsilon_A$ (Section 5.4), and the training-inference mismatch of Section 8 are all still present — none of them came from long-horizon state drift.
+
+In short, the discounted-MDP machinery is what makes the two penalty terms appear; the bandit limit keeps the bookkeeping (who sampled what, with which probabilities) but turns the improvement question into a pure estimation problem.
 
 ## 7. Theoretical Foundations of Clipping Mechanisms
 
@@ -459,7 +505,7 @@ The bridge from theory to samples is the following identity:
 > \mathbb{E}_{s\sim \mu} \big[D_{\mathrm{TV}}(\pi, \pi_2; s)\big] = \frac{1}{2} \mathbb{E}_{s\sim \mu, a\sim\pi_1(\cdot\mid s)} \left| \frac{\pi(a\mid s)}{\pi_1(a\mid s)} - \frac{\pi_2(a\mid s)}{\pi_1(a\mid s)} \right|
 > $$
 
-Note the support-coverage requirement: the behavior policy used in the denominator must assign nonzero mass to the actions that appear in training. For LLMs, this means hard top-k / top-p truncation without smoothing can make some ratios undefined. Section 8 returns to that issue.
+This identity is not new here: it is the same workhorse as GePPO's Lemma 3, restated in mixture notation. Note the support-coverage requirement: the behavior policy used in the denominator must assign nonzero mass to the actions that appear in training. For LLMs, this means hard top-k / top-p truncation without smoothing can make some ratios undefined. Section 8 returns to that issue.
 
 #### Intuitive Understanding
 
@@ -493,6 +539,8 @@ $$
 
 The clipping interval is $\left[\frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} - \epsilon, \frac{\pi_k(a\mid s)}{\pi^{(i)}(a\mid s)} + \epsilon\right]$, with **clipping center at $\rho_k$ rather than 1**.
 
+Credit where it is due: this is exactly GePPO's **generalized clipping** (their Definition 1) — clip $\pi_{k+1}/\pi^{(i)}$ inside an additive band of radius $\epsilon$ centered at $\pi_k/\pi^{(i)}$, which recovers standard PPO clipping when the data are on-policy ($\pi^{(i)}=\pi_k$). I keep the neutral name "Method 1" only for symmetry with what follows.
+
 #### Method 2: Constraint on Incremental Ratio
 
 Noting that $\rho_{k+1} - \rho_k = \rho_k \cdot \left(\frac{\pi_{k+1}}{\pi_k} - 1\right)$, we have:
@@ -510,6 +558,8 @@ $$
 Taking expectations gives $\mathbb{E}[|\rho_{k+1} - \rho_k|] \leq \epsilon\,\mathbb{E}_{a\sim\pi^{(i)}}[\rho_k] = \epsilon$, hence $U_k \leq \epsilon/2$.
 
 This method clips $\pi_{k+1}/\pi_k$ with center at 1, meaning the **clipping constraint itself does not depend on the old policy family $\pi^{(i)}$**. However, if we use the weighted advantage $\hat{A}=\rho_k\cdot A^{\beta^{(k)}}$ below, we still need per-sample behavior probabilities (or recorded logprobs) to compute $\rho_k$.
+
+Method 2 is likewise not new. Since $\rho_k \ge 0$ can be pulled in and out of the $\min$, the clipped surrogate $L^{\mathrm{M2}}$ below coincides term by term with **Decoupled PPO's decoupled clipped objective**, with proximal policy $\pi_k$ and behavior policy $\pi^{(i)}$; AReaL deploys precisely this objective in asynchronous LLM RL.
 
 Before writing down the clipped objectives, one caveat is worth making explicit: the two inequalities above are **hard per-sample constraints at the theory level**. The clipped surrogates below are practical approximations meant to keep $U_k$ in a manageable range; they are not literal guarantees that every optimization step exactly satisfies the hard constraint.
 
@@ -551,13 +601,13 @@ where $\hat{A} = \rho_k \cdot A^{\beta^{(k)}}$ is the importance-weighted advant
 
 ### 7.3 Method Comparison and Selection
 
-#### Table 7.1 Comparison of Three Clipping Mechanisms
+#### Comparison of Three Clipping Mechanisms
 
-| Method       | Clipped Variable                   | Clipping Center            | Clipping Interval                    | More Natural Shift Object          |
-| ------------ | ---------------------------------- | -------------------------- | ------------------------------------ | ---------------------------------- |
-| Standard PPO | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $1$                        | $[1-\epsilon, 1+\epsilon]$           | New policy relative to $\pi^{(i)}$ |
-| Method 1     | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $\rho_k = \pi_k/\pi^{(i)}$ | $[\rho_k-\epsilon, \rho_k+\epsilon]$ | New policy relative to $\pi_k$     |
-| Method 2     | $r = \pi_{k+1}/\pi_k$              | $1$                        | $[1-\epsilon, 1+\epsilon]$           | New policy relative to $\pi_k$     |
+| Method       | Clipped Variable                   | Clipping Center            | Clipping Interval                    | More Natural Shift Object          | Origin                          |
+| ------------ | ---------------------------------- | -------------------------- | ------------------------------------ | ---------------------------------- | ------------------------------- |
+| Standard PPO | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $1$                        | $[1-\epsilon, 1+\epsilon]$           | New policy relative to $\pi^{(i)}$ | PPO (Schulman et al.)           |
+| Method 1     | $\rho_{k+1} = \pi_{k+1}/\pi^{(i)}$ | $\rho_k = \pi_k/\pi^{(i)}$ | $[\rho_k-\epsilon, \rho_k+\epsilon]$ | New policy relative to $\pi_k$     | GePPO's generalized clipping    |
+| Method 2     | $r = \pi_{k+1}/\pi_k$              | $1$                        | $[1-\epsilon, 1+\epsilon]$           | New policy relative to $\pi_k$     | Decoupled PPO (used by AReaL)   |
 
 For the hard per-sample constraints discussed earlier, Methods 1 and 2 do directly control $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$. For the clipped surrogates used in practice, however, the more accurate reading is that they exert optimization pressure on different shift objects rather than explicitly imposing a TV constraint.
 
@@ -567,7 +617,7 @@ If we carry over a single-source trust-region intuition, standard PPO's clipped 
 
 #### Common Advantages of Methods 1 and 2
 
-For the hard-constraint versions introduced earlier, Methods 1 and 2 directly control $D_{\mathrm{TV}}(\pi_{k+1}, \pi_k)$. For the clipped-surrogate versions used in practice, the more accurate statement is that they redirect optimization pressure from “stay close to every behavior policy at once” toward “control the update around the current policy $\pi_k$.” Since $\pi_k$ is unique, that target is shared across all sample sources and avoids the structural difficulty behind the infeasibility result.
+Both methods share one structural advantage: they redirect optimization pressure from “stay close to every behavior policy at once” toward “control the update around the current policy $\pi_k$.” Since $\pi_k$ is unique, that target is shared across all sample sources and avoids the structural difficulty behind the infeasibility result.
 
 #### Method 1 vs Method 2
 
@@ -602,13 +652,10 @@ The discussion so far has focused on optimization-side clipping, but the monoton
 
 Corollary 5.3 shows that $S_k$ also enters the monotonic-improvement lower bound, but it **cannot be controlled from the optimization side**. It has to be handled by the sampling system:
 
-#### (1) Discarding Stale Data
+- **Discarding stale data**: set a threshold $\epsilon_{\mathrm{stale}}$; for each sample, compute $\lvert\rho_k - 1\rvert = \lvert\pi_k(a\mid s)/\pi^{(i)}(a\mid s) - 1\rvert$ and discard samples exceeding the threshold.
+- **Controlling the policy version window**: limit the number of old policy versions in the mixture, e.g., use only data from the most recent $W$ versions. AReaL's maximum-staleness parameter is a deployed example of exactly this knob.
 
-Set a threshold $\epsilon_{\mathrm{stale}}$. For each sample, compute $\lvert\rho_k - 1\rvert = \lvert\pi_k(a\mid s)/\pi^{(i)}(a\mid s) - 1\rvert$, and discard samples exceeding the threshold.
-
-#### (2) Controlling Policy Version Window
-
-Limit the number of old policy versions in the mixture sampling, e.g., using only data from the most recent $W$ versions.
+An alternative division of labor is worth contrasting. GePPO keeps stale data and instead shrinks the clipping radius as $\epsilon^{\mathrm{GePPO}} = \epsilon^{\mathrm{PPO}} / \mathbb{E}_{\nu}[i+1]$, where the denominator grows with the expected age of the data: the optimization side absorbs the staleness budget by moving more slowly. Filtering and version windows spend the budget on the sampling side and leave $\epsilon$ alone. Which is preferable depends on whether compute (regenerating data is expensive) or update progress (moving slowly is expensive) is the binding constraint.
 
 #### Operational Meaning of Clipping
 
@@ -642,7 +689,7 @@ In large-scale distributed training, policies on the inference side and training
 
 Let the behavior policy modeled on the training side be $\pi^{(i)}$, while the policy actually sampling on the inference side is $\hat{\pi}^{(i)}$.
 
-The mismatch discussed here is between the behavior policy and the current training policy. It is distinct from the policy-vs-reference-model KL regularization that is common in RLHF; that is a different regularization axis.
+The mismatch discussed here is between the behavior policy and the current training policy. It is distinct from the policy-vs-reference-model KL regularization that is common in RLHF; that is a different regularization axis. For measurements of this mismatch in real systems and sample-level fixes (truncated importance sampling, sequence-level masking, and friends), see the survey part of the [three-policy post](/reinforcement-learning/2025/11/15/three-policy-en.html); here I only track how the mismatch enters the bound.
 
 #### Effective Staleness
 
@@ -656,7 +703,7 @@ This definition simultaneously covers version staleness and training-inference i
 
 ### 8.2 Theoretical Control of Effective Staleness
 
-By Lemma 7.1, $\hat{S}_k$ can be written in a sample-computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then the effective staleness on the **conditional distribution of retained samples** (which we may denote by $\hat{S}_k^{\mathrm{eff}}$) can be controlled to at most $\epsilon_{\mathrm{stale}}/2$. This controls the filtered training distribution, not the original sampling distribution's $\hat{S}_k$.
+By Lemma 7.1, $\hat{S}_k$ can be written in a sample-computable form. Given threshold $\epsilon_{\mathrm{stale}}$, if training only uses samples satisfying $\lvert\pi_k(a\mid s)/\hat{\pi}^{(i)}(a\mid s) - 1\rvert \leq \epsilon_{\mathrm{stale}}$, then the effective staleness on the **conditional distribution of retained samples** (which we may denote by $\hat{S}_k^{\mathrm{eff}}$) can be controlled to at most $\epsilon_{\mathrm{stale}}/2$. Two qualifiers keep this statement honest: it controls the filtered training distribution, not the original sampling distribution's $\hat{S}_k$; and strictly speaking $\hat{S}_k^{\mathrm{eff}}$ is the expectation of $\tfrac12\lvert\rho_k-1\rvert$ over the filtered sample distribution — a sample-level proxy for TV, no longer a TV distance between two fixed policies.
 
 #### Key Theoretical Conditions
 
@@ -694,13 +741,15 @@ $$
 
 where $C_3$ is determined by conditions such as the bound on the importance ratio. This is not a new algorithmic term; it is a reminder that monotonic improvement also depends on the actual advantage estimate being close enough to the theoretical advantage.
 
+Read the whole display as a **certificate, not an unconditional guarantee**: improvement is certified only when the right-hand side is positive, and Section 5.3 explained why keeping $S_k$ small is a precondition for the certificate to be attainable at all.
+
 #### Theoretical Separation of Concerns
 
 | Control Term | Theoretical Meaning | Constraint Type | Distribution Object |
 | ------------ | ------------------- | --------------- | ------------------- |
 | $U_k$        | Current update shift | constrain $\pi_{k+1}$ relative to $\pi_k$ | target vs. proximal policy |
 | $S_k$        | Sampling staleness shift | constrain behavior-proximal distance | behavior vs. proximal distribution |
-| $\epsilon_A$ | Advantage replacement error | bound $\hat A-A^{\pi_k}$ | estimated vs. theoretical advantage |
+| $\epsilon_A$ | Advantage replacement error | bound $\hat A-A^{\beta^{(k)}}$ (single-policy case: $\hat A-A^{\pi_k}$) | estimated vs. theoretical advantage |
 
 #### Theoretical Role of Clipping Terms
 
@@ -755,6 +804,11 @@ I omit the linear-operator algebra and constant bookkeeping here because the pos
 | $\epsilon$, $\epsilon_{\mathrm{stale}}$, $W$      | Clipping radius, staleness threshold, version window         |
 | $C_{\pi,\pi_k}$                                   | Expected advantage upper bound coefficient                   |
 
+**Related posts**
+
+- [From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL](/reinforcement-learning/2025/11/15/three-policy-en.html)
+- [Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness](/reinforcement-learning/2025/12/01/kl-estimators-en.html)
+
 ## References
 
 1. John Schulman, Sergey Levine, Philipp Moritz, Michael I. Jordan, Pieter Abbeel. "Trust Region Policy Optimization" (TRPO). arXiv:1502.05477. <https://arxiv.org/abs/1502.05477>
@@ -763,5 +817,7 @@ I omit the linear-operator algebra and constant bookkeeping here because the pos
 4. James Queeney, Ioannis Ch. Paschalidis, Christos G. Cassandras. "Generalized Proximal Policy Optimization with Sample Reuse" (GePPO). arXiv:2111.00072. <https://arxiv.org/abs/2111.00072>
 5. Yuzhen Zhou, Jiajun Li, Yusheng Su, et al. "APRIL: Active Partial Rollouts in Reinforcement Learning to Tame Long-tail Generation" (APRIL; partial rollout). arXiv:2509.18521. <https://arxiv.org/abs/2509.18521>
 6. Jacob Hilton, Karl Cobbe, John Schulman. "Batch size-invariance for policy optimization" (Decoupled PPO). arXiv:2110.00641. <https://arxiv.org/abs/2110.00641>
-
 7. Sham Kakade, John Langford. "Approximately Optimal Approximate Reinforcement Learning". ICML 2002. <https://dl.acm.org/doi/10.5555/645531.657706>
+8. Lasse Espeholt, Hubert Soyer, Rémi Munos, et al. "IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures" (V-trace). arXiv:1802.01561. <https://arxiv.org/abs/1802.01561>
+9. Wei Fu, Jiaxuan Gao, Xujie Shen, et al. "AReaL: A Large-Scale Asynchronous Reinforcement Learning System for Language Reasoning". arXiv:2505.24298. <https://arxiv.org/abs/2505.24298>
+10. Michael Noukhovitch, Shengyi Huang, Sophie Xhonneux, et al. "Asynchronous RLHF: Faster and More Efficient Off-Policy RL for Language Models". arXiv:2410.18252. <https://arxiv.org/abs/2410.18252>
