@@ -4434,7 +4434,7 @@ html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
 .cv .card .list-group-item + .list-group-item {
   border-top: 1px dotted var(--rule) !important;
 }
-.cv .card .list-group-item h5.font-italic {
+.cv .card .list-group-item h5.nested-title {
   font-family: var(--font-display);
   font-variation-settings: "opsz" 72;
   font-style: normal;
