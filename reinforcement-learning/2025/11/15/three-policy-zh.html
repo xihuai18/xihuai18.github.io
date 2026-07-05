@@ -23,20 +23,20 @@
     This keeps homepage free to use a portrait image while giving blog pages a better horizontal card.
     --><!-- Itemprop meta tags for Zhihu and other platforms using Schema.org microdata -->
     <meta itemprop="name" content="从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
-    <meta itemprop="description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta itemprop="image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
-    <meta name="weibo:article:description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta name="weibo:article:image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg" />
+    <meta itemprop="description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta itemprop="image" content="https://xihuai18.github.io/assets/img/three-policy/cover-zh-og.jpg" /><!-- WeChat/Weibo/QQ specific meta tags for Chinese social platforms --><meta name="weibo:article:title" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
+    <meta name="weibo:article:description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta name="weibo:article:image" content="https://xihuai18.github.io/assets/img/three-policy/cover-zh-og.jpg" />
 
     <!-- OpenGraph -->
     <meta property="og:site_name" content="Xihuai Wang's Page" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2025-11-15T00:00:00+00:00" /><meta property="article:author" content="Xihuai Leo Wang" /><meta property="og:title" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
     <meta property="og:url" content="https://xihuai18.github.io/reinforcement-learning/2025/11/15/three-policy-zh.html" />
-    <meta property="og:description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta property="og:image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg" />
-    <meta property="og:image:secure_url" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg" />
+    <meta property="og:description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta property="og:image" content="https://xihuai18.github.io/assets/img/three-policy/cover-zh-og.jpg" />
+    <meta property="og:image:secure_url" content="https://xihuai18.github.io/assets/img/three-policy/cover-zh-og.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" /><meta property="og:locale" content="zh_CN" />
 
         <!-- Twitter card --><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
-    <meta name="twitter:description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta name="twitter:image" content="https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg" />
+    <meta name="twitter:description" content="在现代 LLM RL 流程中，训练里的&quot;旧策略&quot;可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。" /><meta name="twitter:image" content="https://xihuai18.github.io/assets/img/three-policy/cover-zh-og.jpg" />
     <meta name="twitter:image:alt" content="Xihuai&#39;s Blog | 从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展" />
     
 
@@ -50,7 +50,7 @@
         },
         "headline": "从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展",
         "description": "在现代 LLM RL 流程中，训练里的\"旧策略\"可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。",
-        "inLanguage": "zh-CN","image": "https://xihuai18.github.io/assets/img/three-policy/three-policy-mini-class-zh-og.jpg","author": {
+        "inLanguage": "zh-CN","image": "https://xihuai18.github.io/assets/img/three-policy/cover-zh-og.jpg","author": {
           "@type": "Person",
           "name": "Xihuai Leo Wang"
         },"publisher": {
@@ -225,7 +225,7 @@
       </aside>
 
       <article class="post-content">
-        <p><img loading="lazy" decoding="async" src="/assets/img/three-policy/three-policy-mini-class-zh.jpg" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+        <p><img loading="lazy" decoding="async" src="/assets/img/three-policy/cover-zh.png" alt="三策略 TRPO 概览" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>本文的核心结论是：当行为策略 $\mu$、参考策略 $\pi_{\theta_{\text{old}}}$ 与目标策略 $\pi_\theta$ 不再重合时，TRPO / PPO 类 surrogate 的可靠性会同时受到”参考 vs 目标”和”行为 vs 参考”两个偏差来源的影响。</p>
