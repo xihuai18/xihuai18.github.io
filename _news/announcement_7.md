@@ -6,6 +6,6 @@ category: milestone
 related_posts: false
 ---
 
-<img src="/assets/img/phd-graduation.png" class="news-photo rounded z-depth-1" alt="Ph.D. Graduation">
+<img src="/assets/img/phd-graduation.jpg" class="news-photo rounded z-depth-1" alt="Ph.D. Graduation">
 
 I have successfully defended my Ph.D. thesis and graduated from Shanghai Jiao Tong University! 🎉
