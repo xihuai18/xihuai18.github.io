@@ -2299,6 +2299,9 @@ i.fa-arrows-alt-h {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+.post-content .table-responsive > table {
+  margin: 0;
+}
 .post-content table {
   width: 100%;
   margin: 1.5rem 0;
@@ -2308,15 +2311,10 @@ i.fa-arrows-alt-h {
   line-height: 1.6;
   color: var(--global-text-color);
   background-color: var(--global-bg-color);
-  display: block;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
-@media (min-width: 768px) {
-  .post-content table {
-    display: table;
-    overflow-x: visible;
-  }
+.post-content table th, .post-content table td {
+  overflow-wrap: normal;
+  word-break: normal;
 }
 .post-content table thead {
   background-color: var(--global-code-bg-color);
@@ -2432,33 +2430,39 @@ i.fa-arrows-alt-h {
   height: auto;
 }
 
-.details-block {
+.details-block,
+.post-content details {
   margin: 1rem 0;
   border: 1px solid var(--global-divider-color);
   border-radius: 0.5rem;
   padding: 0.25rem 0.75rem;
   background: var(--global-card-bg-color);
 }
-.details-block summary {
+.details-block summary,
+.post-content details summary {
   cursor: pointer;
   font-weight: 600;
   padding: 0.35rem 0;
   list-style: none;
   outline: none;
 }
-.details-block summary::-webkit-details-marker {
+.details-block summary::-webkit-details-marker,
+.post-content details summary::-webkit-details-marker {
   display: none;
 }
-.details-block summary::before {
+.details-block summary::before,
+.post-content details summary::before {
   content: "▸";
   display: inline-block;
   margin-right: 0.5rem;
   transform: translateY(-1px);
 }
-.details-block[open] summary::before {
+.details-block[open] summary::before,
+.post-content details[open] summary::before {
   content: "▾";
 }
-.details-block .details-content {
+.details-block .details-content,
+.post-content details .details-content {
   padding: 0.25rem 0 0.75rem;
 }
 
