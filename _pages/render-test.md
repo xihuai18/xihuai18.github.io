@@ -167,12 +167,12 @@ $$
 
 Markdown 属性列表写法:
 
-![KL estimator 示意图](/assets/img/kl-estimators/kl-estimator.png){: style="display:block;margin:0 auto;width:80%;max-width:100%;" }
+![KL estimator 示意图](/assets/img/_archive/kl-estimator.png){: style="display:block;margin:0 auto;width:80%;max-width:100%;" }
 
 HTML figure/figcaption 写法(自 `_plugins/kramdown_phrasing_fix.rb` 修复 figcaption 的 content model 后,`markdown="0"` 不再是硬性要求,但仍是最保险的写法):
 
 <figure style="text-align:center;margin:1.5rem auto;" markdown="0">
-  <img src="/assets/img/three-policy/three-policy-mini-class-zh.jpg" alt="三策略小课堂" style="width:90%;max-width:100%;" />
+  <img src="/assets/img/_archive/three-policy-mini-class-zh.jpg" alt="三策略小课堂" style="width:90%;max-width:100%;" />
   <figcaption style="font-size:0.875em;color:var(--global-text-color-light);margin-top:0.5rem;">HTML figure 写法的图注:三策略 mini-class 示意图。</figcaption>
 </figure>
 
