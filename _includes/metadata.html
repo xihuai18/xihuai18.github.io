@@ -44,7 +44,7 @@
     {%- endcomment -%}
     {%- if redirect_title -%}
         {%- capture _share_meta_title -%}{{ redirect_title }}{%- endcapture -%}
-    {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
+    {%- elsif page.layout == 'post' -%}
         {%- capture _share_meta_title -%}Xihuai's Blog |{% if page.title %} {{ page.title }}{% else %} {{ title }}{% endif %}{%- endcapture -%}
     {%- else -%}
         {%- capture _share_meta_title -%}{%- if page.title -%}{{ page.title }}{%- else -%}{{ title }}{%- endif -%}{%- endcapture -%}
@@ -57,15 +57,15 @@
     {%- capture _site_owner_name -%}{{ site.first_name }} {{ site.middle_name }} {{ site.last_name }}{%- endcapture -%}
     {%- assign _site_owner_name = _site_owner_name | strip -%}
     {%- assign _meta_author_name = page.author | default: '' | strip -%}
-    {%- assign _distill_author_names = page.authors | map: 'name' | compact -%}
-    {%- if _meta_author_name == '' and _distill_author_names.size > 0 -%}
-        {%- assign _meta_author_name = _distill_author_names | join: ', ' -%}
+    {%- assign _page_author_names = page.authors | map: 'name' | compact -%}
+    {%- if _meta_author_name == '' and _page_author_names.size > 0 -%}
+        {%- assign _meta_author_name = _page_author_names | join: ', ' -%}
     {%- endif -%}
     {%- if _meta_author_name == '' -%}
         {%- assign _meta_author_name = site.author.name | default: _site_owner_name | strip -%}
     {%- endif -%}
     {%- assign _schema_title = _share_meta_title -%}
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    {%- if page.layout == 'post' -%}
         {%- assign _schema_title = page.title | default: title | strip_html | strip_newlines | strip -%}
     {%- endif -%}
 
@@ -100,7 +100,7 @@
         {%- unless _share_image_url contains '://' -%}
             {%- assign _share_image_url = _share_image_url | prepend: site.baseurl | prepend: site.url -%}
         {%- endunless -%}
-    {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
+    {%- elsif page.layout == 'post' -%}
         {%- comment -%} Auto-generate share image for blog posts using dynamic service {%- endcomment -%}
         {%- comment -%}
         Tailgraph query params must be URL-encoded as a whole.
@@ -177,7 +177,7 @@
 
     <!-- OpenGraph -->
     <meta property="og:site_name" content="{{ title }}" />
-    {%- if page.layout == 'post' or page.layout == 'distill' -%}
+    {%- if page.layout == 'post' -%}
     <meta property="og:type" content="article" />
     {%- if page.date -%}
     <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}" />
@@ -223,7 +223,7 @@
         <!-- Twitter card -->
         {%- if page.twitter_card -%}
             {%- assign _twitter_card = page.twitter_card -%}
-        {%- elsif page.layout == 'post' or page.layout == 'distill' -%}
+        {%- elsif page.layout == 'post' -%}
             {%- assign _twitter_card = 'summary_large_image' -%}
         {%- else -%}
             {%- assign _twitter_card = site.twitter_card | default: 'summary_large_image' -%}
@@ -369,7 +369,7 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        {%- if page.layout == 'post' or page.layout == 'distill' -%}
+        {%- if page.layout == 'post' -%}
         "@type": "BlogPosting",
         "mainEntityOfPage": {
           "@type": "WebPage",
@@ -381,9 +381,9 @@
         {%- if _share_image_url -%}
         "image": {{ _share_image_url | jsonify }},
         {%- endif -%}
-        {%- if _distill_author_names.size > 0 -%}
+        {%- if _page_author_names.size > 0 -%}
         "author": [
-          {%- for author_name in _distill_author_names -%}
+          {%- for author_name in _page_author_names -%}
           {
             "@type": "Person",
             "name": {{ author_name | jsonify }}

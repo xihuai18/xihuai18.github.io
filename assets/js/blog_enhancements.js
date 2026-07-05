@@ -110,12 +110,4 @@ document.addEventListener("DOMContentLoaded", () => {
     table.parentNode.insertBefore(wrapper, table);
     wrapper.appendChild(table);
   });
-
-  // ============================================================================
-  // Hide empty references blocks (e.g., references enabled but no citations)
-  // ============================================================================
-  document.querySelectorAll(".post-references").forEach((section) => {
-    const hasEntries = section.querySelectorAll("li").length > 0;
-    if (!hasEntries) section.remove();
-  });
 });

@@ -2,7 +2,6 @@ source 'https://rubygems.org'
 # stdlib gems pruned from Ruby 4.0 defaults, still required by older plugins
 gem 'ostruct'
 group :jekyll_plugins do
-    gem 'classifier-reborn'
     gem 'jekyll'
     gem 'jekyll-archives'
     gem 'jekyll-diagrams'
@@ -11,7 +10,6 @@ group :jekyll_plugins do
     gem 'jekyll-imagemagick'
     gem 'jekyll-link-attributes'
     gem 'jekyll-minifier'
-    gem 'jekyll-paginate-v2'
     gem 'jekyll-scholar'
     gem 'jekyll-sitemap'
     gem 'jekyll-twitter-plugin'

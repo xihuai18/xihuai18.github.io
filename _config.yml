@@ -117,14 +117,6 @@ blog_nav_title: Blog
 # blog_description: Blog
 # permalink: /blog/:year/:title/
 
-# # Pagination
-# pagination:
-#   enabled: false
-
-# related_blog_posts:
-#   enabled: false
-#   max_related: 5
-
 # Giscus comments (RECOMMENDED)
 # Follow instructions on https://giscus.app/ to setup for your repo to fill out
 # the information below.
@@ -140,10 +132,6 @@ blog_nav_title: Blog
 #   theme: preferred_color_scheme  # name of the color scheme (preferred works well with al-folio light/dark mode)
 #   emit_metadata: 0
 #   lang: en
-
-# Disqus comments (DEPRECATED)
-# disqus_shortname: # put your disqus shortname
-# https://help.disqus.com/en/articles/1717111-what-s-a-shortname
 
 # External sources.
 # If you have blog posts published on medium.com or other exteranl sources,
@@ -224,7 +212,6 @@ plugins:
   - jekyll-feed
   - jekyll-imagemagick
   - jekyll-minifier
-  - jekyll-paginate-v2
   - jekyll/scholar
   - jekyll-sitemap
   - jekyll-link-attributes

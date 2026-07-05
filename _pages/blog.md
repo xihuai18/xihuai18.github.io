@@ -449,10 +449,6 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
   </section>
   {%- endfor -%}
 
-{% if page.pagination.enabled %}
-{% include pagination.html %}
-{% endif %}
-
 </div>
 
 <script defer src="{{ '/assets/js/blog_filter.js' | relative_url }}"></script>
