@@ -54,27 +54,9 @@ $$
 
 RLHF 的主流实现里更常用 **反向 KL**，因为通常只希望 actor 策略不要过度偏离参考策略，而不是要求它完全覆盖参考分布的所有模式。
 
-### 1.2 三个会改变结论的选择
+### 1.2 先用三问把问题定下来
 
-实现 KL 惩罚时的分歧可以归为三个选择：样本从谁来、约束哪个方向的 KL、KL 项是直接反传还是只做 reward 的系数。任意切换其中一个，推荐的估计器就可能变。
-
-1. **采样来源**：样本来自当前策略 $q_\theta$（on-policy），还是行为策略 $\mu$（off-policy）？
-2. **估计目标**：要估的是反向 KL $D_{\mathrm{KL}}(q_\theta \| p)$，还是正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$？
-3. **应用方式**：KL 项作为损失的一部分参与反向传播，还是作为奖励塑形项（加 stop-gradient）？
-
-**本文范围**：主要讨论 token/sample 级 KL 项及其在 policy-gradient 主项中的行为。Critic、GAE、baseline 归一化，以及一般多步 MDP 的严格 off-policy 修正，只在相关处简要说明，不做系统展开。
-
-与主要讨论 KL 数值近似的经典笔记不同，本文更关心近期 LLM-RL 文献反复提到的那个问题：同一个估计器一旦从 reward 系数改成可微损失项，梯度到底还在不在优化你以为的目标。
-
-> **先看结论（只针对本文讨论的 token/sample 级 KL 项）**
->
-> - 若目标是反向 KL，且把 KL 写成可微损失项：on-policy 的朴素写法直接用 $k_2$ 最省心；若显式构造 $\rho$，则推荐 $\rho k_3$ 或 $\mathrm{sg}(\rho)k_2$。
-> - 若把 KL 写成 stop-grad reward shaping：就策略梯度主项而言，只有 $k_1$ 保持与反向 KL 正则一致的无偏梯度。
-> - 其余常见配置的问题通常不是"数值偏差稍大"，而是梯度目标已经变了。
-
-### 1.3 先用三问把问题定下来
-
-为了降低阅读负担，可以先不看公式，先回答三个问题：
+实现 KL 惩罚时的分歧可以归为三个问题：样本从谁来、想约束哪个方向的 KL、KL 项是直接反传还是只做 reward 的系数。任意换掉其中一个答案，推荐的估计器就可能跟着变：
 
 | 问题 | 如果答案是…… | 需要警惕什么 |
 | --- | --- | --- |
@@ -82,13 +64,15 @@ RLHF 的主流实现里更常用 **反向 KL**，因为通常只希望 actor 策
 | 样本来自哪里？ | 来自 $q_\theta$ 是 on-policy；来自 $\mu$ 是 off-policy | off-policy 下必须区分目标分布与采样分布 |
 | 想约束哪个方向？ | 反向 KL、正向 KL，或某个局部 surrogate | 数值估计的 KL 方向不一定等于 loss 的梯度方向 |
 
-这三问决定了后文所有选型结论。尤其要记住：
+**本文范围**：主要讨论 token/sample 级 KL 项及其在 policy-gradient 主项中的行为。Critic、GAE、baseline 归一化，以及一般多步 MDP 的严格 off-policy 修正，只在相关处简要说明，不做系统展开。
+
+与主要讨论 KL 数值近似的经典笔记不同，本文更关心近期 LLM-RL 文献反复提到的那个问题：同一个估计器一旦从 reward 系数改成可微损失项，梯度到底还在不在优化你以为的目标。这三问决定了后文所有选型结论，尤其要记住：
 
 $$
 \text{KL 数值估计器} \neq \text{KL 优化目标} \neq \text{代码实际回传的梯度}.
 $$
 
-本文后面的表格和推导，都是在反复检查这三个对象是否一致。
+本文后面的表格和推导，都是在反复检查这三个对象是否一致——多数"错误写法"的问题不是数值偏差稍大，而是梯度目标已经悄悄变了。操作层面的答案已浓缩在下一章的三张速查表里。
 
 ## 2. 选型速查表（可跳读）
 
@@ -166,9 +150,7 @@ $$
 - **Off-policy**（$\mu \neq q_\theta$）：由于 $\mu$ 本身不依赖于 $\theta$，$\text{sg}(\mu) = \mu$，此时 $\rho = \frac{q_\theta}{\mu}$。
 - **On-policy**（$\mu = q_\theta$）：令 $\mu = q_\theta$ 但对其应用 stop-gradient，则 $\rho = \frac{q_\theta}{\text{sg}(q_\theta)} \equiv 1$（数值恒为 1），但 $\nabla_\theta \rho = s_\theta \neq 0$。
 
-在 on-policy 情形下，虽然数值上 $\rho\equiv 1$，仍要在计算图中显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$（或等价写成 $\rho=\exp(\log q_\theta-\text{sg}(\log q_\theta))$）。如果直接把 $\rho$ 写成常数 1，score function 这条梯度路径就会丢掉，推导也会退化成后文所说的"朴素 on-policy 实现"。
-
-$\rho$ 补上的正是"采样分布对参数 $\theta$ 的依赖"这条梯度路径。On-policy 时，"先取期望后求梯度"和"先求梯度后取期望"之所以结果不同，就是因为少了这条路径；显式构造 $\rho$，就是把它补回来。
+在 on-policy 情形下，虽然数值上 $\rho\equiv 1$，仍要在计算图中显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$（或等价写成 $\rho=\exp(\log q_\theta-\text{sg}(\log q_\theta))$）：它补上的正是"采样分布依赖参数 $\theta$"这条梯度路径——on-policy 时"先取期望后求梯度"与"先求梯度后取期望"结果不同，缺的就是这条路径。若把 $\rho$ 写成字面常数 1，这条路径就丢了，推导退化成后文的"朴素 on-policy 实现"。
 
 有了这个记号，后面的推导就不必再分 on-policy 和 off-policy 两套写法。
 
@@ -259,26 +241,23 @@ $$
 
 **为什么偏差通常不大？** 更准确地说，$\mathbb{E}_{q_\theta}[k_2]$ 不是标准 KL，但在 $q_\theta \approx p$ 的邻域里它和反向 KL 共享相同的二阶局部展开，因此可以看作一个局部有效的 surrogate；一旦离开小 KL 邻域，这个近似就未必还可靠。
 
-<details>
-<summary>技术注记：$k_2$ 为什么与反向 KL 具有相同的二阶局部行为？</summary>
-
-若取 $\theta_0$ 使得 $q_{\theta_0}=p$，并在标准正则性条件下（以保证积分与微分可交换）对参数做小扰动 $\Delta\theta$，则有
-
-$$
-\mathbb{E}_{q_{\theta_0+\Delta\theta}}[k_2]
-= \frac{1}{2}\, \Delta\theta^T F(\theta_0)\, \Delta\theta + O(\|\Delta\theta\|^3),
-$$
-
-同时
-
-$$
-D_{\mathrm{KL}}\big(q_{\theta_0+\Delta\theta} \| p\big)
-= \frac{1}{2}\, \Delta\theta^T F(\theta_0)\, \Delta\theta + O(\|\Delta\theta\|^3),
-$$
-
-其中 $F(\theta_0)$ 是 $\theta_0$ 处的 Fisher 信息矩阵。
-
-</details>
+> **技术注记：$k_2$ 为什么与反向 KL 具有相同的二阶局部行为？**
+>
+> 若取 $\theta_0$ 使得 $q_{\theta_0}=p$，并在标准正则性条件下（以保证积分与微分可交换）对参数做小扰动 $\Delta\theta$，则有
+>
+> $$
+> \mathbb{E}_{q_{\theta_0+\Delta\theta}}[k_2]
+> = \frac{1}{2}\, \Delta\theta^T F(\theta_0)\, \Delta\theta + O(\|\Delta\theta\|^3),
+> $$
+>
+> 同时
+>
+> $$
+> D_{\mathrm{KL}}\big(q_{\theta_0+\Delta\theta} \| p\big)
+> = \frac{1}{2}\, \Delta\theta^T F(\theta_0)\, \Delta\theta + O(\|\Delta\theta\|^3),
+> $$
+>
+> 其中 $F(\theta_0)$ 是 $\theta_0$ 处的 Fisher 信息矩阵。
 
 **$k_3$：控制变量法构造的 Bregman 散度估计器**
 
@@ -317,6 +296,8 @@ $$
 
 凸函数始终位于其切线上方，所以这个差值**自然非负**。更关键的是，当 $\frac{p}{q_\theta} \to 1$ 时，函数与切线越来越贴近，差值以 $\left(\frac{p}{q_\theta} - 1\right)^2$ 的二阶速度趋近于零——这正是 $k_3$ 在两策略接近时方差较小的根本原因。
 
+**第三种解读（unnormalized KL）**：RPG（Zhang et al., 2025）指出，$k_3$ 恰好是"非归一化 KL"（generalized KL）$D(\tilde q \| \tilde p) = \int \tilde q \log \frac{\tilde q}{\tilde p} - \int \tilde q + \int \tilde p$ 的被积函数：对归一化的 $q, p$ 逐点展开，$q \cdot \left[\log\frac{q}{p} + \frac{p}{q} - 1\right] = q \cdot k_3$。标准 KL 的被积函数 $q\log\frac{q}{p}$ 逐点可负，而它逐点非负——控制变量、Bregman 散度、unnormalized KL 三种解读，说的其实是同一个构造。
+
 三者的设计逻辑对比如下：
 
 | 估计器 |                        定义                         |              设计原理              |
@@ -325,15 +306,7 @@ $$
 | $k_2$  | $\frac{1}{2}\left(\log \frac{p}{q_\theta}\right)^2$ | 局部二阶行为与 KL 一致的 surrogate |
 | $k_3$  | $\frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$  |      控制变量 + Bregman 散度       |
 
-在进入偏差、方差和梯度推导前，先把 $k_i$ 的三种使用语义分开：
-
-| 使用语义 | 关心的问题 | 最容易犯的错误 |
-| --- | --- | --- |
-| KL 数值监控量 | 期望是否等于目标 KL？方差是否低？ | 看到 $k_3$ 数值好，就默认它适合所有位置 |
-| KL 可微 loss | 反向传播的梯度是否等于目标正则的梯度？ | 忽略 score-function 路径或 importance ratio |
-| KL reward shaping | KL sample 是否只通过 policy-gradient 主项起作用？ | 把 detached reward 中的 estimator 当成可微 loss 来理解 |
-
-后文说某个写法"对"或"不对"时，指的不是这个样本值能否估计 KL，而是它在给定用法下是否产生目标函数需要的梯度。
+在进入偏差、方差和梯度推导前，先把使用语义分开：同一个 $k_i$ 可以当**数值监控量**（只关心期望与方差）、当**可微 loss**（关心反传梯度对应哪个目标），也可以当 **reward shaping 的系数**（关心它诱导的策略梯度）。后文说某个写法"对"或"不对"，指的不是这个样本值能否估计 KL，而是它在给定用法下是否产生目标函数需要的梯度。
 
 ## 5. 数值估计：偏差与方差
 
@@ -375,29 +348,23 @@ John Schulman 笔记中的数值例子（$q = \mathcal{N}(0,1)$，$p = \mathcal{
 
 - $k_1 = -\log \frac{p}{q_\theta}$ 以一阶项起步，当 $\frac{p}{q_\theta}$ 接近 1 时波动较大，且可能取负值；
 - $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 在 $\frac{p}{q_\theta}=1$ 处是二阶小量，始终非负，所以两策略接近时方差较小；
-- 但离开小 KL、覆盖良好的局部区域后（$\frac{p}{q_\theta}$ 可能极大），$k_3$ 的方差也会因权重爆炸而迅速上升；此时 $k_1$ 和 $k_3$ 的优劣就不能简单一刀切了。
+- 但离开小 KL、覆盖良好的局部区域后（$\frac{p}{q_\theta}$ 可能极大），$k_3$ 的方差也会因权重爆炸而迅速上升：局部有 $k_3 \approx \frac{1}{2}\left(\frac{p}{q_\theta} - 1\right)^2$，其期望是 $\chi^2$ 散度 $\chi^2(p \| q)$ 的一半——恰好是覆盖变差时发散的那个量。此时 $k_1$ 和 $k_3$ 的优劣就不能简单一刀切了。
 
-从纯数值估计的角度看，可以先记下面这张表：
+从纯数值估计的角度看：$k_1$ 无偏但高方差，$k_2$ 低方差但有偏，$k_3$ 无偏、恒正、低方差。因此在**小 KL、覆盖良好**的常见局部场景下，只看数值时 $k_3$ 往往是更稳妥的选择。
 
-| 估计器 |        对数值的偏差        |    方差特性    |
-| :----: | :------------------------: | :------------: |
-| $k_1$  |            无偏            | 高（可正可负） |
-| $k_2$  | 有偏（小 KL 邻域通常较小） |   低（恒正）   |
-| $k_3$  |            无偏            |   低（恒正）   |
-
-如果只看 KL 数值本身，那么在 **小 KL、覆盖良好** 的常见局部场景下，$k_3$ 往往是更稳妥的选择。
-
-> **注**：若要估计**正向 KL 的数值** $D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_p\left[\log \frac{p}{q_\theta}\right]$，而只能从 $q_\theta$ 采样，则可以用重要性采样 $\mathbb{E}_{q_\theta}\left[\frac{p}{q_\theta} \log \frac{p}{q_\theta}\right]$。
+> **注**：若要估计**正向 KL 的数值** $D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_p\left[\log \frac{p}{q_\theta}\right]$，而只能从 $q_\theta$ 采样，重要性采样给出 $\mathbb{E}_{q_\theta}[r \log r]$（记 $r = \frac{p}{q_\theta}$）。Schulman 的笔记还多走了一步：减去零均值的控制变量 $r - 1$，得到 $\mathbb{E}_{q_\theta}[r \log r - (r - 1)]$——仍然无偏，但恒非负且方差更低（与 $k_3$ 同款的 Bregman 构造，只是换成 $f(x) = x \log x$）。
 
 ## 6. KL 惩罚的两种使用方式
 
 接下来真正分出岔路的是 **KL 惩罚在实现里到底怎么用**。这一步决定了只关心估计器的数值性质，还是要把梯度性质一并算进去。
 
-回顾 KL 正则化强化学习的目标函数（下式中 $\tau\sim q_\theta$ 表示"由策略 $q_\theta$ 诱导的轨迹分布"）：
+回顾 KL 正则化强化学习的目标函数（$\tau\sim q_\theta$ 表示由策略 $q_\theta$ 诱导的轨迹分布，$\beta>0$ 为惩罚系数）：
 
 $$
 J(\theta) = \mathbb{E}_{\tau \sim q_\theta} \left[ \sum_{t=0}^T \gamma^t r(s_t, a_t) \right] - \beta \cdot D_{\mathrm{KL}}(q_\theta \| p)
 $$
+
+先补一句与后文 token 级分析的衔接：当两个策略共享同一环境转移（在 LLM RL 中即同样的上下文拼接过程）时，轨迹级 KL 可以精确分解（$\gamma = 1$ 时）为逐 token 条件 KL 的期望和——实现中惩罚的 token 级 KL 正是这一分解的代码形态。
 
 这个数学形式看似统一，但在基于策略梯度（Policy Gradient）的算法（如 PPO）中实现时，会分化出两种截然不同的范式——代码上可能只差几行，优化语义却完全不同。
 
@@ -429,29 +396,16 @@ KL 被视为环境奖励的一部分，用塑形后的奖励进行标准的 acto
 
 当 KL 散度作为损失函数参与反向传播时，不同估计器对应的优化目标并不相同。这里也是实现语义上最容易混淆的地方。
 
-下面沿用前文的统一框架，把 on-policy 与 off-policy 放进同一套推导。回顾比率定义：
-
-$$
-\rho(x) := \frac{q_\theta(x)}{\text{sg}(\mu(x))}
-$$
-
-其中 $\mu$ 为采样策略。在此框架下：
-
-- **On-policy**（$\mu = q_\theta$）：$\rho \equiv 1$，但 $\nabla_\theta \rho = s_\theta$
-- **Off-policy**（$\mu \neq q_\theta$）：$\rho = \frac{q_\theta}{\mu}$，且 $\nabla_\theta \rho = \rho \cdot s_\theta$
+下面沿用 3.1 节的统一权重 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$，把 on-policy 与 off-policy 放进同一套推导。两种情形下都有 $\nabla_\theta \rho = \rho \cdot s_\theta$：off-policy 时 $\rho = \frac{q_\theta}{\mu}$；on-policy 时数值上 $\rho \equiv 1$，但梯度 $\nabla_\theta \rho = s_\theta$ 并不为零。
 
 ### 7.1 三种估计器的基本梯度
 
 先计算三种估计器本身的梯度（不含 $\rho$），这些结果会在后续分析中反复使用。
 
-**推导 $\nabla_\theta k_1$**：
+**推导 $\nabla_\theta k_1$**：由 $k_1 = \log q_\theta(x) - \log p(x)$ 且 $\nabla_\theta \log p = 0$：
 
 $$
-k_1 = -\log \frac{p(x)}{q_\theta(x)} = \log q_\theta(x) - \log p(x)
-$$
-
-$$
-\nabla_\theta k_1 = \nabla_\theta \log q_\theta(x) - \nabla_\theta \log p(x) = s_\theta - 0 = s_\theta
+\nabla_\theta k_1 = \nabla_\theta \log q_\theta(x) = s_\theta
 $$
 
 **推导 $\nabla_\theta k_2$**：
@@ -524,15 +478,13 @@ $$
 
 ### 7.2 统一框架下的梯度分析
 
-下面用 $\rho$ 框架统一处理 on-policy 和 off-policy。考虑损失函数形式 $L = \rho \cdot k$，其中 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$。
+下面用 $\rho$ 框架统一处理 on-policy 和 off-policy。考虑损失函数形式 $L = \rho \cdot k$，其中 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$。（全文默认 $\mu$ 覆盖 $q_\theta$，即 $\mathrm{supp}(q_\theta) \subseteq \mathrm{supp}(\mu)$，保证 $\rho$ 良定义。）
 
-以下期望一律指对**固定采样分布** $\mu$ 的 $\mathbb{E}_\mu[\cdot]$。既然 $\text{sg}(\mu)$ 不依赖于 $\theta$，对任何关于 $\theta$ 可微的函数 $f_\theta(x)$，都有
+以下期望一律对**固定采样分布** $\mu$ 取。由于 $\mu$ 不依赖 $\theta$，微分与期望可以放心交换（上一节的警示只针对 $\mathbb{E}_{q_\theta}[\cdot]$）：
 
 $$
 \nabla_\theta \mathbb{E}_{\mu}[f_\theta(x)] = \mathbb{E}_{\mu}[\nabla_\theta f_\theta(x)]
 $$
-
-也就是说，在 $\rho$ 框架下，"先期望后梯度"和"先梯度后期望"对 $\mathbb{E}_\mu[\cdot]$ 是等价的；但这并不意味着对 $\mathbb{E}_{q_\theta}[\cdot]$ 也能无条件交换微分与期望。
 
 #### 统一框架下三种估计器的梯度推导
 
@@ -595,15 +547,9 @@ $$
 \end{aligned}
 $$
 
-也就是说，$\rho k_2$ 的梯度期望对应的是"最小化 $\mathbb{E}_{q_\theta}[k_2]$"（一个与 KL 共享局部二阶行为的 surrogate），而**不是**反向 KL $D_{\mathrm{KL}}(q_\theta\|p)$ 的目标函数的真梯度。因此若目标是**精确优化反向 KL**，不建议直接使用 $\rho k_2$。
+也就是说，$\rho k_2$ 的梯度期望对应的是"最小化 $\mathbb{E}_{q_\theta}[k_2]$"（一个与 KL 共享局部二阶行为的 surrogate），而**不是**反向 KL $D_{\mathrm{KL}}(q_\theta\|p)$ 的目标函数的真梯度。因此若目标是**精确优化反向 KL**，不建议直接使用 $\rho k_2$。（它与反向 KL 真梯度的差是 $\mathbb{E}_{q_\theta}[s_\theta k_2]$：在 $q_\theta \approx p$ 的邻域里是高阶小量，但离开该邻域后大小不受控。）
 
-**$\mathbb{E}_\mu[\nabla_\theta(\text{sg}(\rho) k_2)]$**：
-
-$$
-\mathbb{E}_\mu[\rho s_\theta k_1] = \mathbb{E}_{q_\theta}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
-$$
-
-**$\mathbb{E}_\mu[\nabla_\theta(\rho k_3)]$**：
+**$\mathbb{E}_\mu[\nabla_\theta(\text{sg}(\rho) k_2)]$ 与 $\mathbb{E}_\mu[\nabla_\theta(\rho k_3)]$**（两者的梯度随机变量同为 $\rho s_\theta k_1$）：
 
 $$
 \mathbb{E}_\mu[\rho s_\theta k_1] = \mathbb{E}_{q_\theta}[s_\theta k_1] = \nabla_\theta D_{\mathrm{KL}}(q_\theta \| p) \quad \checkmark
@@ -636,16 +582,12 @@ $$
 - 直接用 $k_3$：相当于没有 $\rho$ 的版本，$\mathbb{E}_{q_\theta}[\nabla k_3] = \nabla D_{\mathrm{KL}}(p \| q_\theta)$（正向 KL），**方向错误**；
 - 直接用 $k_2$：$\mathbb{E}_{q_\theta}[\nabla k_2] = \nabla D_{\mathrm{KL}}(q_\theta \| p)$（反向 KL）✓ **在这种朴素实现下是与目标一致的选择**。
 
-但若**显式构造** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$，则：
+> **一个真实案例**：GRPO 的原始目标（DeepSeekMath，式 3–4）加的正是这种朴素 on-policy 的 $k_3$ 可微损失项，在 verl 中对应 `kl_loss_type=low_var_kl`。按上面的分解，这一 KL 项的期望梯度指向的是正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$，而不是目标里写的反向 KL——《Rethinking KL Regularization in RLHF》（Liu et al., 2025）与《A Comedy of Estimators》（Shah et al., 2025）等近期工作都指出了这一点。修复办法有两类：DeepSeek-V3.2 采用重要性比率修正 $\rho k_3$（见 7.4 节）；verl 文档的 `k3+` 选项（数值取 $k_3$、梯度经 straight-through 走 $k_2$）是同一思路的另一种实现。
+
+若**显式构造** $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$（on-policy），或使用标准重要性权重 $\rho = \frac{q_\theta}{\mu}$（**off-policy**，$\mu \neq q_\theta$），则两种场景的结论完全相同：
 
 - **可用**：$\rho k_1$（方差高）、$\text{sg}(\rho) k_2$（推荐）、$\rho k_3$（推荐）——三者均给出反向 KL 梯度；
-- **不宜直接用于精确优化反向 KL**：$\rho k_2$（$\rho$ 参与梯度）——优化的是与 KL 局部二阶行为一致的 surrogate，而非反向 KL。
-
-**Off-policy**（$\mu \neq q_\theta$）：
-
-- $\rho = \frac{q_\theta}{\mu}$（标准重要性权重）；
-- **可用**：$\rho k_1$（方差高）、$\text{sg}(\rho) k_2$（推荐）、$\rho k_3$（推荐）——三者均给出反向 KL 梯度；
-- **不宜直接用于精确优化反向 KL**：$\rho k_2$（$\rho$ 参与梯度）——优化的是与 KL 局部二阶行为一致的 surrogate，而非反向 KL。
+- **不宜直接用于精确优化反向 KL**：$\rho k_2$（$\rho$ 参与梯度）——它优化的是与 KL 局部二阶行为一致的 surrogate。
 
 on-policy 下 $k_2$ 能直接奏效并不是一个可以外推的普遍现象，而是 $\rho \equiv 1$ 时的一种特殊退化：此时 $\nabla_\theta k_2 = k_1 s_\theta$，恰好落在正确的反向 KL 梯度上；这个结论不能直接外推到一般 off-policy 情形。
 
@@ -692,20 +634,7 @@ $$
 
 一旦离开这个小 KL 邻域，$2k_1+1$ 的符号就不再固定；此时整体比较还要结合 $\rho^2$ 与 score 项的加权来判断，不能再简单依赖这一局部展开。
 
-直觉上：
-
-- $g_1 = \rho s_\theta (k_1 + 1)$ 包含一个量级为 $O(1)$ 的零均值噪声项 $\rho s_\theta$；
-- $g_\star = \rho s_\theta k_1$ 已把这个常数噪声项消去，只剩下与 $\varepsilon$ 成正比的一阶小量。
-
-方差对比如下：
-
-|        估计器         |      梯度随机变量       | 系数量级（$\frac{p}{q_\theta}\approx1$） | 方差 |
-| :-------------------: | :---------------------: | :--------------------------------------: | :--: |
-|      $\rho k_1$       | $\rho s_\theta (k_1+1)$ |                  $O(1)$                  |  高  |
-| $\text{sg}(\rho) k_2$ |   $\rho s_\theta k_1$   |             $O(\varepsilon)$             |  低  |
-|      $\rho k_3$       |   $\rho s_\theta k_1$   |             $O(\varepsilon)$             |  低  |
-
-$\text{sg}(\rho) k_2$ 与 $\rho k_3$ 给出的是同一个梯度随机变量；相比之下，$\rho k_1$ 多出一个零均值的常数噪声项，所以在典型的小 KL 场景里通常更吵。
+直觉上：$g_1 = \rho s_\theta (k_1 + 1)$ 比 $g_\star = \rho s_\theta k_1$ 多带一个量级为 $O(1)$ 的零均值噪声项 $\rho s_\theta$，而 $g_\star$ 只剩与 $\varepsilon$ 成正比的一阶小量——这就是 $\rho k_1$ 在典型小 KL 场景里通常更吵的原因。
 
 > **实践建议**：若优化反向 KL，首选 $\rho k_3$ 或 $\text{sg}(\rho) k_2$（两者梯度等价且方差低）；$\rho k_1$ 虽然无偏但方差较高，可作备选，并需配合 clipping / 正则化。
 
@@ -713,11 +642,7 @@ $\text{sg}(\rho) k_2$ 与 $\rho k_3$ 给出的是同一个梯度随机变量；�
 
 当 $\mu$ 与 $q_\theta$ 差异很大时——例如 $\mu$ 在 $q_\theta$ 的高密度区域几乎没有采样，或 $\rho = q_\theta / \mu$ 在尾部爆炸——任何基于 $\rho$ 的方法都会遇到严重的方差问题。此时 $\rho k_3$（或 $\text{sg}(\rho) k_2$）相对于 $\rho k_1$ 的优势就不再有理论保证，需要结合 clipping、正则化等手段综合处理。
 
-在近策略更新的理论设定中，通常会控制 KL 约束、限制 off-policy 程度（例如使用近邻策略 $\mu = q_{\theta_\text{old}}$）。在这种局部近似场景下，可以比较有信心地说：
-
-> **一旦决定用重要性采样优化反向 KL，推荐使用 $\rho k_3$ 或 $\text{sg}(\rho) k_2$（两者梯度等价且方差低）；相比之下，$\rho k_1$ 方差更高。**
-
-与本文的分析一致，DeepSeek-V3.2 技术报告采用 $\frac{q_\theta}{\mu} k_3$ 作为 off-policy KL 惩罚的估计器。在本文记号下，这正是 $\rho k_3$：用当前策略与行为策略的比率修正 $k_3$，从而同时恢复无偏 KL 数值估计和无偏梯度。
+在通常假设的近策略更新设定里——KL 受控、采样自近邻策略 $\mu = q_{\theta_\text{old}}$——上面的实践建议可以放心使用。与本文的分析一致，DeepSeek-V3.2 技术报告采用 $\frac{q_\theta}{\mu} k_3$ 作为 off-policy KL 惩罚的估计器：在本文记号下这正是 $\rho k_3$，同时恢复了无偏 KL 数值估计和正确的反向 KL 梯度——用本文的语言说，恰好修复了 GRPO 式目标里那个朴素 $k_3$ 损失项。
 
 <figure style="text-align:center;" markdown="0">
 <img src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;">
@@ -737,28 +662,13 @@ $\text{sg}(\rho) k_2$ 与 $\rho k_3$ 给出的是同一个梯度随机变量；�
 
 其中 $\rho = \frac{q_\theta}{\text{sg}(\mu)}$。当 on-policy（$\mu = q_\theta$）时，$\rho \equiv 1$。
 
-这里要特别强调：**上表的结论针对的是"loss 写成 $L=\rho\,k$ 且 $\rho$ 在计算图中保留梯度路径"的统一框架**。on-policy 时虽然数值上 $\rho\equiv 1$，但由于 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，仍有 $\nabla_\theta\rho=s_\theta\neq 0$，因此 $\rho k$ 与"直接对 $k$ 的样本均值反向传播"在梯度上并不等价。
-
-如果采用**朴素 on-policy 写法**（即从 $q_\theta$ 采样后把 $\{k_i(x)\}$ 视为普通标量，直接对其样本均值反向传播，不显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$ 来补上 score-function 路径），则退化为：
-
-- 直接使用 $k_1$：$\mathbb{E}_{q_\theta}[\nabla k_1]=0$（无效）；
-- 直接使用 $k_2$：$\mathbb{E}_{q_\theta}[\nabla k_2]=\nabla D_{\mathrm{KL}}(q_\theta\|p)$（反向 KL）✓；
-- 直接使用 $k_3$：$\mathbb{E}_{q_\theta}[\nabla k_3]=\nabla D_{\mathrm{KL}}(p\|q_\theta)$（正向 KL）✗。
-
-把上面的结果压成一句话：
-
-1. **On-policy 优化反向 KL（朴素直接反向传播）**：在本文限定的实现方式下，$k_2$ 是与目标最一致的选择。
-2. **Off-policy 优化反向 KL**：有三个正确选项：
-   - $\rho k_1$：无偏但方差较高；
-   - $\text{sg}(\rho) k_2$：无偏，与 $\rho k_3$ **梯度完全等价**；
-   - $\rho k_3$：无偏且方差更低（与上一项等价，均为推荐选择）。
-3. **$\rho k_2$（权重参与梯度）不对应本文目标**：它优化的是一个只在局部二阶行为上与 KL 一致的 surrogate，而不是反向 KL；这是一个容易被忽视的陷阱。
+这里要特别强调：**上表的结论针对的是"loss 写成 $L=\rho\,k$ 且 $\rho$ 在计算图中保留梯度路径"的统一框架**。on-policy 时数值上 $\rho\equiv 1$，但 $\nabla_\theta\rho=s_\theta\neq 0$——因此 $\rho k$ 与"直接对 $k$ 的样本均值反向传播"并不是同一个梯度。一旦丢掉显式的 $\rho$，就退回 7.3 节开头的朴素结论：$k_1$ 无效、$k_2$ 反向 KL、$k_3$ 正向 KL。
 
 ## 8. 作为奖励塑形项时的梯度分析
 
 这里是最容易掉的坑：既然 $k_1$ 和 $k_3$ 对反向 KL 的数值估计都无偏，那把它们加上 stop-gradient 放进奖励塑形里，是不是也应该没问题？
 
-答案是否定的。数值无偏不推出放进 reward 后梯度仍然正确。因为一旦 KL 变成 shaped reward 的一部分，真正进入优化的是 $\mathbb{E}[s_\theta \hat{k}]$，而不是 $\mathbb{E}[\hat{k}]$ 本身。
+答案是否定的。数值无偏推不出放进 reward 后梯度仍然正确：一旦 KL 变成 shaped reward 的一部分，真正进入优化的是 $\mathbb{E}[s_\theta \hat{k}]$，而不是 $\mathbb{E}[\hat{k}]$ 本身。
 
 ### 8.1 真正的 KL 正则化策略梯度
 
@@ -808,7 +718,7 @@ $$
 \mathbb{E}_{q_\theta}[s_\theta \cdot k_1] = \mathbb{E}_{q_\theta}[s_\theta \cdot k_1] \quad \checkmark
 $$
 
-所以就该策略梯度主项而言，**把 $k_1$ 放进奖励塑形诱导的是无偏梯度**。
+所以就该策略梯度主项而言，**把 $k_1$ 放进奖励塑形诱导的是无偏梯度**。这正是 InstructGPT 一脉 RLHF 流水线里经典的 per-token KL reward 写法。
 
 #### 使用 $k_3$ 作为惩罚：梯度有偏
 
@@ -844,7 +754,18 @@ $$
 
 **把 $k_3$ 放进奖励塑形时，梯度是有偏的**，偏差项正好等于正向 KL 梯度的负值。
 
-更严格地讲，把 $k_3$ 放进奖励塑形时，实际更新会在反向 KL 梯度之外额外混入一个与正向 KL 梯度相关的偏差项，因此不再对应纯粹的反向 KL 正则目标。这里的结论完全来自梯度分解本身，不依赖任何具体实验设定。
+不妨把这个偏差项当成一个目标函数来读。由上面的分解，KL 惩罚对上升方向的贡献为
+
+$$
+-\beta\,\mathbb{E}_{q_\theta}[s_\theta \cdot k_3] = -\beta\,\nabla_\theta\left[D_{\mathrm{KL}}(q_\theta \| p) - D_{\mathrm{KL}}(p \| q_\theta)\right],
+$$
+
+即真正被最小化的"惩罚"是差值 $D_{\mathrm{KL}}(q_\theta \| p) - D_{\mathrm{KL}}(p \| q_\theta)$。它不是散度，而且没有下界。两个高斯例子能把危险讲得很具体（取 $q_\theta = \mathcal{N}(\theta, \sigma_q^2)$，$p = \mathcal{N}(m, \sigma_p^2)$，两个方向的 KL 梯度沿均值方向分别为 $(\theta-m)/\sigma_p^2$ 与 $(\theta-m)/\sigma_q^2$）：
+
+- **抵消与反号**：等方差（$\sigma_q = \sigma_p$）时两个梯度恰好相等、完全抵消，KL 部分的期望更新**严格为零**——惩罚悄无声息地失效，尽管测出来的 KL 数值既正确又为正；参考策略更宽（$\sigma_p > \sigma_q$）时更糟，差值梯度 $(\theta-m)\left(\sigma_p^{-2} - \sigma_q^{-2}\right)$ 与真实反向 KL 梯度反号，把策略均值**推离**参考策略。
+- **塌缩激励**：等均值、$\sigma_q \to 0$ 时，惩罚 $D_{\mathrm{KL}}(q_\theta \| p) - D_{\mathrm{KL}}(p \| q_\theta) = 2\log\frac{\sigma_p}{\sigma_q} + \frac{\sigma_q^2}{2\sigma_p^2} - \frac{\sigma_p^2}{2\sigma_q^2}$ 被 $-\frac{\sigma_p^2}{2\sigma_q^2}$ 主导而趋于 $-\infty$——更新反而在**奖励**策略塌缩到 $p$ 的众数上。
+
+这一结论完全来自梯度分解本身，不依赖任何具体实验设定。
 
 #### 使用 $k_2$ 作为惩罚：同样有偏
 
@@ -880,7 +801,7 @@ $$
 - Shaped reward 保持原形式：$\tilde{R} = R - \beta \cdot k_1$（而不是 $R - \beta \cdot \frac{q_\theta}{\mu} k_1$）；
 - 在本文讨论的 **stop-grad reward shaping**（$\tilde{R}=R-\beta\,\text{sg}(k)$）、目标为 **反向 KL 正则** 的设定下：结论和 on-policy 的策略梯度主项相同，**只有 $k_1$ 能保证梯度主项无偏**。
 
-> **注**：这里默认的是当前样本 / 当前 token 级的 reward shaping 写法；若回到一般多步 MDP 的严格 off-policy 推导，还需要配合逐步重要性采样或相应的值函数修正。
+> **注**：这里默认的是当前样本 / 当前 token 级的 reward shaping 写法；若回到一般多步 MDP 的严格 off-policy 推导，还需要配合逐步重要性采样或相应的值函数修正。另一个实现层面的注意点：实际流水线通常在 rollout 时用 $\mu$ 的 logprob 一次性算好 reward 里的 KL，并在多个梯度 epoch 内冻结；严格说此时 KL 部分的更新对应的是 $\nabla_\theta\left[D_{\mathrm{KL}}(q_\theta \| p) - D_{\mathrm{KL}}(q_\theta \| \mu)\right]$，而非纯粹的反向 KL 梯度。单 epoch（$\mu = q_\theta$）时两者一致。
 
 ### 8.2 这一节的结论：只有 $k_1$ 保持无偏
 
@@ -890,16 +811,11 @@ $$
 | $k_2$  |     ✗      |               ✗                |   不建议   |
 | $k_3$  |     ✓      |               ✗                | 显著不稳定 |
 
-回头看，评价 KL 估计器时，"数值无偏"和"梯度正确"其实是两个独立维度。就本文讨论的奖励塑形写法（stop-grad reward shaping，目标是反向 KL 正则；无论 on-policy 还是 off-policy）而言，就策略梯度主项来说，只有 $k_1$ 满足目标要求。$k_3$ 虽然数值无偏且方差更低，但放进奖励塑形后会导致梯度有偏，实践里也确实更容易不稳定。
+回头看，评价 KL 估计器时，"数值无偏"和"梯度正确"其实是两个独立维度。就本文讨论的奖励塑形写法（stop-grad reward shaping，目标是反向 KL 正则；无论 on-policy 还是 off-policy）而言，就策略梯度主项来说，只有 $k_1$ 满足目标要求。$k_3$ 虽然数值无偏且方差更低，但放进奖励塑形后会导致梯度有偏，实践里也确实更容易不稳定——《A Comedy of Estimators》（Shah et al., 2025）的系统实验给出的正是这一模式：梯度有偏的估计器配置更容易训练不稳，梯度无偏的配置表现更好。
 
 > **补充说明**：一旦把 learned critic、GAE、baseline 归一化等实现细节都考虑进来，实际更新中的偏差分析会复杂得多。本节结论刻意只聚焦在 policy-gradient 主项，就是为了避免把不同来源的偏差混在一起。
 
-到这里容易产生一个"表面矛盾"：
-
-- 在 **奖励塑形项** 里强调的是"若目标是本文讨论的 reverse-KL stop-grad shaping，则只有 $k_1$ 在策略梯度主项上无偏"；
-- 但在前文 **损失项反传**（尤其是 off-policy）里，又推荐用 $\rho k_3$ 或 $\text{sg}(\rho)k_2$ 来获得更低方差的反向 KL 梯度。
-
-下面就来解释两者并不冲突：就"KL 正则项对应的 policy-gradient 随机变量"而言，它们甚至可以做到**样本级完全等价**；差异主要来自 KL 是否进入 advantage / baseline、以及信用分配（credit assignment）的路径。
+到这里容易产生一个"表面矛盾"：奖励塑形里只许用 $k_1$，损失项里却推荐 $\rho k_3$ 或 $\text{sg}(\rho)k_2$。下一节解释两者并不冲突：就 KL 正则项贡献的梯度随机变量而言，它们可以做到**样本级完全等价**；真正的差异在于 KL 是否进入 advantage / baseline，以及信用分配（credit assignment）的路径。
 
 ### 8.3 $k_1$ 奖励塑形与低方差 KL 损失项：等价性与差异
 
@@ -907,37 +823,13 @@ $$
 
 #### KL 梯度项的样本级等价性
 
-这里说的"等价"只限于 KL 正则对应的那一项梯度随机变量；一旦把 learned critic、baseline、GAE、batch 中心化一并算进来，整体更新语义就会分叉。本节统一写成 **policy gradient 的上升方向** $\nabla_\theta J$（若代码里是最小化 loss，则整体只差一个全局负号，不影响等价性结论），并沿用前文的统一权重记号：样本来自 $x\sim\mu$，重要性权重 $\rho=\frac{q_\theta}{\text{sg}(\mu)}$ 作用在策略梯度估计器上。
+这里说的"等价"只限于 KL 正则对应的那一项梯度随机变量；一旦把 learned critic、baseline、GAE、batch 中心化一并算进来，整体更新语义就会分叉。本节统一写成 **policy gradient 的上升方向** $\nabla_\theta J$（代码里最小化 loss 只差一个全局负号），并沿用统一记号：样本来自 $x\sim\mu$，权重 $\rho=\frac{q_\theta}{\text{sg}(\mu)}$ 作用在策略梯度估计器上。
 
-**KL 作为损失项（低方差选择）**：前文已证明，采用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$ 作为正则项时，梯度随机变量都化简为
+前文已证明，**低方差 KL 损失项**（$\text{sg}(\rho) k_2$ 或 $\rho k_3$）反传的梯度随机变量是 $\rho s_\theta k_1$，带上惩罚系数即 $-\beta \cdot \rho s_\theta k_1$；而 **$k_1$ 奖励塑形**（$\tilde{R} = R - \beta \cdot k_1$，对 $k_1$ 做 stop-gradient 只是避免 KL 直接反传，不改变惩罚数值）在策略梯度项里贡献的是 $\rho s_\theta \cdot (-\beta k_1) = -\beta \cdot \rho s_\theta k_1$。
 
-$$
-\nabla_\theta(\text{sg}(\rho) k_2) = \nabla_\theta(\rho k_3) = \rho s_\theta k_1
-$$
+这就是 8.1 / 8.2 节与第 7 章看似在推荐不同写法、实际并不冲突的原因：两条路线的 KL 梯度项是**同一个随机变量**——逐样本相同，因此期望与方差也都相同。
 
-**KL 作为奖励塑形项（$k_1$ in reward）**：shaped reward 为 $\tilde{R} = R - \beta \cdot k_1$（对 $k_1$ 做 stop-gradient 只是在实现上避免"KL 直接反传"，不改变它作为惩罚的数值）。在"策略梯度项"里，KL 惩罚贡献的是
-
-$$
-\mathbb{E}_\mu[\rho s_\theta \cdot (-\beta k_1)] = -\beta \cdot \mathbb{E}_\mu[\rho s_\theta k_1]
-$$
-
-这也解释了为什么前面 8.1 / 8.2 节和第 7 章（损失项）看起来像在推荐不同写法，实际上并不冲突：两者的 KL 梯度项在这里**样本级完全相同**。
-
-也就是说，在不考虑 baseline / advantage 的具体构造细节时：
-
-- "把 KL 写进 loss 并用低方差实现（$\text{sg}(\rho)k_2$ 或 $\rho k_3$）"
-- 与"把 KL 写进 reward 并选 $k_1$（stop-grad shaped reward）"
-
-对策略更新施加的 KL 正则"力"可以完全相同。
-
-具体来说，如果只看"最大化 $J$"时 KL 惩罚贡献的那一项梯度（惩罚项在 $J$ 里带负号，因此这项的上升方向自然带 $-\beta$）：
-
-- **损失项写法（低方差实现）**：$-\beta \cdot \rho s_\theta k_1$；
-- **奖励塑形写法（$k_1$ in reward）**：$\rho s_\theta \cdot (-\beta k_1) = -\beta \cdot \rho s_\theta k_1$。
-
-这是同一个随机变量，所以不仅期望相同，方差也完全相同。
-
-##### 整体更新语义的差异
+#### 整体更新语义的差异
 
 虽然 KL 梯度项在样本级等价，**两种写法的整体更新语义仍然不同**。差异主要体现在以下几个方面：
 
@@ -1000,7 +892,7 @@ $$
 
 仍是**无偏梯度**，同时享受中心化带来的方差缩减。
 
-同 batch 均值中心化引入的偏差为 $O(1/n)$，在 GRPO 等大 batch 场景下影响很小；若追求严格无偏，可改用 leave-one-out 均值，还能享受方差缩减。
+**结论**：同 batch 均值中心化引入的偏差为 $O(1/n)$，在 GRPO 等大 batch 场景下影响很小；若追求严格无偏，可改用 leave-one-out 均值，还能享受方差缩减。
 
 #### 何时选择哪种方式？
 
@@ -1012,34 +904,14 @@ $$
 |   信用分配   |          局部、per-token          |             可能有时间回传（取决于实现）             |
 |   适用场景   |  希望 KL 作为显式正则项单独控制   | 希望 KL 随 shaped reward 一起进入 advantage / return |
 
-**实践建议**：
+**实践建议**：想让 KL 作为显式正则项单独控制（少受 advantage 构造与 critic / baseline 质量影响），就写进 loss，用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$——on-policy 不想显式构造 $\rho$ 时，直接用 $k_2$ 最简单也最不易出错；想让 KL 随 shaped reward 一起进入 advantage / return（接受与 baseline、信用分配路径耦合），就写进 reward，用 $k_1$。
 
-1. **希望 KL 作为显式正则项单独控制**——也就是尽量少受 advantage 构造、critic / baseline 质量影响，那就选 **KL 作为损失项**，使用 $\text{sg}(\rho) k_2$ 或 $\rho k_3$。注意，on-policy 时如果不想显式构造 $\rho=\frac{q_\theta}{\text{sg}(q_\theta)}$，直接用 $k_2$ 更简单也不易出错。
+基于上面"数值无偏 vs 梯度正确"以及"Loss 与 Reward 实现差异"的结论，最后把真实代码里最常见的几个陷阱单独列出来。
 
-2. **希望 KL 随 shaped reward 一起进入 advantage / return**——也就是接受它与 baseline、信用分配路径耦合，那就选 **KL 作为奖励塑形项**，使用 $k_1$。
-
-基于上面"数值无偏 vs 梯度正确"以及"Loss 与 Reward 实现差异"的结论，下面给出一份理论选型速查与常见误区。
-
-## 9. 理论选型指南与常见误区
-
-### 9.1 三种估计器定义速查
-
-$$
-k_1 = \log \frac{q_\theta}{p}, \quad k_2 = \frac{1}{2}\left(\log \frac{p}{q_\theta}\right)^2, \quad k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}
-$$
-
-### 9.2 数值估计性质
-
-| 估计器 | 对反向 KL $D_{\mathrm{KL}}(q_\theta \| p)$ 数值无偏？ |       方差       |
-| :----: | :---------------------------------------------------: | :--------------: |
-| $k_1$  |                           ✓                           | 高（估计值可负） |
-| $k_2$  |              ✗（小 KL 邻域通常偏差较小）              |        低        |
-| $k_3$  |                           ✓                           |        低        |
-
-### 9.3 常见陷阱
+## 9. 常见陷阱
 
 1. **On-policy 下用 $k_1 = \log \frac{q_\theta}{p}$ 作为损失项**：梯度期望为零，完全无效。
-2. **On-policy 下用 $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 作为损失项来优化反向 KL**：若目标是反向 KL，其梯度实际对应的是正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$。
+2. **On-policy 下用 $k_3 = \frac{p}{q_\theta} - 1 - \log \frac{p}{q_\theta}$ 作为损失项来优化反向 KL**：若目标是反向 KL，其梯度实际对应的是正向 KL $D_{\mathrm{KL}}(p \| q_\theta)$。这正是 GRPO 原始目标里 KL 项的写法。
 3. **Off-policy 下用 $\frac{q_\theta}{\mu} k_2$（重要性权重不 detach）**：梯度对应一个只在局部二阶行为上与 KL 一致的 surrogate，而非反向 KL。
 4. **在奖励塑形项里使用 $k_3$**：虽然数值无偏，但诱导的策略梯度有偏，会额外引入并非目标反向 KL 的梯度项。
 5. **On-policy 时把 $\rho$ 简单设为常数 1**：必须显式构造 $\rho = \frac{q_\theta}{\text{sg}(q_\theta)}$（或等价地 $\exp(\log q_\theta - \text{sg}(\log q_\theta))$），否则会丢掉 score-function 梯度路径，使 $\rho k_1$ 和 $\rho k_3$ 退化为朴素形式，不再对应前文的无偏结论。
@@ -1054,6 +926,11 @@ $$
 3. **若把 KL 写成 stop-grad reward shaping**：在本文讨论的策略梯度主项里，只有 $k_1$ 能保持与反向 KL 正则一致的无偏梯度。
 4. **低方差 KL loss 与 $k_1$ in reward 在 KL 那一项上可以样本级等价，但整体算法语义并不相同。** 前者把 KL 当作独立正则项；后者会把 KL 带进 advantage、baseline 和信用分配路径里。
 
+**相关文章**
+
+- [从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展](/reinforcement-learning/2025/11/15/three-policy-zh.html)
+- [驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件](/reinforcement-learning/2025/12/17/offpolicy-zh.html)
+
 ## 参考文献
 
 1. Dibya Ghosh. "KL Divergence for Machine Learning". <https://dibyaghosh.com/blog/probability/kldivergence>
@@ -1061,5 +938,8 @@ $$
 3. Verl Documentation. "Proximal Policy Optimization (PPO)". <https://verl.readthedocs.io/en/latest/algo/ppo.html>
 4. 初七123334. "RLHF/RLVR 训练中的 KL 近似方法浅析（k1 / k2 / k3）". <https://zhuanlan.zhihu.com/p/1966872846212010437>
 5. Kezhao Liu, Jason Klein Liu, Mingtao Chen, Yiming Liu. "Rethinking KL Regularization in RLHF: From Value Estimation to Gradient Optimization". arXiv:2510.01555. <https://arxiv.org/abs/2510.01555>
-6. Yifan Zhang, Yiping Ji, Gavin Brown, et al. "On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning". arXiv:2505.17508. <https://arxiv.org/abs/2505.17508>
-7. Vedant Shah, Johan Obando-Ceron, Vineet Jain, Brian Bartoldson, Bhavya Kailkhura, Sarthak Mittal, Glen Berseth, Pablo Samuel Castro. "A Comedy of Estimators: On KL Regularization in RL Training of LLMs". arXiv:2512.21852. <https://arxiv.org/abs/2512.21852>
+6. Yifan Zhang, Yifeng Liu, Huizhuo Yuan, Yang Yuan, Quanquan Gu, Andrew Chi-Chih Yao. "On the Design of KL-Regularized Policy Gradient Algorithms for LLM Reasoning". arXiv:2505.17508. <https://arxiv.org/abs/2505.17508>
+7. Vedant Shah, Johan Obando-Ceron, Vineet Jain, Brian Bartoldson, Bhavya Kailkhura, Sarthak Mittal, Glen Berseth, Pablo Samuel Castro, Yoshua Bengio, Nikolay Malkin, Moksh Jain, Siddarth Venkatraman, Aaron Courville. "A Comedy of Estimators: On KL Regularization in RL Training of LLMs". arXiv:2512.21852. <https://arxiv.org/abs/2512.21852>
+8. Zhihong Shao, Peiyi Wang, Qihao Zhu, et al. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models". arXiv:2402.03300. <https://arxiv.org/abs/2402.03300>
+9. Long Ouyang, Jeff Wu, Xu Jiang, et al. "Training Language Models to Follow Instructions with Human Feedback". arXiv:2203.02155. <https://arxiv.org/abs/2203.02155>
+10. DeepSeek-AI. "DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models". arXiv:2512.02556. <https://arxiv.org/abs/2512.02556>
