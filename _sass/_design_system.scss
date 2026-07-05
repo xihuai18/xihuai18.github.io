@@ -1439,6 +1439,14 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
     color: var(--fg-2);
   }
 
+  /* General Information map table: kill Bootstrap/MDB row striping, which
+     highlighted every other row (visible as a stray bar in dark mode). */
+  .card .table tr,
+  .card .table tr:nth-of-type(odd),
+  .card .table tr:hover {
+    background: transparent !important;
+  }
+
   .cv-entry {
     display: grid !important;
     grid-template-columns: 160px 1fr !important;
