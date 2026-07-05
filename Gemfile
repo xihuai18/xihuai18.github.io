@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+# stdlib gems pruned from Ruby 4.0 defaults, still required by older plugins
+gem 'ostruct'
 group :jekyll_plugins do
     gem 'classifier-reborn'
     gem 'jekyll'
