@@ -2,7 +2,7 @@
     {% for content in entry.contents %}
       <li class="list-group-item">
       {% if content.title %}
-        <h5 class="font-italic">{{ content.title }}</h5>
+        <h5 class="nested-title">{{ content.title }}</h5>
       {% endif %}
       {% if content.items %}
         {% if content.items.first %}
