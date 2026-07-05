@@ -2,8 +2,6 @@ $(document).ready(function () {
   // Note: legacy `.abstract` and `.bibtex` inline toggles were removed along
   // with the markup that produced them. See _layouts/bib.html + bibtex_copy.js.
 
-  $("a").removeClass("waves-effect waves-light");
-
   function updateUvMode(mode) {
     var key = mode === "d30" ? "uvD30" : "uvAll";
     $(".post-uv").each(function () {

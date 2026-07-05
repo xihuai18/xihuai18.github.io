@@ -117,6 +117,15 @@ img {
   height: auto;
 }
 
+// Shadow helpers — replacements for the two MDB classes the site actually
+// used, so the MDB CDN bundle could be dropped.
+.z-depth-0 {
+  box-shadow: none;
+}
+.z-depth-1 {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.16), 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
 blockquote {
   background: none;
   border-left: 2px solid var(--global-theme-color);
