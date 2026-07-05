@@ -71,7 +71,7 @@
 
     <meta name="author" content="{{ _meta_author_name }}" />
     <meta name="description" content="{{ _share_meta_desc }}" />
-{%- if page.redirect or target or page.permalink == '/404.html' or page.url == '/404.html' -%}
+{%- if page.noindex or page.redirect or target or page.permalink == '/404.html' or page.url == '/404.html' -%}
     <meta name="robots" content="noindex, follow" />
 {%- endif -%}
 {%- if page.keywords or site.keywords %}

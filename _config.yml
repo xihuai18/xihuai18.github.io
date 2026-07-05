@@ -196,6 +196,7 @@ exclude:
   - node_modules
   - README.md
   - README_CN.md
+  - BLOG_AUTHORING.md
   - scripts
   - sitemap-snapshot.xml
   - vendor

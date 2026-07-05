@@ -111,11 +111,17 @@
 }
 
 .post-content {
-  // Make wide tables usable on small screens.
+  // Make wide tables usable on small screens. Tables are wrapped in
+  // .table-responsive at build time (_plugins/table_wrapper.rb); the wrapper
+  // owns the vertical rhythm and the horizontal scroll.
   .table-responsive {
     margin: 1.5rem 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+
+    > table {
+      margin: 0;
+    }
   }
 
   // Enhanced table styling for better readability
@@ -128,15 +134,15 @@
     line-height: 1.6;
     color: var(--global-text-color); // Ensure text color is correct
     background-color: var(--global-bg-color);
-    
-    // Responsive wrapper
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    
-    @media (min-width: 768px) {
-      display: table;
-      overflow-x: visible;
+
+    // Keep Latin words intact inside cells: .toc-content sets
+    // `overflow-wrap: anywhere` for prose, which inherits into table cells
+    // and let the browser shatter words like "sequence" to squeeze columns.
+    // Content that no longer fits overflows into the .table-responsive
+    // horizontal scroll instead; CJK text still wraps normally.
+    th, td {
+      overflow-wrap: normal;
+      word-break: normal;
     }
 
     thead {
@@ -282,8 +288,11 @@
   }
 }
 
-// Collapsible blocks: {% details "Title" %} ... {% enddetails %}
-.details-block {
+// Collapsible blocks: {% details "Title" %} ... {% enddetails %} and native
+// <details markdown="1"> blocks in post bodies (parseable thanks to
+// _plugins/kramdown_phrasing_fix.rb) share the same look.
+.details-block,
+.post-content details {
   margin: 1rem 0;
   border: 1px solid var(--global-divider-color);
   border-radius: 0.5rem;
