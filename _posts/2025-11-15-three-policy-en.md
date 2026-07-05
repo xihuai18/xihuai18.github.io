@@ -3,7 +3,7 @@ layout: post
 title: "From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL"
 date: 2025-11-15
 description: In modern LLM RL pipelines, the policy used as the "old policy" in training can differ from the behavior policy that actually generated the rollouts, breaking the usual on-policy assumption. This note rewrites the TRPO lower bound in a three-policy form — behavior, reference, and target — and argues that the surrogate gap is jointly controlled by two mismatch sources.
-og_image: /assets/img/three-policy/three-policy-mini-class-en.png
+og_image: /assets/img/three-policy/cover-en.png
 categories: reinforcement-learning
 lang: en
 zh_url: /reinforcement-learning/2025/11/15/three-policy-zh.html
@@ -11,7 +11,7 @@ zhihu_url: https://zhuanlan.zhihu.com/p/1973206684907365344
 wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 ---
 
-![Mini-class](/assets/img/three-policy/three-policy-mini-class-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![Three-policy TRPO overview](/assets/img/three-policy/cover-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > The core claim of this note: once the behavior policy $\mu$, the reference policy $\pi_{\theta_{\text{old}}}$, and the target policy $\pi_\theta$ no longer coincide, the reliability of TRPO / PPO-style surrogates is governed by two mismatch sources at once — "reference vs. target" and "behavior vs. reference."
 

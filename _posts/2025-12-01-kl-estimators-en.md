@@ -3,7 +3,7 @@ layout: post
 title: "Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness"
 date: 2025-12-01
 description: "In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares k1, k2, k3 in on-policy and off-policy settings, and turns the result into a practical selection guide."
-og_image: /assets/img/kl-estimators/kl-estimator.png
+og_image: /assets/img/kl-estimators/cover-en.png
 categories: reinforcement-learning
 lang: en
 zh_url: /reinforcement-learning/2025/12/01/kl-estimators-zh.html
@@ -11,7 +11,7 @@ zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
 wechat_url: https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw
 ---
 
-![Mini-class](/assets/img/kl-estimators/kl-estimator.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![KL estimators overview](/assets/img/kl-estimators/cover-en.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares three estimators $k_1, k_2, k_3$ in both on-policy and off-policy settings, and shows how the answer changes depending on whether KL is used as a differentiable loss term or as a detached reward-shaping term.
 

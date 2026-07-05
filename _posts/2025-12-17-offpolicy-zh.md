@@ -3,10 +3,13 @@ layout: post
 title: "驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件"
 date: 2025-12-17
 description: "本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。"
+og_image: /assets/img/offpolicy/cover-zh.png
 categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/12/17/offpolicy-en.html
 ---
+
+![异策略训练概览](/assets/img/offpolicy/cover-zh.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > 本文研究一个在大规模 LLM 强化学习里反复出现的问题：当一个训练 batch 同时混入多个历史策略版本生成的数据时，能否仍为 PPO 式更新写出显式的单调改进下界？
 >

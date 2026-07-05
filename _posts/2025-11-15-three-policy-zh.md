@@ -3,7 +3,7 @@ layout: post
 title: "从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展"
 date: 2025-11-15
 description: 在现代 LLM RL 流程中，训练里的"旧策略"可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。
-og_image: /assets/img/three-policy/three-policy-mini-class-zh.jpg
+og_image: /assets/img/three-policy/cover-zh.png
 categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/11/15/three-policy-en.html
@@ -11,7 +11,7 @@ zhihu_url: https://zhuanlan.zhihu.com/p/1973206684907365344
 wechat_url: https://mp.weixin.qq.com/s/Gkjk_Fy8qWLkkdWAIuy9og
 ---
 
-![Mini-class](/assets/img/three-policy/three-policy-mini-class-zh.jpg){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![三策略 TRPO 概览](/assets/img/three-policy/cover-zh.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > 本文的核心结论是：当行为策略 $\mu$、参考策略 $\pi_{\theta_{\text{old}}}$ 与目标策略 $\pi_\theta$ 不再重合时，TRPO / PPO 类 surrogate 的可靠性会同时受到"参考 vs 目标"和"行为 vs 参考"两个偏差来源的影响。
 

@@ -3,7 +3,7 @@ layout: post
 title: "RL 中的 KL 估计器选型：从数值无偏到梯度正确"
 date: 2025-12-01
 description: "在强化学习中，KL 估计器不能只看数值估得准不准，还要看它在 loss 或 reward 写法下究竟优化了谁。本文比较 k1、k2、k3 在 on-policy 与 off-policy 场景中的差异，并给出可直接落地的选型建议。"
-og_image: /assets/img/kl-estimators/kl-estimator.png
+og_image: /assets/img/kl-estimators/cover-zh.png
 categories: reinforcement-learning
 lang: zh
 en_url: /reinforcement-learning/2025/12/01/kl-estimators-en.html
@@ -11,7 +11,7 @@ zhihu_url: https://zhuanlan.zhihu.com/p/1978993413425763764
 wechat_url: https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw
 ---
 
-![Mini-class](/assets/img/kl-estimators/kl-estimator.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
+![KL 估计器选型概览](/assets/img/kl-estimators/cover-zh.png){: style="display:block;margin:0 auto;width:95%;max-width:100%;" }
 
 > 在强化学习中，KL 估计器不能只看数值估得准不准，还要看它在 loss 或 reward 写法下究竟优化了谁。本文比较三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景下的性质差异，并说明当 KL 作为可微损失项或 detached 的奖励塑形项时，选型结论会怎样变化。
 
