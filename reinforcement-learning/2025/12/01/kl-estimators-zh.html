@@ -98,13 +98,7 @@
     <script src="/assets/js/dark_mode.js"></script>
     
 
-    <!-- Prefetch/Preload for faster navigation -->
-    <link rel="prefetch" href="/" as="document">
-    <link rel="prefetch" href="/blog/" as="document">
-    <link rel="prefetch" href="/publications/" as="document">
-    <link rel="prefetch" href="/cv/" as="document">
-    
-    <!-- Instant.page for instant page loads on hover -->
+    <!-- Instant.page prefetches links on hover/touchstart, covering in-site navigation -->
     <script src="https://cdn.jsdelivr.net/npm/instant.page@5.2.0/instantpage.min.js" type="module" defer></script>
 
   </head>
@@ -219,9 +213,9 @@
 
   <!-- Output links -->
   
-    <a href="https://zhuanlan.zhihu.com/p/1978993413425763764" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="知乎（新标签页打开）">知乎 <img src="/assets/img/icons/zhihu.ico" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
+    <a href="https://zhuanlan.zhihu.com/p/1978993413425763764" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="知乎（新标签页打开）">知乎 <img loading="lazy" decoding="async" src="/assets/img/icons/zhihu.ico" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
   
-    <a href="https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="微信公众号（新标签页打开）">微信公众号 <img src="/assets/img/icons/wechat.png" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
+    <a href="https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="微信公众号（新标签页打开）">微信公众号 <img loading="lazy" decoding="async" src="/assets/img/icons/wechat.png" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
   
 </div>
 
@@ -242,7 +236,7 @@
       </aside>
 
       <article class="post-content">
-        <p><img src="/assets/img/kl-estimators/kl-estimator.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+        <p><img loading="lazy" decoding="async" src="/assets/img/kl-estimators/kl-estimator.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>在强化学习中，KL 估计器不能只看数值估得准不准，还要看它在 loss 或 reward 写法下究竟优化了谁。本文比较三种经典估计器 $k_1, k_2, k_3$ 在 on-policy 和 off-policy 场景下的性质差异，并说明当 KL 作为可微损失项或 detached 的奖励塑形项时，选型结论会怎样变化。</p>
@@ -265,7 +259,7 @@ D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_
 $$</p>
 
 <figure style="text-align:center;">
-  <img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;" />
+  <img loading="lazy" decoding="async" src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;" />
   <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -276,7 +270,7 @@ D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\
 $$</p>
 
 <figure style="text-align:center;">
-  <img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;" />
+  <img loading="lazy" decoding="async" src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;" />
   <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -1270,7 +1264,7 @@ $$</p>
     <p>与本文的分析一致，DeepSeek-V3.2 技术报告采用 $\frac{q_\theta}{\mu} k_3$ 作为 off-policy KL 惩罚的估计器。在本文记号下，这正是 $\rho k_3$：用当前策略与行为策略的比率修正 $k_3$，从而同时恢复无偏 KL 数值估计和无偏梯度。</p>
 
     <figure style="text-align:center;">
-<img src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;" />
+<img loading="lazy" decoding="async" src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;" />
 <figcaption style="font-size:0.9em;color:gray;">图片来源：<a href="https://arxiv.org/pdf/2512.02556v1">DeepSeek-V3.2 技术报告 3.1 章节</a></figcaption>
 </figure>
 

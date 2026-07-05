@@ -98,13 +98,7 @@
     <script src="/assets/js/dark_mode.js"></script>
     
 
-    <!-- Prefetch/Preload for faster navigation -->
-    <link rel="prefetch" href="/" as="document">
-    <link rel="prefetch" href="/blog/" as="document">
-    <link rel="prefetch" href="/publications/" as="document">
-    <link rel="prefetch" href="/cv/" as="document">
-    
-    <!-- Instant.page for instant page loads on hover -->
+    <!-- Instant.page prefetches links on hover/touchstart, covering in-site navigation -->
     <script src="https://cdn.jsdelivr.net/npm/instant.page@5.2.0/instantpage.min.js" type="module" defer></script>
 
   </head>
@@ -219,9 +213,9 @@
 
   <!-- Output links -->
   
-    <a href="https://zhuanlan.zhihu.com/p/1978993413425763764" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="知乎（新标签页打开）">知乎 <img src="/assets/img/icons/zhihu.ico" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
+    <a href="https://zhuanlan.zhihu.com/p/1978993413425763764" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="知乎（新标签页打开）">知乎 <img loading="lazy" decoding="async" src="/assets/img/icons/zhihu.ico" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
   
-    <a href="https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="微信公众号（新标签页打开）">微信公众号 <img src="/assets/img/icons/wechat.png" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
+    <a href="https://mp.weixin.qq.com/s/VD_NBty5na4PfAa7wLoGAw" target="_blank" rel="noopener noreferrer" lang="zh-CN" aria-label="微信公众号（新标签页打开）">微信公众号 <img loading="lazy" decoding="async" src="/assets/img/icons/wechat.png" alt="" aria-hidden="true" style="height: 1em; vertical-align: middle;"></a>
   
 </div>
 
@@ -242,7 +236,7 @@
       </aside>
 
       <article class="post-content">
-        <p><img src="/assets/img/kl-estimators/kl-estimator.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
+        <p><img loading="lazy" decoding="async" src="/assets/img/kl-estimators/kl-estimator.png" alt="Mini-class" style="display:block;margin:0 auto;width:95%;max-width:100%;" /></p>
 
 <blockquote>
   <p>In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares three estimators $k_1, k_2, k_3$ in both on-policy and off-policy settings, and shows how the answer changes depending on whether KL is used as a differentiable loss term or as a detached reward-shaping term.</p>
@@ -265,7 +259,7 @@ D_{\mathrm{KL}}(q_\theta \| p) = \mathbb{E}_{x \sim q_\theta}\left[\log \frac{q_
 $$</p>
 
 <figure style="text-align:center;">
- <img src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;" />
+ <img loading="lazy" decoding="async" src="/assets/img/kl-estimators/kl-estimator-reverse.png" style="width:80%;max-width:100%;" />
  <figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -276,7 +270,7 @@ D_{\mathrm{KL}}(p \| q_\theta) = \mathbb{E}_{x \sim p}\left[\log \frac{p(x)}{q_\
 $$</p>
 
 <figure style="text-align:center;">
- <img src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;" />
+ <img loading="lazy" decoding="async" src="/assets/img/kl-estimators/kl-estimator-forward.png" style="width:80%;max-width:100%;" />
  <figcaption style="font-size:0.9em;color:gray;">Image source: <a href="https://dibyaghosh.com/blog/probability/kldivergence/">Dibya Ghosh's Blog</a></figcaption>
 </figure>
 
@@ -1267,7 +1261,7 @@ $$</p>
     <p>This is also how the DeepSeek v3.2 technical report’s “unbiased KL estimate” lines up with the notation here: they use $\frac{q_\theta}{\mu} k_3$, i.e. $\rho k_3$, to recover both unbiased KL estimation and the correct reverse-KL gradient.</p>
 
     <figure style="text-align:center;">
-<img src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;" />
+<img loading="lazy" decoding="async" src="/assets/img/kl-estimators/dpsk-3d2-k3.png" style="width:95%;max-width:100%;" />
 <figcaption style="font-size:0.9em;color:gray;">Source: <a href="https://arxiv.org/pdf/2512.02556v1">DeepSeek v3.2 Technical Report Section 3.1</a></figcaption>
 </figure>
 

@@ -81,13 +81,7 @@
     <script src="/assets/js/dark_mode.js"></script>
     
 
-    <!-- Prefetch/Preload for faster navigation -->
-    <link rel="prefetch" href="/" as="document">
-    <link rel="prefetch" href="/blog/" as="document">
-    <link rel="prefetch" href="/publications/" as="document">
-    <link rel="prefetch" href="/cv/" as="document">
-    
-    <!-- Instant.page for instant page loads on hover -->
+    <!-- Instant.page prefetches links on hover/touchstart, covering in-site navigation -->
     <script src="https://cdn.jsdelivr.net/npm/instant.page@5.2.0/instantpage.min.js" type="module" defer></script>
 
   </head>
@@ -193,9 +187,9 @@
 <span class="blog-controls__spacer"></span>
 <span class="blog-views-toggle mono-meta">
       Views:
-<a href="#" class="uv-toggle" data-uv-mode="all">All time</a>
+<button type="button" class="uv-toggle" data-uv-mode="all" aria-pressed="false">All time</button>
       /
-<a href="#" class="uv-toggle" data-uv-mode="d30">30 days</a>
+<button type="button" class="uv-toggle" data-uv-mode="d30" aria-pressed="false">30 days</button>
 </span>
     
 
@@ -210,11 +204,11 @@
     <ol class="post-rows"><li class="post-row blog-post-list-item" data-year="2025" data-categories="reinforcement-learning" data-tags="">
 <time class="post-row__date mono-meta" datetime="2025-12-17T00:00:00+00:00" data-date-en="Dec 17, 2025" data-date-zh="2025年12月17日">Dec 17, 2025</time>
 <div class="post-row__body"><div class="post-row__langbar" role="tablist" aria-label="Language">
-<button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang-target="en" role="tab" aria-selected="true">EN</button>
-<button type="button" class="post-row__langtab" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang-target="zh" role="tab" aria-selected="false">中</button>
+<button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang-target="en" role="tab" id="langtab-reinforcement-learning-2025-12-17-offpolicy-en-en" aria-controls="langpane-reinforcement-learning-2025-12-17-offpolicy-en-en" aria-selected="true">EN</button>
+<button type="button" class="post-row__langtab" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang-target="zh" role="tab" id="langtab-reinforcement-learning-2025-12-17-offpolicy-en-zh" aria-controls="langpane-reinforcement-learning-2025-12-17-offpolicy-en-zh" aria-selected="false">中</button>
 </div>
 
-<div class="post-row__lang-pane is-active" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang="en">
+<div class="post-row__lang-pane is-active" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang="en" role="tabpanel" id="langpane-reinforcement-learning-2025-12-17-offpolicy-en-en" aria-labelledby="langtab-reinforcement-learning-2025-12-17-offpolicy-en-en">
 <h3 class="post-row__title">
 <a href="/reinforcement-learning/2025/12/17/offpolicy-en.html">Taming Stale Data: Off-Policy Reinforcement Learning for LLMs with Monotonic Improvement Guarantees</a>
 </h3><p class="post-row__desc">This post derives an off-policy view of LLM reinforcement learning: from single-policy performance bounds to multi-policy mixture sampling, with monotonic-improvement conditions that decompose update shift, sampling staleness, advantage replacement error, and support assumptions.</p><p class="post-row__meta mono-meta">
@@ -223,7 +217,7 @@
 <span class="post-row__views post-uv" data-uv-all="66" data-uv-d30="7">66 views</span></p>
 </div>
 
-<div class="post-row__lang-pane" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang="zh" hidden="">
+<div class="post-row__lang-pane" data-lang-pair="reinforcement-learning-2025-12-17-offpolicy-en" data-lang="zh" role="tabpanel" id="langpane-reinforcement-learning-2025-12-17-offpolicy-en-zh" aria-labelledby="langtab-reinforcement-learning-2025-12-17-offpolicy-en-zh" hidden="">
 <h3 class="post-row__title">
 <a href="/reinforcement-learning/2025/12/17/offpolicy-zh.html">驯服陈旧数据：LLM 强化学习的异策略训练与单调提升条件</a>
 </h3><p class="post-row__desc">本文从单策略采样的性能改进下界出发，推导 LLM 强化学习中的异策略训练问题，扩展到多策略静态/动态混合采样，并把单调提升条件拆成更新增量偏移、采样陈旧性、优势替换误差与支撑集条件。</p><p class="post-row__meta mono-meta">
@@ -234,11 +228,11 @@
 </li><li class="post-row blog-post-list-item" data-year="2025" data-categories="reinforcement-learning" data-tags="">
 <time class="post-row__date mono-meta" datetime="2025-12-01T00:00:00+00:00" data-date-en="Dec 1, 2025" data-date-zh="2025年12月1日">Dec 1, 2025</time>
 <div class="post-row__body"><div class="post-row__langbar" role="tablist" aria-label="Language">
-<button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang-target="en" role="tab" aria-selected="true">EN</button>
-<button type="button" class="post-row__langtab" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang-target="zh" role="tab" aria-selected="false">中</button>
+<button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang-target="en" role="tab" id="langtab-reinforcement-learning-2025-12-01-kl-estimators-en-en" aria-controls="langpane-reinforcement-learning-2025-12-01-kl-estimators-en-en" aria-selected="true">EN</button>
+<button type="button" class="post-row__langtab" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang-target="zh" role="tab" id="langtab-reinforcement-learning-2025-12-01-kl-estimators-en-zh" aria-controls="langpane-reinforcement-learning-2025-12-01-kl-estimators-en-zh" aria-selected="false">中</button>
 </div>
 
-<div class="post-row__lang-pane is-active" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang="en">
+<div class="post-row__lang-pane is-active" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang="en" role="tabpanel" id="langpane-reinforcement-learning-2025-12-01-kl-estimators-en-en" aria-labelledby="langtab-reinforcement-learning-2025-12-01-kl-estimators-en-en">
 <h3 class="post-row__title">
 <a href="/reinforcement-learning/2025/12/01/kl-estimators-en.html">Choosing KL Estimators in RL: From Value Unbiasedness to Gradient Correctness</a>
 </h3><p class="post-row__desc">In RL, KL estimators should not be judged only by how accurately they estimate KL values, but also by what objective their gradients actually optimize. This post compares k1, k2, k3 in on-policy and off-policy settings, and turns the result into a practical selection guide.</p><p class="post-row__meta mono-meta">
@@ -247,7 +241,7 @@
 <span class="post-row__views post-uv" data-uv-all="1030" data-uv-d30="103">1030 views</span></p>
 </div>
 
-<div class="post-row__lang-pane" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang="zh" hidden="">
+<div class="post-row__lang-pane" data-lang-pair="reinforcement-learning-2025-12-01-kl-estimators-en" data-lang="zh" role="tabpanel" id="langpane-reinforcement-learning-2025-12-01-kl-estimators-en-zh" aria-labelledby="langtab-reinforcement-learning-2025-12-01-kl-estimators-en-zh" hidden="">
 <h3 class="post-row__title">
 <a href="/reinforcement-learning/2025/12/01/kl-estimators-zh.html">RL 中的 KL 估计器选型：从数值无偏到梯度正确</a>
 </h3><p class="post-row__desc">在强化学习中，KL 估计器不能只看数值估得准不准，还要看它在 loss 或 reward 写法下究竟优化了谁。本文比较 k1、k2、k3 在 on-policy 与 off-policy 场景中的差异，并给出可直接落地的选型建议。</p><p class="post-row__meta mono-meta">
@@ -258,11 +252,11 @@
 </li><li class="post-row blog-post-list-item" data-year="2025" data-categories="reinforcement-learning" data-tags="">
 <time class="post-row__date mono-meta" datetime="2025-11-15T00:00:00+00:00" data-date-en="Nov 15, 2025" data-date-zh="2025年11月15日">Nov 15, 2025</time>
 <div class="post-row__body"><div class="post-row__langbar" role="tablist" aria-label="Language">
-<button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang-target="en" role="tab" aria-selected="true">EN</button>
-<button type="button" class="post-row__langtab" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang-target="zh" role="tab" aria-selected="false">中</button>
+<button type="button" class="post-row__langtab is-active" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang-target="en" role="tab" id="langtab-reinforcement-learning-2025-11-15-three-policy-en-en" aria-controls="langpane-reinforcement-learning-2025-11-15-three-policy-en-en" aria-selected="true">EN</button>
+<button type="button" class="post-row__langtab" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang-target="zh" role="tab" id="langtab-reinforcement-learning-2025-11-15-three-policy-en-zh" aria-controls="langpane-reinforcement-learning-2025-11-15-three-policy-en-zh" aria-selected="false">中</button>
 </div>
 
-<div class="post-row__lang-pane is-active" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang="en">
+<div class="post-row__lang-pane is-active" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang="en" role="tabpanel" id="langpane-reinforcement-learning-2025-11-15-three-policy-en-en" aria-labelledby="langtab-reinforcement-learning-2025-11-15-three-policy-en-en">
 <h3 class="post-row__title">
 <a href="/reinforcement-learning/2025/11/15/three-policy-en.html">From Two Policies to Three: Extending TRPO under Behavior–Reference Policy Mismatch in LLM RL</a>
 </h3><p class="post-row__desc">In modern LLM RL pipelines, the policy used as the "old policy" in training can differ from the behavior policy that actually generated the rollouts, breaking the usual on-policy assumption. This note rewrites the TRPO lower bound in a three-policy form — behavior, reference, and target — and argues that the surrogate gap is jointly controlled by two mismatch sources.</p><p class="post-row__meta mono-meta">
@@ -271,7 +265,7 @@
 <span class="post-row__views post-uv" data-uv-all="498" data-uv-d30="58">498 views</span></p>
 </div>
 
-<div class="post-row__lang-pane" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang="zh" hidden="">
+<div class="post-row__lang-pane" data-lang-pair="reinforcement-learning-2025-11-15-three-policy-en" data-lang="zh" role="tabpanel" id="langpane-reinforcement-learning-2025-11-15-three-policy-en-zh" aria-labelledby="langtab-reinforcement-learning-2025-11-15-three-policy-en-zh" hidden="">
 <h3 class="post-row__title">
 <a href="/reinforcement-learning/2025/11/15/three-policy-zh.html">从两策略到三策略：LLM RL 中行为策略–参考策略不一致下的 TRPO 扩展</a>
 </h3><p class="post-row__desc">在现代 LLM RL 流程中，训练里的"旧策略"可能已经不等于真正生成 rollout 的行为策略，破坏常见的同策略假设。本文把经典 TRPO 下界改写成行为策略、参考策略、目标策略的三策略形式，并说明 surrogate gap 同时被两个偏差来源控制。</p><p class="post-row__meta mono-meta">

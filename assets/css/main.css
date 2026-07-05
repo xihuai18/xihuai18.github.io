@@ -2816,6 +2816,16 @@ p {
   max-width: var(--post-prose-max);
 }
 
+/* Post diagrams are mostly white-background exports; in dark mode a bare
+   white rectangle glares against the near-black page. Keep the white ground
+   (the plots need it) but frame it as a soft card. */
+html[data-theme=dark] .post-content img:not([src$=".svg"]) {
+  background: #fff;
+  padding: var(--s-2);
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--rule);
+}
+
 p.lead {
   font-size: var(--fs-lg);
   line-height: var(--lh-body);
@@ -4457,6 +4467,15 @@ html[data-theme=dark] .publications .venue-tag.active-filter .venue-name {
   font-family: var(--font-serif);
   color: var(--fg-2);
 }
+.cv {
+  /* General Information map table: kill Bootstrap/MDB row striping, which
+     highlighted every other row (visible as a stray bar in dark mode). */
+}
+.cv .card .table tr,
+.cv .card .table tr:nth-of-type(odd),
+.cv .card .table tr:hover {
+  background: transparent !important;
+}
 .cv .cv-entry {
   display: grid !important;
   grid-template-columns: 160px 1fr !important;
@@ -4785,7 +4804,13 @@ html[data-theme=dark] .cv h2 {
 .blog-views-toggle .uv-toggle {
   color: var(--fg-3);
   text-decoration: none;
+  border: none;
   border-bottom: 1px solid transparent;
+  background: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
 }
 
 .blog-views-toggle .uv-toggle.is-active,

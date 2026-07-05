@@ -16,8 +16,8 @@ $(document).ready(function () {
       $(this).text(value + " " + label);
     });
 
-    $(".uv-toggle").removeClass("font-weight-bold is-active");
-    $('.uv-toggle[data-uv-mode="' + mode + '"]').addClass("is-active");
+    $(".uv-toggle").removeClass("font-weight-bold is-active").attr("aria-pressed", "false");
+    $('.uv-toggle[data-uv-mode="' + mode + '"]').addClass("is-active").attr("aria-pressed", "true");
   }
 
   var savedMode = null;
