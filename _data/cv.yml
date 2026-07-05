@@ -6,7 +6,7 @@
     - name: Email
       value: wang_98xh@qq.com
     - name: Updated Time
-      value: 2026-07-01
+      value: 2026-07-05
 
 - title: Education
   type: time_table
@@ -18,21 +18,41 @@
       institution: School of Computer Science and Engineering, Sun Yat-sen University, Guangzhou, China
       year: 2016-2020
 
+- title: Research Interests
+  type: nested_list
+  contents:
+    - title: Large Language Model Reasoning and Agency
+      items:
+        - Reinforcement learning for enhancing reasoning and agentic capabilities of LLMs
+        - Human-AI collaborative decision-making with LLM-based agents
+    - title: Multi-Agent Reinforcement Learning
+      items:
+        - Sample-efficient algorithms for cooperative MARL
+        - Zero-shot coordination and generalization in multi-agent systems
+
 - title: Experience
   type: time_table
   contents:
     - title: Researcher
       institution: WeLM Team, WeChat AI
       year: 2026-Present
+      description:
+        - Post-training of large language models
     - title: Beidou Intern
       institution: Meituan LongCat Team
       year: 2024-2025
+      description:
+        - LLM reasoning training efficiency, human-AI coding collaboration, and real-time human-AI collaboration with language agents
     - title: Research Intern
       institution: Shanghai Digital Brain Lab
       year: 2022-2023
+      description:
+        - Cooperative multi-agent reinforcement learning
     - title: Research Intern
       institution: Tencent AI Platform
       year: 2020-2021
+      description:
+        - Communication learning in cooperative multi-agent reinforcement learning
 
 - title: Honors and Awards
   type: time_table
@@ -46,6 +66,14 @@
     - year: 2017
       items:
         - National Scholarships
+
+- title: Professional Services
+  type: map
+  contents:
+    - name: Conference Reviewer / PC Member
+      value: ICLR (2024-2026), ICML (2022-2026), NeurIPS (2021-2022, 2024-2025), AAMAS (2024)
+    - name: Journal Reviewer
+      value: TPAMI, Machine Learning, Frontiers of Computer Science
 
 - title: Other Interests
   type: list
