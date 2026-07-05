@@ -185,9 +185,9 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
     <span class="blog-controls__spacer"></span>
     <span class="blog-views-toggle mono-meta">
       Views:
-      <a href="#" class="uv-toggle" data-uv-mode="all">All time</a>
+      <button type="button" class="uv-toggle" data-uv-mode="all" aria-pressed="false">All time</button>
       /
-      <a href="#" class="uv-toggle" data-uv-mode="d30">30 days</a>
+      <button type="button" class="uv-toggle" data-uv-mode="d30" aria-pressed="false">30 days</button>
     </span>
     {% endif %}
 
@@ -357,11 +357,11 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
           {%- if zh_post -%}
           {%- assign pair_id = post.id | slugify -%}
           <div class="post-row__langbar" role="tablist" aria-label="Language">
-            <button type="button" class="post-row__langtab is-active" data-lang-pair="{{ pair_id }}" data-lang-target="en" role="tab" aria-selected="true">EN</button>
-            <button type="button" class="post-row__langtab" data-lang-pair="{{ pair_id }}" data-lang-target="zh" role="tab" aria-selected="false">中</button>
+            <button type="button" class="post-row__langtab is-active" data-lang-pair="{{ pair_id }}" data-lang-target="en" role="tab" id="langtab-{{ pair_id }}-en" aria-controls="langpane-{{ pair_id }}-en" aria-selected="true">EN</button>
+            <button type="button" class="post-row__langtab" data-lang-pair="{{ pair_id }}" data-lang-target="zh" role="tab" id="langtab-{{ pair_id }}-zh" aria-controls="langpane-{{ pair_id }}-zh" aria-selected="false">中</button>
           </div>
 
-          <div class="post-row__lang-pane is-active" data-lang-pair="{{ pair_id }}" data-lang="en">
+          <div class="post-row__lang-pane is-active" data-lang-pair="{{ pair_id }}" data-lang="en" role="tabpanel" id="langpane-{{ pair_id }}-en" aria-labelledby="langtab-{{ pair_id }}-en">
             <h3 class="post-row__title">
               <a href="{{ post_href }}"{{ post_target }}>{{ post.title }}{%- if post_is_external -%} <span class="post-row__external" aria-hidden="true">↗</span>{%- endif -%}</a>
             </h3>
@@ -386,7 +386,7 @@ Pair zh back onto EN via candidate loop. {%- endcomment -%}
             </p>
           </div>
 
-          <div class="post-row__lang-pane" data-lang-pair="{{ pair_id }}" data-lang="zh" hidden>
+          <div class="post-row__lang-pane" data-lang-pair="{{ pair_id }}" data-lang="zh" role="tabpanel" id="langpane-{{ pair_id }}-zh" aria-labelledby="langtab-{{ pair_id }}-zh" hidden>
             <h3 class="post-row__title">
               <a href="{{ zh_href }}"{{ zh_target }}>{{ zh_post.title }}{%- if zh_is_external -%} <span class="post-row__external" aria-hidden="true">↗</span>{%- endif -%}</a>
             </h3>

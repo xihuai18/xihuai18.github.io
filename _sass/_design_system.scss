@@ -1710,7 +1710,13 @@ html[data-theme='dark'] .cv h2 { color: var(--moss-600) !important; }
 .blog-views-toggle .uv-toggle {
   color: var(--fg-3);
   text-decoration: none;
+  border: none;
   border-bottom: 1px solid transparent;
+  background: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
 }
 .blog-views-toggle .uv-toggle.is-active,
 .blog-views-toggle .uv-toggle:hover {
