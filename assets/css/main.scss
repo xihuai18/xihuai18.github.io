@@ -6,6 +6,9 @@
 @use "variables";
 @use "mixins";
 @use "themes";
+// Bootstrap replacement — must precede layout/base/design_system so their
+// overrides win the cascade exactly as they did against the old CDN CSS.
+@use "bootstrap_subset";
 @use "layout";
 @use "base";
 @use "icons";

@@ -997,44 +997,44 @@ html[data-theme='dark'] .venue-filter-status__clear:hover { color: var(--paper);
     font-size: 0.75rem;
 
     a, .btn {
-      display: inline-flex !important;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: transparent !important;
-      border: 1px solid var(--rule-strong) !important;
-      box-shadow: none !important;
-      color: var(--fg-2) !important;
-      text-decoration: none !important;
-      padding: 4px 10px !important;
-      border-radius: var(--r-pill) !important;
-      font-size: 0.72rem !important;
-      font-weight: 500 !important;
-      line-height: 1.2 !important;
-      letter-spacing: 0.02em !important;
-      text-transform: none !important;
+      background: transparent;
+      border: 1px solid var(--rule-strong);
+      box-shadow: none;
+      color: var(--fg-2);
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: var(--r-pill);
+      font-size: 0.72rem;
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+      text-transform: none;
       transition: all var(--t-fast);
     }
     a:hover, .btn:hover {
-      color: var(--accent) !important;
-      border-color: var(--accent) !important;
-      background: var(--accent-wash) !important;
-      text-decoration: none !important;
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-wash);
+      text-decoration: none;
     }
 
     /* Copy-BibTeX pill — distinct icon + label, confirms on click */
     .bibtex-copy {
-      display: inline-flex !important;
+      display: inline-flex;
       align-items: center;
       gap: 5px;
       cursor: pointer;
       user-select: none;
-      color: var(--accent) !important;
-      border-color: var(--accent) !important;
+      color: var(--accent);
+      border-color: var(--accent);
     }
     .bibtex-copy:hover {
-      background: var(--accent) !important;
-      color: #fff !important;
-      border-color: var(--accent) !important;
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
     }
     .bibtex-copy:focus-visible {
       outline: 2px solid var(--accent);
@@ -1042,14 +1042,14 @@ html[data-theme='dark'] .venue-filter-status__clear:hover { color: var(--paper);
     }
     .bibtex-copy .bibtex-copy-icon { flex-shrink: 0; }
     .bibtex-copy.is-copied {
-      background: var(--accent) !important;
-      color: #fff !important;
-      border-color: var(--accent) !important;
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
     }
     .bibtex-copy.is-failed {
-      background: var(--ink-wine) !important;
-      color: #fff !important;
-      border-color: var(--ink-wine) !important;
+      background: var(--ink-wine);
+      color: #fff;
+      border-color: var(--ink-wine);
     }
   }
 
@@ -1070,7 +1070,7 @@ html[data-theme='dark'] .venue-filter-status__clear:hover { color: var(--paper);
 html[data-theme='dark'] .publications .bibliography .links .bibtex-copy:hover,
 html[data-theme='dark'] .publications .bibliography .links .bibtex-copy.is-copied,
 html[data-theme='dark'] .publications .bibliography .links .bibtex-copy.is-failed {
-  color: var(--paper) !important;
+  color: var(--paper);
 }
 .publications ol.bibliography > li.single-pub-in-year {
   border-bottom: none !important;
@@ -1439,12 +1439,13 @@ html[data-theme='dark'] .publications .venue-tag.active-filter .venue-name { col
     color: var(--fg-2);
   }
 
-  /* General Information map table: kill Bootstrap/MDB row striping, which
-     highlighted every other row (visible as a stray bar in dark mode). */
+  /* General Information map table: keep rows flat — no striping/hover fill
+     (Bootstrap's striped/hover variants are gone; this now only overrides the
+     base table hover in _base.scss). */
   .card .table tr,
   .card .table tr:nth-of-type(odd),
   .card .table tr:hover {
-    background: transparent !important;
+    background: transparent;
   }
 
   .cv-entry {

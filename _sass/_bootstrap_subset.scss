@@ -1,0 +1,401 @@
+/*******************************************************************************
+ * Bootstrap 4.6 subset — hand-written replacement for the CDN stylesheet.
+ *
+ * Only the classes actually used by this site are implemented (see the grep
+ * audit in the replacement commit). Values match Bootstrap 4.6.1 so the
+ * cascade against _base.scss / _design_system.scss stays identical to when
+ * the full CDN file loaded first. Colors use the theme CSS variables from
+ * _themes.scss instead of Bootstrap's hardcoded palette.
+ *
+ * Breakpoints (Bootstrap 4): sm=576px  md=768px  lg=992px  xl=1200px
+ ******************************************************************************/
+
+/* ============================================================================
+ * 1. Reboot subset — the normalize layer the site depended on
+ * ========================================================================== */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  font-family: sans-serif;
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  margin: 0;
+  text-align: left;
+}
+
+[tabindex="-1"]:focus:not(:focus-visible) { outline: 0 !important; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+ol, ul, dl {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+ol ol, ul ul, ol ul, ul ol { margin-bottom: 0; }
+
+b, strong { font-weight: bolder; }
+small { font-size: 80%; }
+
+sub, sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+sub { bottom: -0.25em; }
+sup { top: -0.5em; }
+
+a { background-color: transparent; }
+
+pre {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  overflow: auto;
+}
+
+figure { margin: 0 0 1rem; }
+
+img {
+  vertical-align: middle;
+  border-style: none;
+}
+svg {
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+table { border-collapse: collapse; }
+th { text-align: inherit; }
+
+label { margin-bottom: 0.5rem; }
+
+button { border-radius: 0; }
+button:focus:not(:focus-visible) { outline: 0; }
+button, input, optgroup, select, textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+button, input { overflow: visible; }
+button, select { text-transform: none; }
+[role="button"] { cursor: pointer; }
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] { -webkit-appearance: button; }
+button:not(:disabled),
+[type="button"]:not(:disabled),
+[type="reset"]:not(:disabled),
+[type="submit"]:not(:disabled) { cursor: pointer; }
+
+[hidden] { display: none !important; }
+
+/* ============================================================================
+ * 2. Grid — container / row / used columns only
+ * ========================================================================== */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.col-sm-2, .col-sm-10, .col-sm-12,
+.col-lg, .col-lg-3, .col-lg-6 {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+@media (min-width: 576px) {
+  .col-sm-2  { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-sm-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-sm-12 { flex: 0 0 100%;       max-width: 100%; }
+}
+
+@media (min-width: 992px) {
+  .col-lg   { flex-basis: 0; flex-grow: 1; max-width: 100%; }
+  .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+}
+
+/* ============================================================================
+ * 3. Navbar family + collapse (JS only toggles `.show` on #navbarNav)
+ * ========================================================================== */
+.navbar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+}
+.navbar .container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  display: inline-block;
+  padding-top: 0.3125rem;
+  padding-bottom: 0.3125rem;
+  margin-right: 1rem;
+  font-size: 1.25rem;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.navbar-nav {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+.nav-link {
+  display: block;
+  padding: 0.5rem 1rem;
+}
+.navbar-nav .nav-link {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.navbar-collapse {
+  flex-basis: 100%;
+  flex-grow: 1;
+  align-items: center;
+}
+
+.navbar-toggler {
+  padding: 0.25rem 0.75rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+}
+
+/* Collapse behavior — assets/js/common.js toggles `.show` only. */
+.collapse:not(.show) { display: none; }
+
+/* Dropdown markup exists in header.html behind `p.dropdown` (currently no nav
+   page enables it). Keep the closed state so it can never render expanded. */
+.dropdown-menu { display: none; }
+.dropdown-menu.show { display: block; }
+
+/* navbar-expand-sm: collapsed below 576px, expanded row at >=576px */
+@media (max-width: 575.98px) {
+  .navbar-expand-sm > .container {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+@media (min-width: 576px) {
+  .navbar-expand-sm {
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+  }
+  .navbar-expand-sm .navbar-nav { flex-direction: row; }
+  .navbar-expand-sm .navbar-nav .nav-link {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+  }
+  .navbar-expand-sm > .container { flex-wrap: nowrap; }
+  .navbar-expand-sm .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
+  }
+  .navbar-expand-sm .navbar-toggler { display: none; }
+}
+
+/* Positioning helpers used by navbar/footer */
+.fixed-top {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1030;
+}
+.fixed-bottom {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1030;
+}
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+
+/* ============================================================================
+ * 4. Buttons — bib.html link pills (visuals are restyled downstream)
+ * ========================================================================== */
+.btn {
+  display: inline-block;
+  font-weight: 400;
+  color: var(--fg);
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+}
+.btn:hover { text-decoration: none; }
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0.2rem;
+}
+
+/* ============================================================================
+ * 5. Card — CV section shells (dissolved by _design_system.scss)
+ * ========================================================================== */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: var(--bg-raised);
+  background-clip: border-box;
+  border: 1px solid var(--rule);
+  border-radius: 0.25rem;
+}
+.card-title { margin-bottom: 0.75rem; }
+.card-text:last-child { margin-bottom: 0; }
+
+/* ============================================================================
+ * 6. List group — CV lists (borders/backgrounds restyled downstream)
+ * ========================================================================== */
+.list-group {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+  border-radius: 0.25rem;
+}
+.list-group-item {
+  position: relative;
+  display: block;
+  padding: 0.75rem 1.25rem;
+  background-color: transparent;
+  border: 1px solid var(--rule);
+}
+.list-group-item + .list-group-item { border-top-width: 0; }
+.list-group-flush { border-radius: 0; }
+.list-group-flush > .list-group-item { border-width: 0 0 1px; }
+.list-group-flush > .list-group-item:last-child { border-bottom-width: 0; }
+
+/* ============================================================================
+ * 7. Table helpers — cv/map.html, news include, blog_enhancements.js
+ *    (base `.table` sizing lives in _base.scss, unchanged)
+ * ========================================================================== */
+.table-sm th,
+.table-sm td { padding: 0.3rem; }
+
+.table-borderless th,
+.table-borderless td,
+.table-borderless thead th,
+.table-borderless tbody + tbody { border: 0; }
+
+.table-responsive {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================================
+ * 8. Utilities (Bootstrap keeps these !important; preserved so the existing
+ *    override order in _base.scss / _design_system.scss behaves the same)
+ * ========================================================================== */
+.clearfix::after {
+  display: block;
+  clear: both;
+  content: "";
+}
+
+.d-none { display: none !important; }
+@media (min-width: 992px) {
+  .d-lg-block { display: block !important; }
+  .d-lg-none  { display: none !important; }
+}
+
+.flex-nowrap { flex-wrap: nowrap !important; }
+
+.float-left  { float: left !important; }
+.float-right { float: right !important; }
+
+.ml-auto { margin-left: auto !important; }
+.mt-0 { margin-top: 0 !important; }
+.mt-3 { margin-top: 1rem !important; }
+.mt-5 { margin-top: 3rem !important; }
+
+.p-1  { padding: 0.25rem !important; }
+.p-3  { padding: 1rem !important; }
+.pl-2 { padding-left: 0.5rem !important; }
+.pr-2 { padding-right: 0.5rem !important; }
+
+.text-right { text-align: right !important; }
+
+.font-weight-bold    { font-weight: 700 !important; }
+.font-weight-lighter { font-weight: lighter !important; }
+
+.rounded { border-radius: 0.25rem !important; }
+.rounded-circle { border-radius: 50% !important; }
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+.lead {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
