@@ -25,7 +25,9 @@ let setTheme = (theme) =>  {
   
   // Defer non-critical operations to avoid blocking the main thread
   requestAnimationFrame(() => {
-    localStorage.setItem("theme", theme);
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (e) {} // private browsing may block storage access
     
     // Giscus theme update can be async
     setGiscusTheme(theme);
@@ -93,4 +95,12 @@ let initTheme = (theme) => {
 }
 
 
-initTheme(localStorage.getItem("theme"));
+let getStoredTheme = () => {
+  try {
+    return localStorage.getItem("theme");
+  } catch (e) {
+    return null;
+  }
+}
+
+initTheme(getStoredTheme());

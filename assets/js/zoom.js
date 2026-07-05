@@ -1,10 +1,12 @@
 // Initialize medium zoom.
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
   // Get background color with transparency
   const bgColor = getComputedStyle(document.documentElement)
       .getPropertyValue('--global-bg-color') + 'ee';  // + 'ee' for transparency.
 
-  // Initialize zoom for explicitly marked images
+  // Initialize zoom for explicitly marked images.
+  // Intentionally global (window.medium_zoom): theme.js updates the overlay
+  // background on theme switches.
   medium_zoom = mediumZoom('[data-zoomable]', {
     background: bgColor,
   });
